@@ -1,0 +1,16 @@
+﻿{
+  "name": "Brother's Fitness Gym OS",
+  "short_name": "Gym OS",
+  "description": "Pain is Temporary. Pride is Forever.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#000000",
+  "theme_color": "#D71921",
+  "icons": [
+    {
+      "src": "/favicon.ico",
+      "sizes": "64x64 32x32 24x24 16x16",
+      "type": "image/x-icon"
+    }
+  ]
+}
