@@ -1,163 +1,187 @@
 ﻿"use client";
-import { useState } from "react";
-import { Mail, Send, CheckCircle2, AlertCircle, Phone, MapPin, XCircle } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+
+import { MapPin, Phone, Mail, Send, MessageCircle } from "lucide-react";
+import { motion, useInView } from "framer-motion";
+import { useRef, useState, useEffect } from "react";
 
 export default function ContactForm() {
-  const [formData, setFormData] = useState({ name: "", email: "", message: "" });
-  const [status, setStatus] = useState<"idle" | "submitting" | "success" | "error">("idle");
+  const ref = useRef(null);
+  const isInView = useInView(ref, { once: true, margin: "-100px" });
+  const [isMobile, setIsMobile] = useState(true);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setStatus("submitting");
-
-    try {
-      const response = await fetch("/api/contact", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
-      });
-
-      if (response.ok) {
-        setStatus("success");
-        setFormData({ name: "", email: "", message: "" });
-        setTimeout(() => setStatus("idle"), 5000);
-      } else {
-        setStatus("error");
-      }
-    } catch (error) {
-      setStatus("error");
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      setIsMobile(window.innerWidth < 768);
+      const handleResize = () => setIsMobile(window.innerWidth < 768);
+      window.addEventListener('resize', handleResize);
+      return () => window.removeEventListener('resize', handleResize);
     }
-  };
+  }, []);
+
+  const phoneNumber = "+919131179343";
+  const whatsappNumber = "919131179343";
 
   return (
-    <section id="contact" className="py-12 md:py-24 bg-white dark:bg-gym-black transition-colors duration-300 relative border-t border-black/10 dark:border-white/10">
-      <div className="max-w-4xl mx-auto px-4 md:px-6">
-        
-        <div className="text-center mb-8 md:mb-16">
-            <h3 className="text-2xl md:text-4xl font-black font-sans italic uppercase text-black dark:text-white flex items-center justify-center gap-3">
-                <Mail className="text-gym-red" /> INITIATE <span className="text-gym-red">CONTACT</span>
-            </h3>
-            <p className="font-dot text-xs md:text-sm text-gray-500 mt-2 tracking-widest">JOIN THE BROTHERHOOD. START YOUR ARC.</p>
-        </div>
+    <section
+      id="contact"
+      ref={ref}
+      className="min-h-screen bg-black py-12 md:py-20 relative overflow-hidden"
+    >
+      {/* Background grid - disabled on mobile for performance */}
+      {!isMobile && (
+        <motion.div
+          className="absolute inset-0 opacity-[0.02]"
+          style={{
+            backgroundImage: `linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px),
+                             linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)`,
+            backgroundSize: "30px 30px",
+          }}
+          animate={{ backgroundPosition: ["0px 0px", "30px 30px"] }}
+          transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+        />
+      )}
 
-        <div className="grid grid-cols-1 md:grid-cols-5 gap-6 md:gap-12 bg-gray-50 dark:bg-black/20 p-4 sm:p-6 md:p-8 border border-gray-200 dark:border-white/10 relative overflow-hidden rounded-sm">
-            <div className="absolute top-0 left-0 w-1 h-full bg-gym-red"></div>
+      <div className="max-w-7xl mx-auto px-4 relative z-10">
+        <motion.div
+          className="text-center mb-8 md:mb-12"
+          initial={{ opacity: 0, y: 20 }}
+          animate={isInView ? { opacity: 1, y: 0 } : {}}
+          transition={{ duration: 0.6 }}
+        >
+          <h2 className="heading-display text-4xl md:text-6xl mb-4">
+            CONTACT STATION
+          </h2>
+          <p className="text-lg text-gray-400 font-mono tracking-wide">
+            BEGIN YOUR TRANSFORMATION. REACH OUT NOW.
+          </p>
+        </motion.div>
 
-            <form onSubmit={handleSubmit} className="md:col-span-3 space-y-4 sm:space-y-6">
-                <div className="space-y-2">
-                    <label className="font-dot text-xs font-bold text-gray-500 uppercase tracking-widest">Identity // Name</label>
-                    <input 
-                        required
-                        name="name"
-                        value={formData.name}
-                        onChange={handleChange}
-                        type="text" 
-                        placeholder="ENTER FULL NAME"
-                        className="w-full p-4 bg-white dark:bg-black border border-gray-300 dark:border-white/20 font-bold font-sans focus:border-gym-red focus:ring-1 focus:ring-gym-red outline-none transition-all placeholder:text-gray-400 text-black dark:text-white rounded-sm"
-                    />
+        <div className="max-w-6xl mx-auto align-center">
+          {/* Contact Layout: 2 Separated Columns */}
+          <div className="grid lg:grid-cols-2 gap-8 lg:gap-12">
+
+            {/* Column 1: Contact Info Card */}
+            <motion.div
+              initial={{ opacity: 0, x: -50 }}
+              animate={isInView ? { opacity: 1, x: 0 } : {}}
+              transition={{ duration: 0.6, delay: 0.2 }}
+              className="bg-black border-2 border-white rounded-xl overflow-hidden p-5 md:p-8 flex flex-col justify-center relative group min-h-[450px]"
+            >
+              {/* Animated Red Line on hover/view */}
+              <motion.div
+                className="absolute top-0 left-0 w-1 h-full bg-gym-red origin-top"
+                initial={{ scaleY: 0 }}
+                whileInView={{ scaleY: 1 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.8 }}
+              />
+
+              <div className="space-y-6 md:space-y-8 relative z-10">
+                {/* Highlighting Text */}
+                <div className="bg-white/5 border-l-2 border-green-500 p-3 md:p-4 mb-4 md:mb-6 relative overflow-hidden">
+                  <div className="absolute inset-0 bg-green-500/10 animate-pulse" />
+                  <p className="text-xs md:text-sm font-mono font-bold text-white uppercase tracking-wide relative z-10">
+                    ⚡ We respond to your enquiry within 24 hours.
+                  </p>
                 </div>
-                
-                <div className="space-y-2">
-                    <label className="font-dot text-xs font-bold text-gray-500 uppercase tracking-widest">Comms // Email</label>
-                    <input 
-                        required 
-                        name="email"
-                        value={formData.email}
-                        onChange={handleChange}
-                        type="email" 
-                        placeholder="EMAIL ADDRESS"
-                        className="w-full p-4 bg-white dark:bg-black border border-gray-300 dark:border-white/20 font-bold font-sans focus:border-gym-red focus:ring-1 focus:ring-gym-red outline-none transition-all placeholder:text-gray-400 text-black dark:text-white rounded-sm"
-                    />
-                </div>
 
-                <div className="space-y-2">
-                    <label className="font-dot text-xs font-bold text-gray-500 uppercase tracking-widest">Transmission // Message</label>
-                    <textarea 
-                        required 
-                        name="message"
-                        value={formData.message}
-                        onChange={handleChange}
-                        rows={4}
-                        placeholder="STATE YOUR GOALS..."
-                        className="w-full p-4 bg-white dark:bg-black border border-gray-300 dark:border-white/20 font-bold font-sans focus:border-gym-red focus:ring-1 focus:ring-gym-red outline-none transition-all placeholder:text-gray-400 text-black dark:text-white resize-none rounded-sm"
-                    ></textarea>
-                </div>
+                <motion.div className="flex items-start gap-4" whileHover={{ x: 5 }}>
+                  <MapPin className="w-5 h-5 md:w-6 md:h-6 text-gym-red mt-1 flex-shrink-0" />
+                  <div>
+                    <h3 className="text-[10px] md:text-xs font-mono font-bold text-gray-500 uppercase tracking-widest mb-1 md:mb-2">
+                      LOCATION
+                    </h3>
+                    <p className="text-base md:text-lg font-sans text-white leading-relaxed">
+                      Lakhnadon, Madhya Pradesh<br />
+                      PIN: 480886
+                    </p>
+                  </div>
+                </motion.div>
 
-                <button 
-                    disabled={status === "submitting" || status === "success"}
-                    className={`w-full py-4 font-black font-dot tracking-widest uppercase transition-all flex items-center justify-center gap-3 rounded-sm
-                        ${status === "success" 
-                            ? "bg-green-600 text-white hover:bg-green-700"
-                            : status === "error"
-                            ? "bg-red-600 text-white hover:bg-red-700"
-                            : "bg-black dark:bg-white text-white dark:text-black hover:bg-gym-red dark:hover:bg-gym-red hover:text-white"
-                        } disabled:opacity-80 disabled:cursor-not-allowed`}
-                >
-                    {status === "submitting" ? (
-                        <span className="animate-pulse">TRANSMITTING...</span>
-                    ) : status === "success" ? (
-                        <>TRANSMISSION SENT <CheckCircle2 size={20} /></>
-                    ) : status === "error" ? (
-                        <>FAILED. RETRY? <XCircle size={20} /></>
-                    ) : (
-                        <>SEND_MESSAGE <Send size={18} /></>
-                    )}
-                </button>
-            </form>
+                <motion.div className="flex items-start gap-4" whileHover={{ x: 5 }}>
+                  <Phone className="w-5 h-5 md:w-6 md:h-6 text-gym-red mt-1 flex-shrink-0" />
+                  <div className="flex-1">
+                    <h3 className="text-[10px] md:text-xs font-mono font-bold text-gray-500 uppercase tracking-widest mb-1 md:mb-2">
+                      PHONE (AMAN)
+                    </h3>
+                    <p className="text-xl md:text-2xl font-display font-bold text-white mb-4 md:mb-5">
+                      +91 91311 79343
+                    </p>
 
-            <div className="md:col-span-2 flex flex-col justify-center gap-6 sm:gap-8 border-t md:border-t-0 md:border-l border-gray-200 dark:border-white/10 pt-6 sm:pt-8 md:pt-0 md:pl-6 sm:md:pl-8">
-                <div>
-                    <h4 className="font-black font-sans italic text-xl mb-2 text-black dark:text-white flex items-center gap-2">
-                        <MapPin size={18} className="text-gym-red" /> LOCATION
-                    </h4>
-                    {/* DIRECT MAPS LINK */}
-                    <a 
-                        href="https://www.google.com/maps/search/?api=1&query=Brothers+Fitness+Lakhnadon+Madhya+Pradesh+480886"
+                    {/* Action Buttons */}
+                    <div className="flex gap-3 md:gap-4 flex-col sm:flex-row">
+                      <motion.a
+                        href={`tel:${phoneNumber}`}
+                        className="flex-1 bg-gym-red text-white px-3 py-3 md:px-4 md:py-3.5 text-xs font-mono font-bold uppercase tracking-wider hover:bg-white hover:text-black transition-all flex items-center justify-center gap-2 rounded"
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                      >
+                        <Phone className="w-3 h-3 md:w-4 md:h-4" />
+                        Call Now
+                      </motion.a>
+
+                      <motion.a
+                        href={`https://wa.me/${whatsappNumber}?text=Hi%20Aman,%20I'm%20interested%20in%20joining%20Brother's%20Fitness!`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="font-sans text-sm text-gray-500 ml-6 hover:text-gym-red transition-colors underline decoration-dotted underline-offset-4"
-                    >
-                        Lakhnadon, Madhya Pradesh, 480886
-                    </a>
-                </div>
-                
-                <div>
-                    <h4 className="font-black font-sans italic text-xl mb-3 text-black dark:text-white flex items-center gap-2">
-                        <Phone size={18} className="text-gym-red" /> DIRECT LINE
-                    </h4>
-                    
-                    {/* CALL BUTTON */}
-                    <a 
-                        href="tel:+919131179343"
-                        className="flex items-center justify-center gap-2 w-full py-3 bg-gym-red text-white font-dot font-bold text-xs tracking-widest uppercase hover:bg-red-700 transition-all shadow-lg rounded-sm mb-3 group"
-                    >
-                        <Phone size={14} className="group-hover:animate-bounce" /> INITIATE_CALL
-                    </a>
-
-                    <a href="tel:+919131179343" className="block font-sans text-sm text-gray-500 font-bold ml-1 hover:text-white transition-colors">
-                        +91 91311 79343
-                    </a>
-                    <a href="mailto:brothersfitnesszone@gmail.com" className="block font-sans text-sm text-gray-500 ml-1 hover:text-white transition-colors">
-                        brothersfitnesszone@gmail.com
-                    </a>
-                </div>
-                
-                <div className="p-4 bg-gym-red/10 border border-gym-red/20 rounded-sm">
-                    <div className="flex items-start gap-3">
-                        <AlertCircle className="text-gym-red shrink-0" size={20} />
-                        <p className="text-xs font-sans text-gray-600 dark:text-gray-400">
-                            <span className="text-gym-red font-bold">NOTE:</span> We respond to all inquiries within 24 hours.
-                        </p>
+                        className="flex-1 bg-[#25D366] text-white px-3 py-3 md:px-4 md:py-3.5 text-xs font-mono font-bold uppercase tracking-wider hover:bg-white hover:text-[#25D366] transition-all flex items-center justify-center gap-2 rounded"
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                      >
+                        <MessageCircle className="w-3 h-3 md:w-4 md:h-4" />
+                        WhatsApp
+                      </motion.a>
                     </div>
-                </div>
-            </div>
-        </div>
+                  </div>
+                </motion.div>
 
+                <motion.div className="flex items-start gap-4" whileHover={{ x: 5 }}>
+                  <Mail className="w-5 h-5 md:w-6 md:h-6 text-gym-red mt-1 flex-shrink-0" />
+                  <div>
+                    <h3 className="text-[10px] md:text-xs font-mono font-bold text-gray-500 uppercase tracking-widest mb-1 md:mb-2">
+                      EMAIL
+                    </h3>
+                    <a
+                      href="mailto:brothersfitnesszone@gmail.com"
+                      className="text-sm md:text-lg font-sans text-white hover:text-gym-red transition-colors break-all"
+                    >
+                      brothersfitnesszone@gmail.com
+                    </a>
+                  </div>
+                </motion.div>
+              </div>
+            </motion.div>
+
+            {/* Column 2: Map Card */}
+            <motion.div
+              className="relative h-full min-h-[350px] md:min-h-[450px] bg-gray-900 border-2 border-white rounded-xl overflow-hidden"
+              initial={{ opacity: 0, x: 50 }}
+              animate={isInView ? { opacity: 1, x: 0 } : {}}
+              transition={{ duration: 0.6, delay: 0.4 }}
+            >
+              <div className="absolute inset-0 grayscale hover:grayscale-0 transition-all duration-700">
+                <iframe
+                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3667.123456789012!2d79.6!3d22.6!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMjLCsDM2JzAwLjAiTiA3OcKwMzYnMDAuMCJF!5e0!3m2!1sen!2sin!4v1234567890123!5m2!1sen!2sin&maptype=satellite"
+                  width="100%"
+                  height="100%"
+                  style={{ border: 0 }}
+                  allowFullScreen
+                  loading="lazy"
+                  referrerPolicy="no-referrer-when-downgrade"
+                />
+              </div>
+
+              {/* Overlay Label */}
+              <div className="absolute bottom-4 left-4 bg-black/90 px-4 py-2 md:bottom-6 md:left-6 md:px-6 md:py-3 border-l-4 border-gym-red backdrop-blur-sm pointer-events-none max-w-[calc(100%-2rem)]">
+                <p className="text-xs md:text-sm font-mono font-bold text-white uppercase tracking-wider flex items-center gap-2 md:gap-3 flex-wrap">
+                  <MapPin className="w-3 h-3 md:w-4 md:h-4 text-gym-red" />
+                  <span>Lakhnadon, Madhya Pradesh</span>
+                </p>
+              </div>
+            </motion.div>
+          </div>
+
+        </div>
       </div>
     </section>
   );

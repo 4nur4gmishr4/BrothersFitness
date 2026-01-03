@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+﻿import { NextResponse } from "next/server";
 
 export async function POST(request: Request) {
   try {
@@ -15,15 +15,19 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Invalid phone number" }, { status: 400 });
     }
 
-    // Process registration (offline mode)
-    console.log(`Registration received: ${name}, ${phone}`);
+    // Process registration (offline mode) - Remove in production
+    if (process.env.NODE_ENV === 'development') {
+      console.log(`Registration received: ${name}, ${phone}`);
+    }
 
     return NextResponse.json(
       { message: "Transmission Successful", status: "lead_recorded" },
       { status: 200 }
     );
   } catch (error) {
-    console.error("Error:", error);
+    if (process.env.NODE_ENV === 'development') {
+      console.error("Error:", error);
+    }
     return NextResponse.json(
       { error: "Transmission Failed", details: error instanceof Error ? error.message : "Unknown error" },
       { status: 500 }

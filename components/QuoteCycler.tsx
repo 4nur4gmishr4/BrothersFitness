@@ -5,7 +5,7 @@ import { useSound } from "@/components/SoundContext"; // Import hook
 
 const QUOTES = [
   "PAIN IS TEMPORARY. PRIDE IS FOREVER.",
-  "WE DON'\T STOP WHEN TIRED. WE STOP WHEN DONE.",
+  "WE DON'T STOP WHEN TIRED. WE STOP WHEN DONE.",
   "NO SHORTCUTS. JUST HEAVY LIFTING.",
   "DISCIPLINE EQUALS FREEDOM. EXECUTE.",
   "YOUR ONLY COMPETITION IS THE MIRROR."
@@ -15,16 +15,16 @@ export default function QuoteCycler() {
   const [text, setText] = useState("");
   const [loopNum, setLoopNum] = useState(0);
   const [isWaiting, setIsWaiting] = useState(false);
-  
+
   const { isEnabled } = useSound(); // Get sound state
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   // Initialize Audio
   useEffect(() => {
     if (typeof window !== "undefined") {
-        audioRef.current = new Audio("/audio/keytype.mp3");
-        audioRef.current.volume = 0.4;
-        audioRef.current.loop = true;
+      audioRef.current = new Audio("/audio/keytype.mp3");
+      audioRef.current.volume = 0.4;
+      audioRef.current.loop = true;
     }
   }, []);
 
@@ -34,10 +34,10 @@ export default function QuoteCycler() {
 
     // Play only if Sound is Enabled AND Not Waiting AND Text is Typing
     if (isEnabled && !isWaiting && text.length > 0) {
-        audioRef.current.play().catch(() => {});
+      audioRef.current.play().catch(() => { });
     } else {
-        audioRef.current.pause();
-        audioRef.current.currentTime = 0;
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
     }
   }, [isWaiting, text, isEnabled]);
 
@@ -52,14 +52,14 @@ export default function QuoteCycler() {
         setText("");
         setLoopNum((prev) => prev + 1);
         setIsWaiting(false);
-      }, 5000); 
+      }, 5000);
       return () => clearTimeout(timer);
     }
 
     if (!isWaiting) {
       const timer = setTimeout(() => {
         setText(fullText.substring(0, text.length + 1));
-      }, 50); 
+      }, 50);
       return () => clearTimeout(timer);
     }
 
@@ -67,8 +67,8 @@ export default function QuoteCycler() {
 
   return (
     <div className="h-[30px] md:h-[40px] flex items-center justify-center overflow-hidden w-full">
-      <motion.h3 
-        className="text-xs md:text-xl font-dot font-bold tracking-[0.15em] text-black dark:text-white uppercase text-center whitespace-nowrap"
+      <motion.h3
+        className="text-xs md:text-xl font-dot font-bold tracking-[0.15em] text-white uppercase text-center whitespace-nowrap"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
       >
