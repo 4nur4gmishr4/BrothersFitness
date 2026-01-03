@@ -1,5 +1,6 @@
 ﻿"use client";
-import React, { createContext, useContext, useState, useEffect } from "react";
+
+import { createContext, useContext, useState, ReactNode } from "react";
 
 interface SoundContextType {
   isEnabled: boolean;
@@ -8,10 +9,9 @@ interface SoundContextType {
 
 const SoundContext = createContext<SoundContextType | undefined>(undefined);
 
-export function SoundProvider({ children }: { children: React.ReactNode }) {
-  const [isEnabled, setIsEnabled] = useState(true);
+export function SoundProvider({ children }: { children: ReactNode }) {
+  const [isEnabled, setIsEnabled] = useState(false);
 
-  // Toggle function
   const toggleSound = () => {
     setIsEnabled((prev) => !prev);
   };

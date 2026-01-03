@@ -1,23 +1,25 @@
 ﻿"use client";
+
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence, useMotionValue, useSpring, useTransform } from "framer-motion";
 import { Calendar, Crosshair, Layers, Zap } from "lucide-react";
 
-// --- 3D TILT COMPONENT (Mobile Optimized) ---
-function TiltCard({ children, className, onClick }: any) {
+function TiltCard({ children, className, onClick }: { children: React.ReactNode; className?: string; onClick?: () => void }) {
   const x = useMotionValue(0);
   const y = useMotionValue(0);
-  const [isMobile, setIsMobile] = useState(false);
+  const [isMobile, setIsMobile] = useState(true);
 
   useEffect(() => {
-    setIsMobile(window.innerWidth < 768);
+    if (typeof window !== 'undefined') {
+      setIsMobile(window.innerWidth < 768);
+    }
   }, []);
 
   const mouseX = useSpring(x, { stiffness: 500, damping: 100 });
   const mouseY = useSpring(y, { stiffness: 500, damping: 100 });
 
-  function onMouseMove({ currentTarget, clientX, clientY }: any) {
-    if (isMobile) return; // Disable on mobile
+  function onMouseMove({ currentTarget, clientX, clientY }: React.MouseEvent) {
+    if (isMobile) return;
     const { left, top, width, height } = currentTarget.getBoundingClientRect();
     x.set(clientX - left - width / 2);
     y.set(clientY - top - height / 2);
@@ -25,36 +27,25 @@ function TiltCard({ children, className, onClick }: any) {
 
   const rotateX = useTransform(mouseY, [-100, 100], [5, -5]);
   const rotateY = useTransform(mouseX, [-100, 100], [-5, 5]);
-  
-  // Holographic Sheen
+
   const sheenX = useTransform(mouseX, [-100, 100], ["0%", "100%"]);
   const sheenY = useTransform(mouseY, [-100, 100], ["0%", "100%"]);
 
   return (
     <motion.div
-      style={isMobile ? {} : { rotateX, rotateY, transformStyle: "preserve-3d" }}
+      style={{ rotateX, rotateY, transformStyle: "preserve-3d" }}
       onMouseMove={onMouseMove}
       onMouseLeave={() => { x.set(0); y.set(0); }}
       onClick={onClick}
       className={`${className} relative`}
     >
-      <div style={isMobile ? {} : { transform: "translateZ(20px)" }}>
-        {children}
-      </div>
-      
-      {/* Glossy Sheen Overlay - Hidden on Mobile */}
+      {children}
       {!isMobile && (
-        <motion.div 
-          style={{ 
-              background: "radial-gradient(circle at center, rgba(255,255,255,0.1) 0%, transparent 60%)",
-              left: sheenX,
-              top: sheenY,
-              position: "absolute",
-              width: "200%",
-              height: "200%",
-              transform: "translate(-50%, -50%) pointer-events-none"
+        <motion.div
+          style={{
+            background: `radial-gradient(circle at ${sheenX} ${sheenY}, rgba(255,255,255,0.3), transparent 50%)`,
           }}
-          className="pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+          className="absolute inset-0 pointer-events-none"
         />
       )}
     </motion.div>
@@ -91,91 +82,101 @@ export default function DailyProtocol() {
   }, []);
 
   return (
-    <section id="protocol" className="py-12 md:py-24 bg-gym-black/5 dark:bg-black relative border-t border-gray-200 dark:border-white/10 transition-colors duration-300">
-      <div className="max-w-7xl mx-auto px-4 md:px-6">
-        
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 md:gap-8 mb-8 md:mb-12">
-            <div className="flex items-center gap-4">
-                <div className="relative">
-                    <div className="absolute inset-0 bg-gym-red blur-lg opacity-50 animate-pulse"></div>
-                    <Calendar className="relative text-gym-red w-8 h-8 md:w-10 md:h-10" />
-                </div>
-                <div>
-                    <h3 className="text-2xl md:text-4xl font-black font-sans italic uppercase text-black dark:text-white">DAILY <span className="text-gym-red">PROTOCOL</span></h3>
-                    <p className="font-dot text-xs text-gray-500 tracking-widest mt-1">LIVE TRAINING SCHEDULE</p>
-                </div>
-            </div>
+    <section id="protocol" className="min-h-screen bg-black text-white py-12 md:py-20">
+      <div className="max-w-7xl mx-auto px-4">
+        <motion.div
+          className="text-center mb-8 md:mb-10"
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6 }}
+        >
+          <h2 className="text-4xl md:text-6xl font-black uppercase mb-4 font-sans">DAILY PROTOCOL</h2>
+          <p className="text-lg text-gray-400 font-dot">LIVE TRAINING SCHEDULE</p>
+        </motion.div>
 
-            <div className="flex gap-2 bg-white dark:bg-white/5 p-1 rounded-sm border border-gray-200 dark:border-white/10 w-full md:w-auto">
-                <TabButton 
-                    label="SINGLE / DOUBLE" 
-                    icon={<Layers size={14} />} 
-                    isActive={activeSplit === "standard"} 
-                    onClick={() => setActiveSplit("standard")} 
-                />
-                <TabButton 
-                    label="TRIPLE (PPL)" 
-                    icon={<Zap size={14} />} 
-                    isActive={activeSplit === "triple"} 
-                    onClick={() => setActiveSplit("triple")} 
-                />
-            </div>
+        <div className="flex gap-4 justify-center mb-12">
+          <TabButton
+            label="BRO SPLIT"
+            icon={<Crosshair className="w-5 h-5" />}
+            isActive={activeSplit === "standard"}
+            onClick={() => setActiveSplit("standard")}
+          />
+          <TabButton
+            label="TRIPLE SPLIT"
+            icon={<Layers className="w-5 h-5" />}
+            isActive={activeSplit === "triple"}
+            onClick={() => setActiveSplit("triple")}
+          />
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 perspective-1000">
-            <AnimatePresence mode="wait">
-                {SPLITS[activeSplit].map((item, idx) => {
-                    const isToday = currentDay === idx;
-                    
-                    return (
-                        <TiltCard
-                            key={`${activeSplit}-${idx}`}
-                            className={`relative p-5 md:p-6 border rounded-sm overflow-hidden group flex flex-col justify-between min-h-[150px] cursor-default
-                                ${isToday 
-                                    ? "bg-gym-red text-white border-gym-red shadow-[0_0_30px_rgba(215,25,33,0.3)] scale-[1.02] md:scale-105 z-10" 
-                                    : "bg-white dark:bg-white/5 border-gray-200 dark:border-white/10 opacity-70 hover:opacity-100 hover:border-gym-yellow transition-all"
-                                }`}
-                        >
-                            {isToday && (
-                                <div className="absolute top-2 right-2 flex items-center gap-1 font-dot text-[10px] bg-black/20 px-2 py-1 rounded">
-                                    <span className="w-2 h-2 bg-white rounded-full animate-pulse"></span>
-                                    ACTIVE
-                                </div>
-                            )}
-
-                            <div>
-                                <div className="font-dot text-xs tracking-[0.2em] opacity-60 mb-2">{item.day}</div>
-                                <h4 className={`text-xl md:text-2xl font-black font-sans italic uppercase leading-none mb-3 ${isToday ? "text-white" : "text-black dark:text-white"}`}>
-                                    {item.focus}
-                                </h4>
-                            </div>
-                            
-                            <div className="flex items-start gap-2 text-xs font-sans font-medium border-t border-black/10 dark:border-white/10 pt-3">
-                                <Crosshair size={14} className={`mt-0.5 shrink-0 ${isToday ? "text-white" : "text-gym-red"}`} />
-                                <span className="uppercase tracking-tight whitespace-normal leading-tight">{item.type}</span>
-                            </div>
-                        </TiltCard>
-                    );
-                })}
-            </AnimatePresence>
-        </div>
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={activeSplit}
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -20 }}
+            transition={{ duration: 0.3 }}
+            className="grid gap-3 md:gap-5"
+          >
+            {SPLITS[activeSplit].map((item, idx) => {
+              const isToday = currentDay === idx;
+              return (
+                <motion.div
+                  key={`${activeSplit}-${item.day}`}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: idx * 0.05 }}
+                  className={`border p-6 md:p-8 relative ${
+                    isToday
+                      ? "border-gym-red bg-gym-red/10"
+                      : "border-white/20 hover:border-white/40"
+                  } transition-all`}
+                  whileHover={{ scale: 1.02 }}
+                >
+                  {isToday && (
+                    <motion.div
+                      className="absolute top-4 right-4 bg-gym-red text-white px-3 py-1 text-xs font-dot font-bold"
+                      animate={{
+                        boxShadow: [
+                          "0 0 10px rgba(215, 25, 33, 0.5)",
+                          "0 0 20px rgba(215, 25, 33, 0.8)",
+                          "0 0 10px rgba(215, 25, 33, 0.5)"
+                        ]
+                      }}
+                      transition={{ duration: 2, repeat: Infinity }}
+                    >
+                      ACTIVE
+                    </motion.div>
+                  )}
+                  <h3 className="text-2xl md:text-3xl font-black font-sans mb-2">{item.day}</h3>
+                  <p className="text-xl md:text-2xl text-gym-red font-bold mb-1">{item.focus}</p>
+                  <p className="text-sm text-gray-400 font-dot">{item.type}</p>
+                </motion.div>
+              );
+            })}
+          </motion.div>
+        </AnimatePresence>
       </div>
     </section>
   );
 }
 
-function TabButton({ label, icon, isActive, onClick }: any) {
-    return (
-        <button 
-            onClick={onClick}
-            className={`flex-1 md:flex-none flex items-center justify-center gap-2 px-4 py-3 md:px-6 md:py-2 font-dot text-[10px] md:text-xs font-bold tracking-widest transition-all whitespace-nowrap rounded-sm
-                ${isActive 
-                    ? "bg-gym-red text-white shadow-md" 
-                    : "text-gray-500 hover:text-gym-red hover:bg-gray-100 dark:hover:bg-white/10"
-                }`}
-        >
-            {icon}
-            <span>{label}</span>
-        </button>
-    )
+function TabButton({ label, icon, isActive, onClick }: { label: string; icon: React.ReactNode; isActive: boolean; onClick: () => void }) {
+  return (
+    <motion.button
+      onClick={onClick}
+      className={`flex items-center gap-2 px-6 py-3 font-dot font-bold text-xs uppercase tracking-widest border transition-all ${
+        isActive
+          ? "bg-gym-red text-white border-gym-red"
+          : "bg-transparent text-gray-400 border-white/20 hover:border-gym-red hover:text-gym-red"
+      }`}
+      whileHover={{ scale: 1.05 }}
+      whileTap={{ scale: 0.95 }}
+    >
+      {icon}
+      {label}
+    </motion.button>
+  );
 }
+

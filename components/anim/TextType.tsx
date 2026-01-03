@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 import { motion } from "framer-motion";
 
 export default function TextType({ text, delay = 0 }: { text: string, delay?: number }) {
@@ -34,10 +34,9 @@ export default function TextType({ text, delay = 0 }: { text: string, delay?: nu
       exit="exit"
       className="flex flex-wrap justify-center gap-x-[0.2em] gap-y-2"
     >
-      {words.map((word, index) => (
+      {words.map((word, wordIndex) => (
         <span key={index} className="whitespace-nowrap flex">
-          {Array.from(word).map((char, charIndex) => (
-            <motion.span key={charIndex} variants={child}>
+          {Array.from(word).map((char, charIndex) => (`n              <motion.span key={`char-${wordIndex}-${charIndex}`} key={charIndex} variants={child}>
               {char}
             </motion.span>
           ))}

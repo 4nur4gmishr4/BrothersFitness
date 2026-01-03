@@ -33,7 +33,7 @@ export default function DecryptedText({
     setRevealedIndices(new Set());
 
     intervalRef.current = setInterval(() => {
-      setDisplayText((prevText) =>
+      setDisplayText(() =>
         text
           .split("")
           .map((char, index) => {
@@ -68,7 +68,7 @@ export default function DecryptedText({
         clearTimeout(timeoutId);
         if (intervalRef.current) clearInterval(intervalRef.current);
     };
-  }, [text, animateOn, delay]);
+  }, [text, animateOn, delay, speed, maxIterations]);
 
   return (
     <span 

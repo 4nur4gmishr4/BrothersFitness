@@ -1,15 +1,15 @@
 ﻿import type { Metadata, Viewport } from "next";
 import { Inter, DotGothic16 } from "next/font/google";
 import "./globals.css";
-import { SoundProvider } from "@/components/SoundContext";
+import PageWrapper from "@/components/PageWrapper";
 
-const inter = Inter({ 
+const inter = Inter({
   subsets: ["latin"],
   variable: "--font-inter"
 });
 
-const dotGothic = DotGothic16({ 
-  weight: "400", 
+const dotGothic = DotGothic16({
+  weight: "400",
   subsets: ["latin"],
   variable: "--font-dot"
 });
@@ -25,6 +25,11 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   title: "Brother's Fitness",
   description: "Pain is Temporary. Pride is Forever.",
+  icons: {
+    icon: "/assets/favicon.png",
+    shortcut: "/assets/favicon.png",
+    apple: "/assets/favicon.png",
+  },
 };
 
 export default function RootLayout({
@@ -35,9 +40,9 @@ export default function RootLayout({
   return (
     <html lang="en" className="dark">
       <body className={`${inter.variable} ${dotGothic.variable} font-sans bg-black text-white antialiased`}>
-        <SoundProvider>
-            {children}
-        </SoundProvider>
+        <PageWrapper>
+          {children}
+        </PageWrapper>
       </body>
     </html>
   );
