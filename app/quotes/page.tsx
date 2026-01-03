@@ -275,8 +275,8 @@ export default function QuotesPage() {
                 key={cat.id}
                 onClick={() => setActiveCategory(cat.id as keyof typeof quotes)}
                 className={`flex items-center gap-2 px-6 py-3 font-mono text-xs uppercase tracking-widest border transition-all ${activeCategory === cat.id
-                    ? `${cat.color} text-white border-transparent`
-                    : "bg-transparent text-gray-400 border-white/20 hover:border-white/40"
+                  ? `${cat.color} text-white border-transparent`
+                  : "bg-transparent text-gray-400 border-white/20 hover:border-white/40"
                   }`}
               >
                 {cat.icon}
@@ -301,14 +301,14 @@ export default function QuotesPage() {
                   >
                     <Heart
                       className={`w-6 h-6 cursor-pointer transition-colors ${favorites.includes(currentQuotes[currentQuoteIndex])
-                          ? "fill-gym-red text-gym-red"
-                          : "text-white/40 hover:text-white"
+                        ? "fill-gym-red text-gym-red"
+                        : "text-white/40 hover:text-white"
                         }`}
                     />
                   </div>
 
                   <p className="text-2xl md:text-4xl lg:text-5xl font-display font-bold text-center leading-relaxed">
-                    "{currentQuotes[currentQuoteIndex]}"
+                    &quot;{currentQuotes[currentQuoteIndex]}&quot;
                   </p>
 
                   <div className="flex justify-center gap-4 mt-12">
@@ -350,7 +350,7 @@ export default function QuotesPage() {
                     />
                   </div>
                   <p className="text-sm md:text-base font-sans leading-relaxed pr-6">
-                    "{quote}"
+                    &quot;{quote}&quot;
                   </p>
                 </div>
               ))}

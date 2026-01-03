@@ -1,6 +1,6 @@
 "use client";
 
-import { MapPin, Phone, Mail, Sparkles, Code, Instagram, MessageCircle } from "lucide-react";
+import { MapPin, Phone, Mail, Sparkles, Instagram, MessageCircle } from "lucide-react";
 import { motion, AnimatePresence, useInView } from "framer-motion";
 import Link from "next/link";
 import { useState, useEffect, useRef } from "react";
@@ -92,7 +92,7 @@ export default function Footer() {
               }}
               transition={{ duration: 3, repeat: Infinity }}
             >
-              BROTHER'S FITNESS
+              BROTHER&apos;S FITNESS
             </motion.h3>
 
             {/* Rotating Tagline */}
@@ -244,7 +244,7 @@ export default function Footer() {
         >
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
             <p className="text-xs font-mono text-gray-400">
-              © 2024 BROTHER'S FITNESS. ALL RIGHTS RESERVED.
+              © 2024 BROTHER&apos;S FITNESS. ALL RIGHTS RESERVED.
             </p>
             <motion.p
               className="text-xs font-mono text-gray-400"

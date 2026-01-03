@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence, useMotionValue, useSpring, useTransform } from "framer-motion";
-import { Calendar, Crosshair, Layers, Zap } from "lucide-react";
+import { Crosshair, Layers } from "lucide-react";
 
 function TiltCard({ children, className, onClick }: { children: React.ReactNode; className?: string; onClick?: () => void }) {
   const x = useMotionValue(0);
@@ -127,11 +127,10 @@ export default function DailyProtocol() {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: idx * 0.05 }}
-                  className={`border p-6 md:p-8 relative ${
-                    isToday
+                  className={`border p-6 md:p-8 relative ${isToday
                       ? "border-gym-red bg-gym-red/10"
                       : "border-white/20 hover:border-white/40"
-                  } transition-all`}
+                    } transition-all`}
                   whileHover={{ scale: 1.02 }}
                 >
                   {isToday && (
@@ -166,11 +165,10 @@ function TabButton({ label, icon, isActive, onClick }: { label: string; icon: Re
   return (
     <motion.button
       onClick={onClick}
-      className={`flex items-center gap-2 px-6 py-3 font-dot font-bold text-xs uppercase tracking-widest border transition-all ${
-        isActive
+      className={`flex items-center gap-2 px-6 py-3 font-dot font-bold text-xs uppercase tracking-widest border transition-all ${isActive
           ? "bg-gym-red text-white border-gym-red"
           : "bg-transparent text-gray-400 border-white/20 hover:border-gym-red hover:text-gym-red"
-      }`}
+        }`}
       whileHover={{ scale: 1.05 }}
       whileTap={{ scale: 0.95 }}
     >

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { motion, useScroll, useSpring, AnimatePresence, useMotionValueEvent } from "framer-motion";
 import { ArrowUp } from "lucide-react";
 import { SoundProvider } from "@/components/SoundContext";
