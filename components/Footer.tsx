@@ -244,7 +244,7 @@ export default function Footer() {
         >
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
             <p className="text-xs font-mono text-gray-400">
-              © 2024 BROTHER&apos;S FITNESS. ALL RIGHTS RESERVED.
+              © 2026 BROTHER&apos;S FITNESS. ALL RIGHTS RESERVED.
             </p>
             <motion.p
               className="text-xs font-mono text-gray-400"
