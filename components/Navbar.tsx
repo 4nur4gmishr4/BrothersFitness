@@ -90,7 +90,7 @@ export default function Navbar() {
             >
               <span className="text-sm sm:text-base md:text-lg lg:text-xl font-display font-black uppercase tracking-tighter">
                 <span className="text-white group-hover:text-gym-red transition-colors duration-300">
-                  BROTHER'S
+                  BROTHER&apos;S
                 </span>
                 <span className="text-gym-red">_</span>
                 <span className="text-white group-hover:text-gym-red transition-colors duration-300">

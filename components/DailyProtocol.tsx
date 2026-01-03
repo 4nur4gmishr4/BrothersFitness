@@ -4,53 +4,7 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence, useMotionValue, useSpring, useTransform } from "framer-motion";
 import { Crosshair, Layers } from "lucide-react";
 
-function TiltCard({ children, className, onClick }: { children: React.ReactNode; className?: string; onClick?: () => void }) {
-  const x = useMotionValue(0);
-  const y = useMotionValue(0);
-  const [isMobile, setIsMobile] = useState(true);
 
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      setIsMobile(window.innerWidth < 768);
-    }
-  }, []);
-
-  const mouseX = useSpring(x, { stiffness: 500, damping: 100 });
-  const mouseY = useSpring(y, { stiffness: 500, damping: 100 });
-
-  function onMouseMove({ currentTarget, clientX, clientY }: React.MouseEvent) {
-    if (isMobile) return;
-    const { left, top, width, height } = currentTarget.getBoundingClientRect();
-    x.set(clientX - left - width / 2);
-    y.set(clientY - top - height / 2);
-  }
-
-  const rotateX = useTransform(mouseY, [-100, 100], [5, -5]);
-  const rotateY = useTransform(mouseX, [-100, 100], [-5, 5]);
-
-  const sheenX = useTransform(mouseX, [-100, 100], ["0%", "100%"]);
-  const sheenY = useTransform(mouseY, [-100, 100], ["0%", "100%"]);
-
-  return (
-    <motion.div
-      style={{ rotateX, rotateY, transformStyle: "preserve-3d" }}
-      onMouseMove={onMouseMove}
-      onMouseLeave={() => { x.set(0); y.set(0); }}
-      onClick={onClick}
-      className={`${className} relative`}
-    >
-      {children}
-      {!isMobile && (
-        <motion.div
-          style={{
-            background: `radial-gradient(circle at ${sheenX} ${sheenY}, rgba(255,255,255,0.3), transparent 50%)`,
-          }}
-          className="absolute inset-0 pointer-events-none"
-        />
-      )}
-    </motion.div>
-  );
-}
 
 const SPLITS = {
   standard: [
@@ -128,8 +82,8 @@ export default function DailyProtocol() {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: idx * 0.05 }}
                   className={`border p-6 md:p-8 relative ${isToday
-                      ? "border-gym-red bg-gym-red/10"
-                      : "border-white/20 hover:border-white/40"
+                    ? "border-gym-red bg-gym-red/10"
+                    : "border-white/20 hover:border-white/40"
                     } transition-all`}
                   whileHover={{ scale: 1.02 }}
                 >
@@ -166,8 +120,8 @@ function TabButton({ label, icon, isActive, onClick }: { label: string; icon: Re
     <motion.button
       onClick={onClick}
       className={`flex items-center gap-2 px-6 py-3 font-dot font-bold text-xs uppercase tracking-widest border transition-all ${isActive
-          ? "bg-gym-red text-white border-gym-red"
-          : "bg-transparent text-gray-400 border-white/20 hover:border-gym-red hover:text-gym-red"
+        ? "bg-gym-red text-white border-gym-red"
+        : "bg-transparent text-gray-400 border-white/20 hover:border-gym-red hover:text-gym-red"
         }`}
       whileHover={{ scale: 1.05 }}
       whileTap={{ scale: 0.95 }}

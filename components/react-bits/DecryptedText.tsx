@@ -83,7 +83,7 @@ export default function DecryptedText({
       clearTimeout(timeoutId);
       if (intervalRef.current) clearInterval(intervalRef.current);
     };
-  }, [text, animateOn, delay, speed, maxIterations]);
+  }, [text, animateOn, delay, speed, maxIterations, scramble]);
 
   return (
     <span
