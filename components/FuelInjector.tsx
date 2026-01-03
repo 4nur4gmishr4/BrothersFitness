@@ -1,8 +1,8 @@
 ﻿"use client";
 
 import { useState, useRef } from "react";
-import { Flame, Zap, TrendingUp, TrendingDown } from "lucide-react";
-import { motion, AnimatePresence, useInView, useSpring, useTransform } from "framer-motion";
+import { TrendingUp, TrendingDown } from "lucide-react";
+import { motion, AnimatePresence, useInView } from "framer-motion";
 import { useEffect } from "react";
 
 export default function FuelInjector() {
@@ -125,8 +125,8 @@ function ModeButton({ label, icon, isActive, onClick }: { label: string; icon: R
     <motion.button
       onClick={onClick}
       className={`flex items-center gap-2 px-6 py-3 font-dot font-bold text-xs uppercase tracking-widest border-2 transition-all ${isActive
-          ? "bg-gym-red text-white border-gym-red"
-          : "bg-transparent text-gray-400 border-white hover:border-gym-red"
+        ? "bg-gym-red text-white border-gym-red"
+        : "bg-transparent text-gray-400 border-white hover:border-gym-red"
         }`}
       whileHover={{ scale: 1.05 }}
       whileTap={{ scale: 0.95 }}
@@ -174,8 +174,8 @@ function CalorieCard({ label, value, suffix, isInView, highlight = false }: { la
   return (
     <motion.div
       className={`border-2 p-6 ${highlight
-          ? "border-gym-red bg-gym-red/5"
-          : "border-gray-700"
+        ? "border-gym-red bg-gym-red/5"
+        : "border-gray-700"
         }`}
       whileHover={{ scale: 1.05 }}
       transition={{ duration: 0.2 }}

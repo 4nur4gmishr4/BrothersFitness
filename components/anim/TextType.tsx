@@ -8,10 +8,10 @@ export default function TextType({ text, delay = 0 }: { text: string, delay?: nu
     hidden: { opacity: 0 },
     visible: {
       opacity: 1,
-      transition: { 
-        staggerChildren: 0.08, 
+      transition: {
+        staggerChildren: 0.08,
         // Base delay of 0.5s plus any added delay
-        delayChildren: 0.5 + delay 
+        delayChildren: 0.5 + delay
       },
     },
     exit: { opacity: 0, transition: { duration: 0.5 } }
@@ -35,11 +35,14 @@ export default function TextType({ text, delay = 0 }: { text: string, delay?: nu
       className="flex flex-wrap justify-center gap-x-[0.2em] gap-y-2"
     >
       {words.map((word, wordIndex) => (
-        <span key={index} className="whitespace-nowrap flex">
-          {Array.from(word).map((char, charIndex) => (`n              <motion.span key={`char-${wordIndex}-${charIndex}`} key={charIndex} variants={child}>
+        <span key={wordIndex} className="whitespace-nowrap flex">
+          {Array.from(word).map((char, charIndex) => (
+            <motion.span key={`char-${wordIndex}-${charIndex}`} variants={child}>
               {char}
             </motion.span>
           ))}
+          {/* Add a non-breaking space after each word except the last one if needed, 
+              but since we wrap words in spans, we rely on gap-x for spacing */}\r
         </span>
       ))}
     </motion.div>

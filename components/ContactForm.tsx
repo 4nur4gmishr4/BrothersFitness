@@ -1,6 +1,6 @@
 ﻿"use client";
 
-import { MapPin, Phone, Mail, Send, MessageCircle } from "lucide-react";
+import { MapPin, Phone, Mail, MessageCircle } from "lucide-react";
 import { motion, useInView } from "framer-motion";
 import { useRef, useState, useEffect } from "react";
 
