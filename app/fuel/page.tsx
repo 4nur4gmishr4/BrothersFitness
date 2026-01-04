@@ -53,7 +53,7 @@ const LoadingStatus = () => {
             setIndex((prev) => (prev + 1) % messages.length);
         }, 3000);
         return () => clearInterval(interval);
-    }, []);
+    }, [messages.length]);
 
     return (
         <p className="font-dot text-xs text-green-500 uppercase tracking-widest min-h-[1.5em]">
@@ -67,8 +67,8 @@ function FuelSynthesizerContent() {
     const searchParams = useSearchParams();
     const missionRef = useRef<HTMLDivElement>(null);
 
-    const [calories, setCalories] = useState(searchParams.get("calories") || "");
-    const [mode, setMode] = useState(searchParams.get("mode") || "bulk");
+    const [calories] = useState(searchParams.get("calories") || "");
+    const [mode] = useState(searchParams.get("mode") || "bulk");
     const [dietType, setDietType] = useState("Everything");
     const [budget, setBudget] = useState("Standard");
     const [lang, setLang] = useState<"en" | "hi">("en");
@@ -443,7 +443,7 @@ function FuelSynthesizerContent() {
                         <div className="grid md:grid-cols-2 gap-6">
                             <div className="bg-gym-red/10 border-l-4 border-gym-red p-6">
                                 <h3 className="text-gym-red font-dot text-xs uppercase tracking-widest mb-2">Your Plan</h3>
-                                <p className="font-medium text-lg italic">"{data.tactical_brief[lang]}"</p>
+                                <p className="font-medium text-lg italic">&quot;{data.tactical_brief[lang]}&quot;</p>
                             </div>
 
                             {data.transformation_timeline && (

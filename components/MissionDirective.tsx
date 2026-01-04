@@ -1,7 +1,7 @@
 "use client";
 
 import React, { forwardRef } from 'react';
-import { IndianRupee, ShoppingCart, Utensils, Zap } from 'lucide-react';
+import { ShoppingCart, Utensils, Zap } from 'lucide-react';
 
 // Reusing types from page.tsx (ideally move to a types.ts file)
 type LocalizedText = { en: string; hi: string };
@@ -71,7 +71,7 @@ const MissionDirective = forwardRef<HTMLDivElement, MissionDirectiveProps>(({ da
                     <Zap className="w-5 h-5" />
                     Your Plan
                 </h3>
-                <p className="italic">"{data.tactical_brief[lang]}"</p>
+                <p className="italic">&quot;{data.tactical_brief[lang]}&quot;</p>
             </div>
 
             {/* Biometrics Snapshot */}
