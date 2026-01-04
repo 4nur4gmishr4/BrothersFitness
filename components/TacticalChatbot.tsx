@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { motion, AnimatePresence, useDragControls } from "framer-motion";
+import { motion, AnimatePresence, useDragControls, PanInfo } from "framer-motion";
 import { Cpu, X, Send, Dumbbell, Utensils, Zap, Languages } from "lucide-react";
 
 type ChatMessage = {
@@ -66,7 +66,7 @@ export default function TacticalChatbot() {
         }
     }, []);
 
-    const updatePosition = (info: any) => {
+    const updatePosition = (info: PanInfo) => {
         if (typeof window !== 'undefined') {
             const newPos = {
                 bottom: `${Math.max(20, window.innerHeight - info.point.y - 28)}px`,
