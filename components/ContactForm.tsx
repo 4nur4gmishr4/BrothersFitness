@@ -29,15 +29,13 @@ export default function ContactForm() {
     >
       {/* Background grid - disabled on mobile for performance */}
       {!isMobile && (
-        <motion.div
-          className="absolute inset-0 opacity-[0.02]"
+        <div
+          className="absolute inset-0 opacity-[0.02] animate-pulse"
           style={{
             backgroundImage: `linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px),
                              linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)`,
             backgroundSize: "30px 30px",
           }}
-          animate={{ backgroundPosition: ["0px 0px", "30px 30px"] }}
-          transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
         />
       )}
 
@@ -91,9 +89,16 @@ export default function ContactForm() {
                     <h3 className="text-[10px] md:text-xs font-mono font-bold text-gray-500 uppercase tracking-widest mb-1 md:mb-2">
                       LOCATION
                     </h3>
-                    <p className="text-base md:text-lg font-sans text-white leading-relaxed">
-                      Lakhnadon, Madhya Pradesh<br />
-                      PIN: 480886
+                    <a
+                      href="https://www.google.com/maps?q=22.59907,79.61161"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-base md:text-lg font-sans text-white leading-relaxed hover:text-gym-red transition-colors cursor-pointer inline-block"
+                    >
+                      Lakhnadon, 480886, MP
+                    </a>
+                    <p className="text-xs text-gray-500 mt-1 font-mono">
+                      Click to view on Google Maps
                     </p>
                   </div>
                 </motion.div>
@@ -159,15 +164,16 @@ export default function ContactForm() {
               animate={isInView ? { opacity: 1, x: 0 } : {}}
               transition={{ duration: 0.6, delay: 0.4 }}
             >
-              <div className="absolute inset-0 grayscale hover:grayscale-0 transition-all duration-700">
+              <div className="absolute inset-0 hover:grayscale-0 transition-all duration-700">
                 <iframe
-                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3667.123456789012!2d79.6!3d22.6!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMjLCsDM2JzAwLjAiTiA3OcKwMzYnMDAuMCJF!5e0!3m2!1sen!2sin!4v1234567890123!5m2!1sen!2sin&maptype=satellite"
+                  src="https://www.google.com/maps/embed?pb=!4v1767551049933!6m8!1m7!1sVgx1G-8DgYzc7r9doCFl-w!2m2!1d22.59908339631551!2d79.61152925095537!3f152.81242427702475!4f-7.897474045401708!5f0.7820865974627469"
                   width="100%"
                   height="100%"
                   style={{ border: 0 }}
                   allowFullScreen
                   loading="lazy"
                   referrerPolicy="no-referrer-when-downgrade"
+                  title="Brother's Fitness 3D Map View"
                 />
               </div>
 
@@ -175,7 +181,7 @@ export default function ContactForm() {
               <div className="absolute bottom-4 left-4 bg-black/90 px-4 py-2 md:bottom-6 md:left-6 md:px-6 md:py-3 border-l-4 border-gym-red backdrop-blur-sm pointer-events-none max-w-[calc(100%-2rem)]">
                 <p className="text-xs md:text-sm font-mono font-bold text-white uppercase tracking-wider flex items-center gap-2 md:gap-3 flex-wrap">
                   <MapPin className="w-3 h-3 md:w-4 md:h-4 text-gym-red" />
-                  <span>Lakhnadon, Madhya Pradesh</span>
+                  <span>Lakhnadon, 480886, MP</span>
                 </p>
               </div>
             </motion.div>

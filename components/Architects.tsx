@@ -3,11 +3,12 @@
 import { Shield, Medal, Instagram } from "lucide-react";
 import Image from "next/image";
 import { motion, useInView } from "framer-motion";
-import { useRef } from "react";
+import { useRef, useState } from "react";
 
 export default function Architects() {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: "-100px" });
+  const [tappedCard, setTappedCard] = useState<string | null>(null);
 
   const trainers = [
     {
@@ -40,9 +41,9 @@ export default function Architects() {
           transition={{ duration: 0.6 }}
         >
           <h2 className="heading-display text-4xl md:text-6xl mb-4">
-            THE ARCHITECTS
+            OUR TRAINERS
           </h2>
-          <p className="text-lg text-gray-400 font-mono tracking-wide">
+          <p className="text-lg text-gray-300 font-mono tracking-wide">
             BUILT BY BROTHERS. FORGED IN IRON.
           </p>
         </motion.div>
@@ -86,6 +87,7 @@ export default function Architects() {
                       className="relative group/instagram"
                       whileHover={{ scale: 1.2, rotate: 10 }}
                       whileTap={{ scale: 0.9 }}
+                      aria-label={`Follow ${t.name} on Instagram`}
                     >
                       <motion.div
                         className="absolute inset-0 bg-gradient-to-br from-purple-500 via-pink-500 to-yellow-500 rounded-full blur-md opacity-0 group-hover/instagram:opacity-75"
@@ -101,16 +103,21 @@ export default function Architects() {
                   )}
                 </div>
 
-                <div className="relative w-full aspect-square mb-6 overflow-hidden bg-gray-900">
+                <div
+                  className="relative w-full aspect-square mb-6 overflow-hidden bg-gray-900 cursor-pointer"
+                  onClick={() => setTappedCard(tappedCard === t.id ? null : t.id)}
+                  onTouchStart={() => setTappedCard(tappedCard === t.id ? null : t.id)}
+                >
                   <motion.div
                     className="relative w-full h-full"
                     initial={{ filter: "grayscale(100%)" }}
+                    animate={{ filter: tappedCard === t.id ? "grayscale(0%)" : "grayscale(100%)" }}
                     whileHover={{ filter: "grayscale(0%)" }}
                     transition={{ duration: 0.5 }}
                   >
                     <Image
                       src={t.src}
-                      alt={t.name}
+                      alt={`${t.name} - ${t.role} at Brother's Fitness specializing in ${t.spec}`}
                       fill
                       className="object-contain"
                       sizes="(max-width: 768px) 100vw, 50vw"
@@ -118,14 +125,14 @@ export default function Architects() {
                     />
                   </motion.div>
 
-                  <motion.div
+                  <div
                     className="absolute inset-0 pointer-events-none"
                     style={{
                       backgroundImage: "repeating-linear-gradient(0deg, rgba(215, 25, 33, 0.1) 0px, transparent 2px, transparent 4px)",
                     }}
-                    animate={{ y: ["0%", "100%"] }}
-                    transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
                   />
+
+                  {/* Tap hint for mobile - REMOVED */}
                 </div>
 
                 <div className="space-y-3">
@@ -138,7 +145,7 @@ export default function Architects() {
                       {t.isMain ? <Shield className="w-6 h-6 text-gym-red" /> : <Medal className="w-6 h-6 text-gym-red" />}
                     </motion.div>
                   </div>
-                  <p className="label-text text-gray-400">
+                  <p className="label-text text-gray-300">
                     {t.role}
                   </p>
                   <motion.p
@@ -159,4 +166,3 @@ export default function Architects() {
     </section>
   );
 }
-

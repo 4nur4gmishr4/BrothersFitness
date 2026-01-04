@@ -4,81 +4,118 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { SoundProvider } from "@/components/SoundContext";
 
+import TacticalChatbot from "@/components/TacticalChatbot";
+
 export default function PageWrapper({ children }: { children: React.ReactNode }) {
-    const [loading, setLoading] = useState(true);
+    // Start with content visible to prevent flash
+    const [showLoader, setShowLoader] = useState(false);
+    const [showContent, setShowContent] = useState(true);
     const [videoEnded, setVideoEnded] = useState(false);
 
     useEffect(() => {
-        // Lock scroll during loading
+        // Check if returning user synchronously
+        const hasLoadedData = sessionStorage.getItem("brofit_loaded");
+        let isReturning = false;
+
+        if (hasLoadedData) {
+            try {
+                const { timestamp } = JSON.parse(hasLoadedData);
+                const sevenDays = 7 * 24 * 60 * 60 * 1000;
+
+                if (Date.now() - timestamp < sevenDays) {
+                    isReturning = true;
+                }
+            } catch (e) {
+                // Invalid format
+            }
+        }
+
+        if (isReturning) {
+            // Returning user: content already visible, no loader needed
+            setShowContent(true);
+            setShowLoader(false);
+            setVideoEnded(true);
+            return;
+        }
+
+        // New user: Show loader immediately
+        setShowLoader(true);
+        setShowContent(false);
         document.body.style.overflow = "hidden";
 
-        // Safety fallback: Force end after 5 seconds if video hangs
+        // Safety fallback: Force end after 2.5 seconds
         const timer = setTimeout(() => {
-            setVideoEnded(true);
-        }, 5000);
+            handleVideoComplete();
+        }, 2500);
 
-        return () => clearTimeout(timer);
+        // Absolute fail-safe: Force remove loader after 4 seconds
+        const failSafe = setTimeout(() => {
+            setShowLoader(false);
+            setShowContent(true);
+            setVideoEnded(true);
+            document.body.style.overflow = "";
+            sessionStorage.setItem("brofit_loaded", JSON.stringify({ timestamp: Date.now() }));
+        }, 4000);
+
+        return () => {
+            clearTimeout(timer);
+            clearTimeout(failSafe);
+        };
     }, []);
 
-    const handleAnimationComplete = () => {
-        document.body.style.overflow = ""; // Unlock scroll
-        // Additional cleanup if needed
+    const handleVideoComplete = () => {
+        if (videoEnded) return;
+        setVideoEnded(true);
+
+        setTimeout(() => {
+            setShowLoader(false);
+            setShowContent(true);
+            document.body.style.overflow = "";
+            sessionStorage.setItem("brofit_loaded", JSON.stringify({ timestamp: Date.now() }));
+        }, 500);
     };
 
     return (
         <SoundProvider>
             {/* Loader Overlay */}
             <AnimatePresence mode="wait">
-                {loading && (
+                {showLoader && (
                     <motion.div
                         key="loader"
                         className="fixed inset-0 z-[100] bg-black grid place-items-center"
                         initial={{ opacity: 1 }}
-                        exit={{ opacity: 0, transition: { duration: 0.5, delay: 0.5 } }} // Fade out background after reveal starts
+                        exit={{ opacity: 0, transition: { duration: 0.8, ease: "easeInOut" } }}
                     >
                         <video
                             src="/assets/Brofitlottie.webm"
                             autoPlay
                             muted
                             playsInline
-                            onEnded={() => setVideoEnded(true)}
+                            onEnded={handleVideoComplete}
+                            onError={handleVideoComplete}
                             className="w-16 md:w-24 object-contain"
                         />
                     </motion.div>
                 )}
             </AnimatePresence>
 
-            {/* Main Content with Reveal Animation */}
-            <motion.div
-                key="main-content"
-                className="relative min-h-screen"
-                initial={{ clipPath: "circle(0% at 50% 50%)" }}
-                animate={{
-                    clipPath: videoEnded ? "circle(150% at 50% 50%)" : "circle(0% at 50% 50%)"
-                }}
-                transition={{
-                    type: "spring",
-                    stiffness: 70,
-                    damping: 15,
-                    mass: 1,
-                    restDelta: 0.001
-                }}
-                onAnimationComplete={() => {
-                    if (videoEnded) {
-                        setLoading(false);
-                        handleAnimationComplete();
-                        // Slight delay to ensure the circle has fully expanded before removing clip-path
-                        // This prevents any visual "snap" if the spring is still settling
-                        setTimeout(() => {
-                            const element = document.getElementById('main-content-wrapper');
-                            if (element) element.style.clipPath = 'none';
-                        }, 100);
-                    }
-                }}
-                id="main-content-wrapper"
-            >
-                {children}
-            </motion.div>
+            {/* Main Content - Always visible, animated only on first load */}
+            <AnimatePresence mode="wait">
+                {showContent && (
+                    <motion.div
+                        key="main-content"
+                        className="relative min-h-screen"
+                        initial={{ opacity: videoEnded ? 1 : 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ duration: 0.5, ease: "easeOut" }}
+                        id="main-content-wrapper"
+                    >
+                        {children}
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
+            <TacticalChatbot />
         </SoundProvider>
     );
 }
