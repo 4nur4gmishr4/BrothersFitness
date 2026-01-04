@@ -2,7 +2,7 @@
 
 import { useState, useEffect, Suspense, useRef } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { ArrowLeft, RefreshCw, Cpu, ShoppingCart, Utensils, IndianRupee, Globe, Home, Store } from "lucide-react";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
