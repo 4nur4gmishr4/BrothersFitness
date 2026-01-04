@@ -1,8 +1,11 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Activity, Flame, Dumbbell } from "lucide-react";
 import { motion, AnimatePresence, useSpring, useTransform } from "framer-motion";
+import dynamic from "next/dynamic";
+
+const ShareMissionReport = dynamic(() => import("./ShareMissionReport"), { ssr: false });
 
 export default function Diagnostics() {
   const [activeTab, setActiveTab] = useState("bmi");
@@ -18,10 +21,10 @@ export default function Diagnostics() {
           transition={{ duration: 0.6 }}
         >
           <h2 className="text-4xl md:text-6xl font-black uppercase mb-4 font-sans">
-            System Diagnostics
+            CALIBRATE YOUR METRICS
           </h2>
           <p className="text-lg text-gray-400 font-dot">
-            CALIBRATE YOUR METRICS.
+            ANALYZE PERFORMANCE // OPTIMIZE RESULTS
           </p>
         </motion.div>
 
@@ -72,6 +75,7 @@ function BMICalculator() {
   const [height, setHeight] = useState("");
   const [weight, setWeight] = useState("");
   const [result, setResult] = useState<number | null>(null);
+  const resultRef = useRef<HTMLDivElement>(null);
 
   const calculate = () => {
     const h = parseFloat(height) / 100;
@@ -97,7 +101,7 @@ function BMICalculator() {
 
       {result !== null && (
         <ResultDisplay>
-          <div className="text-center">
+          <div className="text-center" ref={resultRef}>
             <p className="text-xs font-dot uppercase tracking-widest text-gray-500 mb-2">
               YOUR BMI SCORE
             </p>
@@ -113,6 +117,9 @@ function BMICalculator() {
               {result < 18.5 ? "UNDERWEIGHT" : result < 25 ? "NORMAL WEIGHT" : result < 30 ? "OVERWEIGHT" : "OBESE"}
             </motion.p>
           </div>
+          <div className="flex justify-center">
+            <ShareMissionReport targetRef={resultRef} filename="bmi-report" />
+          </div>
         </ResultDisplay>
       )}
     </motion.div>
@@ -126,6 +133,7 @@ function TDEECalculator() {
   const [age, setAge] = useState("");
   const [activity, setActivity] = useState("1.2");
   const [result, setResult] = useState<number | null>(null);
+  const resultRef = useRef<HTMLDivElement>(null);
 
   const calculate = () => {
     const w = parseFloat(weight);
@@ -195,7 +203,7 @@ function TDEECalculator() {
 
       {result !== null && (
         <ResultDisplay>
-          <div className="space-y-6">
+          <div className="space-y-6" ref={resultRef}>
             {/* Maintenance Calories - Center Top */}
             <motion.div
               className="text-center p-6 bg-white/5 border-2 border-white/20 rounded-sm"
@@ -270,21 +278,21 @@ function TDEECalculator() {
 
               {/* Right Column - Weight Loss */}
               <div className="space-y-4">
-                <h4 className="text-sm font-dot font-bold uppercase tracking-widest text-blue-400 text-center">
+                <h4 className="text-sm font-dot font-bold uppercase tracking-widest text-gym-red text-center">
                   Weight Loss Calories
                 </h4>
 
                 {/* Mild Weight Loss */}
                 <motion.div
-                  className="text-center p-4 bg-white/5 border border-blue-500/20 rounded-sm"
+                  className="text-center p-4 bg-white/5 border border-gym-red/20 rounded-sm"
                   initial={{ opacity: 0, x: 20 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: 0.2 }}
                 >
-                  <p className="text-xs font-dot uppercase tracking-widest text-blue-400 mb-2">
+                  <p className="text-xs font-dot uppercase tracking-widest text-gym-red mb-2">
                     Mild Loss
                   </p>
-                  <p className="text-3xl font-black font-sans text-blue-400">
+                  <p className="text-3xl font-black font-sans text-gym-red">
                     <AnimatedNumber value={result - 275} />
                   </p>
                   <p className="text-xs text-gray-400 mt-1">-0.25 KG/WEEK</p>
@@ -292,15 +300,15 @@ function TDEECalculator() {
 
                 {/* Weight Loss */}
                 <motion.div
-                  className="text-center p-4 bg-white/5 border border-blue-400/30 rounded-sm"
+                  className="text-center p-4 bg-white/5 border border-gym-red/30 rounded-sm"
                   initial={{ opacity: 0, x: 20 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: 0.25 }}
                 >
-                  <p className="text-xs font-dot uppercase tracking-widest text-blue-300 mb-2">
+                  <p className="text-xs font-dot uppercase tracking-widest text-gym-red/90 mb-2">
                     Weight Loss
                   </p>
-                  <p className="text-3xl font-black font-sans text-blue-300">
+                  <p className="text-3xl font-black font-sans text-gym-red/90">
                     <AnimatedNumber value={result - 550} />
                   </p>
                   <p className="text-xs text-gray-400 mt-1">-0.5 KG/WEEK</p>
@@ -308,15 +316,15 @@ function TDEECalculator() {
 
                 {/* Extreme Weight Loss */}
                 <motion.div
-                  className="text-center p-4 bg-white/5 border border-blue-500/50 rounded-sm"
+                  className="text-center p-4 bg-white/5 border border-gym-red/50 rounded-sm"
                   initial={{ opacity: 0, x: 20 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: 0.3 }}
                 >
-                  <p className="text-xs font-dot uppercase tracking-widest text-blue-200 mb-2">
+                  <p className="text-xs font-dot uppercase tracking-widest text-gym-red/80 mb-2">
                     Extreme Loss
                   </p>
-                  <p className="text-3xl font-black font-sans text-blue-200">
+                  <p className="text-3xl font-black font-sans text-gym-red/80">
                     <AnimatedNumber value={result - 1100} />
                   </p>
                   <p className="text-xs text-gray-400 mt-1">-1 KG/WEEK</p>
@@ -326,9 +334,12 @@ function TDEECalculator() {
 
             <div className="mt-6 text-center">
               <p className="text-xs text-gray-400 italic">
-                ?? Extreme weight changes should be monitored by a healthcare professional
+                ⚠️ Extreme weight changes should be monitored by a healthcare professional
               </p>
             </div>
+          </div>
+          <div className="flex justify-center">
+            <ShareMissionReport targetRef={resultRef} filename="tdee-report" />
           </div>
         </ResultDisplay>
       )}
@@ -340,6 +351,7 @@ function OneRepMaxCalculator() {
   const [lift, setLift] = useState("");
   const [reps, setReps] = useState("");
   const [result, setResult] = useState<number | null>(null);
+  const resultRef = useRef<HTMLDivElement>(null);
 
   const calculate = () => {
     const w = parseFloat(lift);
@@ -365,29 +377,34 @@ function OneRepMaxCalculator() {
 
       {result !== null && (
         <ResultDisplay>
-          <div className="text-center mb-6">
-            <p className="text-xs font-dot uppercase tracking-widest text-gray-500 mb-2">
-              ESTIMATED 1RM
-            </p>
-            <p className="text-6xl font-black font-sans text-gym-red">
-              <AnimatedNumber value={result} />kg
-            </p>
-            <p className="text-sm text-gray-400 mt-2">MAX EFFORT</p>
-          </div>
+          <div ref={resultRef}>
+            <div className="text-center mb-6">
+              <p className="text-xs font-dot uppercase tracking-widest text-gray-500 mb-2">
+                ESTIMATED 1RM
+              </p>
+              <p className="text-6xl font-black font-sans text-gym-red">
+                <AnimatedNumber value={result} />kg
+              </p>
+              <p className="text-sm text-gray-400 mt-2">MAX EFFORT</p>
+            </div>
 
-          <div className="grid grid-cols-3 gap-4">
-            <div className="text-center">
-              <p className="text-xs font-dot uppercase mb-2">STRENGTH</p>
-              <p className="text-2xl font-bold">{Math.round(result * 0.90)}kg</p>
+            <div className="grid grid-cols-3 gap-4">
+              <div className="text-center">
+                <p className="text-xs font-dot uppercase mb-2">STRENGTH</p>
+                <p className="text-2xl font-bold">{Math.round(result * 0.90)}kg</p>
+              </div>
+              <div className="text-center">
+                <p className="text-xs font-dot uppercase mb-2">HYPERTROPHY</p>
+                <p className="text-2xl font-bold">{Math.round(result * 0.75)}kg</p>
+              </div>
+              <div className="text-center">
+                <p className="text-xs font-dot uppercase mb-2">ENDURANCE</p>
+                <p className="text-2xl font-bold">{Math.round(result * 0.60)}kg</p>
+              </div>
             </div>
-            <div className="text-center">
-              <p className="text-xs font-dot uppercase mb-2">HYPERTROPHY</p>
-              <p className="text-2xl font-bold">{Math.round(result * 0.75)}kg</p>
-            </div>
-            <div className="text-center">
-              <p className="text-xs font-dot uppercase mb-2">ENDURANCE</p>
-              <p className="text-2xl font-bold">{Math.round(result * 0.60)}kg</p>
-            </div>
+          </div>
+          <div className="flex justify-center">
+            <ShareMissionReport targetRef={resultRef} filename="1rm-report" />
           </div>
         </ResultDisplay>
       )}

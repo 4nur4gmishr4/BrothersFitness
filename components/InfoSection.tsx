@@ -26,15 +26,13 @@ export default function InfoSection() {
     >
       {/* Background grid - disabled on mobile for performance */}
       {!isMobile && (
-        <motion.div
+        <div
           className="absolute inset-0 opacity-[0.02]"
           style={{
             backgroundImage: `linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px),
                              linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)`,
             backgroundSize: "30px 30px",
           }}
-          animate={{ backgroundPosition: ["0px 0px", "30px 30px"] }}
-          transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
         />
       )}
 
@@ -62,7 +60,7 @@ export default function InfoSection() {
               <div className="space-y-4 md:space-y-5">
                 {/* MORNING SESSION: 6:00 AM - 10:00 AM */}
                 <motion.div whileHover={{ x: 5 }} transition={{ duration: 0.2 }}>
-                  <h3 className="label-text text-gray-400 mb-1.5">
+                  <h3 className="label-text text-gray-300 mb-1.5">
                     MORNING SESSION
                   </h3>
                   <motion.p
@@ -72,14 +70,14 @@ export default function InfoSection() {
                   >
                     06:00 AM - 10:00 AM
                   </motion.p>
-                  <p className="text-xs md:text-sm text-gray-400 mt-1">
+                  <p className="text-xs md:text-sm text-gray-300 mt-1">
                     ✓ Men and Women Together
                   </p>
                 </motion.div>
 
                 {/* WOMEN-ONLY SESSION: 4:30 PM - 6:30 PM */}
                 <motion.div whileHover={{ x: 5 }} transition={{ duration: 0.2 }}>
-                  <h3 className="label-text text-gray-400 mb-1.5">
+                  <h3 className="label-text text-gray-300 mb-1.5">
                     WOMEN-ONLY SESSION
                   </h3>
                   <motion.p
@@ -96,7 +94,7 @@ export default function InfoSection() {
 
                 {/* EVENING SESSION: 6:30 PM - 10:00 PM */}
                 <motion.div whileHover={{ x: 5 }} transition={{ duration: 0.2 }}>
-                  <h3 className="label-text text-gray-400 mb-1.5">
+                  <h3 className="label-text text-gray-300 mb-1.5">
                     EVENING SESSION
                   </h3>
                   <motion.p
@@ -106,14 +104,14 @@ export default function InfoSection() {
                   >
                     06:30 PM - 10:00 PM
                   </motion.p>
-                  <p className="text-xs md:text-sm text-gray-400 mt-1">
+                  <p className="text-xs md:text-sm text-gray-300 mt-1">
                     ✓ Men and Women Together
                   </p>
                 </motion.div>
 
                 {/* SUNDAY CLOSED */}
                 <div className="pt-3 border-t-2 border-gym-red">
-                  <h3 className="label-text text-gray-400 mb-1.5">
+                  <h3 className="label-text text-gray-300 mb-1.5">
                     SUNDAY
                   </h3>
                   <p className="text-lg md:text-xl font-bold text-gym-red">CLOSED</p>
@@ -121,21 +119,21 @@ export default function InfoSection() {
 
                 {/* SCHEDULE SUMMARY */}
                 <motion.div
-                  className="bg-blue-900/20 border-l-4 border-blue-500 p-3 mt-4"
+                  className="bg-gym-red/10 border-l-4 border-gym-red p-3 mt-4"
                   initial={{ opacity: 0, x: -20 }}
                   animate={isInView ? { opacity: 1, x: 0 } : {}}
                   transition={{ delay: 0.5 }}
                 >
-                  <p className="text-xs font-mono font-bold uppercase tracking-wider text-blue-200 mb-1.5">
+                  <p className="text-xs font-mono font-bold uppercase tracking-wider text-gym-red mb-1.5">
                     ℹ SCHEDULE SUMMARY
                   </p>
-                  <p className="text-xs md:text-sm text-blue-100 leading-relaxed">
+                  <p className="text-xs md:text-sm text-white/90 leading-relaxed">
                     <strong>Mixed Training:</strong> 6:00-10:00 AM & 6:30-10:00 PM<br />
                     <strong>Women Only:</strong> 4:30-6:30 PM
                   </p>
                 </motion.div>
 
-                <p className="text-xs font-mono text-gray-400 mt-2">
+                <p className="text-xs font-mono text-gray-300 mt-2">
                   IST // UTC+05:30
                 </p>
               </div>

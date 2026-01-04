@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { Flame, Brain, Target, Laugh, Sparkles, ArrowLeft, Shuffle, Heart } from "lucide-react";
 import Link from "next/link";
+import Footer from "@/components/Footer";
 
 const quotes = {
   intensity: [
@@ -180,7 +181,7 @@ const quotes = {
 const categories = [
   { id: "intensity", name: "Pure Intensity", icon: <Flame className="w-5 h-5" />, color: "bg-red-500" },
   { id: "mindset", name: "Mindset", icon: <Brain className="w-5 h-5" />, color: "bg-purple-500" },
-  { id: "discipline", name: "Discipline", icon: <Target className="w-5 h-5" />, color: "bg-blue-500" },
+  { id: "discipline", name: "Discipline", icon: <Target className="w-5 h-5" />, color: "bg-gym-red" },
   { id: "funny", name: "Humor", icon: <Laugh className="w-5 h-5" />, color: "bg-yellow-500" }
 ];
 
@@ -358,6 +359,7 @@ export default function QuotesPage() {
           )}
         </div>
       </div>
+      <Footer />
     </div>
   );
 }

@@ -3,17 +3,19 @@
 import { useState } from "react";
 import { motion, useScroll, useSpring, AnimatePresence, useMotionValueEvent } from "framer-motion";
 import { ArrowUp } from "lucide-react";
+import dynamic from "next/dynamic";
 import { SoundProvider } from "@/components/SoundContext";
 import Navbar from "@/components/Navbar";
 import Hero from "@/components/Hero";
-import InfoSection from "@/components/InfoSection";
-import DailyProtocol from "@/components/DailyProtocol";
-import Architects from "@/components/Architects";
-import FuelInjector from "@/components/FuelInjector";
-import Diagnostics from "@/components/Diagnostics";
-import PaymentSection from "@/components/PaymentSection";
-import ContactForm from "@/components/ContactForm";
-import Footer from "@/components/Footer";
+
+// Lazy load below-the-fold components
+// Lazy load below-the-fold components
+const InfoSection = dynamic(() => import("@/components/InfoSection"), { ssr: true });
+const FeaturesOverview = dynamic(() => import("@/components/FeaturesOverview"), { ssr: true });
+const DailyProtocol = dynamic(() => import("@/components/DailyProtocol"), { ssr: true });
+const Architects = dynamic(() => import("@/components/Architects"), { ssr: true });
+const ContactForm = dynamic(() => import("@/components/ContactForm"), { ssr: true });
+const Footer = dynamic(() => import("@/components/Footer"), { ssr: true });
 
 export default function Home() {
   const { scrollYProgress } = useScroll();
@@ -26,7 +28,6 @@ export default function Home() {
     restDelta: 0.001
   });
 
-  // Track scroll position for Go to Top button visibility
   useMotionValueEvent(scrollYProgress, "change", (latest) => {
     setShowGoToTop(latest > 0.1);
     setScrollPercent(Math.round(latest * 100));
@@ -36,7 +37,6 @@ export default function Home() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  // Calculate circle circumference for progress indicator
   const circleRadius = 18;
   const circumference = 2 * Math.PI * circleRadius;
   const strokeDashoffset = circumference - (scrollPercent / 100) * circumference;
@@ -53,11 +53,9 @@ export default function Home() {
         <Navbar />
         <Hero />
         <InfoSection />
-        <PaymentSection />
+        <FeaturesOverview />
         <DailyProtocol />
         <Architects />
-        <FuelInjector />
-        <Diagnostics />
         <ContactForm />
         <Footer />
 
@@ -70,7 +68,7 @@ export default function Home() {
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.8, y: 20 }}
               transition={{ duration: 0.3 }}
-              className="fixed bottom-6 right-6 z-50 group"
+              className="fixed bottom-6 right-6 z-[9998] group"
               aria-label="Go to top"
             >
               {/* Circular Progress Background */}

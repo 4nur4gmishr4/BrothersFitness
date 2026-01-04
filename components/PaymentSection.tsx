@@ -125,7 +125,7 @@ Please activate my membership. Thank you!`;
           <h2 className="text-4xl sm:text-5xl lg:text-6xl font-display font-black uppercase tracking-tighter mb-4">
             JOIN THE BROTHERHOOD
           </h2>
-          <p className="text-gray-400 font-mono text-sm uppercase tracking-wide">
+          <p className="text-gray-300 font-mono text-sm uppercase tracking-wide">
             {step === "plan" && "Select Your Plan"}
             {step === "details" && "Your Membership Details"}
             {step === "paymentChoice" && "Choose Payment Method"}
@@ -161,7 +161,7 @@ Please activate my membership. Thank you!`;
                     </div>
                   )}
                   <div className="text-center">
-                    <h3 className="text-sm font-mono uppercase tracking-widest text-gray-400 mb-2">
+                    <h3 className="text-sm font-mono uppercase tracking-widest text-gray-300 mb-2">
                       {plan.label}
                     </h3>
                     <div className="flex items-baseline justify-center gap-1 mb-1">
@@ -244,7 +244,7 @@ Please activate my membership. Thank you!`;
 
                   {/* Mobile */}
                   <div>
-                    <label className="flex items-center gap-2 text-sm font-mono uppercase tracking-wide text-gray-400 mb-2">
+                    <label className="flex items-center gap-2 text-sm font-mono uppercase tracking-wide text-gray-300 mb-2">
                       <Phone className="w-4 h-4" />
                       Mobile Number
                     </label>
@@ -266,6 +266,7 @@ Please activate my membership. Thank you!`;
                       type="button"
                       onClick={goBack}
                       className="flex-1 border border-white/20 hover:border-gym-red text-white font-mono uppercase tracking-wide py-3 rounded transition-all"
+                      aria-label="Go back to plan selection"
                     >
                       ← Back
                     </button>
@@ -273,6 +274,7 @@ Please activate my membership. Thank you!`;
                       type="submit"
                       disabled={!formData.name || !formData.gender || formData.mobile.length !== 10}
                       className="flex-1 bg-gym-red hover:bg-gym-red/90 disabled:bg-gray-700 disabled:cursor-not-allowed text-white font-display font-bold uppercase tracking-wider py-3 rounded transition-all transform hover:scale-[1.02] active:scale-[0.98]"
+                      aria-label="Proceed to payment options"
                     >
                       Go to Payments →
                     </button>
@@ -346,6 +348,7 @@ Please activate my membership. Thank you!`;
                   <button
                     onClick={() => openWhatsApp(true)}
                     className="bg-[#25D366] hover:bg-[#20BA5A] text-white font-display font-bold uppercase tracking-wider py-3 px-8 rounded transition-all transform hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-3 mx-auto"
+                    aria-label="Send payment screenshot via WhatsApp"
                   >
                     <MessageCircle className="w-5 h-5" />
                     Send Payment Screenshot
@@ -357,7 +360,8 @@ Please activate my membership. Thank you!`;
               <div className="text-center mt-6">
                 <button
                   onClick={goBack}
-                  className="text-gray-400 hover:text-white font-mono text-sm uppercase tracking-wide transition-colors"
+                  className="text-gray-300 hover:text-white font-mono text-sm uppercase tracking-wide transition-colors"
+                  aria-label="Go back to membership details"
                 >
                   ← Back to Details
                 </button>
@@ -435,6 +439,7 @@ Please activate my membership. Thank you!`;
                 <button
                   onClick={() => openWhatsApp(true)}
                   className="w-full bg-[#25D366] hover:bg-[#20BA5A] text-white font-display font-bold uppercase tracking-wider py-4 rounded transition-all transform hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-3 mb-4"
+                  aria-label="Send payment confirmation via WhatsApp"
                 >
                   <MessageCircle className="w-5 h-5" />
                   Send Payment Screenshot via WhatsApp
@@ -445,12 +450,14 @@ Please activate my membership. Thank you!`;
                   <button
                     onClick={goBack}
                     className="flex-1 border border-white/20 hover:border-gym-red text-white font-mono uppercase text-sm py-3 rounded transition-all"
+                    aria-label="Change payment method"
                   >
                     ← Change Method
                   </button>
                   <button
                     onClick={resetFlow}
                     className="flex-1 border border-white/20 hover:border-gym-red text-white font-mono uppercase text-sm py-3 rounded transition-all"
+                    aria-label="Start payment process over"
                   >
                     Start Over
                   </button>

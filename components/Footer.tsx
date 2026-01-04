@@ -33,13 +33,11 @@ export default function Footer() {
   }, []);
 
   const quickLinks = [
-    { name: "Operations", href: "#operations" },
-    { name: "Protocol", href: "#protocol" },
-    { name: "Architects", href: "#architects" },
-    { name: "Fuel", href: "#fuel" },
-    { name: "Payment", href: "#payment" },
-    { name: "Diagnostics", href: "#diagnostics" },
-    { name: "Contact", href: "#contact" },
+    { name: "Home", href: "/", external: true },
+    { name: "Workouts", href: "/workouts", external: true },
+    { name: "Diet Planner", href: "/fuel", external: true },
+    { name: "Calculators", href: "/calculators", external: true },
+    { name: "Pricing", href: "/pricing", external: true },
     { name: "Quotes", href: "/quotes", external: true },
   ];
 
@@ -47,9 +45,18 @@ export default function Footer() {
   const devWhatsApp = "919302786886";
 
   const scrollToSection = (href: string) => {
-    const element = document.getElementById(href.replace('#', ''));
-    if (element) {
-      element.scrollIntoView({ behavior: "smooth" });
+    if (href.startsWith('/')) {
+      // External route
+      window.location.href = href;
+    } else {
+      // Hash link - scroll to section
+      const element = document.getElementById(href.replace('#', ''));
+      if (element) {
+        element.scrollIntoView({ behavior: "smooth" });
+      } else {
+        // If not found, redirect to home with hash
+        window.location.href = `/${href}`;
+      }
     }
   };
 
@@ -57,18 +64,10 @@ export default function Footer() {
     <footer className="bg-black text-white py-12 md:py-16 relative overflow-hidden">
       {/* Background animation - desktop only */}
       {!isMobile && (
-        <motion.div
+        <div
           className="absolute inset-0 opacity-5"
           style={{
             backgroundImage: "repeating-linear-gradient(0deg, rgba(215, 25, 33, 0.1) 0px, transparent 2px, transparent 20px)"
-          }}
-          animate={{
-            backgroundPosition: ["0px 0px", "0px 20px"]
-          }}
-          transition={{
-            duration: 3,
-            repeat: Infinity,
-            ease: "linear"
           }}
         />
       )}

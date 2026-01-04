@@ -4,6 +4,15 @@ import withPWA from '@ducanh2912/next-pwa';
 const nextConfig = {
   reactStrictMode: true,
   outputFileTracingRoot: undefined,
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'wger.de',
+        pathname: '/media/**',
+      },
+    ],
+  },
 };
 
 export default withPWA({
