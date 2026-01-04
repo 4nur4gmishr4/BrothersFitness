@@ -234,8 +234,8 @@ export default function Navbar() {
                         custom={index}
                       >
                         <div className={`flex items-center justify-between px-5 py-3 sm:py-4 border rounded-lg transition-all duration-200 ${isActive
-                            ? "border-gym-red bg-gym-red/20 shadow-[0_0_15px_rgba(215,25,33,0.3)]"
-                            : "border-white/10 hover:border-gym-red/50 bg-white/5 hover:bg-gym-red/10"
+                          ? "border-gym-red bg-gym-red/20 shadow-[0_0_15px_rgba(215,25,33,0.3)]"
+                          : "border-white/10 hover:border-gym-red/50 bg-white/5 hover:bg-gym-red/10"
                           }`}>
                           <span className={`text-base sm:text-lg md:text-xl font-display font-bold uppercase tracking-wide transition-colors ${isActive ? "text-gym-red" : "text-white group-hover:text-gym-red"
                             }`}>
@@ -288,17 +288,7 @@ export default function Navbar() {
               </div>
 
               {/* Status Footer */}
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ delay: 0.6 }}
-                className="mt-6"
-              >
-                <p className="text-xs font-mono uppercase tracking-widest text-gray-600 text-center">
-                  SYSTEM STATUS: ONLINE
-                </p>
-              </motion.div>
+
             </motion.div>
           </>
         )}
