@@ -6,7 +6,7 @@ export default function HeroLoopManager() {
   return (
     <div className="text-center">
       <span className="text-5xl md:text-7xl lg:text-8xl font-display font-black uppercase tracking-tighter block inline-block">
-        BROTHER'S
+        BROTHER&apos;S
       </span>
 
       <div className="mt-2">
@@ -44,6 +44,6 @@ export default function HeroLoopManager() {
           animation: gradient-flow 3s ease infinite;
         }
       `}</style>
-    </div>
+    </div >
   );
 }
