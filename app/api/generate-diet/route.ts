@@ -3,7 +3,15 @@ import OpenAI from "openai";
 import { NextResponse } from "next/server";
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+
+// Lazy initialization to avoid build-time crash when OPENAI_API_KEY is not set
+let openaiClient: OpenAI | null = null;
+function getOpenAI(): OpenAI {
+    if (!openaiClient) {
+        openaiClient = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+    }
+    return openaiClient;
+}
 
 export async function POST(req: Request) {
     try {
@@ -12,7 +20,7 @@ export async function POST(req: Request) {
             mode,
             dietType,
             budget,
-            exclusions,
+            // exclusions removed - not currently used
             goal_description,
             currentWeight,
             targetWeight,
@@ -111,7 +119,7 @@ export async function POST(req: Request) {
         // 2. Fallback to OpenAI (GPT-4o-Mini)
         try {
             console.log("[System] Gemini failed. Engaging OpenAI (GPT-4o-Mini)...");
-            const completion = await openai.chat.completions.create({
+            const completion = await getOpenAI().chat.completions.create({
                 messages: [
                     { role: "system", content: "You are a JSON-only API. You must return valid JSON matching the user's schema. Do not include markdown formatting." },
                     { role: "user", content: prompt }
