@@ -25,7 +25,7 @@ export default function PageWrapper({ children }: { children: React.ReactNode })
                 if (Date.now() - timestamp < sevenDays) {
                     isReturning = true;
                 }
-            } catch (e) {
+            } catch {
                 // Invalid format
             }
         }
