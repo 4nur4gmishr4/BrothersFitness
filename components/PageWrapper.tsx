@@ -67,8 +67,15 @@ export default function PageWrapper({ children }: { children: React.ReactNode })
                     if (videoEnded) {
                         setLoading(false);
                         handleAnimationComplete();
+                        // Slight delay to ensure the circle has fully expanded before removing clip-path
+                        // This prevents any visual "snap" if the spring is still settling
+                        setTimeout(() => {
+                            const element = document.getElementById('main-content-wrapper');
+                            if (element) element.style.clipPath = 'none';
+                        }, 100);
                     }
                 }}
+                id="main-content-wrapper"
             >
                 {children}
             </motion.div>

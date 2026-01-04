@@ -88,7 +88,7 @@ export default function Navbar() {
               whileHover={!isMobile ? { scale: 1.05 } : undefined}
               whileTap={{ scale: 0.95 }}
             >
-              <span className="text-sm sm:text-base md:text-lg lg:text-xl font-display font-black uppercase tracking-tighter">
+              <span className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-display font-black uppercase tracking-tighter">
                 <span className="text-white group-hover:text-gym-red transition-colors duration-300">
                   BROTHER&apos;S
                 </span>
@@ -106,12 +106,12 @@ export default function Navbar() {
                 href="https://www.instagram.com/brothers_fitness_17?igsh=MW0xYmV2dHIzOHlneQ=="
                 target="_blank"
                 rel="noopener noreferrer"
-                className="p-2 sm:p-2.5 text-gray-400 hover:text-gym-red transition-colors"
+                className="p-2.5 sm:p-2.5 text-gray-400 hover:text-gym-red transition-colors"
                 aria-label="Instagram"
                 whileHover={!isMobile ? { scale: 1.1, rotate: 5 } : undefined}
                 whileTap={{ scale: 0.9 }}
               >
-                <Instagram className="w-4 h-4 sm:w-5 sm:h-5" />
+                <Instagram className="w-6 h-6 sm:w-6 sm:h-6" />
               </motion.a>
 
               {/* WhatsApp */}
@@ -119,41 +119,41 @@ export default function Navbar() {
                 href="https://wa.me/919131179343?text=Hi%20Aman,%20I'm%20interested%20in%20joining%20Brother's%20Fitness!"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="p-2 sm:p-2.5 text-gray-400 hover:text-[#25D366] transition-colors"
+                className="p-2.5 sm:p-2.5 text-gray-400 hover:text-[#25D366] transition-colors"
                 aria-label="WhatsApp"
                 whileHover={!isMobile ? { scale: 1.1, rotate: -5 } : undefined}
                 whileTap={{ scale: 0.9 }}
               >
-                <MessageCircle className="w-4 h-4 sm:w-5 sm:h-5" />
+                <MessageCircle className="w-6 h-6 sm:w-6 sm:h-6" />
               </motion.a>
 
               {/* Sound Toggle */}
               <motion.button
                 onClick={toggleSound}
-                className="p-2 sm:p-2.5 text-gray-400 hover:text-gym-red transition-colors"
+                className="p-2.5 sm:p-2.5 text-gray-400 hover:text-gym-red transition-colors"
                 aria-label="Toggle Sound"
                 whileHover={!isMobile ? { scale: 1.1 } : undefined}
                 whileTap={{ scale: 0.9 }}
               >
                 {isEnabled ? (
-                  <Volume2 className="w-4 h-4 sm:w-5 sm:h-5" />
+                  <Volume2 className="w-6 h-6 sm:w-6 sm:h-6" />
                 ) : (
-                  <VolumeX className="w-4 h-4 sm:w-5 sm:h-5" />
+                  <VolumeX className="w-6 h-6 sm:w-6 sm:h-6" />
                 )}
               </motion.button>
 
               {/* Hamburger Menu */}
               <motion.button
                 onClick={() => setIsOpen(!isOpen)}
-                className="p-2 sm:p-2.5 text-gray-400 hover:text-gym-red transition-colors"
+                className="p-2.5 sm:p-2.5 text-gray-400 hover:text-gym-red transition-colors"
                 aria-label="Toggle Menu"
                 whileHover={!isMobile ? { scale: 1.1 } : undefined}
                 whileTap={{ scale: 0.9 }}
               >
                 {isOpen ? (
-                  <X className="w-5 h-5 sm:w-6 sm:h-6" />
+                  <X className="w-7 h-7 sm:w-7 sm:h-7" />
                 ) : (
-                  <Menu className="w-5 h-5 sm:w-6 sm:h-6" />
+                  <Menu className="w-7 h-7 sm:w-7 sm:h-7" />
                 )}
               </motion.button>
             </div>
