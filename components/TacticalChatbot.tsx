@@ -92,7 +92,7 @@ export default function TacticalChatbot() {
             } else {
                 setMessages((prev) => [...prev, { role: "model", text: data.response || (language === "hi" ? "Sampark toot gaya." : "Connection Severed.") }]);
             }
-        } catch (e) {
+        } catch {
             setMessages((prev) => [...prev, {
                 role: "model",
                 text: language === "hi" ? "System offline hai." : "Error: System Offline.",
@@ -124,7 +124,7 @@ export default function TacticalChatbot() {
                                 if (saved) {
                                     try {
                                         pos = JSON.parse(saved);
-                                    } catch (e) { }
+                                    } catch { }
                                 }
                             }
                             return { ...pos, scale: 1, opacity: 1 };

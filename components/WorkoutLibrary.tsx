@@ -3,7 +3,7 @@
 import { useState } from "react";
 import useSWR from "swr";
 import { motion, AnimatePresence } from "framer-motion";
-import { Search, Calculator, Filter, ChevronLeft, ChevronRight, Dumbbell } from "lucide-react";
+import { Search, Filter, ChevronLeft, ChevronRight, Dumbbell } from "lucide-react";
 import Image from "next/image";
 
 const API_KEY = "20c850ea667feceda7afe40fd0fb61899605aa11";
@@ -12,6 +12,21 @@ const BASE_URL = "https://wger.de/api/v2";
 const fetcher = (url: string) => fetch(url, {
     headers: { 'Authorization': `Token ${API_KEY}` }
 }).then(res => res.json());
+
+interface Exercise {
+    id: number;
+    name: string;
+    description?: string;
+    category?: { id: number; name: string };
+    images?: { image: string }[];
+    videos?: { video: string }[];
+    muscles?: { id: number; name: string }[];
+}
+
+interface Category {
+    id: number;
+    name: string;
+}
 
 export default function WorkoutLibrary() {
     const [page, setPage] = useState(1);
@@ -59,7 +74,7 @@ export default function WorkoutLibrary() {
 
     // Filter by search locally since API search can be restrictive/slow on free tier or tricky with 'exerciseinfo'
     const filteredExercises = search
-        ? exercises.filter((ex: any) => ex.name?.toLowerCase().includes(search.toLowerCase()))
+        ? exercises.filter((ex: Exercise) => ex.name?.toLowerCase().includes(search.toLowerCase()))
         : exercises;
 
     return (
@@ -90,7 +105,7 @@ export default function WorkoutLibrary() {
                         value={category || ""}
                     >
                         <option value="">ALL DIVISIONS</option>
-                        {categories?.results?.map((cat: any) => (
+                        {categories?.results?.map((cat: Category) => (
                             <option key={cat.id} value={cat.id}>{cat.name.toUpperCase()}</option>
                         ))}
                     </select>
@@ -100,7 +115,7 @@ export default function WorkoutLibrary() {
             {/* Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 <AnimatePresence mode="popLayout">
-                    {filteredExercises.map((exercise: any) => (
+                    {filteredExercises.map((exercise: Exercise) => (
                         <motion.div
                             key={exercise.id}
                             initial={{ opacity: 0, scale: 0.95 }}
@@ -150,8 +165,8 @@ export default function WorkoutLibrary() {
                                 />
 
                                 <div className="mt-auto pt-4 border-t border-white/10 flex flex-wrap gap-2">
-                                    {exercise.muscles?.length > 0 ? (
-                                        exercise.muscles.map((m: any) => (
+                                    {exercise.muscles && exercise.muscles.length > 0 ? (
+                                        exercise.muscles.map((m: { id: number; name: string }) => (
                                             <span key={m.id} className="text-[10px] bg-white/10 px-2 py-1 rounded text-gray-300 uppercase">
                                                 {m.name}
                                             </span>
