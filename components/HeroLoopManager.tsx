@@ -1,30 +1,18 @@
 ﻿"use client";
 
-import DecryptedText from "@/components/react-bits/DecryptedText";
+
 
 export default function HeroLoopManager() {
   return (
     <div className="text-center">
-      <DecryptedText
-        text="BROTHER'S"
-        speed={50}
-        maxIterations={15}
-        className="text-5xl md:text-7xl lg:text-8xl font-display font-black uppercase tracking-tighter block"
-        parentClassName="inline-block"
-        animateOn="view"
-        delay={0}
-      />
-      
+      <span className="text-5xl md:text-7xl lg:text-8xl font-display font-black uppercase tracking-tighter block inline-block">
+        BROTHER'S
+      </span>
+
       <div className="mt-2">
-        <DecryptedText
-          text="FITNESS"
-          speed={50}
-          maxIterations={15}
-          className="text-6xl md:text-8xl lg:text-9xl font-display font-black uppercase tracking-tighter block animated-gradient-text"
-          parentClassName="inline-block"
-          animateOn="view"
-          delay={0.2}
-        />
+        <span className="text-6xl md:text-8xl lg:text-9xl font-display font-black uppercase tracking-tighter block animated-gradient-text inline-block">
+          FITNESS
+        </span>
       </div>
 
       <style jsx global>{`

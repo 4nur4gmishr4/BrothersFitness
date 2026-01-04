@@ -66,9 +66,9 @@ export default function QuoteCycler() {
   }, [text, loopNum, isWaiting]);
 
   return (
-    <div className="h-[30px] md:h-[40px] flex items-center justify-center overflow-hidden w-full">
+    <div className="h-[60px] md:h-[40px] flex items-center justify-center w-full px-4">
       <motion.h3
-        className="text-xs md:text-xl font-dot font-bold tracking-[0.15em] text-white uppercase text-center whitespace-nowrap"
+        className="text-xs md:text-xl font-dot font-bold tracking-[0.15em] text-white uppercase text-center leading-relaxed"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
       >
