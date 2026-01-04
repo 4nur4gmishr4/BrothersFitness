@@ -61,6 +61,7 @@ export default function PageWrapper({ children }: { children: React.ReactNode })
             clearTimeout(timer);
             clearTimeout(failSafe);
         };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     const handleVideoComplete = () => {
