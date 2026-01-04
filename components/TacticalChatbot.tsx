@@ -35,6 +35,48 @@ export default function TacticalChatbot() {
     const isDragging = useRef(false);
     const controls = useDragControls();
 
+    const [position, setPosition] = useState({ bottom: "100px", right: "24px" });
+    const [isLoaded, setIsLoaded] = useState(false);
+
+    // Initialize position and load from storage safely
+    useEffect(() => {
+        setIsLoaded(true);
+        const isMobile = window.innerWidth < 768;
+        const defaultPos = isMobile ? { bottom: "80px", right: "24px" } : { bottom: "100px", right: "24px" };
+
+        try {
+            const saved = localStorage.getItem('brofit_chatbot_pos');
+            if (saved) {
+                const parsed = JSON.parse(saved);
+                // Validate bounds (simple check) to prevent off-screen button
+                const botVal = parseInt(parsed.bottom);
+                const rightVal = parseInt(parsed.right);
+
+                // If values are unreasonably large (off-screen) or negative, reset
+                if (botVal > window.innerHeight - 50 || botVal < 0 || rightVal > window.innerWidth - 50 || rightVal < 0) {
+                    setPosition(defaultPos);
+                } else {
+                    setPosition(parsed);
+                }
+            } else {
+                setPosition(defaultPos);
+            }
+        } catch {
+            setPosition(defaultPos);
+        }
+    }, []);
+
+    const updatePosition = (info: any) => {
+        if (typeof window !== 'undefined') {
+            const newPos = {
+                bottom: `${Math.max(20, window.innerHeight - info.point.y - 28)}px`,
+                right: `${Math.max(20, window.innerWidth - info.point.x - 28)}px`
+            };
+            setPosition(newPos);
+            localStorage.setItem('brofit_chatbot_pos', JSON.stringify(newPos));
+        }
+    };
+
     // Load language from localStorage on mount
     useEffect(() => {
         const saved = localStorage.getItem("brofit_chat_lang");
@@ -104,32 +146,16 @@ export default function TacticalChatbot() {
         }
     };
 
+    if (!isLoaded) return null; // Prevent hydration mismatch
+
     return (
         <>
             <AnimatePresence>
                 {!isOpen && (
                     <motion.button
                         className="fixed z-[9999] w-12 h-12 min-[350px]:w-14 min-[350px]:h-14 bg-gym-red rounded-full flex items-center justify-center shadow-[0_0_20px_rgba(215,25,33,0.5)] border-2 border-white/20"
-
-                        // Initial position logic maintained
-                        initial={typeof window !== 'undefined' && window.innerWidth < 768 ? { bottom: "80px", right: "24px", scale: 0, opacity: 0 } : { bottom: "100px", right: "24px", scale: 0, opacity: 0 }}
-
-                        animate={(() => {
-                            let pos = typeof window !== 'undefined' && window.innerWidth < 768
-                                ? { bottom: "80px", right: "24px" }
-                                : { bottom: "100px", right: "24px" };
-
-                            if (typeof window !== 'undefined') {
-                                const saved = localStorage.getItem('brofit_chatbot_pos');
-                                if (saved) {
-                                    try {
-                                        pos = JSON.parse(saved);
-                                    } catch { }
-                                }
-                            }
-                            return { ...pos, scale: 1, opacity: 1 };
-                        })()}
-
+                        initial={{ scale: 0, opacity: 0, ...position }}
+                        animate={{ scale: 1, opacity: 1, ...position }}
                         exit={{ scale: 0, opacity: 0, transition: { duration: 0.2 } }}
 
                         whileHover={{ scale: 1.1 }}
@@ -137,15 +163,9 @@ export default function TacticalChatbot() {
                         drag
                         dragMomentum={false}
                         onDragStart={() => { isDragging.current = true; }}
-                        onDragEnd={(event, info) => {
+                        onDragEnd={(_, info) => {
                             setTimeout(() => { isDragging.current = false; }, 100);
-                            if (typeof window !== 'undefined') {
-                                const newPos = {
-                                    bottom: `${window.innerHeight - info.point.y - 28}px`,
-                                    right: `${window.innerWidth - info.point.x - 28}px`
-                                };
-                                localStorage.setItem('brofit_chatbot_pos', JSON.stringify(newPos));
-                            }
+                            updatePosition(info);
                         }}
                         onClick={() => { if (!isDragging.current) setIsOpen(true); }}
                         whileDrag={{ scale: 1.2, cursor: "grabbing" }}
