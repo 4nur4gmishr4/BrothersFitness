@@ -5,9 +5,16 @@ import { NextResponse } from "next/server";
 const apiKey = process.env.GEMINI_API_KEY!;
 const genAI = new GoogleGenerativeAI(apiKey);
 
-const openai = new OpenAI({
-    apiKey: process.env.OPENAI_API_KEY,
-});
+// Lazy initialization to avoid build-time crash when OPENAI_API_KEY is not set
+let openaiClient: OpenAI | null = null;
+function getOpenAI(): OpenAI {
+    if (!openaiClient) {
+        openaiClient = new OpenAI({
+            apiKey: process.env.OPENAI_API_KEY,
+        });
+    }
+    return openaiClient;
+}
 
 /**
  * Hybrid Generation Strategy:
@@ -45,7 +52,7 @@ async function generateWithFallback(message: string, systemPrompt: string, signa
     // 2. Fallback to OpenAI (GPT-4o-Mini)
     try {
         console.log("[System] Engaging OpenAI Backup (GPT-4o-Mini)...");
-        const completion = await openai.chat.completions.create({
+        const completion = await getOpenAI().chat.completions.create({
             messages: [
                 { role: "system", content: systemPrompt },
                 { role: "assistant", content: "Affirmative. Systems Online. Ready to assist." },
