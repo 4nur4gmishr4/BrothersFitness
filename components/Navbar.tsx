@@ -264,34 +264,66 @@ export default function Navbar() {
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
                   transition={{ delay: 0.5 }}
-                  className="mt-8 pt-6 border-t border-white/10"
+                  className="mt-8 pt-6 border-t border-white/10 space-y-6"
                 >
-                  <p className="text-xs font-mono uppercase tracking-widest text-gray-500 mb-4 text-center">
-                    Connect with Aman
-                  </p>
-                  <div className="flex gap-3 justify-center">
-                    <motion.a
-                      href="https://www.instagram.com/brothers_fitness_17?igsh=MW0xYmV2dHIzOHlneQ=="
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center gap-2 px-4 py-3 bg-white/5 border border-white/10 rounded-lg hover:border-gym-red hover:bg-gym-red/10 transition-all group"
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                    >
-                      <Instagram className="w-5 h-5 text-gray-400 group-hover:text-gym-red transition-colors" />
-                      <span className="text-sm font-mono text-gray-400 group-hover:text-white transition-colors">Instagram</span>
-                    </motion.a>
-                    <motion.a
-                      href="https://wa.me/919131179343?text=Hi%20Aman,%20I'm%20interested%20in%20joining%20Brother's%20Fitness!"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center gap-2 px-4 py-3 bg-white/5 border border-white/10 rounded-lg hover:border-[#25D366] hover:bg-[#25D366]/10 transition-all group"
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                    >
-                      <MessageCircle className="w-5 h-5 text-gray-400 group-hover:text-[#25D366] transition-colors" />
-                      <span className="text-sm font-mono text-gray-400 group-hover:text-white transition-colors">WhatsApp</span>
-                    </motion.a>
+                  {/* Aman's Contact */}
+                  <div>
+                    <p className="text-xs font-mono uppercase tracking-widest text-gray-500 mb-4 text-center">
+                      Connect with Aman
+                    </p>
+                    <div className="flex gap-3 justify-center">
+                      <motion.a
+                        href="https://www.instagram.com/brothers_fitness_17?igsh=MW0xYmV2dHIzOHlneQ=="
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-2 px-4 py-3 bg-white/5 border border-white/10 rounded-lg hover:border-gym-red hover:bg-gym-red/10 transition-all group"
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                      >
+                        <Instagram className="w-5 h-5 text-gray-400 group-hover:text-gym-red transition-colors" />
+                        <span className="text-sm font-mono text-gray-400 group-hover:text-white transition-colors">Instagram</span>
+                      </motion.a>
+                      <motion.a
+                        href="https://wa.me/919131179343?text=Hi%20Aman,%20I'm%20interested%20in%20joining%20Brother's%20Fitness!"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-2 px-4 py-3 bg-white/5 border border-white/10 rounded-lg hover:border-[#25D366] hover:bg-[#25D366]/10 transition-all group"
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                      >
+                        <MessageCircle className="w-5 h-5 text-gray-400 group-hover:text-[#25D366] transition-colors" />
+                        <span className="text-sm font-mono text-gray-400 group-hover:text-white transition-colors">WhatsApp</span>
+                      </motion.a>
+                    </div>
+                  </div>
+
+                  {/* Pradeep's Contact */}
+                  <div>
+                    <p className="text-xs font-mono uppercase tracking-widest text-gray-500 mb-4 text-center">
+                      Call Pradeep
+                    </p>
+                    <div className="flex gap-3 justify-center">
+                      <motion.a
+                        href="tel:+919131272754"
+                        className="flex items-center gap-2 px-4 py-3 bg-white/5 border border-white/10 rounded-lg hover:border-gym-red hover:bg-gym-red/10 transition-all group"
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                      >
+                        <MessageCircle className="w-5 h-5 text-gray-400 group-hover:text-gym-red transition-colors" />
+                        <span className="text-sm font-mono text-gray-400 group-hover:text-white transition-colors">Call</span>
+                      </motion.a>
+                      <motion.a
+                        href="https://wa.me/919131272754?text=Hi%20Pradeep,%20I'm%20interested%20in%20joining%20Brother's%20Fitness!"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-2 px-4 py-3 bg-white/5 border border-white/10 rounded-lg hover:border-[#25D366] hover:bg-[#25D366]/10 transition-all group"
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                      >
+                        <MessageCircle className="w-5 h-5 text-gray-400 group-hover:text-[#25D366] transition-colors" />
+                        <span className="text-sm font-mono text-gray-400 group-hover:text-white transition-colors">WhatsApp</span>
+                      </motion.a>
+                    </div>
                   </div>
                 </motion.div>
               </div>
