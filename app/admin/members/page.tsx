@@ -13,6 +13,7 @@ import { toast } from 'sonner';
 import { useAdmin } from '@/lib/auth-context';
 import type { GymMember } from '@/lib/supabase';
 import Navbar from '@/components/Navbar';
+import Image from 'next/image';
 
 // Helper to calculate status
 const getMemberStatus = (endDateString: string | null) => {
@@ -732,7 +733,7 @@ export default function MembersPage() {
                                     <div className="flex items-start gap-4 mb-4">
                                         <div className="w-14 h-14 bg-white/5 rounded-full flex items-center justify-center overflow-hidden flex-shrink-0 border border-white/10 cursor-pointer hover:ring-2 hover:ring-gym-red transition-all" onClick={() => member.photo_url && setSelectedImageUrl(member.photo_url)}>
                                             {member.photo_url ? (
-                                                <img src={member.photo_url} alt={member.full_name} className="w-full h-full object-cover" />
+                                                <Image src={member.photo_url} alt={member.full_name} fill className="object-cover" />
                                             ) : (
                                                 <User className="w-7 h-7 text-gray-500" />
                                             )}
@@ -830,7 +831,7 @@ export default function MembersPage() {
                                         <div className="flex justify-center">
                                             <div className="w-32 h-32 bg-zinc-900 border-2 border-dashed border-white/20 rounded-full flex items-center justify-center overflow-hidden">
                                                 {photoPreview ? (
-                                                    <img src={photoPreview || undefined} alt="Preview" className="w-full h-full object-cover" />
+                                                    <Image src={photoPreview} alt="Preview" fill className="object-cover" />
                                                 ) : (
                                                     <div className="text-center text-gray-500">
                                                         <Camera className="w-10 h-10 mx-auto mb-1 opacity-50" />
@@ -1082,10 +1083,12 @@ export default function MembersPage() {
                         className="relative max-w-md max-h-[80vh] w-full"
                         onClick={(e) => e.stopPropagation()}
                     >
-                        <img
+                        <Image
                             src={selectedImageUrl}
                             alt="Member Photo"
-                            className="w-full h-full object-contain rounded-xl shadow-2xl"
+                            width={400}
+                            height={600}
+                            className="w-full h-auto object-contain rounded-xl shadow-2xl"
                         />
                         <button
                             onClick={() => setSelectedImageUrl(null)}
@@ -1164,7 +1167,7 @@ export default function MembersPage() {
                         onClick={(e) => e.stopPropagation()}
                     >
                         <div className="text-center mb-4">
-                            <h2 className="text-2xl font-black text-gym-red">BROTHER'S FITNESS</h2>
+                            <h2 className="text-2xl font-black text-gym-red">BROTHER&apos;S FITNESS</h2>
                             <p className="text-xs text-gray-500">Pain is Temporary. Pride is Forever.</p>
                         </div>
                         <div className="border-t border-b border-gray-200 py-4 my-4">

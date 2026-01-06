@@ -11,6 +11,11 @@ const nextConfig = {
         hostname: 'wger.de',
         pathname: '/media/**',
       },
+      {
+        protocol: 'https',
+        hostname: 'vytveiwzomclnphosjsh.supabase.co',
+        pathname: '/storage/v1/object/public/member-photos/**',
+      },
     ],
   },
 };

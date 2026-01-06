@@ -1,6 +1,6 @@
 ﻿"use client";
 
-import { Shield, Medal, Instagram } from "lucide-react";
+import { Shield, Medal, Instagram, MessageCircle } from "lucide-react";
 import Image from "next/image";
 import { motion, useInView } from "framer-motion";
 import { useRef, useState } from "react";
@@ -18,7 +18,8 @@ export default function Architects() {
       src: "/assets/aman.jpeg",
       id: "001",
       isMain: true,
-      instagram: "https://www.instagram.com/aman_shrivastavaaa?igsh=MWJ5MHhodnJrY3BoNA=="
+      instagram: "https://www.instagram.com/aman_shrivastavaaa?igsh=MWJ5MHhodnJrY3BoNA==",
+      whatsapp: null
     },
     {
       name: "PRADEEP",
@@ -27,7 +28,8 @@ export default function Architects() {
       src: "/assets/pradeep.jpeg",
       id: "002",
       isMain: false,
-      instagram: null
+      instagram: null,
+      whatsapp: "919131272754"
     }
   ];
 
@@ -98,6 +100,29 @@ export default function Architects() {
                       />
                       <div className="relative bg-gradient-to-br from-purple-500 via-pink-500 to-yellow-500 p-2 rounded-full">
                         <Instagram className="w-4 h-4 text-white" />
+                      </div>
+                    </motion.a>
+                  )}
+
+                  {t.whatsapp && (
+                    <motion.a
+                      href={`https://wa.me/${t.whatsapp}?text=Hi%20${t.name},%20I'm%20interested%20in%20joining%20Brother's%20Fitness!`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="relative group/whatsapp"
+                      whileHover={{ scale: 1.2, rotate: 10 }}
+                      whileTap={{ scale: 0.9 }}
+                      aria-label={`Contact ${t.name} on WhatsApp`}
+                    >
+                      <motion.div
+                        className="absolute inset-0 bg-[#25D366] rounded-full blur-md opacity-0 group-hover/whatsapp:opacity-75"
+                        animate={{
+                          scale: [1, 1.3, 1]
+                        }}
+                        transition={{ duration: 2, repeat: Infinity }}
+                      />
+                      <div className="relative bg-[#25D366] p-2 rounded-full">
+                        <MessageCircle className="w-4 h-4 text-white" />
                       </div>
                     </motion.a>
                   )}
