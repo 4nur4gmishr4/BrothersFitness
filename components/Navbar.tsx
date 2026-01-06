@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { motion, AnimatePresence, useScroll, useMotionValueEvent } from "framer-motion";
-import { Menu, X, ArrowRight, Volume2, VolumeX, Instagram, MessageCircle, Users, Shield } from "lucide-react";
+import { Menu, X, ArrowRight, Volume2, VolumeX, Instagram, MessageCircle } from "lucide-react";
 import { useSound } from "@/components/SoundContext";
 import { useAdmin } from "@/lib/auth-context";
 
