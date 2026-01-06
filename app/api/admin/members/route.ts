@@ -44,7 +44,7 @@ export async function POST(req: Request) {
     }
 }
 
-// DELETE member
+// DELETE member (also removes photo from storage)
 export async function DELETE(req: Request) {
     try {
         const { searchParams } = new URL(req.url);
@@ -57,6 +57,29 @@ export async function DELETE(req: Request) {
             );
         }
 
+        // First, get the member to retrieve photo_url
+        const { data: member } = await supabase
+            .from('gym_members')
+            .select('photo_url')
+            .eq('id', id)
+            .single();
+
+        // If member has a photo, delete it from storage
+        if (member?.photo_url) {
+            try {
+                // Extract filename from URL (e.g., "https://...supabase.co/storage/v1/object/public/member-photos/filename.jpg")
+                const urlParts = member.photo_url.split('/');
+                const filename = urlParts[urlParts.length - 1];
+                if (filename) {
+                    await supabase.storage.from('member-photos').remove([filename]);
+                }
+            } catch (storageError) {
+                console.warn('Failed to delete photo from storage:', storageError);
+                // Continue with member deletion even if photo deletion fails
+            }
+        }
+
+        // Now delete the member record
         const { error } = await supabase
             .from('gym_members')
             .delete()
