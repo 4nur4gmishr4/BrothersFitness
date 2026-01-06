@@ -732,9 +732,9 @@ export default function MembersPage() {
                                     className="bg-zinc-900/50 border border-white/10 rounded-xl p-4 hover:border-gym-red/40 transition-all group"
                                 >
                                     <div className="flex items-start gap-4 mb-4">
-                                        <div className="w-14 h-14 bg-white/5 rounded-full flex items-center justify-center overflow-hidden flex-shrink-0 border border-white/10 cursor-pointer hover:ring-2 hover:ring-gym-red transition-all" onClick={() => member.photo_url && setSelectedImageUrl(member.photo_url)}>
+                                        <div className="relative w-14 h-14 bg-white/5 rounded-full flex items-center justify-center overflow-hidden flex-shrink-0 border border-white/10 cursor-pointer hover:ring-2 hover:ring-gym-red transition-all" onClick={() => member.photo_url && setSelectedImageUrl(member.photo_url)}>
                                             {member.photo_url ? (
-                                                <Image src={member.photo_url} alt={member.full_name} fill className="object-cover" />
+                                                <Image src={member.photo_url} alt={member.full_name} fill className="object-cover" sizes="56px" />
                                             ) : (
                                                 <User className="w-7 h-7 text-gray-500" />
                                             )}
@@ -808,11 +808,11 @@ export default function MembersPage() {
             {/* Add/Edit Form Modal */}
             {
                 showForm && (
-                    <div className="fixed inset-0 bg-black/80 z-[70] flex items-start justify-center pt-20 p-4 overflow-y-auto backdrop-blur-sm">
+                    <div className="fixed inset-0 bg-black/80 z-[70] flex items-center justify-center p-4 overflow-y-auto backdrop-blur-sm">
                         <motion.div
                             initial={{ opacity: 0, scale: 0.95, y: 20 }}
                             animate={{ opacity: 1, scale: 1, y: 0 }}
-                            className="bg-[#0a0a0a] border border-white/10 rounded-xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col shadow-2xl"
+                            className="bg-[#0a0a0a] border border-white/10 rounded-xl w-full max-w-2xl my-8 max-h-[calc(100vh-4rem)] overflow-hidden flex flex-col shadow-2xl"
                         >
                             <div className="bg-zinc-900/50 border-b border-white/10 p-4 flex justify-between items-center shrink-0">
                                 <h2 className="text-lg font-bold flex items-center gap-2">
@@ -824,15 +824,21 @@ export default function MembersPage() {
                                 </button>
                             </div>
 
-                            <div className="overflow-y-auto p-6">
+                            <div className="overflow-y-auto p-4 sm:p-6 flex-1">
                                 <form id="memberForm" onSubmit={handleSubmit} className="space-y-6">
                                     {/* Photo Section */}
                                     <div className="space-y-4">
                                         {/* Photo Preview */}
                                         <div className="flex justify-center">
-                                            <div className="w-32 h-32 bg-zinc-900 border-2 border-dashed border-white/20 rounded-full flex items-center justify-center overflow-hidden">
+                                            <div className="relative w-32 h-32 bg-zinc-900 border-2 border-dashed border-white/20 rounded-full flex items-center justify-center overflow-hidden shrink-0">
                                                 {photoPreview ? (
-                                                    <Image src={photoPreview} alt="Preview" fill className="object-cover" />
+                                                    <Image
+                                                        src={photoPreview}
+                                                        alt="Preview"
+                                                        fill
+                                                        className="object-cover"
+                                                        sizes="128px"
+                                                    />
                                                 ) : (
                                                     <div className="text-center text-gray-500">
                                                         <Camera className="w-10 h-10 mx-auto mb-1 opacity-50" />
