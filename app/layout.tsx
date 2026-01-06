@@ -5,6 +5,8 @@ import PageWrapper from "@/components/PageWrapper";
 import { GamificationProvider } from "@/components/GamificationContext";
 import ReadingProgressBar from "@/components/ReadingProgressBar";
 import PageTransition from "@/components/PageTransition";
+import { AdminProvider } from "@/lib/auth-context";
+import { Toaster } from "sonner";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -71,13 +73,26 @@ export default function RootLayout({
     <html lang="en" className="dark">
       <body className={`${inter.variable} ${dotGothic.variable} font-sans bg-black text-white antialiased`}>
         <ReadingProgressBar />
-        <GamificationProvider>
-          <PageWrapper>
-            <PageTransition>
-              {children}
-            </PageTransition>
-          </PageWrapper>
-        </GamificationProvider>
+        <Toaster
+          theme="dark"
+          position="top-right"
+          toastOptions={{
+            style: {
+              background: '#1a1a1a',
+              border: '1px solid rgba(255,255,255,0.1)',
+              color: '#fff'
+            }
+          }}
+        />
+        <AdminProvider>
+          <GamificationProvider>
+            <PageWrapper>
+              <PageTransition>
+                {children}
+              </PageTransition>
+            </PageWrapper>
+          </GamificationProvider>
+        </AdminProvider>
       </body>
     </html>
   );

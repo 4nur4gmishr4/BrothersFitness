@@ -131,7 +131,7 @@ function TDEECalculator() {
   const [weight, setWeight] = useState("");
   const [height, setHeight] = useState("");
   const [age, setAge] = useState("");
-  const [activity, setActivity] = useState("1.2");
+  const [activity, setActivity] = useState("1.55");
   const [result, setResult] = useState<number | null>(null);
   const resultRef = useRef<HTMLDivElement>(null);
 

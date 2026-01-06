@@ -1,10 +1,11 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { motion, AnimatePresence, useScroll, useMotionValueEvent } from "framer-motion";
-import { Menu, X, ArrowRight, Volume2, VolumeX, Instagram, MessageCircle } from "lucide-react";
+import { Menu, X, ArrowRight, Volume2, VolumeX, Instagram, MessageCircle, Users, Shield } from "lucide-react";
 import { useSound } from "@/components/SoundContext";
+import { useAdmin } from "@/lib/auth-context";
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
@@ -12,7 +13,9 @@ export default function Navbar() {
   const [isMobile, setIsMobile] = useState(false);
   const { scrollY } = useScroll();
   const { isEnabled, toggleSound } = useSound();
+  const { isAdmin } = useAdmin();
   const pathname = usePathname();
+  const router = useRouter();
 
   useMotionValueEvent(scrollY, "change", (latest) => {
     setIsScrolled(latest > 20);
@@ -95,7 +98,13 @@ export default function Navbar() {
           <div className="flex items-center justify-between h-16 sm:h-20">
             {/* Logo */}
             <motion.button
-              onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+              onClick={() => {
+                if (pathname === '/') {
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                } else {
+                  router.push('/');
+                }
+              }}
               className="relative z-50 group"
               whileHover={!isMobile ? { scale: 1.05 } : undefined}
               whileTap={{ scale: 0.95 }}

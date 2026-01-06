@@ -1,12 +1,14 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { SoundProvider } from "@/components/SoundContext";
 
 import TacticalChatbot from "@/components/TacticalChatbot";
 
 export default function PageWrapper({ children }: { children: React.ReactNode }) {
+    const pathname = usePathname();
     // Start with content visible to prevent flash
     const [showLoader, setShowLoader] = useState(false);
     const [showContent, setShowContent] = useState(true);
@@ -116,7 +118,7 @@ export default function PageWrapper({ children }: { children: React.ReactNode })
                 )}
             </AnimatePresence>
 
-            <TacticalChatbot />
+            {pathname === "/" && <TacticalChatbot />}
         </SoundProvider>
     );
 }
