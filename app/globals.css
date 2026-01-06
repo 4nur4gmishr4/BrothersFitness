@@ -384,3 +384,68 @@ body {
   background-size: 200% 200%;
   animation: gradient-shift-instagram 3s ease infinite;
 }
+
+/* Glassmorphism 2.0 Utilities */
+.glass-panel {
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.glass-panel-strong {
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Glow Border Effect */
+.glow-border {
+  position: relative;
+}
+
+.glow-border::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  background: linear-gradient(45deg, var(--gym-red), transparent, var(--gym-red));
+  border-radius: inherit;
+  z-index: -1;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.glow-border:hover::before {
+  opacity: 1;
+}
+
+@keyframes border-glow {
+  0%, 100% {
+    box-shadow: 0 0 5px rgba(215, 25, 33, 0.3), inset 0 0 5px rgba(215, 25, 33, 0.1);
+  }
+  50% {
+    box-shadow: 0 0 20px rgba(215, 25, 33, 0.5), inset 0 0 10px rgba(215, 25, 33, 0.2);
+  }
+}
+
+.animate-border-glow {
+  animation: border-glow 3s ease-in-out infinite;
+}
+
+/* Reduced motion for accessibility and low-end devices */
+@media (prefers-reduced-motion: reduce) {
+  .glass-panel,
+  .glass-panel-strong {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+  
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
