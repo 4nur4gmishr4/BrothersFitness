@@ -13,7 +13,7 @@ export default function Navbar() {
   const [isMobile, setIsMobile] = useState(false);
   const { scrollY } = useScroll();
   const { isEnabled, toggleSound } = useSound();
-  const { isAdmin } = useAdmin();
+  useAdmin(); // Keep the hook call for context, but don't destructure unused values
   const pathname = usePathname();
   const router = useRouter();
 
