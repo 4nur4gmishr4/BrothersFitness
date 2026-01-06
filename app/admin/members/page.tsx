@@ -7,7 +7,7 @@ import {
     Plus, Search, Edit2, Trash2, Camera, X, Save,
     User, Phone, Shield,
     Users, LogOut, TrendingUp, AlertTriangle, AlertCircle, CheckCircle,
-    Download, MessageCircle, IndianRupee
+    Download, MessageCircle, IndianRupee, FileText, Send, Gift, BarChart3
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAdmin } from '@/lib/auth-context';
@@ -19,7 +19,6 @@ const getMemberStatus = (endDateString: string | null) => {
     if (!endDateString) return 'active';
     const end = new Date(endDateString);
     const now = new Date();
-    // Reset hours for accurate date comparison
     now.setHours(0, 0, 0, 0);
     end.setHours(0, 0, 0, 0);
 
@@ -29,6 +28,28 @@ const getMemberStatus = (endDateString: string | null) => {
     if (diffDays < 0) return 'expired';
     if (diffDays <= 7) return 'expiring';
     return 'active';
+};
+
+// Date formatter helper - DD/Mon/YYYY format
+const formatDate = (dateString: string | null): string => {
+    if (!dateString) return '-';
+    const date = new Date(dateString);
+    const day = date.getDate().toString().padStart(2, '0');
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const month = months[date.getMonth()];
+    const year = date.getFullYear();
+    return `${day}/${month}/${year}`;
+};
+
+// Days until date helper
+const getDaysUntil = (dateString: string): number => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const target = new Date(dateString);
+    target.setFullYear(today.getFullYear()); // Use current year for comparison
+    if (target < today) target.setFullYear(today.getFullYear() + 1); // Next year if passed
+    target.setHours(0, 0, 0, 0);
+    return Math.ceil((target.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
 };
 
 export default function MembersPage() {
@@ -46,6 +67,10 @@ export default function MembersPage() {
     const [photoPreview, setPhotoPreview] = useState<string | null>(null);
     const [photoFile, setPhotoFile] = useState<File | null>(null);
     const [selectedImageUrl, setSelectedImageUrl] = useState<string | null>(null);
+    const [showBulkMessage, setShowBulkMessage] = useState(false);
+    const [bulkMessageText, setBulkMessageText] = useState('');
+    const [showAnalytics, setShowAnalytics] = useState(false);
+    const [receiptMember, setReceiptMember] = useState<GymMember | null>(null);
 
     // Form state
     const [formData, setFormData] = useState({
@@ -111,22 +136,48 @@ export default function MembersPage() {
         }
     };
 
-    // Calculate Stats
-    // Calculate Stats with Birthday and Expiry Alerts
+    // Calculate Stats with Birthday, Expiry Alerts, and Analytics
     const stats = useMemo(() => {
         const total = members.length;
         const expired = members.filter(m => getMemberStatus(m.membership_end) === 'expired').length;
         const expiring = members.filter(m => getMemberStatus(m.membership_end) === 'expiring').length;
         const active = total - expired;
 
-        // Revenue Calculation (Fixed Pricing Model)
+        // Revenue & Plan Calculation
+        let monthlyCount = 0, quarterlyCount = 0, halfYearlyCount = 0;
         let monthly = 0, quarterly = 0, halfYearly = 0;
         members.forEach(m => {
-            if (m.membership_type === 'Monthly') monthly += 700;
-            if (m.membership_type === 'Quarterly') quarterly += 1800;
-            if (m.membership_type === 'Half-Yearly') halfYearly += 3300;
+            if (m.membership_type === 'Monthly') { monthly += 700; monthlyCount++; }
+            if (m.membership_type === 'Quarterly') { quarterly += 1800; quarterlyCount++; }
+            if (m.membership_type === 'Half-Yearly') { halfYearly += 3300; halfYearlyCount++; }
         });
         const totalRevenue = monthly + quarterly + halfYearly;
+
+        // Growth Analytics - members joined this month vs last month
+        const now = new Date();
+        const thisMonthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+        const lastMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+        const lastMonthEnd = new Date(now.getFullYear(), now.getMonth(), 0);
+
+        const joinedThisMonth = members.filter(m => {
+            if (!m.created_at) return false;
+            const created = new Date(m.created_at);
+            return created >= thisMonthStart;
+        }).length;
+
+        const joinedLastMonth = members.filter(m => {
+            if (!m.created_at) return false;
+            const created = new Date(m.created_at);
+            return created >= lastMonthStart && created <= lastMonthEnd;
+        }).length;
+
+        // Revenue projection (based on expiring memberships)
+        const potentialRenewalRevenue = members.filter(m => getMemberStatus(m.membership_end) === 'expiring').reduce((sum, m) => {
+            if (m.membership_type === 'Monthly') return sum + 700;
+            if (m.membership_type === 'Quarterly') return sum + 1800;
+            if (m.membership_type === 'Half-Yearly') return sum + 3300;
+            return sum;
+        }, 0);
 
         // Birthday & Expiry Alerts
         const today = new Date();
@@ -139,6 +190,13 @@ export default function MembersPage() {
             return dob.getMonth() === todayMonth && dob.getDate() === todayDate;
         });
 
+        // Upcoming birthdays in next 7 days (excluding today)
+        const upcomingBirthdays = members.filter(m => {
+            if (!m.date_of_birth) return false;
+            const days = getDaysUntil(m.date_of_birth);
+            return days > 0 && days <= 7;
+        }).map(m => ({ ...m, daysUntil: getDaysUntil(m.date_of_birth!) })).sort((a, b) => a.daysUntil - b.daysUntil);
+
         const expiringToday = members.filter(m => {
             if (!m.membership_end) return false;
             const end = new Date(m.membership_end);
@@ -148,7 +206,9 @@ export default function MembersPage() {
         return {
             total, active, expiring, expired,
             revenue: { monthly, quarterly, halfYearly, total: totalRevenue },
-            alerts: { birthdays, expiringToday }
+            plans: { monthly: monthlyCount, quarterly: quarterlyCount, halfYearly: halfYearlyCount },
+            growth: { thisMonth: joinedThisMonth, lastMonth: joinedLastMonth, projectedRevenue: potentialRenewalRevenue },
+            alerts: { birthdays, upcomingBirthdays, expiringToday }
         };
     }, [members]);
 
@@ -355,7 +415,23 @@ export default function MembersPage() {
                                 <p className="text-gray-400 text-sm">Welcome back, Aman</p>
                             </div>
                         </div>
-                        <div className="flex items-center gap-2 ml-auto">
+                        <div className="flex items-center gap-2 ml-auto flex-wrap">
+                            <button
+                                onClick={() => setShowBulkMessage(true)}
+                                className="bg-green-600/20 text-green-400 px-3 py-2 rounded hover:bg-green-600/30 transition-colors flex items-center gap-2"
+                                title="Bulk WhatsApp"
+                            >
+                                <Send className="w-4 h-4" />
+                                <span className="hidden sm:inline">Bulk Message</span>
+                            </button>
+                            <button
+                                onClick={() => setShowAnalytics(!showAnalytics)}
+                                className="bg-purple-600/20 text-purple-400 px-3 py-2 rounded hover:bg-purple-600/30 transition-colors flex items-center gap-2"
+                                title="Analytics"
+                            >
+                                <BarChart3 className="w-4 h-4" />
+                                <span className="hidden sm:inline">Analytics</span>
+                            </button>
                             <button
                                 onClick={exportToCSV}
                                 className="bg-white/10 text-white px-3 py-2 rounded hover:bg-white/20 transition-colors flex items-center gap-2"
@@ -402,7 +478,95 @@ export default function MembersPage() {
                                 </div>
                             </div>
                         )}
+                        {stats.alerts.upcomingBirthdays.length > 0 && (
+                            <div className="bg-gradient-to-r from-purple-500/10 to-indigo-500/10 border border-purple-500/30 rounded-xl p-4 flex items-start gap-3">
+                                <div className="text-3xl"><Gift className="w-8 h-8 text-purple-400" /></div>
+                                <div className="flex-1">
+                                    <h3 className="font-bold text-purple-300 mb-1">🎁 Upcoming Birthdays (Next 7 Days)</h3>
+                                    <div className="flex flex-wrap gap-2 mt-2">
+                                        {stats.alerts.upcomingBirthdays.map(m => (
+                                            <span key={m.id} className="bg-purple-500/20 text-purple-200 px-2 py-1 rounded text-xs">
+                                                {m.full_name} <span className="text-purple-400">({m.daysUntil}d)</span>
+                                            </span>
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
+                        )}
                     </div>
+                )}
+
+                {/* Analytics Panel */}
+                {showAnalytics && (
+                    <motion.div
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: 'auto' }}
+                        exit={{ opacity: 0, height: 0 }}
+                        className="mb-6 bg-gradient-to-br from-purple-900/20 to-indigo-900/20 border border-purple-500/30 rounded-xl p-6"
+                    >
+                        <h3 className="font-bold text-lg mb-4 flex items-center gap-2">
+                            <BarChart3 className="w-5 h-5 text-purple-400" /> Business Analytics
+                        </h3>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            {/* Growth Chart */}
+                            <div className="bg-black/30 rounded-lg p-4">
+                                <h4 className="text-xs uppercase text-gray-400 mb-3">Monthly Growth</h4>
+                                <div className="flex items-end gap-4 h-24">
+                                    <div className="flex-1 flex flex-col items-center">
+                                        <div className="w-full bg-gray-700 rounded-t" style={{ height: `${Math.max(10, (stats.growth.lastMonth / Math.max(stats.growth.lastMonth, stats.growth.thisMonth, 1)) * 80)}px` }}></div>
+                                        <span className="text-xs text-gray-400 mt-1">Last</span>
+                                        <span className="font-bold">{stats.growth.lastMonth}</span>
+                                    </div>
+                                    <div className="flex-1 flex flex-col items-center">
+                                        <div className="w-full bg-green-500 rounded-t" style={{ height: `${Math.max(10, (stats.growth.thisMonth / Math.max(stats.growth.lastMonth, stats.growth.thisMonth, 1)) * 80)}px` }}></div>
+                                        <span className="text-xs text-gray-400 mt-1">This</span>
+                                        <span className="font-bold text-green-400">{stats.growth.thisMonth}</span>
+                                    </div>
+                                </div>
+                                <div className="text-center mt-2 text-xs text-gray-500">New Members</div>
+                            </div>
+
+                            {/* Plan Popularity */}
+                            <div className="bg-black/30 rounded-lg p-4">
+                                <h4 className="text-xs uppercase text-gray-400 mb-3">Plan Popularity</h4>
+                                <div className="space-y-2">
+                                    <div className="flex items-center gap-2">
+                                        <div className="flex-1 bg-gray-700 rounded-full h-2 overflow-hidden">
+                                            <div className="bg-blue-500 h-full" style={{ width: `${(stats.plans.monthly / Math.max(stats.total, 1)) * 100}%` }}></div>
+                                        </div>
+                                        <span className="text-xs w-20">Monthly ({stats.plans.monthly})</span>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <div className="flex-1 bg-gray-700 rounded-full h-2 overflow-hidden">
+                                            <div className="bg-green-500 h-full" style={{ width: `${(stats.plans.quarterly / Math.max(stats.total, 1)) * 100}%` }}></div>
+                                        </div>
+                                        <span className="text-xs w-20">Quarterly ({stats.plans.quarterly})</span>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <div className="flex-1 bg-gray-700 rounded-full h-2 overflow-hidden">
+                                            <div className="bg-purple-500 h-full" style={{ width: `${(stats.plans.halfYearly / Math.max(stats.total, 1)) * 100}%` }}></div>
+                                        </div>
+                                        <span className="text-xs w-20">Half-Yearly ({stats.plans.halfYearly})</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Revenue Projection */}
+                            <div className="bg-black/30 rounded-lg p-4">
+                                <h4 className="text-xs uppercase text-gray-400 mb-3">Revenue Projection</h4>
+                                <div className="text-center">
+                                    <div className="text-3xl font-black text-emerald-400">
+                                        ₹{stats.growth.projectedRevenue.toLocaleString('en-IN')}
+                                    </div>
+                                    <div className="text-xs text-gray-400 mt-1">Potential from {stats.expiring} expiring</div>
+                                </div>
+                                <div className="mt-3 pt-3 border-t border-white/10">
+                                    <div className="text-xs text-gray-400">Current Total</div>
+                                    <div className="font-bold text-lg">₹{stats.revenue.total.toLocaleString('en-IN')}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </motion.div>
                 )}
 
                 {/* Dashboard Stats */}
@@ -594,12 +758,12 @@ export default function MembersPage() {
                                     <div className="bg-black/30 rounded p-2 mb-4 space-y-1">
                                         <div className="flex justify-between text-xs">
                                             <span className="text-gray-500">Started:</span>
-                                            <span className="text-gray-300 font-mono">{member.membership_start || 'N/A'}</span>
+                                            <span className="text-gray-300 font-mono">{formatDate(member.membership_start)}</span>
                                         </div>
                                         <div className="flex justify-between text-xs">
                                             <span className="text-gray-500">Ends:</span>
                                             <span className={`font-mono font-bold ${status === 'expired' ? 'text-red-400' : 'text-white'}`}>
-                                                {member.membership_end || 'N/A'}
+                                                {formatDate(member.membership_end)}
                                             </span>
                                         </div>
                                     </div>
@@ -623,6 +787,13 @@ export default function MembersPage() {
                                             className="w-10 bg-white/5 text-gray-400 rounded hover:text-red-400 hover:bg-red-500/10 transition-colors flex items-center justify-center"
                                         >
                                             <Trash2 className="w-4 h-4" />
+                                        </button>
+                                        <button
+                                            onClick={() => setReceiptMember(member)}
+                                            className="w-10 bg-blue-500/10 text-blue-400 rounded hover:bg-blue-500/20 transition-colors flex items-center justify-center"
+                                            title="Generate Receipt"
+                                        >
+                                            <FileText className="w-4 h-4" />
                                         </button>
                                     </div>
                                 </motion.div>
@@ -922,6 +1093,131 @@ export default function MembersPage() {
                         >
                             <X className="w-5 h-5 text-white" />
                         </button>
+                    </motion.div>
+                </div>
+            )}
+
+            {/* Bulk WhatsApp Modal */}
+            {showBulkMessage && (
+                <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[60] flex items-center justify-center p-4" onClick={() => setShowBulkMessage(false)}>
+                    <motion.div
+                        initial={{ opacity: 0, scale: 0.9 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        className="bg-gray-900 border border-white/10 rounded-xl p-6 max-w-lg w-full"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <div className="flex justify-between items-center mb-4">
+                            <h3 className="text-lg font-bold flex items-center gap-2">
+                                <Send className="w-5 h-5 text-green-400" /> Bulk WhatsApp Message
+                            </h3>
+                            <button onClick={() => setShowBulkMessage(false)} className="text-gray-400 hover:text-white">
+                                <X className="w-5 h-5" />
+                            </button>
+                        </div>
+                        <p className="text-sm text-gray-400 mb-4">Send a message to all {stats.active} active members</p>
+                        <textarea
+                            value={bulkMessageText}
+                            onChange={(e) => setBulkMessageText(e.target.value)}
+                            placeholder="Type your message here... (e.g., 'Gym will be closed tomorrow for maintenance')"
+                            className="w-full bg-black/50 border border-white/20 rounded-lg p-3 text-white placeholder-gray-500 focus:border-gym-red focus:outline-none resize-none h-32"
+                        />
+                        <div className="mt-4 flex gap-3">
+                            <button
+                                onClick={() => {
+                                    const activeMembers = members.filter(m => getMemberStatus(m.membership_end) !== 'expired');
+                                    activeMembers.forEach((m, i) => {
+                                        setTimeout(() => {
+                                            const message = encodeURIComponent(bulkMessageText || 'Update from Brother\'s Fitness! 💪');
+                                            window.open(`https://wa.me/91${m.mobile.replace(/\\D/g, '')}?text=${message}`, '_blank');
+                                        }, i * 500);
+                                    });
+                                    toast.success(`Opening WhatsApp for ${activeMembers.length} members...`);
+                                    setShowBulkMessage(false);
+                                }}
+                                className="flex-1 bg-green-600 text-white py-2 rounded-lg hover:bg-green-700 transition-colors flex items-center justify-center gap-2"
+                            >
+                                <MessageCircle className="w-4 h-4" /> Send to All ({stats.active})
+                            </button>
+                            <button
+                                onClick={() => {
+                                    const activeMembers = members.filter(m => getMemberStatus(m.membership_end) !== 'expired');
+                                    const numbers = activeMembers.map(m => `+91${m.mobile.replace(/\\D/g, '')}`).join('\\n');
+                                    navigator.clipboard.writeText(numbers);
+                                    toast.success('All phone numbers copied to clipboard!');
+                                }}
+                                className="bg-white/10 text-white px-4 py-2 rounded-lg hover:bg-white/20 transition-colors"
+                            >
+                                Copy Numbers
+                            </button>
+                        </div>
+                    </motion.div>
+                </div>
+            )}
+
+            {/* PDF Receipt Modal */}
+            {receiptMember && (
+                <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[60] flex items-center justify-center p-4" onClick={() => setReceiptMember(null)}>
+                    <motion.div
+                        initial={{ opacity: 0, scale: 0.9 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        className="bg-white text-black rounded-xl p-6 max-w-md w-full"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <div className="text-center mb-4">
+                            <h2 className="text-2xl font-black text-gym-red">BROTHER'S FITNESS</h2>
+                            <p className="text-xs text-gray-500">Pain is Temporary. Pride is Forever.</p>
+                        </div>
+                        <div className="border-t border-b border-gray-200 py-4 my-4">
+                            <div className="flex justify-between mb-2">
+                                <span className="text-gray-500">Member:</span>
+                                <span className="font-bold">{receiptMember.full_name}</span>
+                            </div>
+                            <div className="flex justify-between mb-2">
+                                <span className="text-gray-500">Mobile:</span>
+                                <span>{receiptMember.mobile}</span>
+                            </div>
+                            <div className="flex justify-between mb-2">
+                                <span className="text-gray-500">Plan:</span>
+                                <span className="font-bold">{receiptMember.membership_type}</span>
+                            </div>
+                            <div className="flex justify-between mb-2">
+                                <span className="text-gray-500">Valid From:</span>
+                                <span>{formatDate(receiptMember.membership_start)}</span>
+                            </div>
+                            <div className="flex justify-between mb-2">
+                                <span className="text-gray-500">Valid Until:</span>
+                                <span>{formatDate(receiptMember.membership_end)}</span>
+                            </div>
+                        </div>
+                        <div className="flex justify-between items-center mb-4">
+                            <span className="text-lg font-bold">Amount Paid:</span>
+                            <span className="text-2xl font-black text-gym-red">
+                                ₹{receiptMember.membership_type === 'Monthly' ? '700' : receiptMember.membership_type === 'Quarterly' ? '1,800' : '3,300'}
+                            </span>
+                        </div>
+                        <div className="text-center text-xs text-gray-400 mb-4">
+                            Receipt Date: {formatDate(new Date().toISOString())}
+                        </div>
+                        <div className="flex gap-3">
+                            <button
+                                onClick={() => {
+                                    const amount = receiptMember.membership_type === 'Monthly' ? '700' : receiptMember.membership_type === 'Quarterly' ? '1800' : '3300';
+                                    const message = `🏋️ *BROTHER'S FITNESS RECEIPT*%0A%0A👤 Member: ${receiptMember.full_name}%0A📱 Mobile: ${receiptMember.mobile}%0A📋 Plan: ${receiptMember.membership_type}%0A📅 Valid: ${formatDate(receiptMember.membership_start)} to ${formatDate(receiptMember.membership_end)}%0A💰 Amount: ₹${amount}%0A%0A_Pain is Temporary. Pride is Forever._ 💪`;
+                                    window.open(`https://wa.me/91${receiptMember.mobile.replace(/\\D/g, '')}?text=${message}`, '_blank');
+                                    toast.success('Receipt sent via WhatsApp!');
+                                    setReceiptMember(null);
+                                }}
+                                className="flex-1 bg-green-600 text-white py-2 rounded-lg hover:bg-green-700 transition-colors flex items-center justify-center gap-2"
+                            >
+                                <MessageCircle className="w-4 h-4" /> Send via WhatsApp
+                            </button>
+                            <button
+                                onClick={() => setReceiptMember(null)}
+                                className="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300 transition-colors"
+                            >
+                                Close
+                            </button>
+                        </div>
                     </motion.div>
                 </div>
             )}
