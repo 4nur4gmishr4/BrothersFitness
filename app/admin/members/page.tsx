@@ -107,7 +107,6 @@ export default function MembersPage() {
 
             if (formData.membership_type === 'Quarterly') daysToAdd = 90;
             if (formData.membership_type === 'Half-Yearly') daysToAdd = 180;
-            if (formData.membership_type === 'Yearly') daysToAdd = 365;
 
             start.setDate(start.getDate() + daysToAdd);
             setFormData(prev => ({
@@ -412,9 +411,9 @@ export default function MembersPage() {
     return (
         <>
             <Navbar />
-            <div className="min-h-screen bg-black text-white p-4 md:p-8 pb-20">
+            <div className="min-h-screen bg-black text-white p-4 md:p-8 pb-20 overflow-x-hidden">
                 {/* Header */}
-                <div className="max-w-6xl mx-auto">
+                <div className="max-w-6xl mx-auto overflow-x-hidden">
                     <div className="flex justify-between items-center mb-8 border-b border-white/10 pb-4 flex-wrap gap-4">
                         <div className="flex items-center gap-4">
                             <div>
@@ -587,7 +586,7 @@ export default function MembersPage() {
                 )}
 
                 {/* Dashboard Stats */}
-                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8 max-w-full">
                     <div className="glass-panel glow-border p-4 rounded-xl hover:animate-border-glow transition-all">
                         <div className="flex justify-between items-start mb-2">
                             <span className="text-gray-400 text-xs uppercase font-bold tracking-wider">Total Members</span>
