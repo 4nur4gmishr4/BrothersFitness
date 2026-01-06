@@ -1,9 +1,25 @@
-import { createClient } from '@supabase/supabase-js';
+import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+// Lazy initialization to prevent build-time errors when env vars are not set
+let supabaseClient: SupabaseClient | null = null;
+
+export const getSupabase = (): SupabaseClient => {
+    if (!supabaseClient) {
+        if (!supabaseUrl || !supabaseAnonKey) {
+            throw new Error('Supabase environment variables are not configured');
+        }
+        supabaseClient = createClient(supabaseUrl, supabaseAnonKey);
+    }
+    return supabaseClient;
+};
+
+// For backward compatibility - will throw at runtime if env vars not set
+export const supabase = supabaseUrl && supabaseAnonKey
+    ? createClient(supabaseUrl, supabaseAnonKey)
+    : (null as unknown as SupabaseClient);
 
 // Types for our database tables
 export type GymMember = {
