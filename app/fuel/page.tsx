@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, Suspense, useRef } from "react";
+import { useState, useEffect, Suspense, useRef, useCallback } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { ArrowLeft, RefreshCw, Cpu, ShoppingCart, Utensils, IndianRupee, Globe, Home, Store, Calculator } from "lucide-react";
@@ -152,7 +152,7 @@ function FuelSynthesizerContent() {
     };
 
     // Calculate TDEE using Mifflin-St Jeor equation (same as Diagnostics.tsx)
-    const calculateTDEE = (): number | null => {
+    const calculateTDEE = useCallback((): number | null => {
         const w = parseFloat(currentWeight);
         const h = parseFloat(height);
         const a = parseFloat(age);
@@ -168,10 +168,10 @@ function FuelSynthesizerContent() {
 
         // TDEE = BMR * Activity Multiplier
         return Math.round(bmr * act);
-    };
+    }, [currentWeight, height, age, gender, activityLevel]);
 
     // Calculate target calories based on weight goal
-    const calculateTargetCalories = (): number | null => {
+    const calculateTargetCalories = useCallback((): number | null => {
         const tdee = calculateTDEE();
         if (tdee === null) return null;
 
@@ -198,20 +198,20 @@ function FuelSynthesizerContent() {
             // Maintenance
             return tdee;
         }
-    };
+    }, [calculateTDEE, currentWeight, targetWeight, weightChangeRate]);
 
     // Manual calculation handler
-    const handleCalculateCalories = () => {
+    const handleCalculateCalories = useCallback(() => {
         const targetCals = calculateTargetCalories();
         setCalculatedCalories(targetCals);
-    };
+    }, [calculateTargetCalories]);
 
     // Auto-calculate on input change IF already calculated once
     useEffect(() => {
         if (calculatedCalories !== null) {
             handleCalculateCalories();
         }
-    }, [currentWeight, targetWeight, age, height, gender, activityLevel, weightChangeRate]);
+    }, [currentWeight, targetWeight, age, height, gender, activityLevel, weightChangeRate, calculatedCalories, handleCalculateCalories]);
 
     // Comprehensive validation function
     const validateInputs = (): { valid: boolean; error: string } => {
