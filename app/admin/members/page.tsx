@@ -4,8 +4,8 @@ import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import {
-    ArrowLeft, Plus, Search, Edit2, Trash2, Camera, X, Save,
-    User, Phone, Mail, MapPin, Calendar, Ruler, Weight, Shield,
+    Plus, Search, Edit2, Trash2, Camera, X, Save,
+    User, Phone, Shield,
     Users, LogOut, TrendingUp, AlertTriangle, AlertCircle, CheckCircle,
     Download, MessageCircle, IndianRupee
 } from 'lucide-react';
@@ -41,12 +41,10 @@ export default function MembersPage() {
     const [searchQuery, setSearchQuery] = useState('');
     const [filterStatus, setFilterStatus] = useState<'all' | 'active' | 'expiring' | 'expired'>('all');
     const [error, setError] = useState('');
-    const fileInputRef = useRef<HTMLInputElement>(null);
     const cameraInputRef = useRef<HTMLInputElement>(null);
     const galleryInputRef = useRef<HTMLInputElement>(null);
     const [photoPreview, setPhotoPreview] = useState<string | null>(null);
     const [photoFile, setPhotoFile] = useState<File | null>(null);
-    const [showImageOptions, setShowImageOptions] = useState(false);
     const [selectedImageUrl, setSelectedImageUrl] = useState<string | null>(null);
 
     // Form state
@@ -199,7 +197,6 @@ export default function MembersPage() {
                 setPhotoPreview(reader.result as string);
             };
             reader.readAsDataURL(file);
-            setShowImageOptions(false);
         }
     };
 
@@ -493,7 +490,7 @@ export default function MembersPage() {
                             ].map((tab) => (
                                 <button
                                     key={tab.id}
-                                    onClick={() => setFilterStatus(tab.id as any)}
+                                    onClick={() => setFilterStatus(tab.id as 'all' | 'active' | 'expiring' | 'expired')}
                                     className={`px-3 py-1.5 rounded text-xs font-bold transition-all ${filterStatus === tab.id
                                         ? 'bg-gym-red text-white shadow-lg'
                                         : 'text-gray-400 hover:text-white hover:bg-white/5'

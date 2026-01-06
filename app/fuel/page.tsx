@@ -3,7 +3,7 @@
 import { useState, useEffect, Suspense, useRef } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import { ArrowLeft, RefreshCw, Cpu, ShoppingCart, Utensils, IndianRupee, Globe, Home, Store, Calculator, Target } from "lucide-react";
+import { ArrowLeft, RefreshCw, Cpu, ShoppingCart, Utensils, IndianRupee, Globe, Home, Store, Calculator } from "lucide-react";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
 import MissionDirective from "@/components/MissionDirective";
