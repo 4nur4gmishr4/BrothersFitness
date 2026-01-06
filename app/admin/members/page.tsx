@@ -14,6 +14,7 @@ import { useAdmin } from '@/lib/auth-context';
 import type { GymMember } from '@/lib/supabase';
 import Navbar from '@/components/Navbar';
 import Image from 'next/image';
+import BulkMessageModal from '@/components/admin/BulkMessageModal';
 
 // Helper to calculate status
 const getMemberStatus = (endDateString: string | null) => {
@@ -572,21 +573,21 @@ export default function MembersPage() {
 
                 {/* Dashboard Stats */}
                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-                    <div className="bg-white/5 border border-white/10 p-4 rounded-xl">
+                    <div className="glass-panel glow-border p-4 rounded-xl hover:animate-border-glow transition-all">
                         <div className="flex justify-between items-start mb-2">
                             <span className="text-gray-400 text-xs uppercase font-bold tracking-wider">Total Members</span>
                             <Users className="w-4 h-4 text-blue-400" />
                         </div>
                         <div className="text-2xl font-black">{stats.total}</div>
                     </div>
-                    <div className="bg-white/5 border border-white/10 p-4 rounded-xl">
+                    <div className="glass-panel glow-border p-4 rounded-xl hover:animate-border-glow transition-all">
                         <div className="flex justify-between items-start mb-2">
                             <span className="text-gray-400 text-xs uppercase font-bold tracking-wider">Active</span>
                             <CheckCircle className="w-4 h-4 text-green-400" />
                         </div>
                         <div className="text-2xl font-black text-green-400">{stats.active}</div>
                     </div>
-                    <div className="bg-white/5 border border-white/10 p-4 rounded-xl">
+                    <div className="glass-panel glow-border p-4 rounded-xl hover:animate-border-glow transition-all">
                         <div className="flex justify-between items-start mb-2">
                             <span className="text-gray-400 text-xs uppercase font-bold tracking-wider">Expiring Soon</span>
                             <AlertTriangle className="w-4 h-4 text-yellow-400" />
@@ -594,7 +595,7 @@ export default function MembersPage() {
                         <div className="text-2xl font-black text-yellow-400">{stats.expiring}</div>
                         <div className="text-[10px] text-gray-500 mt-1">Expire in &lt; 7 days</div>
                     </div>
-                    <div className="bg-white/5 border border-white/10 p-4 rounded-xl">
+                    <div className="glass-panel glow-border p-4 rounded-xl hover:animate-border-glow transition-all">
                         <div className="flex justify-between items-start mb-2">
                             <span className="text-gray-400 text-xs uppercase font-bold tracking-wider">Expired</span>
                             <AlertCircle className="w-4 h-4 text-red-500" />
@@ -602,7 +603,7 @@ export default function MembersPage() {
                         <div className="text-2xl font-black text-red-500">{stats.expired}</div>
                     </div>
                     {/* Revenue Card */}
-                    <div className="bg-white/5 border border-white/10 p-4 rounded-xl md:col-span-2 lg:col-span-4 xl:col-span-1 min-w-[200px] relative overflow-hidden group">
+                    <div className="glass-panel-strong glow-border p-4 rounded-xl md:col-span-2 lg:col-span-4 xl:col-span-1 min-w-[200px] relative overflow-hidden group hover:animate-border-glow transition-all">
                         <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
                             <IndianRupee className="w-16 h-16" />
                         </div>
@@ -1100,61 +1101,12 @@ export default function MembersPage() {
                 </div>
             )}
 
-            {/* Bulk WhatsApp Modal */}
+            {/* Bulk WhatsApp Modal - Enhanced Version */}
             {showBulkMessage && (
-                <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[60] flex items-center justify-center p-4" onClick={() => setShowBulkMessage(false)}>
-                    <motion.div
-                        initial={{ opacity: 0, scale: 0.9 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        className="bg-gray-900 border border-white/10 rounded-xl p-6 max-w-lg w-full"
-                        onClick={(e) => e.stopPropagation()}
-                    >
-                        <div className="flex justify-between items-center mb-4">
-                            <h3 className="text-lg font-bold flex items-center gap-2">
-                                <Send className="w-5 h-5 text-green-400" /> Bulk WhatsApp Message
-                            </h3>
-                            <button onClick={() => setShowBulkMessage(false)} className="text-gray-400 hover:text-white">
-                                <X className="w-5 h-5" />
-                            </button>
-                        </div>
-                        <p className="text-sm text-gray-400 mb-4">Send a message to all {stats.active} active members</p>
-                        <textarea
-                            value={bulkMessageText}
-                            onChange={(e) => setBulkMessageText(e.target.value)}
-                            placeholder="Type your message here... (e.g., 'Gym will be closed tomorrow for maintenance')"
-                            className="w-full bg-black/50 border border-white/20 rounded-lg p-3 text-white placeholder-gray-500 focus:border-gym-red focus:outline-none resize-none h-32"
-                        />
-                        <div className="mt-4 flex gap-3">
-                            <button
-                                onClick={() => {
-                                    const activeMembers = members.filter(m => getMemberStatus(m.membership_end) !== 'expired');
-                                    activeMembers.forEach((m, i) => {
-                                        setTimeout(() => {
-                                            const message = encodeURIComponent(bulkMessageText || 'Update from Brother\'s Fitness! 💪');
-                                            window.open(`https://wa.me/91${m.mobile.replace(/\\D/g, '')}?text=${message}`, '_blank');
-                                        }, i * 500);
-                                    });
-                                    toast.success(`Opening WhatsApp for ${activeMembers.length} members...`);
-                                    setShowBulkMessage(false);
-                                }}
-                                className="flex-1 bg-green-600 text-white py-2 rounded-lg hover:bg-green-700 transition-colors flex items-center justify-center gap-2"
-                            >
-                                <MessageCircle className="w-4 h-4" /> Send to All ({stats.active})
-                            </button>
-                            <button
-                                onClick={() => {
-                                    const activeMembers = members.filter(m => getMemberStatus(m.membership_end) !== 'expired');
-                                    const numbers = activeMembers.map(m => `+91${m.mobile.replace(/\\D/g, '')}`).join('\\n');
-                                    navigator.clipboard.writeText(numbers);
-                                    toast.success('All phone numbers copied to clipboard!');
-                                }}
-                                className="bg-white/10 text-white px-4 py-2 rounded-lg hover:bg-white/20 transition-colors"
-                            >
-                                Copy Numbers
-                            </button>
-                        </div>
-                    </motion.div>
-                </div>
+                <BulkMessageModal
+                    members={members}
+                    onClose={() => setShowBulkMessage(false)}
+                />
             )}
 
             {/* PDF Receipt Modal */}
