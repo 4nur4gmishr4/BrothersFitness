@@ -10,12 +10,11 @@ interface AnalyticsPanelProps {
     onClose: () => void;
 }
 
-// Pricing for revenue calculation
+// Pricing for revenue calculation (matching registration system)
 const PLAN_PRICES: Record<string, number> = {
-    'Monthly': 500,
-    'Quarterly': 1350,
-    'Half-Yearly': 2500,
-    'Yearly': 4500
+    'Monthly': 700,
+    'Quarterly': 1800,
+    'Half-Yearly': 3300
 };
 
 export default function AnalyticsPanel({ members, onClose }: AnalyticsPanelProps) {
@@ -50,7 +49,7 @@ export default function AnalyticsPanel({ members, onClose }: AnalyticsPanelProps
             if (m.membership_start) {
                 const startDate = new Date(m.membership_start);
                 const monthKey = `${startDate.getFullYear()}-${String(startDate.getMonth() + 1).padStart(2, '0')}`;
-                const price = PLAN_PRICES[plan] || 500;
+                const price = PLAN_PRICES[plan] || 700; // Default to Monthly price
                 monthlyRevenue[monthKey] = (monthlyRevenue[monthKey] || 0) + price;
             }
         });
