@@ -8,6 +8,7 @@ import CurvedLoop from "@/components/react-bits/CurvedLoop";
 
 export default function Hero() {
   const [isMobile, setIsMobile] = useState(true);
+  const [memberCount, setMemberCount] = useState(85);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -16,6 +17,20 @@ export default function Hero() {
       window.addEventListener('resize', handleResize);
       return () => window.removeEventListener('resize', handleResize);
     }
+  }, []);
+
+  // Fetch member count
+  useEffect(() => {
+    const fetchMemberCount = async () => {
+      try {
+        const res = await fetch('/api/public/member-count');
+        const data = await res.json();
+        setMemberCount(data.count);
+      } catch {
+        setMemberCount(85); // Fallback
+      }
+    };
+    fetchMemberCount();
   }, []);
 
   return (
@@ -103,13 +118,26 @@ export default function Hero() {
           <QuoteCycler />
         </motion.div>
 
+        {/* Member Count Badge */}
+        <motion.div
+          className="mb-8 md:mb-10 flex items-center gap-2 px-4 py-2 bg-white/5 border border-white/20 rounded-full backdrop-blur-sm"
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 1.2 }}
+        >
+          <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+          <span className="font-mono text-xs md:text-sm text-gray-300">
+            <span className="font-bold text-white">{memberCount}+</span> Active Members
+          </span>
+        </motion.div>
+
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 1.2 }}
         >
           <motion.a
-            href="#operations"
+            href="#protocol"
             className="inline-block relative group"
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}

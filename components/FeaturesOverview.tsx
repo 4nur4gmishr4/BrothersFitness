@@ -18,7 +18,7 @@ const features = [
         icon: <Calendar className="w-6 h-6" />,
         title: "Gym Schedule",
         description: "Check our daily workout timings and plan your sessions.",
-        link: null, // Stays on home
+        link: "#protocol",
         color: "text-blue-400"
     },
     {
