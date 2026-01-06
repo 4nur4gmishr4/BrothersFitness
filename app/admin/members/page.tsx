@@ -14,7 +14,15 @@ import { useAdmin } from '@/lib/auth-context';
 import type { GymMember } from '@/lib/supabase';
 import Navbar from '@/components/Navbar';
 import Image from 'next/image';
-import BulkMessageModal from '@/components/admin/BulkMessageModal';
+import dynamic from 'next/dynamic';
+
+const BulkMessageModal = dynamic(() => import('@/components/admin/BulkMessageModal'), {
+    loading: () => <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[60]" />
+});
+
+const AnalyticsPanel = dynamic(() => import('@/components/admin/AnalyticsPanel'), {
+    loading: () => <div className="h-64 bg-white/5 animate-pulse rounded-xl mb-6" />
+});
 
 // Helper to calculate status
 const getMemberStatus = (endDateString: string | null) => {
@@ -500,11 +508,18 @@ export default function MembersPage() {
 
                 {/* Analytics Panel */}
                 {showAnalytics && (
+                    <AnalyticsPanel
+                        members={members}
+                        onClose={() => setShowAnalytics(false)}
+                    />
+                )}
+                {/* Statistics Grid - previously hidden if new component is used */}
+                {showAnalytics && (
                     <motion.div
                         initial={{ opacity: 0, height: 0 }}
                         animate={{ opacity: 1, height: 'auto' }}
                         exit={{ opacity: 0, height: 0 }}
-                        className="mb-6 bg-gradient-to-br from-purple-900/20 to-indigo-900/20 border border-purple-500/30 rounded-xl p-6"
+                        className="mb-6 bg-gradient-to-br from-purple-900/20 to-indigo-900/20 border border-purple-500/30 rounded-xl p-6 hidden" // Hiding old analytics
                     >
                         <h3 className="font-bold text-lg mb-4 flex items-center gap-2">
                             <BarChart3 className="w-5 h-5 text-purple-400" /> Business Analytics
