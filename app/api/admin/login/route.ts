@@ -1,8 +1,8 @@
 import { NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
 
-// Hardcoded admin password - in production, use environment variable
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'BroFit@Admin2024';
+// Admin password should strictly come from environment variables
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
 
 export async function POST(req: Request) {
     try {
