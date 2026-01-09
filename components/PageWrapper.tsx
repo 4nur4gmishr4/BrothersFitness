@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { SoundProvider } from "@/components/SoundContext";
 
 import TacticalChatbot from "@/components/TacticalChatbot";
 
@@ -79,7 +78,7 @@ export default function PageWrapper({ children }: { children: React.ReactNode })
     };
 
     return (
-        <SoundProvider>
+        <>
             {/* Loader Overlay */}
             <AnimatePresence mode="wait">
                 {showLoader && (
@@ -119,6 +118,6 @@ export default function PageWrapper({ children }: { children: React.ReactNode })
             </AnimatePresence>
 
             {pathname === "/" && <TacticalChatbot />}
-        </SoundProvider>
+        </>
     );
 }

@@ -6,12 +6,18 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Search, Filter, ChevronLeft, ChevronRight, Dumbbell } from "lucide-react";
 import Image from "next/image";
 
-const API_KEY = "20c850ea667feceda7afe40fd0fb61899605aa11";
+const API_KEY = process.env.NEXT_PUBLIC_WGER_API_KEY; // Must be set in .env.local
 const BASE_URL = "https://wger.de/api/v2";
 
 const fetcher = (url: string) => fetch(url, {
-    headers: { 'Authorization': `Token ${API_KEY}` }
+    headers: API_KEY ? { 'Authorization': `Token ${API_KEY}` } : {}
 }).then(res => res.json());
+
+// Helper to strip HTML tags and get plain text
+const stripHtml = (html: string): string => {
+    if (!html) return '';
+    return html.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
+};
 
 interface Exercise {
     id: number;
@@ -159,10 +165,11 @@ export default function WorkoutLibrary() {
                                     {exercise.name}
                                 </h3>
 
-                                <div
-                                    className="text-gray-400 text-xs font-sans line-clamp-4 mb-4 prose prose-invert prose-sm prose-p:my-1"
-                                    dangerouslySetInnerHTML={{ __html: exercise.description || "<p>NO STRATEGIC DATA AVAILABLE.</p>" }}
-                                />
+                                <p
+                                    className="text-gray-400 text-xs font-sans line-clamp-4 mb-4"
+                                >
+                                    {stripHtml(exercise.description || '') || 'NO STRATEGIC DATA AVAILABLE.'}
+                                </p>
 
                                 <div className="mt-auto pt-4 border-t border-white/10 flex flex-wrap gap-2">
                                     {exercise.muscles && exercise.muscles.length > 0 ? (

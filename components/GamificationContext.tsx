@@ -106,7 +106,10 @@ export function GamificationProvider({ children }: { children: ReactNode }) {
 
     const hasMedal = (medalId: MedalId) => medals.includes(medalId);
 
-    if (!isLoaded) return <>{children}</>;
+    // Render Provider even if not loaded (with initial values), or handle loading state differently if needed.
+    // Ideally, we should render children always.
+    // If we simply return children when !isLoaded, context users will crash.
+    // So we MUST return Provider.
 
     return (
         <GamificationContext.Provider value={{ medals, visitStreak, awardMedal, hasMedal }}>

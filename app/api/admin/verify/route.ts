@@ -1,20 +1,20 @@
 import { NextResponse } from 'next/server';
+import { verifyAdminToken, extractBearerToken } from '@/lib/auth';
 
 export async function GET(req: Request) {
     try {
         const authHeader = req.headers.get('Authorization');
+        const token = extractBearerToken(authHeader);
 
-        if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        if (!token) {
             return NextResponse.json(
                 { error: 'No token provided' },
                 { status: 401 }
             );
         }
 
-        const token = authHeader.split(' ')[1];
-
-        // Simple token validation - check if it looks like a bcrypt hash
-        if (token && token.startsWith('$2')) {
+        // Verify against stored tokens
+        if (verifyAdminToken(token)) {
             return NextResponse.json({
                 valid: true,
                 message: 'Session valid'

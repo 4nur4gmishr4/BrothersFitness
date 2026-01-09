@@ -32,10 +32,16 @@ export default function DeploymentAlerts({ members }: DeploymentAlertsProps) {
                 else if (diffDays > 3 && diffDays <= 7) expiring7Days.push(m);
             }
 
-            // Check birthday
+            // Check birthday (handles year rollover - Dec 28 to Jan 3)
             if (m.date_of_birth) {
                 const dob = new Date(m.date_of_birth);
-                const thisYearBday = new Date(today.getFullYear(), dob.getMonth(), dob.getDate());
+                let thisYearBday = new Date(today.getFullYear(), dob.getMonth(), dob.getDate());
+
+                // If birthday has already passed this year, check next year's birthday
+                if (thisYearBday < today) {
+                    thisYearBday = new Date(today.getFullYear() + 1, dob.getMonth(), dob.getDate());
+                }
+
                 if (thisYearBday >= today && thisYearBday <= next7Days) {
                     birthdays.push(m);
                 }

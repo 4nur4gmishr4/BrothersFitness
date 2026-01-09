@@ -7,7 +7,8 @@ import {
     Plus, Search, Edit2, Trash2, Camera, X, Save,
     User, Phone, Shield,
     Users, LogOut, TrendingUp, AlertTriangle, AlertCircle, CheckCircle,
-    Download, MessageCircle, IndianRupee, FileText, Send, Gift, BarChart3
+    Download, MessageCircle, IndianRupee, FileText, Send, Gift, BarChart3,
+    Clock, Mail
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAdmin } from '@/lib/auth-context';
@@ -15,6 +16,9 @@ import type { GymMember } from '@/lib/supabase';
 import Navbar from '@/components/Navbar';
 import Image from 'next/image';
 import dynamic from 'next/dynamic';
+import { PLAN_PRICES } from '@/lib/config';
+import imageCompression from 'browser-image-compression';
+import fuzzysort from 'fuzzysort';
 
 const BulkMessageModal = dynamic(() => import('@/components/admin/BulkMessageModal'), {
     loading: () => <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[60]" />
@@ -23,6 +27,10 @@ const BulkMessageModal = dynamic(() => import('@/components/admin/BulkMessageMod
 const AnalyticsPanel = dynamic(() => import('@/components/admin/AnalyticsPanel'), {
     loading: () => <div className="h-64 bg-white/5 animate-pulse rounded-xl mb-6" />
 });
+
+const ActivityLogPanel = dynamic(() => import('@/components/admin/ActivityLogPanel'));
+const LeadsInbox = dynamic(() => import('@/components/admin/LeadsInbox'));
+import DeploymentAlerts from '@/components/admin/DeploymentAlerts';
 
 // Helper to calculate status
 const getMemberStatus = (endDateString: string | null) => {
@@ -71,6 +79,7 @@ export default function MembersPage() {
     const [editingMember, setEditingMember] = useState<GymMember | null>(null);
     const [searchQuery, setSearchQuery] = useState('');
     const [filterStatus, setFilterStatus] = useState<'all' | 'active' | 'expiring' | 'expired'>('all');
+    const [sortBy, setSortBy] = useState<'newest' | 'oldest' | 'a-z' | 'z-a'>('newest');
     const [error, setError] = useState('');
     const cameraInputRef = useRef<HTMLInputElement>(null);
     const galleryInputRef = useRef<HTMLInputElement>(null);
@@ -82,18 +91,60 @@ export default function MembersPage() {
     const [showAnalytics, setShowAnalytics] = useState(false);
     const [receiptMember, setReceiptMember] = useState<GymMember | null>(null);
 
+    const [searchTerm, setSearchTerm] = useState('');
+    const [showActivityLog, setShowActivityLog] = useState(false);
+    const [showLeadsInbox, setShowLeadsInbox] = useState(false);
+    const [unreadLeadsCount, setUnreadLeadsCount] = useState(0);
+
+    // Fetch unread leads count
+    const fetchUnreadCount = useCallback(async () => {
+        try {
+            const token = sessionStorage.getItem('admin_token');
+            if (!token) return;
+
+            const res = await fetch('/api/admin/leads', {
+                headers: { 'Authorization': `Bearer ${token}` },
+                cache: 'no-store'
+            });
+            const data = await res.json();
+
+            if (res.ok && data.leads) {
+                const readLeads = JSON.parse(localStorage.getItem('brofit_admin_read_leads') || '[]');
+                const unread = data.leads.filter((l: any) => !readLeads.includes(l.id)).length;
+                setUnreadLeadsCount(unread);
+            }
+        } catch (err) {
+            console.error('Failed to fetch lead count', err);
+        }
+    }, []);
+
+    // Poll for unread messages every 30s
+    useEffect(() => {
+        if (isAdmin) {
+            fetchUnreadCount();
+            const interval = setInterval(fetchUnreadCount, 30000);
+            return () => clearInterval(interval);
+        }
+    }, [isAdmin, fetchUnreadCount]);
+
+    // Refresh count when inbox closes
+    useEffect(() => {
+        if (!showLeadsInbox) {
+            fetchUnreadCount();
+        }
+    }, [showLeadsInbox, fetchUnreadCount]);
     // Form state
-    const [formData, setFormData] = useState({
+    const [formData, setFormData] = useState<Partial<GymMember>>({
         full_name: '',
         email: '',
         mobile: '',
         address: '',
         date_of_birth: '',
         gender: 'Male',
-        height_cm: '',
-        weight_kg: '',
+        height_cm: null,
+        weight_kg: null,
         membership_type: 'Monthly',
-        membership_start: new Date().toISOString().split('T')[0], // Default to today
+        membership_start: new Date().toISOString().split('T')[0],
         membership_end: '',
         emergency_contact: '',
         notes: ''
@@ -105,8 +156,23 @@ export default function MembersPage() {
             const start = new Date(formData.membership_start);
             let daysToAdd = 30; // Default Monthly
 
-            if (formData.membership_type === 'Quarterly') daysToAdd = 90;
-            if (formData.membership_type === 'Half-Yearly') daysToAdd = 180;
+            switch (formData.membership_type) {
+                case '15 Days':
+                    daysToAdd = 15;
+                    break;
+                case '1 Month':
+                case 'Monthly': // Legacy support
+                    daysToAdd = 30;
+                    break;
+                case '3 Months':
+                case 'Quarterly': // Legacy support
+                    daysToAdd = 90;
+                    break;
+                case '6 Months':
+                case 'Half-Yearly': // Legacy support
+                    daysToAdd = 180;
+                    break;
+            }
 
             start.setDate(start.getDate() + daysToAdd);
             setFormData(prev => ({
@@ -132,7 +198,10 @@ export default function MembersPage() {
 
     const fetchMembers = async () => {
         try {
-            const res = await fetch('/api/admin/members');
+            const token = sessionStorage.getItem('admin_token');
+            const res = await fetch('/api/admin/members', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
             const data = await res.json();
             if (data.members) {
                 setMembers(data.members);
@@ -153,14 +222,16 @@ export default function MembersPage() {
         const active = total - expired;
 
         // Revenue & Plan Calculation
-        let monthlyCount = 0, quarterlyCount = 0, halfYearlyCount = 0;
-        let monthly = 0, quarterly = 0, halfYearly = 0;
+        let monthlyCount = 0, quarterlyCount = 0, halfYearlyCount = 0, fifteenDaysCount = 0;
+        let monthly = 0, quarterly = 0, halfYearly = 0, fifteenDays = 0;
         members.forEach(m => {
-            if (m.membership_type === 'Monthly') { monthly += 700; monthlyCount++; }
-            if (m.membership_type === 'Quarterly') { quarterly += 1800; quarterlyCount++; }
-            if (m.membership_type === 'Half-Yearly') { halfYearly += 3300; halfYearlyCount++; }
+            const price = (PLAN_PRICES as any)[m.membership_type || 'Monthly'] || 0;
+            if (m.membership_type === 'Monthly' || m.membership_type === '1 Month') { monthly += price; monthlyCount++; }
+            else if (m.membership_type === 'Quarterly' || m.membership_type === '3 Months') { quarterly += price; quarterlyCount++; }
+            else if (m.membership_type === 'Half-Yearly' || m.membership_type === '6 Months') { halfYearly += price; halfYearlyCount++; }
+            else if (m.membership_type === '15 Days') { fifteenDays += price; fifteenDaysCount++; }
         });
-        const totalRevenue = monthly + quarterly + halfYearly;
+        const totalRevenue = monthly + quarterly + halfYearly + fifteenDays;
 
         // Growth Analytics - members joined this month vs last month
         const now = new Date();
@@ -182,10 +253,7 @@ export default function MembersPage() {
 
         // Revenue projection (based on expiring memberships)
         const potentialRenewalRevenue = members.filter(m => getMemberStatus(m.membership_end) === 'expiring').reduce((sum, m) => {
-            if (m.membership_type === 'Monthly') return sum + 700;
-            if (m.membership_type === 'Quarterly') return sum + 1800;
-            if (m.membership_type === 'Half-Yearly') return sum + 3300;
-            return sum;
+            return sum + ((PLAN_PRICES as any)[m.membership_type || 'Monthly'] || 0);
         }, 0);
 
         // Birthday & Expiry Alerts
@@ -214,8 +282,8 @@ export default function MembersPage() {
 
         return {
             total, active, expiring, expired,
-            revenue: { monthly, quarterly, halfYearly, total: totalRevenue },
-            plans: { monthly: monthlyCount, quarterly: quarterlyCount, halfYearly: halfYearlyCount },
+            revenue: { monthly, quarterly, halfYearly, fifteenDays, total: totalRevenue },
+            plans: { monthly: monthlyCount, quarterly: quarterlyCount, halfYearly: halfYearlyCount, fifteenDays: fifteenDaysCount },
             growth: { thisMonth: joinedThisMonth, lastMonth: joinedLastMonth, projectedRevenue: potentialRenewalRevenue },
             alerts: { birthdays, upcomingBirthdays, expiringToday }
         };
@@ -227,6 +295,7 @@ export default function MembersPage() {
         const timer = setTimeout(() => setDebouncedSearch(searchQuery), 300);
         return () => clearTimeout(timer);
     }, [searchQuery]);
+
 
     // Export members to CSV
     const exportToCSV = useCallback(() => {
@@ -272,25 +341,44 @@ export default function MembersPage() {
     const uploadPhoto = async (memberId: string): Promise<string | null> => {
         if (!photoFile) return null;
 
-        const formData = new FormData();
-        formData.append('file', photoFile);
-        formData.append('memberId', memberId);
-
         try {
+            console.log('Original size:', (photoFile.size / 1024 / 1024).toFixed(2), 'MB');
+
+            const options = {
+                maxSizeMB: 0.5, // Compress to ~500KB
+                maxWidthOrHeight: 1200,
+                useWebWorker: true
+            };
+
+            const compressedFile = await imageCompression(photoFile, options);
+            console.log('Compressed size:', (compressedFile.size / 1024 / 1024).toFixed(2), 'MB');
+
+            const formData = new FormData();
+            formData.append('file', compressedFile);
+            formData.append('memberId', memberId);
+
+            const token = sessionStorage.getItem('admin_token');
             const res = await fetch('/api/admin/upload', {
                 method: 'POST',
+                headers: { 'Authorization': `Bearer ${token}` },
                 body: formData
             });
             const data = await res.json();
             return data.url || null;
-        } catch {
-            console.error('Photo upload failed');
+        } catch (err) {
+            console.error('Photo upload failed:', err);
             return null;
         }
     };
 
+    const [isSubmitting, setIsSubmitting] = useState(false);
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+
+        // Prevent duplicate submissions
+        if (isSubmitting) return;
+        setIsSubmitting(true);
         setError('');
 
         try {
@@ -304,25 +392,35 @@ export default function MembersPage() {
 
             const memberData = {
                 ...formData,
-                height_cm: formData.height_cm ? parseFloat(formData.height_cm) : null,
-                weight_kg: formData.weight_kg ? parseFloat(formData.weight_kg) : null,
+                // Fields are already numbers or null in the state
+                height_cm: formData.height_cm,
+                weight_kg: formData.weight_kg,
                 photo_url: photoUrl
             };
 
+            const token = sessionStorage.getItem('admin_token');
             const res = await fetch('/api/admin/members', {
                 method: editingMember ? 'PUT' : 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
                 body: JSON.stringify(editingMember ? { id: editingMember.id, ...memberData } : memberData)
             });
 
             if (!res.ok) throw new Error('Failed to save member');
 
-            await fetchMembers();
+            // Close popup IMMEDIATELY before fetching
             resetForm();
             toast.success(editingMember ? 'Member Updated Successfully! ✅' : 'Member Registered! 🚀');
+
+            // Fetch members in background
+            fetchMembers();
         } catch {
             toast.error('Failed to save member. Please try again.');
             setError('Failed to save member. Please try again.');
+        } finally {
+            setIsSubmitting(false);
         }
     };
 
@@ -330,7 +428,11 @@ export default function MembersPage() {
         if (!confirm('Are you sure you want to delete this member?')) return;
 
         try {
-            const res = await fetch(`/api/admin/members?id=${id}`, { method: 'DELETE' });
+            const token = sessionStorage.getItem('admin_token');
+            const res = await fetch(`/api/admin/members?id=${id}`, {
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
             if (!res.ok) throw new Error('Failed to delete');
             await fetchMembers();
             toast.success('Member Deleted');
@@ -349,8 +451,8 @@ export default function MembersPage() {
             address: member.address || '',
             date_of_birth: member.date_of_birth || '',
             gender: member.gender || 'Male',
-            height_cm: member.height_cm?.toString() || '',
-            weight_kg: member.weight_kg?.toString() || '',
+            height_cm: member.height_cm,
+            weight_kg: member.weight_kg,
             membership_type: member.membership_type || 'Monthly',
             membership_start: member.membership_start || new Date().toISOString().split('T')[0],
             membership_end: member.membership_end || '',
@@ -361,6 +463,29 @@ export default function MembersPage() {
         setShowForm(true);
     };
 
+    const handleRenew = (member: GymMember) => {
+        setEditingMember(member);
+        const today = new Date().toISOString().split('T')[0];
+        setFormData({
+            full_name: member.full_name || '',
+            email: member.email || '',
+            mobile: member.mobile || '',
+            address: member.address || '',
+            date_of_birth: member.date_of_birth || '',
+            gender: member.gender || 'Male',
+            height_cm: member.height_cm,
+            weight_kg: member.weight_kg,
+            membership_type: member.membership_type || 'Monthly',
+            membership_start: today, // Start from today
+            membership_end: '', // Will be calculated by useEffect
+            emergency_contact: member.emergency_contact || '',
+            notes: member.notes || ''
+        });
+        setPhotoPreview(member.photo_url);
+        setShowForm(true);
+        toast.info(`Renewing membership for ${member.full_name}`);
+    };
+
     const resetForm = () => {
         setFormData({
             full_name: '',
@@ -369,8 +494,8 @@ export default function MembersPage() {
             address: '',
             date_of_birth: '',
             gender: 'Male',
-            height_cm: '',
-            weight_kg: '',
+            height_cm: null,
+            weight_kg: null,
             membership_type: 'Monthly',
             membership_start: new Date().toISOString().split('T')[0],
             membership_end: '',
@@ -383,20 +508,43 @@ export default function MembersPage() {
         setShowForm(false);
     };
 
-    const filteredMembers = members.filter(m => {
-        const matchesSearch = (
-            m.full_name?.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
-            m.mobile?.includes(debouncedSearch) ||
-            m.email?.toLowerCase().includes(debouncedSearch.toLowerCase())
-        );
+    const filteredMembers = useMemo(() => {
+        // Apply fuzzy search if there's a query
+        let searchResults = members;
+        if (debouncedSearch.trim()) {
+            const results = fuzzysort.go(debouncedSearch, members, {
+                keys: ['full_name', 'mobile', 'email'],
+                threshold: -10000, // Lower = more lenient
+                limit: 100
+            });
+            searchResults = results.map(r => r.obj);
+        }
 
-        if (!matchesSearch) return false;
+        // Apply status filter
+        let filtered = searchResults.filter(m => {
+            const status = getMemberStatus(m.membership_end);
+            if (filterStatus === 'all') return true;
+            if (filterStatus === 'active') return status === 'active' || status === 'expiring';
+            return status === filterStatus;
+        });
 
-        const status = getMemberStatus(m.membership_end);
-        if (filterStatus === 'all') return true;
-        if (filterStatus === 'active') return status === 'active' || status === 'expiring';
-        return status === filterStatus;
-    });
+        // Apply sorting
+        filtered = [...filtered].sort((a, b) => {
+            switch (sortBy) {
+                case 'a-z':
+                    return (a.full_name || '').localeCompare(b.full_name || '');
+                case 'z-a':
+                    return (b.full_name || '').localeCompare(a.full_name || '');
+                case 'oldest':
+                    return new Date(a.created_at || 0).getTime() - new Date(b.created_at || 0).getTime();
+                case 'newest':
+                default:
+                    return new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime();
+            }
+        });
+
+        return filtered;
+    }, [members, debouncedSearch, filterStatus, sortBy]);
 
     if (isLoading) {
         return (
@@ -431,7 +579,7 @@ export default function MembersPage() {
                                 title="Bulk WhatsApp"
                             >
                                 <Send className="w-4 h-4" />
-                                <span className="hidden sm:inline">Bulk Message</span>
+                                <span className="inline">Bulk Message</span>
                             </button>
                             <button
                                 onClick={() => setShowAnalytics(!showAnalytics)}
@@ -439,7 +587,28 @@ export default function MembersPage() {
                                 title="Analytics"
                             >
                                 <BarChart3 className="w-4 h-4" />
-                                <span className="hidden sm:inline">Analytics</span>
+                                <span className="inline">Analytics</span>
+                            </button>
+                            <button
+                                onClick={() => setShowActivityLog(true)}
+                                className="bg-orange-600/20 text-orange-400 px-3 py-2 rounded hover:bg-orange-600/30 transition-colors flex items-center gap-2"
+                                title="Activity Log"
+                            >
+                                <Clock className="w-4 h-4" />
+                                <span className="inline">History</span>
+                            </button>
+                            <button
+                                onClick={() => setShowLeadsInbox(true)}
+                                className="bg-pink-600/20 text-pink-400 px-3 py-2 rounded hover:bg-pink-600/30 transition-colors flex items-center gap-2 relative"
+                                title="Leads Inbox"
+                            >
+                                <Mail className="w-4 h-4" />
+                                <span className="inline">Inbox</span>
+                                {unreadLeadsCount > 0 && (
+                                    <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center animate-pulse">
+                                        {unreadLeadsCount}
+                                    </span>
+                                )}
                             </button>
                             <button
                                 onClick={exportToCSV}
@@ -447,30 +616,88 @@ export default function MembersPage() {
                                 title="Export Members"
                             >
                                 <Download className="w-4 h-4" />
-                                <span className="hidden sm:inline">Export</span>
+                                <span className="inline">Export</span>
+                            </button>
+                            <button
+                                onClick={async () => {
+                                    try {
+                                        toast.loading('Creating backup...', { id: 'backup' });
+                                        const token = sessionStorage.getItem('admin_token');
+                                        if (!token) throw new Error('No admin token found');
+
+                                        const res = await fetch('/api/admin/backup', {
+                                            headers: { Authorization: `Bearer ${token}` }
+                                        });
+
+                                        const data = await res.json();
+
+                                        if (!res.ok) {
+                                            if (res.status === 401) {
+                                                toast.error('Session expired. Please login again.', { id: 'backup' });
+                                                logout();
+                                                router.push('/');
+                                                return;
+                                            }
+                                            throw new Error(data.details || data.error || 'Backup failed');
+                                        }
+
+                                        // Download as file
+                                        const blob = new Blob([JSON.stringify(data.data, null, 2)], { type: 'application/json' });
+                                        const url = URL.createObjectURL(blob);
+                                        const a = document.createElement('a');
+                                        a.href = url;
+                                        a.download = data.filename || 'backup.json';
+                                        a.click();
+                                        URL.revokeObjectURL(url);
+
+                                        toast.success(`Backup created: ${data.total_members} members`, { id: 'backup' });
+                                    } catch (err: any) {
+                                        console.error('Backup error:', err);
+                                        toast.error(`Backup failed: ${err.message}`, { id: 'backup' });
+                                    }
+                                }}
+                                className="bg-blue-600/20 text-blue-400 px-3 py-2 rounded hover:bg-blue-600/30 transition-colors flex items-center gap-2"
+                                title="Backup Database"
+                            >
+                                <Shield className="w-4 h-4" />
+                                <span className="inline">Backup</span>
                             </button>
                             <button
                                 onClick={() => { logout(); router.push('/'); }}
                                 className="bg-white/10 text-white px-3 py-2 rounded hover:bg-white/20 transition-colors flex items-center gap-2"
                             >
                                 <LogOut className="w-4 h-4" />
-                                <span className="hidden sm:inline">Logout</span>
+                                <span className="inline">Logout</span>
                             </button>
                         </div>
                     </div>
                 </div>
 
                 {/* Birthday & Expiry Alerts */}
-                {(stats.alerts.birthdays.length > 0 || stats.alerts.expiringToday.length > 0) && (
+                {(stats.alerts.birthdays.length > 0 || stats.alerts.expiringToday.length > 0 || stats.alerts.upcomingBirthdays.length > 0) && (
                     <div className="mb-6 space-y-3">
                         {stats.alerts.birthdays.length > 0 && (
                             <div className="bg-gradient-to-r from-pink-500/10 to-purple-500/10 border border-pink-500/30 rounded-xl p-4 flex items-start gap-3">
                                 <div className="text-3xl">🎂</div>
                                 <div className="flex-1">
                                     <h3 className="font-bold text-pink-300 mb-1">Birthday Today!</h3>
-                                    <p className="text-sm text-gray-300">
-                                        {stats.alerts.birthdays.map(m => m.full_name).join(', ')} - Wish them a happy birthday!
+                                    <p className="text-sm text-gray-300 mb-2">
+                                        {stats.alerts.birthdays.map(m => m.full_name).join(', ')}
                                     </p>
+                                    <div className="flex flex-wrap gap-2">
+                                        {stats.alerts.birthdays.map(m => (
+                                            <button
+                                                key={m.id}
+                                                onClick={() => {
+                                                    const msg = encodeURIComponent(`🎂 Happy Birthday ${m.full_name}! 🎉\n\nWishing you strength, health, and gains! May this year bring you closer to all your fitness goals! 💪\n\n- Brother's Fitness Family`);
+                                                    window.open(`https://wa.me/91${m.mobile?.replace(/\D/g, '')}?text=${msg}`, '_blank');
+                                                }}
+                                                className="bg-pink-500/20 hover:bg-pink-500/30 text-pink-200 px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-colors"
+                                            >
+                                                <MessageCircle className="w-3 h-3" /> Wish {m.full_name?.split(' ')[0]}
+                                            </button>
+                                        ))}
+                                    </div>
                                 </div>
                             </div>
                         )}
@@ -481,9 +708,23 @@ export default function MembersPage() {
                                     <h3 className="font-bold text-red-300 mb-1">
                                         {stats.alerts.expiringToday.length} Membership{stats.alerts.expiringToday.length > 1 ? 's' : ''} Expiring Today
                                     </h3>
-                                    <p className="text-sm text-gray-300">
+                                    <p className="text-sm text-gray-300 mb-2">
                                         {stats.alerts.expiringToday.map(m => m.full_name).join(', ')}
                                     </p>
+                                    <div className="flex flex-wrap gap-2">
+                                        {stats.alerts.expiringToday.map(m => (
+                                            <button
+                                                key={m.id}
+                                                onClick={() => {
+                                                    const msg = encodeURIComponent(`Hi ${m.full_name}! 👋\n\nYour Brother's Fitness membership expires TODAY. Renew now to continue your fitness journey without interruption! 💪\n\nVisit us or reply to renew.\n\n- Brother's Fitness`);
+                                                    window.open(`https://wa.me/91${m.mobile?.replace(/\D/g, '')}?text=${msg}`, '_blank');
+                                                }}
+                                                className="bg-red-500/20 hover:bg-red-500/30 text-red-200 px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-colors"
+                                            >
+                                                <MessageCircle className="w-3 h-3" /> Remind {m.full_name?.split(' ')[0]}
+                                            </button>
+                                        ))}
+                                    </div>
                                 </div>
                             </div>
                         )}
@@ -505,6 +746,9 @@ export default function MembersPage() {
                     </div>
                 )}
 
+                {/* Deployment Alerts (Tactical) */}
+                <DeploymentAlerts members={members} />
+
                 {/* Analytics Panel */}
                 {showAnalytics && (
                     <AnalyticsPanel
@@ -512,96 +756,24 @@ export default function MembersPage() {
                         onClose={() => setShowAnalytics(false)}
                     />
                 )}
-                {/* Statistics Grid - previously hidden if new component is used */}
-                {showAnalytics && (
-                    <motion.div
-                        initial={{ opacity: 0, height: 0 }}
-                        animate={{ opacity: 1, height: 'auto' }}
-                        exit={{ opacity: 0, height: 0 }}
-                        className="mb-6 bg-gradient-to-br from-purple-900/20 to-indigo-900/20 border border-purple-500/30 rounded-xl p-6 hidden" // Hiding old analytics
-                    >
-                        <h3 className="font-bold text-lg mb-4 flex items-center gap-2">
-                            <BarChart3 className="w-5 h-5 text-purple-400" /> Business Analytics
-                        </h3>
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            {/* Growth Chart */}
-                            <div className="bg-black/30 rounded-lg p-4">
-                                <h4 className="text-xs uppercase text-gray-400 mb-3">Monthly Growth</h4>
-                                <div className="flex items-end gap-4 h-24">
-                                    <div className="flex-1 flex flex-col items-center">
-                                        <div className="w-full bg-gray-700 rounded-t" style={{ height: `${Math.max(10, (stats.growth.lastMonth / Math.max(stats.growth.lastMonth, stats.growth.thisMonth, 1)) * 80)}px` }}></div>
-                                        <span className="text-xs text-gray-400 mt-1">Last</span>
-                                        <span className="font-bold">{stats.growth.lastMonth}</span>
-                                    </div>
-                                    <div className="flex-1 flex flex-col items-center">
-                                        <div className="w-full bg-green-500 rounded-t" style={{ height: `${Math.max(10, (stats.growth.thisMonth / Math.max(stats.growth.lastMonth, stats.growth.thisMonth, 1)) * 80)}px` }}></div>
-                                        <span className="text-xs text-gray-400 mt-1">This</span>
-                                        <span className="font-bold text-green-400">{stats.growth.thisMonth}</span>
-                                    </div>
-                                </div>
-                                <div className="text-center mt-2 text-xs text-gray-500">New Members</div>
-                            </div>
-
-                            {/* Plan Popularity */}
-                            <div className="bg-black/30 rounded-lg p-4">
-                                <h4 className="text-xs uppercase text-gray-400 mb-3">Plan Popularity</h4>
-                                <div className="space-y-2">
-                                    <div className="flex items-center gap-2">
-                                        <div className="flex-1 bg-gray-700 rounded-full h-2 overflow-hidden">
-                                            <div className="bg-blue-500 h-full" style={{ width: `${(stats.plans.monthly / Math.max(stats.total, 1)) * 100}%` }}></div>
-                                        </div>
-                                        <span className="text-xs w-20">Monthly ({stats.plans.monthly})</span>
-                                    </div>
-                                    <div className="flex items-center gap-2">
-                                        <div className="flex-1 bg-gray-700 rounded-full h-2 overflow-hidden">
-                                            <div className="bg-green-500 h-full" style={{ width: `${(stats.plans.quarterly / Math.max(stats.total, 1)) * 100}%` }}></div>
-                                        </div>
-                                        <span className="text-xs w-20">Quarterly ({stats.plans.quarterly})</span>
-                                    </div>
-                                    <div className="flex items-center gap-2">
-                                        <div className="flex-1 bg-gray-700 rounded-full h-2 overflow-hidden">
-                                            <div className="bg-purple-500 h-full" style={{ width: `${(stats.plans.halfYearly / Math.max(stats.total, 1)) * 100}%` }}></div>
-                                        </div>
-                                        <span className="text-xs w-20">Half-Yearly ({stats.plans.halfYearly})</span>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Revenue Projection */}
-                            <div className="bg-black/30 rounded-lg p-4">
-                                <h4 className="text-xs uppercase text-gray-400 mb-3">Revenue Projection</h4>
-                                <div className="text-center">
-                                    <div className="text-3xl font-black text-emerald-400">
-                                        ₹{stats.growth.projectedRevenue.toLocaleString('en-IN')}
-                                    </div>
-                                    <div className="text-xs text-gray-400 mt-1">Potential from {stats.expiring} expiring</div>
-                                </div>
-                                <div className="mt-3 pt-3 border-t border-white/10">
-                                    <div className="text-xs text-gray-400">Current Total</div>
-                                    <div className="font-bold text-lg">₹{stats.revenue.total.toLocaleString('en-IN')}</div>
-                                </div>
-                            </div>
-                        </div>
-                    </motion.div>
-                )}
 
                 {/* Dashboard Stats */}
                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8 max-w-full">
-                    <div className="glass-panel glow-border p-4 rounded-xl hover:animate-border-glow transition-all">
+                    <div className="glass-panel p-4 rounded-xl transition-all hover:bg-white/5">
                         <div className="flex justify-between items-start mb-2">
                             <span className="text-gray-400 text-xs uppercase font-bold tracking-wider">Total Members</span>
                             <Users className="w-4 h-4 text-blue-400" />
                         </div>
                         <div className="text-2xl font-black">{stats.total}</div>
                     </div>
-                    <div className="glass-panel glow-border p-4 rounded-xl hover:animate-border-glow transition-all">
+                    <div className="glass-panel p-4 rounded-xl transition-all hover:bg-white/5">
                         <div className="flex justify-between items-start mb-2">
                             <span className="text-gray-400 text-xs uppercase font-bold tracking-wider">Active</span>
                             <CheckCircle className="w-4 h-4 text-green-400" />
                         </div>
                         <div className="text-2xl font-black text-green-400">{stats.active}</div>
                     </div>
-                    <div className="glass-panel glow-border p-4 rounded-xl hover:animate-border-glow transition-all">
+                    <div className="glass-panel p-4 rounded-xl transition-all hover:bg-white/5">
                         <div className="flex justify-between items-start mb-2">
                             <span className="text-gray-400 text-xs uppercase font-bold tracking-wider">Expiring Soon</span>
                             <AlertTriangle className="w-4 h-4 text-yellow-400" />
@@ -609,7 +781,7 @@ export default function MembersPage() {
                         <div className="text-2xl font-black text-yellow-400">{stats.expiring}</div>
                         <div className="text-[10px] text-gray-500 mt-1">Expire in &lt; 7 days</div>
                     </div>
-                    <div className="glass-panel glow-border p-4 rounded-xl hover:animate-border-glow transition-all">
+                    <div className="glass-panel p-4 rounded-xl transition-all hover:bg-white/5">
                         <div className="flex justify-between items-start mb-2">
                             <span className="text-gray-400 text-xs uppercase font-bold tracking-wider">Expired</span>
                             <AlertCircle className="w-4 h-4 text-red-500" />
@@ -617,10 +789,7 @@ export default function MembersPage() {
                         <div className="text-2xl font-black text-red-500">{stats.expired}</div>
                     </div>
                     {/* Revenue Card */}
-                    <div className="glass-panel-strong glow-border p-4 rounded-xl md:col-span-2 lg:col-span-4 xl:col-span-1 min-w-[200px] relative overflow-hidden group hover:animate-border-glow transition-all">
-                        <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-                            <IndianRupee className="w-16 h-16" />
-                        </div>
+                    <div className="glass-panel-strong p-4 rounded-xl col-span-2 lg:col-span-4 relative overflow-hidden group transition-all hover:bg-white/5">
                         <div className="flex justify-between items-start mb-2 relative z-10">
                             <span className="text-gray-400 text-xs uppercase font-bold tracking-wider">Estimated Revenue</span>
                             <IndianRupee className="w-4 h-4 text-emerald-400" />
@@ -629,26 +798,33 @@ export default function MembersPage() {
                             <span className="text-base text-gray-500">₹</span>
                             {stats.revenue.total.toLocaleString('en-IN')}
                         </div>
-                        <div className="grid grid-cols-3 gap-2 mt-3 text-[10px] text-gray-500 border-t border-white/10 pt-2 relative z-10">
+                        <div className="grid grid-cols-4 gap-2 mt-3 text-[10px] text-gray-500 border-t border-white/10 pt-2 relative z-10">
+                            <div>
+                                <span className="block text-gray-400 font-bold mb-0.5">15d</span>
+                                ₹{stats.revenue.fifteenDays.toLocaleString('en-IN')}
+                            </div>
                             <div>
                                 <span className="block text-gray-400 font-bold mb-0.5">Mo</span>
-                                ₹{(stats.revenue.monthly / 1000).toFixed(1)}k
+                                ₹{stats.revenue.monthly.toLocaleString('en-IN')}
                             </div>
                             <div>
                                 <span className="block text-gray-400 font-bold mb-0.5">Qr</span>
-                                ₹{(stats.revenue.quarterly / 1000).toFixed(1)}k
+                                ₹{stats.revenue.quarterly.toLocaleString('en-IN')}
                             </div>
                             <div>
                                 <span className="block text-gray-400 font-bold mb-0.5">Hy</span>
-                                ₹{(stats.revenue.halfYearly / 1000).toFixed(1)}k
+                                ₹{stats.revenue.halfYearly.toLocaleString('en-IN')}
                             </div>
                         </div>
                     </div>
                 </div>
 
+
+
                 {/* Controls Area: Search + Add + Filter */}
-                <div className="flex flex-col md:flex-row gap-4 justify-between items-center mb-6">
-                    <div className="relative w-full md:w-auto flex-1 max-w-md">
+                <div className="flex flex-col gap-4 mb-6">
+                    {/* Row 1: Search */}
+                    <div className="relative w-full">
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
                         <input
                             type="text"
@@ -659,9 +835,10 @@ export default function MembersPage() {
                         />
                     </div>
 
-                    <div className="flex items-center gap-2 w-full md:w-auto">
+                    {/* Row 2: Filter Tabs + Sort + New Member Button */}
+                    <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center">
                         {/* Filter Tabs */}
-                        <div className="bg-white/5 p-1 rounded-lg flex border border-white/10">
+                        <div className="bg-white/5 p-1 rounded-lg flex border border-white/10 flex-shrink-0">
                             {[
                                 { id: 'all', label: 'All' },
                                 { id: 'active', label: 'Active' },
@@ -681,9 +858,28 @@ export default function MembersPage() {
                             ))}
                         </div>
 
+                        {/* Sort Dropdown - White Arrow */}
+                        <select
+                            value={sortBy}
+                            onChange={(e) => setSortBy(e.target.value as 'newest' | 'oldest' | 'a-z' | 'z-a')}
+                            className="bg-black border border-white/20 rounded-lg px-3 py-2 pr-8 text-xs font-bold text-white focus:outline-none focus:border-gym-red cursor-pointer flex-shrink-0 appearance-none"
+                            style={{
+                                backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E")`,
+                                backgroundPosition: 'right 8px center',
+                                backgroundRepeat: 'no-repeat'
+                            }}
+                        >
+                            <option value="newest" className="bg-black text-white">Newest First</option>
+                            <option value="oldest" className="bg-black text-white">Oldest First</option>
+                            <option value="a-z" className="bg-black text-white">A → Z</option>
+                            <option value="z-a" className="bg-black text-white">Z → A</option>
+                        </select>
+
+
+                        {/* New Member Button */}
                         <button
                             onClick={() => { setShowForm(true); setEditingMember(null); }}
-                            className="bg-gym-red text-white py-2.5 px-4 rounded-lg flex items-center justify-center gap-2 hover:bg-red-700 transition-colors shadow-lg shadow-red-900/20 w-full sm:w-auto"
+                            className="bg-gym-red text-white py-2.5 px-4 rounded-lg flex items-center justify-center gap-2 hover:bg-red-700 transition-colors shadow-lg shadow-red-900/20 flex-shrink-0 sm:ml-auto"
                         >
                             <Plus className="w-4 h-4" />
                             <span className="text-sm font-bold">New Member</span>
@@ -792,6 +988,15 @@ export default function MembersPage() {
                                         >
                                             <MessageCircle className="w-4 h-4" />
                                         </button>
+                                        {status === 'expired' && (
+                                            <button
+                                                onClick={() => handleRenew(member)}
+                                                className="bg-gym-red text-white px-3 py-2 rounded font-bold text-xs hover:bg-red-700 transition-colors flex items-center gap-1.5 shadow-lg shadow-red-900/20"
+                                                title="Renew Subscription"
+                                            >
+                                                Renew
+                                            </button>
+                                        )}
                                         <button
                                             onClick={() => handleEdit(member)}
                                             className="flex-1 bg-white/5 text-gray-300 py-2 rounded text-xs font-bold hover:bg-white/10 transition-colors flex items-center justify-center gap-1.5"
@@ -817,7 +1022,7 @@ export default function MembersPage() {
                         })}
                     </div>
                 )}
-            </div>
+            </div >
 
             {/* Add/Edit Form Modal */}
             {
@@ -925,7 +1130,7 @@ export default function MembersPage() {
                                                     <input
                                                         type="tel"
                                                         required
-                                                        value={formData.mobile}
+                                                        value={formData.mobile || ''}
                                                         onChange={(e) => setFormData({ ...formData, mobile: e.target.value })}
                                                         className="w-full bg-black border border-white/20 rounded-lg p-2.5 text-white focus:border-gym-red focus:outline-none transition-colors"
                                                         placeholder="10-digit mobile"
@@ -935,7 +1140,7 @@ export default function MembersPage() {
                                                     <label className="block text-xs font-medium text-gray-300 mb-1.5">Email Address</label>
                                                     <input
                                                         type="email"
-                                                        value={formData.email}
+                                                        value={formData.email || ''}
                                                         onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                                                         className="w-full bg-black border border-white/20 rounded-lg p-2.5 text-white focus:border-gym-red focus:outline-none transition-colors"
                                                         placeholder="Optional"
@@ -946,7 +1151,7 @@ export default function MembersPage() {
                                                     <input
                                                         type="date"
                                                         required
-                                                        value={formData.date_of_birth}
+                                                        value={formData.date_of_birth || ''}
                                                         onChange={(e) => setFormData({ ...formData, date_of_birth: e.target.value })}
                                                         className="w-full bg-black border border-white/20 rounded-lg p-2.5 text-white focus:border-gym-red focus:outline-none transition-colors"
                                                     />
@@ -963,18 +1168,19 @@ export default function MembersPage() {
                                                     <label className="block text-xs font-medium text-gray-300 mb-1.5">Plan Type</label>
                                                     <select
                                                         className="hidden" // Keep hidden select for form logic if needed, but we use buttons
-                                                        value={formData.membership_type}
+                                                        value={formData.membership_type || 'Monthly'}
                                                         onChange={(e) => setFormData({ ...formData, membership_type: e.target.value })}
                                                     >
                                                         <option value="Monthly">Monthly</option>
                                                         <option value="Quarterly">Quarterly</option>
                                                         <option value="Half-Yearly">Half-Yearly</option>
                                                     </select>
-                                                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                                                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                                                         {[
-                                                            { id: 'Monthly', label: 'Monthly', price: '₹700' },
-                                                            { id: 'Quarterly', label: 'Quarterly', price: '₹1,800' },
-                                                            { id: 'Half-Yearly', label: 'Half-Yearly', price: '₹3,300' }
+                                                            { id: '15 Days', label: '15 Days', price: `₹${PLAN_PRICES['15 Days']}` },
+                                                            { id: '1 Month', label: 'Monthly', price: `₹${PLAN_PRICES['1 Month']}` },
+                                                            { id: '3 Months', label: 'Quarterly', price: `₹${PLAN_PRICES['3 Months']}` },
+                                                            { id: '6 Months', label: 'Half-Yearly', price: `₹${PLAN_PRICES['6 Months']}` }
                                                         ].map(plan => (
                                                             <button
                                                                 key={plan.id}
@@ -999,7 +1205,7 @@ export default function MembersPage() {
                                                     <input
                                                         type="date"
                                                         required
-                                                        value={formData.membership_start}
+                                                        value={formData.membership_start || ''}
                                                         onChange={(e) => setFormData({ ...formData, membership_start: e.target.value })}
                                                         className="w-full bg-black border border-white/20 rounded-lg p-2.5 text-white focus:border-gym-red focus:outline-none transition-colors"
                                                     />
@@ -1012,7 +1218,7 @@ export default function MembersPage() {
                                                 <label className="block text-xs font-medium text-gray-300 mb-1.5">Gender *</label>
                                                 <select
                                                     required
-                                                    value={formData.gender}
+                                                    value={formData.gender || 'Male'}
                                                     onChange={(e) => setFormData({ ...formData, gender: e.target.value })}
                                                     className="w-full bg-black border border-white/20 rounded-lg p-2.5 text-white"
                                                 >
@@ -1026,8 +1232,8 @@ export default function MembersPage() {
                                                 <input
                                                     type="number"
                                                     required
-                                                    value={formData.height_cm}
-                                                    onChange={(e) => setFormData({ ...formData, height_cm: e.target.value })}
+                                                    value={formData.height_cm || ''}
+                                                    onChange={e => setFormData({ ...formData, height_cm: parseFloat(e.target.value) || null })}
                                                     className="w-full bg-black border border-white/20 rounded-lg p-2.5 text-white"
                                                     placeholder="e.g. 175"
                                                 />
@@ -1037,8 +1243,8 @@ export default function MembersPage() {
                                                 <input
                                                     type="number"
                                                     required
-                                                    value={formData.weight_kg}
-                                                    onChange={(e) => setFormData({ ...formData, weight_kg: e.target.value })}
+                                                    value={formData.weight_kg || ''}
+                                                    onChange={e => setFormData({ ...formData, weight_kg: parseFloat(e.target.value) || null })}
                                                     className="w-full bg-black border border-white/20 rounded-lg p-2.5 text-white"
                                                     placeholder="e.g. 75"
                                                 />
@@ -1048,7 +1254,7 @@ export default function MembersPage() {
                                         <div className="md:col-span-2">
                                             <label className="block text-xs font-medium text-gray-300 mb-1.5">Address / Notes (Optional)</label>
                                             <textarea
-                                                value={formData.address}
+                                                value={formData.address || ''}
                                                 onChange={(e) => setFormData({ ...formData, address: e.target.value })}
                                                 rows={2}
                                                 className="w-full bg-black border border-white/20 rounded-lg p-2.5 text-white focus:border-gym-red focus:outline-none transition-colors"
@@ -1060,8 +1266,8 @@ export default function MembersPage() {
                                             <label className="block text-xs font-medium text-gray-300 mb-1.5">Emergency Contact</label>
                                             <input
                                                 type="tel"
-                                                value={formData.emergency_contact}
-                                                onChange={(e) => setFormData({ ...formData, emergency_contact: e.target.value })}
+                                                value={formData.emergency_contact || ''}
+                                                onChange={e => setFormData({ ...formData, emergency_contact: e.target.value })}
                                                 className="w-full bg-black border border-white/20 rounded-lg p-2.5 text-white focus:border-gym-red focus:outline-none transition-colors"
                                                 placeholder="Name & Number"
                                             />
@@ -1074,17 +1280,31 @@ export default function MembersPage() {
                                 <button
                                     type="button"
                                     onClick={resetForm}
-                                    className="flex-1 border border-white/10 bg-white/5 py-3 rounded-lg text-gray-400 font-bold hover:bg-white/10 hover:text-white transition-colors"
+                                    disabled={isSubmitting}
+                                    className="flex-1 border border-white/10 bg-white/5 py-3 rounded-lg text-gray-400 font-bold hover:bg-white/10 hover:text-white transition-colors disabled:opacity-50"
                                 >
                                     Cancel
                                 </button>
                                 <button
                                     type="submit"
                                     form="memberForm"
-                                    className="flex-[2] bg-gym-red py-3 rounded-lg font-bold text-white flex items-center justify-center gap-2 hover:bg-red-700 transition-colors shadow-lg shadow-red-900/20"
+                                    disabled={isSubmitting}
+                                    className="flex-[2] bg-gym-red py-3 rounded-lg font-bold text-white flex items-center justify-center gap-2 hover:bg-red-700 transition-colors shadow-lg shadow-red-900/20 disabled:opacity-70 disabled:cursor-not-allowed"
                                 >
-                                    <Save className="w-5 h-5" />
-                                    {editingMember ? 'Update Member Profile' : 'Register Member'}
+                                    {isSubmitting ? (
+                                        <>
+                                            <svg className="animate-spin w-5 h-5" viewBox="0 0 24 24" fill="none">
+                                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                                            </svg>
+                                            {photoFile ? 'Uploading Photo...' : 'Registering...'}
+                                        </>
+                                    ) : (
+                                        <>
+                                            <Save className="w-5 h-5" />
+                                            {editingMember ? 'Update Member Profile' : 'Register Member'}
+                                        </>
+                                    )}
                                 </button>
                             </div>
                         </motion.div>
@@ -1092,110 +1312,123 @@ export default function MembersPage() {
                 )
             }
             {/* Fullscreen Image Modal */}
-            {selectedImageUrl && (
-                <div
-                    className="fixed inset-0 z-[80] bg-black/95 flex items-center justify-center p-4 backdrop-blur-xl"
-                    onClick={() => setSelectedImageUrl(null)}
-                >
-                    <motion.div
-                        initial={{ opacity: 0, scale: 0.8 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-                        className="relative max-w-md max-h-[80vh] w-full"
-                        onClick={(e) => e.stopPropagation()}
+            {
+                selectedImageUrl && (
+                    <div
+                        className="fixed inset-0 z-[80] bg-black/95 flex items-center justify-center p-4 backdrop-blur-xl"
+                        onClick={() => setSelectedImageUrl(null)}
                     >
-                        <Image
-                            src={selectedImageUrl}
-                            alt="Member Photo"
-                            width={400}
-                            height={600}
-                            className="w-full h-auto object-contain rounded-xl shadow-2xl"
-                        />
-                        <button
-                            onClick={() => setSelectedImageUrl(null)}
-                            className="absolute -top-3 -right-3 bg-gym-red p-2 rounded-full shadow-lg hover:bg-red-700 transition-colors"
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.8 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+                            className="relative max-w-md max-h-[80vh] w-full"
+                            onClick={(e) => e.stopPropagation()}
                         >
-                            <X className="w-5 h-5 text-white" />
-                        </button>
-                    </motion.div>
-                </div>
-            )}
+                            <Image
+                                src={selectedImageUrl}
+                                alt="Member Photo"
+                                width={400}
+                                height={600}
+                                className="w-full h-auto object-contain rounded-xl shadow-2xl"
+                            />
+                            <button
+                                onClick={() => setSelectedImageUrl(null)}
+                                className="absolute -top-3 -right-3 bg-gym-red p-2 rounded-full shadow-lg hover:bg-red-700 transition-colors"
+                            >
+                                <X className="w-5 h-5 text-white" />
+                            </button>
+                        </motion.div>
+                    </div>
+                )
+            }
 
-            {/* Bulk WhatsApp Modal - Enhanced Version */}
+            {/* Modals */}
+            <ActivityLogPanel
+                isOpen={showActivityLog}
+                onClose={() => setShowActivityLog(false)}
+            />
+            <LeadsInbox
+                isOpen={showLeadsInbox}
+                onClose={() => setShowLeadsInbox(false)}
+            />
+
             {showBulkMessage && (
                 <BulkMessageModal
-                    members={members}
+                    members={filteredMembers}
                     onClose={() => setShowBulkMessage(false)}
                 />
             )}
 
             {/* PDF Receipt Modal */}
-            {receiptMember && (
-                <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[60] flex items-center justify-center p-4" onClick={() => setReceiptMember(null)}>
-                    <motion.div
-                        initial={{ opacity: 0, scale: 0.9 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        className="bg-white text-black rounded-xl p-6 max-w-md w-full"
-                        onClick={(e) => e.stopPropagation()}
-                    >
-                        <div className="text-center mb-4">
-                            <h2 className="text-2xl font-black text-gym-red">BROTHER&apos;S FITNESS</h2>
-                            <p className="text-xs text-gray-500">Pain is Temporary. Pride is Forever.</p>
-                        </div>
-                        <div className="border-t border-b border-gray-200 py-4 my-4">
-                            <div className="flex justify-between mb-2">
-                                <span className="text-gray-500">Member:</span>
-                                <span className="font-bold">{receiptMember.full_name}</span>
+            {
+                receiptMember && (
+                    <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[60] flex items-center justify-center p-4" onClick={() => setReceiptMember(null)}>
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.9 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            className="bg-white text-black rounded-xl p-6 max-w-md w-full"
+                            onClick={(e) => e.stopPropagation()}
+                        >
+                            <div className="text-center mb-4">
+                                <h2 className="text-2xl font-black text-gym-red">BROTHER&apos;S FITNESS</h2>
+                                <p className="text-xs text-gray-500">Pain is Temporary. Pride is Forever.</p>
                             </div>
-                            <div className="flex justify-between mb-2">
-                                <span className="text-gray-500">Mobile:</span>
-                                <span>{receiptMember.mobile}</span>
+                            <div className="border-t border-b border-gray-200 py-4 my-4">
+                                <div className="flex justify-between mb-2">
+                                    <span className="text-gray-500">Member:</span>
+                                    <span className="font-bold">{receiptMember.full_name}</span>
+                                </div>
+                                <div className="flex justify-between mb-2">
+                                    <span className="text-gray-500">Mobile:</span>
+                                    <span>{receiptMember.mobile}</span>
+                                </div>
+                                <div className="flex justify-between mb-2">
+                                    <span className="text-gray-500">Plan:</span>
+                                    <span className="font-bold">{receiptMember.membership_type}</span>
+                                </div>
+                                <div className="flex justify-between mb-2">
+                                    <span className="text-gray-500">Valid From:</span>
+                                    <span>{formatDate(receiptMember.membership_start)}</span>
+                                </div>
+                                <div className="flex justify-between mb-2">
+                                    <span className="text-gray-500">Valid Until:</span>
+                                    <span>{formatDate(receiptMember.membership_end)}</span>
+                                </div>
                             </div>
-                            <div className="flex justify-between mb-2">
-                                <span className="text-gray-500">Plan:</span>
-                                <span className="font-bold">{receiptMember.membership_type}</span>
+                            <div className="flex justify-between items-center mb-4">
+                                <span className="text-lg font-bold">Amount Paid:</span>
+                                <span className="text-2xl font-black text-gym-red">
+                                    ₹{(PLAN_PRICES as any)[receiptMember.membership_type || '1 Month']?.toLocaleString('en-IN') || '0'}
+                                </span>
                             </div>
-                            <div className="flex justify-between mb-2">
-                                <span className="text-gray-500">Valid From:</span>
-                                <span>{formatDate(receiptMember.membership_start)}</span>
+                            <div className="text-center text-xs text-gray-400 mb-4">
+                                Receipt Date: {formatDate(new Date().toISOString())}
                             </div>
-                            <div className="flex justify-between mb-2">
-                                <span className="text-gray-500">Valid Until:</span>
-                                <span>{formatDate(receiptMember.membership_end)}</span>
+                            <div className="flex gap-3">
+                                <button
+                                    onClick={() => {
+                                        const amount = (PLAN_PRICES as any)[receiptMember.membership_type || '1 Month'] || 0;
+                                        const message = `🏋️ *BROTHER'S FITNESS RECEIPT*%0A%0A👤 Member: ${receiptMember.full_name}%0A📱 Mobile: ${receiptMember.mobile}%0A📋 Plan: ${receiptMember.membership_type}%0A📅 Valid: ${formatDate(receiptMember.membership_start)} to ${formatDate(receiptMember.membership_end)}%0A💰 Amount: ₹${amount}%0A%0A_Pain is Temporary. Pride is Forever._ 💪`;
+                                        window.open(`https://wa.me/91${receiptMember.mobile.replace(/\D/g, '')}?text=${message}`, '_blank');
+                                        toast.success('Receipt sent via WhatsApp!');
+                                        setReceiptMember(null);
+                                    }}
+                                    className="flex-1 bg-green-600 text-white py-2 rounded-lg hover:bg-green-700 transition-colors flex items-center justify-center gap-2"
+                                >
+                                    <MessageCircle className="w-4 h-4" /> Send via WhatsApp
+                                </button>
+                                <button
+                                    onClick={() => setReceiptMember(null)}
+                                    className="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300 transition-colors"
+                                >
+                                    Close
+                                </button>
                             </div>
-                        </div>
-                        <div className="flex justify-between items-center mb-4">
-                            <span className="text-lg font-bold">Amount Paid:</span>
-                            <span className="text-2xl font-black text-gym-red">
-                                ₹{receiptMember.membership_type === 'Monthly' ? '700' : receiptMember.membership_type === 'Quarterly' ? '1,800' : '3,300'}
-                            </span>
-                        </div>
-                        <div className="text-center text-xs text-gray-400 mb-4">
-                            Receipt Date: {formatDate(new Date().toISOString())}
-                        </div>
-                        <div className="flex gap-3">
-                            <button
-                                onClick={() => {
-                                    const amount = receiptMember.membership_type === 'Monthly' ? '700' : receiptMember.membership_type === 'Quarterly' ? '1800' : '3300';
-                                    const message = `🏋️ *BROTHER'S FITNESS RECEIPT*%0A%0A👤 Member: ${receiptMember.full_name}%0A📱 Mobile: ${receiptMember.mobile}%0A📋 Plan: ${receiptMember.membership_type}%0A📅 Valid: ${formatDate(receiptMember.membership_start)} to ${formatDate(receiptMember.membership_end)}%0A💰 Amount: ₹${amount}%0A%0A_Pain is Temporary. Pride is Forever._ 💪`;
-                                    window.open(`https://wa.me/91${receiptMember.mobile.replace(/\\D/g, '')}?text=${message}`, '_blank');
-                                    toast.success('Receipt sent via WhatsApp!');
-                                    setReceiptMember(null);
-                                }}
-                                className="flex-1 bg-green-600 text-white py-2 rounded-lg hover:bg-green-700 transition-colors flex items-center justify-center gap-2"
-                            >
-                                <MessageCircle className="w-4 h-4" /> Send via WhatsApp
-                            </button>
-                            <button
-                                onClick={() => setReceiptMember(null)}
-                                className="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300 transition-colors"
-                            >
-                                Close
-                            </button>
-                        </div>
-                    </motion.div>
-                </div>
-            )}
+                        </motion.div>
+                    </div>
+                )
+            }
         </>
     );
 }

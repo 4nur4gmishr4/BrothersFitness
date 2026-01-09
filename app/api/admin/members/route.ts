@@ -1,8 +1,41 @@
 import { NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
+import { verifyAdminToken, extractBearerToken } from '@/lib/auth';
+
+// Helper to check auth
+function checkAuth(req: Request): NextResponse | null {
+    const token = extractBearerToken(req.headers.get('Authorization'));
+    if (!token || !verifyAdminToken(token)) {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+    return null;
+}
+
+// Helper to log admin activity (fails silently if table doesn't exist)
+async function logActivity(
+    actionType: 'CREATE' | 'UPDATE' | 'DELETE',
+    memberId: string | null,
+    memberName: string | null,
+    details?: Record<string, unknown>
+) {
+    try {
+        await supabase.from('admin_activity_logs').insert([{
+            action_type: actionType,
+            member_id: memberId,
+            member_name: memberName,
+            details: details || null
+        }]);
+    } catch (err) {
+        // Silently fail - logging shouldn't block operations
+        console.warn('Activity log failed:', err);
+    }
+}
 
 // GET all members
-export async function GET() {
+export async function GET(req: Request) {
+    const authError = checkAuth(req);
+    if (authError) return authError;
+
     try {
         const { data, error } = await supabase
             .from('gym_members')
@@ -23,6 +56,9 @@ export async function GET() {
 
 // POST new member
 export async function POST(req: Request) {
+    const authError = checkAuth(req);
+    if (authError) return authError;
+
     try {
         const body = await req.json();
 
@@ -34,7 +70,28 @@ export async function POST(req: Request) {
 
         if (error) throw error;
 
-        return NextResponse.json({ member: data });
+        // Log the creation
+        await logActivity('CREATE', data.id, data.full_name, {
+            membership_type: data.membership_type,
+            mobile: data.mobile
+        });
+
+        // Generate WhatsApp welcome message URL
+        const welcomeMessage = encodeURIComponent(
+            `🏋️ Welcome to Brother's Fitness, ${data.full_name}! 🎉\n\n` +
+            `Your ${data.membership_type} membership is now ACTIVE! 💪\n\n` +
+            `📅 Start: ${data.membership_start}\n` +
+            `📅 End: ${data.membership_end}\n\n` +
+            `Let's crush those goals together! 🔥\n\n` +
+            `- Team BroFit`
+        );
+        const whatsappUrl = data.mobile ?
+            `https://wa.me/91${data.mobile.replace(/\D/g, '')}?text=${welcomeMessage}` : null;
+
+        return NextResponse.json({
+            member: data,
+            welcomeWhatsApp: whatsappUrl
+        });
     } catch (error) {
         console.error('Error creating member:', error);
         return NextResponse.json(
@@ -46,6 +103,9 @@ export async function POST(req: Request) {
 
 // DELETE member (also removes photo from storage)
 export async function DELETE(req: Request) {
+    const authError = checkAuth(req);
+    if (authError) return authError;
+
     try {
         const { searchParams } = new URL(req.url);
         const id = searchParams.get('id');
@@ -57,10 +117,10 @@ export async function DELETE(req: Request) {
             );
         }
 
-        // First, get the member to retrieve photo_url
+        // First, get the member to retrieve photo_url and name for logging
         const { data: member } = await supabase
             .from('gym_members')
-            .select('photo_url')
+            .select('photo_url, full_name, mobile')
             .eq('id', id)
             .single();
 
@@ -87,6 +147,11 @@ export async function DELETE(req: Request) {
 
         if (error) throw error;
 
+        // Log the deletion
+        await logActivity('DELETE', id, member?.full_name || null, {
+            mobile: member?.mobile
+        });
+
         return NextResponse.json({ success: true });
     } catch (error) {
         console.error('Error deleting member:', error);
@@ -99,6 +164,9 @@ export async function DELETE(req: Request) {
 
 // PUT update member
 export async function PUT(req: Request) {
+    const authError = checkAuth(req);
+    if (authError) return authError;
+
     try {
         const body = await req.json();
         const { id, ...updateData } = body;
@@ -118,6 +186,11 @@ export async function PUT(req: Request) {
             .single();
 
         if (error) throw error;
+
+        // Log the update
+        await logActivity('UPDATE', id, data.full_name, {
+            updated_fields: Object.keys(updateData)
+        });
 
         return NextResponse.json({ member: data });
     } catch (error) {
