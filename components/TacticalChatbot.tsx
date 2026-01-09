@@ -30,6 +30,7 @@ export default function TacticalChatbot() {
     const [input, setInput] = useState("");
     const [loading, setLoading] = useState(false);
     const [language, setLanguage] = useState<"en" | "hi" | null>(null);
+    const [rateLimitRemaining, setRateLimitRemaining] = useState<number | null>(null);
 
     const scrollRef = useRef<HTMLDivElement>(null);
     const isDragging = useRef(false);
@@ -97,6 +98,25 @@ export default function TacticalChatbot() {
         }
     }, [messages, language]);
 
+    // Fetch rate limit status
+    const fetchRateLimit = async () => {
+        try {
+            const res = await fetch('/api/rate-limit-status');
+            if (res.ok) {
+                const data = await res.json();
+                setRateLimitRemaining(data.ai.remaining);
+            }
+        } catch (err) {
+            console.error('Failed to fetch rate limit:', err);
+        }
+    };
+
+    useEffect(() => {
+        if (isOpen && rateLimitRemaining === null) {
+            fetchRateLimit();
+        }
+    }, [isOpen, rateLimitRemaining]);
+
     const handleSend = async (text: string) => {
         if (!text.trim()) return;
 
@@ -106,9 +126,13 @@ export default function TacticalChatbot() {
         setLoading(true);
 
         try {
+            const userId = localStorage.getItem('brofit_user_id') || 'unknown';
             const res = await fetch("/api/chat", {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
+                headers: {
+                    "Content-Type": "application/json",
+                    "x-brofit-user-id": userId
+                },
                 body: JSON.stringify({
                     message: text,
                     context: {
@@ -133,6 +157,7 @@ export default function TacticalChatbot() {
                 }]);
             } else {
                 setMessages((prev) => [...prev, { role: "model", text: data.response || (language === "hi" ? "Sampark toot gaya." : "Connection Severed.") }]);
+                fetchRateLimit(); // Update remaining count
             }
         } catch {
             setMessages((prev) => [...prev, {
@@ -153,6 +178,7 @@ export default function TacticalChatbot() {
             <AnimatePresence>
                 {!isOpen && (
                     <motion.button
+                        id="tactical-chatbot-button"
                         className="fixed z-[9999] w-12 h-12 min-[350px]:w-14 min-[350px]:h-14 bg-gym-red rounded-full flex items-center justify-center shadow-[0_0_20px_rgba(215,25,33,0.5)] border-2 border-white/20"
                         initial={{ scale: 0, opacity: 0, ...position }}
                         animate={{ scale: 1, opacity: 1, ...position }}
@@ -200,9 +226,14 @@ export default function TacticalChatbot() {
                             className="bg-gym-red p-4 flex justify-between items-center cursor-move touch-none"
                             onPointerDown={(e) => controls.start(e)}
                         >
-                            <div className="flex items-center gap-2 pointer-events-none">
+                            <div className="flex items-center gap-3 pointer-events-none">
                                 <Cpu className="w-5 h-5 text-white" />
                                 <span className="font-black uppercase tracking-widest text-sm text-white">BroFit AI</span>
+                                {rateLimitRemaining !== null && (
+                                    <span className="text-xs bg-white/20 px-2 py-0.5 rounded-full font-bold">
+                                        {rateLimitRemaining}/5
+                                    </span>
+                                )}
                             </div>
                             <button
                                 onClick={(e) => { e.stopPropagation(); setIsOpen(false); }}

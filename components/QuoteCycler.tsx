@@ -1,7 +1,7 @@
 ﻿"use client";
 import { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
-import { useSound } from "@/components/SoundContext"; // Import hook
+import { useTacticalSound } from "@/components/TacticalSoundContext"; // Import hook
 
 const QUOTES = [
   "PAIN IS TEMPORARY. PRIDE IS FOREVER.",
@@ -16,7 +16,7 @@ export default function QuoteCycler() {
   const [loopNum, setLoopNum] = useState(0);
   const [isWaiting, setIsWaiting] = useState(false);
 
-  const { isEnabled } = useSound(); // Get sound state
+  const { soundEnabled } = useTacticalSound(); // Get sound state
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   // Initialize Audio
@@ -33,13 +33,13 @@ export default function QuoteCycler() {
     if (!audioRef.current) return;
 
     // Play only if Sound is Enabled AND Not Waiting AND Text is Typing
-    if (isEnabled && !isWaiting && text.length > 0) {
+    if (soundEnabled && !isWaiting && text.length > 0) {
       audioRef.current.play().catch(() => { });
     } else {
       audioRef.current.pause();
       audioRef.current.currentTime = 0;
     }
-  }, [isWaiting, text, isEnabled]);
+  }, [isWaiting, text, soundEnabled]);
 
   // Typing Logic
   useEffect(() => {

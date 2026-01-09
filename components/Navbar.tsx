@@ -4,15 +4,16 @@ import { useState, useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { motion, AnimatePresence, useScroll, useMotionValueEvent } from "framer-motion";
 import { Menu, X, ArrowRight, Volume2, VolumeX, Instagram, MessageCircle } from "lucide-react";
-import { useSound } from "@/components/SoundContext";
+import { useTacticalSound } from "@/components/TacticalSoundContext";
 import { useAdmin } from "@/lib/auth-context";
+import TrophyRoom from "@/components/TrophyRoom";
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const { scrollY } = useScroll();
-  const { isEnabled, toggleSound } = useSound();
+  const { soundEnabled, toggleSound } = useTacticalSound();
   useAdmin(); // Keep the hook call for context, but don't destructure unused values
   const pathname = usePathname();
   const router = useRouter();
@@ -26,6 +27,14 @@ export default function Navbar() {
       setIsMobile(window.innerWidth < 768);
       const handleResize = () => setIsMobile(window.innerWidth < 768);
       window.addEventListener('resize', handleResize);
+
+      // Ensure Rate Limit ID exists
+      if (!localStorage.getItem('brofit_user_id')) {
+        // Fallback for environments where crypto.randomUUID is not available (insecure contexts)
+        const uniqueId = Date.now().toString(36) + Math.random().toString(36).substr(2);
+        localStorage.setItem('brofit_user_id', uniqueId);
+      }
+
       return () => window.removeEventListener('resize', handleResize);
     }
   }, []);
@@ -136,32 +145,20 @@ export default function Navbar() {
               </motion.a>
 
               {/* WhatsApp */}
+              {/* WhatsApp */}
               <motion.a
                 href="https://wa.me/919131179343?text=Hi%20Aman,%20I'm%20interested%20in%20joining%20Brother's%20Fitness!"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="p-2.5 sm:p-2.5 text-gray-400 hover:text-[#25D366] transition-colors"
-                aria-label="WhatsApp"
-                whileHover={!isMobile ? { scale: 1.1, rotate: -5 } : undefined}
+                whileHover={!isMobile ? { scale: 1.1 } : undefined}
                 whileTap={{ scale: 0.9 }}
               >
                 <MessageCircle className="w-4 h-4 sm:w-6 sm:h-6" />
               </motion.a>
 
-              {/* Sound Toggle */}
-              <motion.button
-                onClick={toggleSound}
-                className="p-2.5 sm:p-2.5 text-gray-400 hover:text-gym-red transition-colors"
-                aria-label="Toggle Sound"
-                whileHover={!isMobile ? { scale: 1.1 } : undefined}
-                whileTap={{ scale: 0.9 }}
-              >
-                {isEnabled ? (
-                  <Volume2 className="w-4 h-4 sm:w-6 sm:h-6" />
-                ) : (
-                  <VolumeX className="w-4 h-4 sm:w-6 sm:h-6" />
-                )}
-              </motion.button>
+              {/* Trophy Room (Gamification) */}
+              <TrophyRoom />
 
               {/* Hamburger Menu */}
               <motion.button
@@ -258,7 +255,7 @@ export default function Navbar() {
                   })}
                 </motion.nav>
 
-                {/* Contact Section */}
+                {/* Footer / Connect Section */}
                 <motion.div
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
@@ -266,70 +263,80 @@ export default function Navbar() {
                   transition={{ delay: 0.5 }}
                   className="mt-8 pt-6 border-t border-white/10 space-y-6"
                 >
-                  {/* Aman's Contact */}
-                  <div>
-                    <p className="text-xs font-mono uppercase tracking-widest text-gray-500 mb-4 text-center">
-                      Connect with Aman
-                    </p>
-                    <div className="flex gap-3 justify-center">
-                      <motion.a
-                        href="https://www.instagram.com/brothers_fitness_17?igsh=MW0xYmV2dHIzOHlneQ=="
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center gap-2 px-4 py-3 bg-white/5 border border-white/10 rounded-lg hover:border-gym-red hover:bg-gym-red/10 transition-all group"
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                      >
-                        <Instagram className="w-5 h-5 text-gray-400 group-hover:text-gym-red transition-colors" />
-                        <span className="text-sm font-mono text-gray-400 group-hover:text-white transition-colors">Instagram</span>
-                      </motion.a>
-                      <motion.a
-                        href="https://wa.me/919131179343?text=Hi%20Aman,%20I'm%20interested%20in%20joining%20Brother's%20Fitness!"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center gap-2 px-4 py-3 bg-white/5 border border-white/10 rounded-lg hover:border-[#25D366] hover:bg-[#25D366]/10 transition-all group"
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                      >
-                        <MessageCircle className="w-5 h-5 text-gray-400 group-hover:text-[#25D366] transition-colors" />
-                        <span className="text-sm font-mono text-gray-400 group-hover:text-white transition-colors">WhatsApp</span>
-                      </motion.a>
-                    </div>
+                  {/* Sound Toggle in Menu */}
+                  <div className="flex justify-center">
+                    <button
+                      onClick={toggleSound}
+                      className="flex items-center gap-2 px-6 py-3 bg-white/5 border border-white/10 rounded-full hover:bg-white/10 transition-colors"
+                    >
+                      <span className="text-sm font-mono text-gray-400 uppercase tracking-widest">
+                        {soundEnabled ? 'Sound On' : 'Sound Off'}
+                      </span>
+                      {soundEnabled ? (
+                        <Volume2 className="w-5 h-5 text-gym-red" />
+                      ) : (
+                        <VolumeX className="w-5 h-5 text-gray-500" />
+                      )}
+                    </button>
                   </div>
 
-                  {/* Pradeep's Contact */}
-                  <div>
-                    <p className="text-xs font-mono uppercase tracking-widest text-gray-500 mb-4 text-center">
-                      Call Pradeep
-                    </p>
-                    <div className="flex gap-3 justify-center">
-                      <motion.a
-                        href="tel:+919131272754"
-                        className="flex items-center gap-2 px-4 py-3 bg-white/5 border border-white/10 rounded-lg hover:border-gym-red hover:bg-gym-red/10 transition-all group"
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                      >
-                        <MessageCircle className="w-5 h-5 text-gray-400 group-hover:text-gym-red transition-colors" />
-                        <span className="text-sm font-mono text-gray-400 group-hover:text-white transition-colors">Call</span>
-                      </motion.a>
-                      <motion.a
-                        href="https://wa.me/919131272754?text=Hi%20Pradeep,%20I'm%20interested%20in%20joining%20Brother's%20Fitness!"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center gap-2 px-4 py-3 bg-white/5 border border-white/10 rounded-lg hover:border-[#25D366] hover:bg-[#25D366]/10 transition-all group"
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                      >
-                        <MessageCircle className="w-5 h-5 text-gray-400 group-hover:text-[#25D366] transition-colors" />
-                        <span className="text-sm font-mono text-gray-400 group-hover:text-white transition-colors">WhatsApp</span>
-                      </motion.a>
+                  {/* Social Links */}
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-3">
+                      <p className="text-[10px] font-mono uppercase tracking-widest text-gray-500 text-center">
+                        Connect with Aman
+                      </p>
+                      <div className="flex justify-center gap-3">
+                        <motion.a
+                          href="https://www.instagram.com/brothers_fitness_17"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="p-3 bg-white/5 rounded-lg text-gray-400 hover:text-gym-red transition-colors"
+                          whileHover={{ scale: 1.1 }}
+                          whileTap={{ scale: 0.9 }}
+                        >
+                          <Instagram className="w-5 h-5" />
+                        </motion.a>
+                        <motion.a
+                          href="https://wa.me/919131179343"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="p-3 bg-white/5 rounded-lg text-gray-400 hover:text-[#25D366] transition-colors"
+                          whileHover={{ scale: 1.1 }}
+                          whileTap={{ scale: 0.9 }}
+                        >
+                          <MessageCircle className="w-5 h-5" />
+                        </motion.a>
+                      </div>
+                    </div>
+                    <div className="space-y-3">
+                      <p className="text-[10px] font-mono uppercase tracking-widest text-gray-500 text-center">
+                        Call Pradeep
+                      </p>
+                      <div className="flex justify-center gap-3">
+                        <motion.a
+                          href="tel:+919131272754"
+                          className="p-3 bg-white/5 rounded-lg text-gray-400 hover:text-gym-red transition-colors"
+                          whileHover={{ scale: 1.1 }}
+                          whileTap={{ scale: 0.9 }}
+                        >
+                          <MessageCircle className="w-5 h-5" />
+                        </motion.a>
+                        <motion.a
+                          href="https://wa.me/919131272754"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="p-3 bg-white/5 rounded-lg text-gray-400 hover:text-[#25D366] transition-colors"
+                          whileHover={{ scale: 1.1 }}
+                          whileTap={{ scale: 0.9 }}
+                        >
+                          <MessageCircle className="w-5 h-5" />
+                        </motion.a>
+                      </div>
                     </div>
                   </div>
                 </motion.div>
               </div>
-
-              {/* Status Footer */}
-
             </motion.div>
           </>
         )}

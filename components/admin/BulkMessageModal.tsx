@@ -46,11 +46,18 @@ export default function BulkMessageModal({ members, onClose }: BulkMessageModalP
                 if (!m.date_of_birth) return false;
                 const dob = new Date(m.date_of_birth);
                 const today = new Date();
-                const next7Days = new Date();
+                today.setHours(0, 0, 0, 0);
+                const next7Days = new Date(today);
                 next7Days.setDate(today.getDate() + 7);
 
-                // Check if birthday falls within next 7 days
-                const thisYearBday = new Date(today.getFullYear(), dob.getMonth(), dob.getDate());
+                // Check if birthday falls within next 7 days (handles year rollover)
+                let thisYearBday = new Date(today.getFullYear(), dob.getMonth(), dob.getDate());
+
+                // If birthday has passed this year, check next year
+                if (thisYearBday < today) {
+                    thisYearBday = new Date(today.getFullYear() + 1, dob.getMonth(), dob.getDate());
+                }
+
                 return thisYearBday >= today && thisYearBday <= next7Days;
             }
 
@@ -81,12 +88,12 @@ export default function BulkMessageModal({ members, onClose }: BulkMessageModalP
     };
 
     return (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={onClose}>
+        <div className="fixed inset-0 bg-black/90 backdrop-blur-md z-[100] flex items-start sm:items-center justify-center overflow-y-auto" onClick={onClose}>
             <motion.div
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.9 }}
-                className="bg-zinc-900 border border-white/10 rounded-2xl p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 20 }}
+                className="bg-zinc-900/95 border border-white/20 rounded-none sm:rounded-2xl p-4 sm:p-6 w-full sm:max-w-2xl min-h-screen sm:min-h-0 sm:max-h-[90vh] overflow-y-auto sm:my-4"
                 onClick={e => e.stopPropagation()}
             >
                 <div className="flex justify-between items-center mb-6">
@@ -128,8 +135,8 @@ export default function BulkMessageModal({ members, onClose }: BulkMessageModalP
                             key={f}
                             onClick={() => setFilter(f)}
                             className={`px-3 py-1.5 rounded-full text-xs font-mono uppercase transition-colors ${filter === f
-                                    ? 'bg-gym-red text-white'
-                                    : 'bg-white/5 text-gray-400 hover:bg-white/10'
+                                ? 'bg-gym-red text-white'
+                                : 'bg-white/5 text-gray-400 hover:bg-white/10'
                                 }`}
                         >
                             {f} ({f === 'all' ? members.length : filteredMembers.length})

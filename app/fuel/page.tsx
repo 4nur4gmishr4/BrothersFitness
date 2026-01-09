@@ -138,6 +138,24 @@ function FuelSynthesizerContent() {
     const [error, setError] = useState("");
     const [pdfLoading, setPdfLoading] = useState(false);
     const [timelineUnit, setTimelineUnit] = useState<"days" | "weeks" | "months" | "years">("weeks");
+    const [rateLimitRemaining, setRateLimitRemaining] = useState<number | null>(null);
+
+    // Fetch rate limit status
+    const fetchRateLimit = async () => {
+        try {
+            const res = await fetch('/api/rate-limit-status');
+            if (res.ok) {
+                const data = await res.json();
+                setRateLimitRemaining(data.ai.remaining);
+            }
+        } catch (err) {
+            console.error('Failed to fetch rate limit:', err);
+        }
+    };
+
+    useEffect(() => {
+        fetchRateLimit();
+    }, []);
 
     // Activity level multiplier mapping
     const getActivityMultiplier = (level: string): number => {
@@ -296,9 +314,13 @@ function FuelSynthesizerContent() {
         const timeoutId = setTimeout(() => controller.abort(), 90000); // 90 second timeout
 
         try {
+            const userId = localStorage.getItem('brofit_user_id') || 'unknown';
             const res = await fetch("/api/generate-diet", {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
+                headers: {
+                    "Content-Type": "application/json",
+                    "x-brofit-user-id": userId
+                },
                 body: JSON.stringify({
                     calories: calculatedCalories?.toString() || calories,
                     mode,
@@ -328,6 +350,7 @@ function FuelSynthesizerContent() {
             }
 
             setData(result);
+            fetchRateLimit(); // Update remaining count after generation
         } catch (err: unknown) {
             const message = err instanceof Error ? err.message : 'Unknown error';
             if (message.includes('abort') || (err instanceof Error && err.name === 'AbortError')) {
@@ -408,6 +431,14 @@ function FuelSynthesizerContent() {
                             <ArrowLeft className="w-5 h-5" />
                             <span className="font-dot text-[10px] uppercase tracking-widest hidden sm:inline">Back</span>
                         </button>
+                        {rateLimitRemaining !== null && (
+                            <div className="flex items-center gap-1.5 bg-white/5 border border-white/10 px-3 py-1.5 rounded-full">
+                                <Cpu className="w-3 h-3 text-gym-red" />
+                                <span className="text-xs font-bold">
+                                    {rateLimitRemaining}/5 AI
+                                </span>
+                            </div>
+                        )}
                     </div>
                     <div className="text-right">
                         <h1 className="text-2xl font-black uppercase tracking-tighter">Fuel / Diet Generator</h1>

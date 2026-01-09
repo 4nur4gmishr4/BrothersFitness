@@ -1,8 +1,9 @@
 ﻿"use client";
 
-import { MapPin, Phone, Mail, MessageCircle } from "lucide-react";
+import { MapPin, Phone, Mail, MessageCircle, Send, Loader2 } from "lucide-react";
 import { motion, useInView } from "framer-motion";
 import { useRef, useState, useEffect } from "react";
+import { toast } from "sonner";
 
 export default function ContactForm() {
   const ref = useRef(null);
@@ -58,12 +59,12 @@ export default function ContactForm() {
           {/* Contact Layout: 2 Separated Columns */}
           <div className="grid lg:grid-cols-2 gap-8 lg:gap-12">
 
-            {/* Column 1: Contact Info Card */}
+            {/* Column 1: Contact Info & Message Form Combined */}
             <motion.div
               initial={{ opacity: 0, x: -50 }}
               animate={isInView ? { opacity: 1, x: 0 } : {}}
               transition={{ duration: 0.6, delay: 0.2 }}
-              className="bg-black border-2 border-white rounded-xl overflow-hidden p-5 md:p-8 flex flex-col justify-center relative group min-h-[450px]"
+              className="bg-black border-2 border-white rounded-xl overflow-hidden p-5 md:p-8 relative group"
             >
               {/* Animated Red Line on hover/view */}
               <motion.div
@@ -83,6 +84,7 @@ export default function ContactForm() {
                   </p>
                 </div>
 
+                {/* Location */}
                 <motion.div className="flex items-start gap-4" whileHover={{ x: 5 }}>
                   <MapPin className="w-5 h-5 md:w-6 md:h-6 text-gym-red mt-1 flex-shrink-0" />
                   <div>
@@ -103,6 +105,7 @@ export default function ContactForm() {
                   </div>
                 </motion.div>
 
+                {/* Phone Aman */}
                 <motion.div className="flex items-start gap-4" whileHover={{ x: 5 }}>
                   <Phone className="w-5 h-5 md:w-6 md:h-6 text-gym-red mt-1 flex-shrink-0" />
                   <div className="flex-1">
@@ -174,6 +177,7 @@ export default function ContactForm() {
                   </div>
                 </motion.div>
 
+                {/* Email */}
                 <motion.div className="flex items-start gap-4" whileHover={{ x: 5 }}>
                   <Mail className="w-5 h-5 md:w-6 md:h-6 text-gym-red mt-1 flex-shrink-0" />
                   <div>
@@ -188,12 +192,24 @@ export default function ContactForm() {
                     </a>
                   </div>
                 </motion.div>
+
+                <div className="w-full h-[1px] bg-white/10" />
+
+                {/* Integrated Contact Form */}
+                <motion.div initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} transition={{ delay: 0.2 }}>
+                  <div className="flex items-center gap-2 mb-6">
+                    <MessageCircle className="w-5 h-5 text-white" />
+                    <h3 className="text-xl font-display font-bold text-white">SEND A MESSAGE</h3>
+                  </div>
+                  <ContactFormLogic />
+                </motion.div>
+
               </div>
             </motion.div>
 
-            {/* Column 2: Map Card */}
+            {/* Column 2: Map Card Only */}
             <motion.div
-              className="relative h-full min-h-[350px] md:min-h-[450px] bg-gray-900 border-2 border-white rounded-xl overflow-hidden"
+              className="relative h-full min-h-[450px] md:min-h-full bg-gray-900 border-2 border-white rounded-xl overflow-hidden"
               initial={{ opacity: 0, x: 50 }}
               animate={isInView ? { opacity: 1, x: 0 } : {}}
               transition={{ duration: 0.6, delay: 0.4 }}
@@ -224,5 +240,100 @@ export default function ContactForm() {
         </div>
       </div>
     </section>
+  );
+}
+
+function ContactFormLogic() {
+  const [loading, setLoading] = useState(false);
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    message: ''
+  });
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+
+    try {
+      const res = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData)
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) throw new Error(data.error || 'Failed to send message');
+
+      toast.success('Message sent successfully! We will contact you shortly. 🚀');
+      setFormData({ name: '', email: '', phone: '', message: '' });
+    } catch (err: any) {
+      toast.error(err.message || 'Something went wrong. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div>
+        <label className="block text-xs font-mono text-gray-400 mb-1 uppercase">Name</label>
+        <input
+          type="text"
+          required
+          value={formData.name}
+          onChange={e => setFormData({ ...formData, name: e.target.value })}
+          className="w-full bg-black/50 border border-white/10 rounded-lg p-3 text-sm text-white focus:border-gym-red focus:outline-none transition-colors"
+          placeholder="Your Name"
+        />
+      </div>
+      <div>
+        <label className="block text-xs font-mono text-gray-400 mb-1 uppercase">Phone</label>
+        <input
+          type="tel"
+          value={formData.phone}
+          onChange={e => setFormData({ ...formData, phone: e.target.value })}
+          className="w-full bg-black/50 border border-white/10 rounded-lg p-3 text-sm text-white focus:border-gym-red focus:outline-none transition-colors"
+          placeholder="+91..."
+        />
+      </div>
+      <div>
+        <label className="block text-xs font-mono text-gray-400 mb-1 uppercase">Email</label>
+        <input
+          type="email"
+          required
+          value={formData.email}
+          onChange={e => setFormData({ ...formData, email: e.target.value })}
+          className="w-full bg-black/50 border border-white/10 rounded-lg p-3 text-sm text-white focus:border-gym-red focus:outline-none transition-colors"
+          placeholder="your@email.com"
+        />
+      </div>
+      <div>
+        <label className="block text-xs font-mono text-gray-400 mb-1 uppercase">Message</label>
+        <textarea
+          required
+          value={formData.message}
+          onChange={e => setFormData({ ...formData, message: e.target.value })}
+          className="w-full bg-black/50 border border-white/10 rounded-lg p-3 text-sm text-white focus:border-gym-red focus:outline-none transition-colors h-24 resize-none"
+          placeholder="How can we help you?"
+        />
+      </div>
+
+      <button
+        type="submit"
+        disabled={loading}
+        className="w-full bg-white text-black font-bold uppercase py-3 rounded-lg hover:bg-gym-red hover:text-white transition-all flex items-center justify-center gap-2 group disabled:opacity-50 disabled:cursor-not-allowed"
+      >
+        {loading ? (
+          <Loader2 className="w-4 h-4 animate-spin" />
+        ) : (
+          <>
+            Send Message <Send className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+          </>
+        )}
+      </button>
+    </form>
   );
 }

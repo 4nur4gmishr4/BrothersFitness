@@ -3,6 +3,7 @@ import { Inter, DotGothic16 } from "next/font/google";
 import "./globals.css";
 import PageWrapper from "@/components/PageWrapper";
 import { GamificationProvider } from "@/components/GamificationContext";
+import { TacticalSoundProvider } from "@/components/TacticalSoundContext";
 import ReadingProgressBar from "@/components/ReadingProgressBar";
 import PageTransition from "@/components/PageTransition";
 import { AdminProvider } from "@/lib/auth-context";
@@ -86,11 +87,13 @@ export default function RootLayout({
         />
         <AdminProvider>
           <GamificationProvider>
-            <PageWrapper>
-              <PageTransition>
-                {children}
-              </PageTransition>
-            </PageWrapper>
+            <TacticalSoundProvider>
+              <PageWrapper>
+                <PageTransition>
+                  {children}
+                </PageTransition>
+              </PageWrapper>
+            </TacticalSoundProvider>
           </GamificationProvider>
         </AdminProvider>
       </body>

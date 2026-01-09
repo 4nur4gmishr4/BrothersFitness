@@ -1,6 +1,9 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import OpenAI from "openai";
 import { NextResponse } from "next/server";
+import { checkRateLimit, RATE_LIMITS } from "@/lib/rate-limit";
+import { GenerateDietSchema, DietResponseSchema } from "@/lib/validation";
+import { logger } from "@/lib/logger";
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
 
@@ -14,13 +17,43 @@ function getOpenAI(): OpenAI {
 }
 
 export async function POST(req: Request) {
+    // Rate limit check - 5 combined AI requests per day per IP (diet + chatbot)
+    const headerUserId = req.headers.get("x-brofit-user-id");
+    const forwarded = req.headers.get("x-forwarded-for");
+    const ip = forwarded?.split(",")[0]?.trim() || "unknown";
+
+    // Prioritize User ID (Browser UUID), fallback to IP
+    const identifier = (headerUserId && headerUserId !== 'unknown') ? `user_${headerUserId}` : `ai_${ip}`;
+
+    const rateCheck = checkRateLimit(identifier, RATE_LIMITS.AI_COMBINED);
+
+    if (!rateCheck.allowed) {
+        return NextResponse.json(
+            {
+                error: "Daily AI limit reached. You can use AI features (diet + chatbot) up to 5 times per day. Please try again tomorrow.",
+                resetIn: rateCheck.resetIn
+            },
+            { status: 429 }
+        );
+    }
+
     try {
+        const body = await req.json();
+
+        // Validate with Zod
+        const parsed = GenerateDietSchema.safeParse(body);
+        if (!parsed.success) {
+            return NextResponse.json(
+                { error: parsed.error.issues[0]?.message || 'Invalid request' },
+                { status: 400 }
+            );
+        }
+
         const {
             calories,
             mode,
             dietType,
             budget,
-            // exclusions removed - not currently used
             goal_description,
             currentWeight,
             targetWeight,
@@ -29,11 +62,11 @@ export async function POST(req: Request) {
             gender,
             activityLevel,
             weightChangeRate
-        } = await req.json();
+        } = parsed.data;
 
         // Calculate calorie adjustment based on weight change rate
         // 1 kg of body mass = ~7700 kcal, divided by 7 days = ~1100 kcal/day per kg/week
-        const rateNum = parseFloat(weightChangeRate) || 0.5;
+        const rateNum = parseFloat(String(weightChangeRate)) || 0.5;
         const calorieAdjustment = Math.round(rateNum * 1100);
 
         const prompt = `
@@ -51,7 +84,7 @@ export async function POST(req: Request) {
       **OPERATIONAL PARAMETERS**
       - Daily Calorie Target: ${calories ? calories + " kcal (PRE-CALCULATED)" : "CALCULATE OPTIMAL TDEE"}
       - Calorie Adjustment: ${calorieAdjustment} kcal/day (${rateNum} kg/week × 1100)
-      - Training Mode: ${mode} (${parseFloat(targetWeight) > parseFloat(currentWeight) ? "BULK - Add calories" : "CUT - Subtract calories"})
+      - Training Mode: ${mode} (${parseFloat(String(targetWeight)) > parseFloat(String(currentWeight)) ? "BULK - Add calories" : "CUT - Subtract calories"})
       - Diet Preference: ${dietType}
       - Budget: ${budget}
       - Primary Objective: ${goal_description}
@@ -161,7 +194,7 @@ export async function POST(req: Request) {
 
         for (const entry of modelChain) {
             try {
-                console.log(`[AI Uplink] Attempting synthesis with ${entry.name} (${entry.provider})...`);
+                logger.info(`Attempting AI synthesis`, { model: entry.name, provider: entry.provider });
 
                 if (entry.provider === "google") {
                     const model = genAI.getGenerativeModel({
@@ -171,7 +204,14 @@ export async function POST(req: Request) {
                     const result = await model.generateContent(prompt);
                     const text = result.response.text();
                     const cleanJson = text.replace(/```json/g, "").replace(/```/g, "").trim();
-                    return NextResponse.json(JSON.parse(cleanJson));
+                    const parsedResponse = JSON.parse(cleanJson);
+
+                    // Validate AI response structure (lenient)
+                    const validated = DietResponseSchema.safeParse(parsedResponse);
+                    if (!validated.success) {
+                        logger.warn('AI response structure mismatch', { issues: validated.error.issues.length });
+                    }
+                    return NextResponse.json(parsedResponse);
                 } else {
                     const completion = await getOpenAI().chat.completions.create({
                         messages: [
@@ -184,11 +224,18 @@ export async function POST(req: Request) {
 
                     const content = completion.choices[0].message.content;
                     if (!content) throw new Error("OpenAI returned empty response");
-                    return NextResponse.json(JSON.parse(content));
+                    const parsedResponse = JSON.parse(content);
+
+                    // Validate AI response structure (lenient)
+                    const validated = DietResponseSchema.safeParse(parsedResponse);
+                    if (!validated.success) {
+                        logger.warn('AI response structure mismatch', { issues: validated.error.issues.length });
+                    }
+                    return NextResponse.json(parsedResponse);
                 }
             } catch (error: unknown) {
                 const err = error as { message?: string; status?: number };
-                console.warn(`[System] ${entry.name} failed. Moving to next candidate. Error:`, err.message || error);
+                logger.warn(`Model failed, trying next`, { model: entry.name, error: err.message || 'Unknown' });
                 continue; // Move to the next model in the chain
             }
         }
@@ -196,7 +243,7 @@ export async function POST(req: Request) {
         // If all fail
         throw new Error("All AI Strategic Units Exhausted");
     } catch (error) {
-        console.error("Fatal API Error:", error);
+        logger.error("Fatal API Error", { error: error instanceof Error ? error.message : 'Unknown' });
         return NextResponse.json(
             { error: "Failed to synthesize protocol. Systems Overloaded. Please try again later." },
             { status: 500 }
