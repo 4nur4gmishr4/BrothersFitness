@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Mail, Phone, Calendar, Trash2, User, MessageCircle, MessageSquare, Lock } from 'lucide-react';
+import { X, Mail, Phone, Trash2, User, MessageSquare, Lock, MessageCircle } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface Lead {
@@ -29,28 +29,7 @@ export default function LeadsInbox({
     const [readLeads, setReadLeads] = useState<string[]>([]);
     const [searchQuery, setSearchQuery] = useState('');
 
-    useEffect(() => {
-        if (isOpen) {
-            fetchLeads();
-            // Load read status from local storage
-            const saved = localStorage.getItem('brofit_admin_read_leads');
-            if (saved) setReadLeads(JSON.parse(saved));
-
-            // Poll for new messages every 10 seconds while open
-            const interval = setInterval(fetchLeads, 10000);
-            return () => clearInterval(interval);
-        }
-    }, [isOpen]);
-
-    const markAsRead = (id: string) => {
-        if (!readLeads.includes(id)) {
-            const updated = [...readLeads, id];
-            setReadLeads(updated);
-            localStorage.setItem('brofit_admin_read_leads', JSON.stringify(updated));
-        }
-    };
-
-    const fetchLeads = async () => {
+    const fetchLeads = useCallback(async () => {
         try {
             // Only show loading spinner on first load, not polling
             if (leads.length === 0) setLoading(true);
@@ -73,6 +52,27 @@ export default function LeadsInbox({
             if (leads.length === 0) toast.error('Could not load inbox');
         } finally {
             setLoading(false);
+        }
+    }, [leads.length]);
+
+    useEffect(() => {
+        if (isOpen) {
+            fetchLeads();
+            // Load read status from local storage
+            const saved = localStorage.getItem('brofit_admin_read_leads');
+            if (saved) setReadLeads(JSON.parse(saved));
+
+            // Poll for new messages every 10 seconds while open
+            const interval = setInterval(fetchLeads, 10000);
+            return () => clearInterval(interval);
+        }
+    }, [isOpen, fetchLeads]);
+
+    const markAsRead = (id: string) => {
+        if (!readLeads.includes(id)) {
+            const updated = [...readLeads, id];
+            setReadLeads(updated);
+            localStorage.setItem('brofit_admin_read_leads', JSON.stringify(updated));
         }
     };
 

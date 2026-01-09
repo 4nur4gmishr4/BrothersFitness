@@ -269,8 +269,8 @@ function ContactFormLogic() {
 
       toast.success('Message sent successfully! We will contact you shortly. 🚀');
       setFormData({ name: '', email: '', phone: '', message: '' });
-    } catch (err: any) {
-      toast.error(err.message || 'Something went wrong. Please try again.');
+    } catch (err: unknown) {
+      toast.error((err as Error).message || 'Something went wrong. Please try again.');
     } finally {
       setLoading(false);
     }

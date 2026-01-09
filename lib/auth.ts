@@ -41,11 +41,11 @@ export function verifyAdminToken(token: string): boolean {
     return signature === expectedSignature;
 }
 
-export function storeAdminToken(token: string): void {
+export function storeAdminToken(_token: string): void {
     // No-op: Token is stateless and carries its own proof of validity
 }
 
-export function revokeAdminToken(token: string): void {
+export function revokeAdminToken(_token: string): void {
     // In a stateless system, revocation usually requires a blacklist in Redis
     // For this simple case, we rely on token expiration
 }

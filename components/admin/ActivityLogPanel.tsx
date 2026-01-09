@@ -10,7 +10,7 @@ interface Log {
     action_type: 'CREATE' | 'UPDATE' | 'DELETE';
     member_name: string;
     member_id: string;
-    details: any;
+    details: unknown;
     created_at: string;
 }
 
@@ -114,7 +114,7 @@ export default function ActivityLogPanel({
                                             <span className="text-[10px] text-gray-500">{formatTime(log.created_at)}</span>
                                         </div>
                                         <p className="font-medium text-sm mt-1">{log.member_name || 'Unknown Member'}</p>
-                                        {log.details && (
+                                        {!!log.details && (
                                             <pre className="mt-2 text-[10px] text-gray-500 bg-black/30 p-2 rounded overflow-x-auto">
                                                 {JSON.stringify(log.details, null, 2)}
                                             </pre>

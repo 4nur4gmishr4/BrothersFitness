@@ -87,11 +87,10 @@ export default function MembersPage() {
     const [photoFile, setPhotoFile] = useState<File | null>(null);
     const [selectedImageUrl, setSelectedImageUrl] = useState<string | null>(null);
     const [showBulkMessage, setShowBulkMessage] = useState(false);
-    const [bulkMessageText, setBulkMessageText] = useState('');
+    // const [bulkMessageText, setBulkMessageText] = useState(''); // Removed unused state
     const [showAnalytics, setShowAnalytics] = useState(false);
     const [receiptMember, setReceiptMember] = useState<GymMember | null>(null);
-
-    const [searchTerm, setSearchTerm] = useState('');
+    // const [searchTerm, setSearchTerm] = useState(''); // Removed unused state
     const [showActivityLog, setShowActivityLog] = useState(false);
     const [showLeadsInbox, setShowLeadsInbox] = useState(false);
     const [unreadLeadsCount, setUnreadLeadsCount] = useState(0);
@@ -110,7 +109,7 @@ export default function MembersPage() {
 
             if (res.ok && data.leads) {
                 const readLeads = JSON.parse(localStorage.getItem('brofit_admin_read_leads') || '[]');
-                const unread = data.leads.filter((l: any) => !readLeads.includes(l.id)).length;
+                const unread = data.leads.filter((l: { id: string }) => !readLeads.includes(l.id)).length;
                 setUnreadLeadsCount(unread);
             }
         } catch (err) {
@@ -225,7 +224,7 @@ export default function MembersPage() {
         let monthlyCount = 0, quarterlyCount = 0, halfYearlyCount = 0, fifteenDaysCount = 0;
         let monthly = 0, quarterly = 0, halfYearly = 0, fifteenDays = 0;
         members.forEach(m => {
-            const price = (PLAN_PRICES as any)[m.membership_type || 'Monthly'] || 0;
+            const price = (PLAN_PRICES as Record<string, number>)[m.membership_type || 'Monthly'] || 0;
             if (m.membership_type === 'Monthly' || m.membership_type === '1 Month') { monthly += price; monthlyCount++; }
             else if (m.membership_type === 'Quarterly' || m.membership_type === '3 Months') { quarterly += price; quarterlyCount++; }
             else if (m.membership_type === 'Half-Yearly' || m.membership_type === '6 Months') { halfYearly += price; halfYearlyCount++; }
@@ -253,7 +252,7 @@ export default function MembersPage() {
 
         // Revenue projection (based on expiring memberships)
         const potentialRenewalRevenue = members.filter(m => getMemberStatus(m.membership_end) === 'expiring').reduce((sum, m) => {
-            return sum + ((PLAN_PRICES as any)[m.membership_type || 'Monthly'] || 0);
+            return sum + ((PLAN_PRICES as Record<string, number>)[m.membership_type || 'Monthly'] || 0);
         }, 0);
 
         // Birthday & Expiry Alerts
@@ -651,9 +650,9 @@ export default function MembersPage() {
                                         URL.revokeObjectURL(url);
 
                                         toast.success(`Backup created: ${data.total_members} members`, { id: 'backup' });
-                                    } catch (err: any) {
+                                    } catch (err: unknown) {
                                         console.error('Backup error:', err);
-                                        toast.error(`Backup failed: ${err.message}`, { id: 'backup' });
+                                        toast.error(`Backup failed: ${(err as Error).message}`, { id: 'backup' });
                                     }
                                 }}
                                 className="bg-blue-600/20 text-blue-400 px-3 py-2 rounded hover:bg-blue-600/30 transition-colors flex items-center gap-2"
@@ -1399,7 +1398,7 @@ export default function MembersPage() {
                             <div className="flex justify-between items-center mb-4">
                                 <span className="text-lg font-bold">Amount Paid:</span>
                                 <span className="text-2xl font-black text-gym-red">
-                                    ₹{(PLAN_PRICES as any)[receiptMember.membership_type || '1 Month']?.toLocaleString('en-IN') || '0'}
+                                    ₹{(PLAN_PRICES as Record<string, number>)[receiptMember.membership_type || '1 Month']?.toLocaleString('en-IN') || '0'}
                                 </span>
                             </div>
                             <div className="text-center text-xs text-gray-400 mb-4">
@@ -1408,7 +1407,7 @@ export default function MembersPage() {
                             <div className="flex gap-3">
                                 <button
                                     onClick={() => {
-                                        const amount = (PLAN_PRICES as any)[receiptMember.membership_type || '1 Month'] || 0;
+                                        const amount = (PLAN_PRICES as Record<string, number>)[receiptMember.membership_type || '1 Month'] || 0;
                                         const message = `🏋️ *BROTHER'S FITNESS RECEIPT*%0A%0A👤 Member: ${receiptMember.full_name}%0A📱 Mobile: ${receiptMember.mobile}%0A📋 Plan: ${receiptMember.membership_type}%0A📅 Valid: ${formatDate(receiptMember.membership_start)} to ${formatDate(receiptMember.membership_end)}%0A💰 Amount: ₹${amount}%0A%0A_Pain is Temporary. Pride is Forever._ 💪`;
                                         window.open(`https://wa.me/91${receiptMember.mobile.replace(/\D/g, '')}?text=${message}`, '_blank');
                                         toast.success('Receipt sent via WhatsApp!');

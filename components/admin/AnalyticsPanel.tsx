@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
-import { TrendingUp, Users, AlertTriangle, Crown, X } from 'lucide-react';
+import { TrendingUp, Crown, X } from 'lucide-react';
 import type { GymMember } from '@/lib/supabase';
 import { PLAN_PRICES } from '@/lib/config';
 
@@ -48,7 +48,7 @@ export default function AnalyticsPanel({ members, onClose }: AnalyticsPanelProps
                 const monthKey = `${startDate.getFullYear()}-${String(startDate.getMonth() + 1).padStart(2, '0')}`;
 
                 // Get price for this member's plan
-                const price = (PLAN_PRICES as any)[plan] || 0;
+                const price = (PLAN_PRICES as Record<string, number>)[plan] || 0;
 
                 monthlyRevenue[monthKey] = (monthlyRevenue[monthKey] || 0) + price;
 
@@ -164,7 +164,7 @@ export default function AnalyticsPanel({ members, onClose }: AnalyticsPanelProps
                                             <span className="text-gray-300 truncate max-w-[120px]">{m.full_name}</span>
                                             <div className="flex gap-2 text-gray-500">
                                                 <span className="text-[10px] border border-white/10 px-1 rounded">{m.membership_type}</span>
-                                                <span className="font-mono text-white">₹{(PLAN_PRICES as any)[m.membership_type || '1 Month'] || 0}</span>
+                                                <span className="font-mono text-white">₹{(PLAN_PRICES as Record<string, number>)[m.membership_type || '1 Month'] || 0}</span>
                                             </div>
                                         </div>
                                     ))

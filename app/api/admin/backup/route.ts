@@ -57,7 +57,7 @@ export async function GET(req: Request) {
             // Also return the data directly for download
             data: JSON.parse(backupData)
         });
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error('Backup error:', error);
         return NextResponse.json(
             {

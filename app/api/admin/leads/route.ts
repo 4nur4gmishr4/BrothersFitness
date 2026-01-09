@@ -25,7 +25,7 @@ export async function GET(req: Request) {
         }
 
         return NextResponse.json({ leads: data });
-    } catch (error) {
+    } catch {
         return NextResponse.json({ error: 'Failed to fetch leads' }, { status: 500 });
     }
 }
@@ -50,7 +50,7 @@ export async function DELETE(req: Request) {
         if (error) throw error;
 
         return NextResponse.json({ success: true });
-    } catch (error) {
+    } catch {
         return NextResponse.json({ error: 'Failed to delete lead' }, { status: 500 });
     }
 }
