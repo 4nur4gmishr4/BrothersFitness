@@ -16,10 +16,24 @@ export const getSupabase = (): SupabaseClient => {
     return supabaseClient;
 };
 
-// For backward compatibility - will throw at runtime if env vars not set
-export const supabase = supabaseUrl && supabaseAnonKey
-    ? createClient(supabaseUrl, supabaseAnonKey)
-    : (null as unknown as SupabaseClient);
+/**
+ * For backward compatibility.
+ * WARNING: This will throw at runtime if Supabase env vars are not set.
+ * Prefer using getSupabase() for explicit error handling.
+ */
+export const supabase: SupabaseClient = (() => {
+    if (!supabaseUrl || !supabaseAnonKey) {
+        // Return a proxy that throws on any property access
+        return new Proxy({} as SupabaseClient, {
+            get() {
+                throw new Error(
+                    'Supabase client not initialized: NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY must be set.'
+                );
+            },
+        });
+    }
+    return createClient(supabaseUrl, supabaseAnonKey);
+})();
 
 // Types for our database tables
 export type GymMember = {

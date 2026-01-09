@@ -1,7 +1,14 @@
 import { NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
+import { verifyAdminToken, extractBearerToken } from '@/lib/auth';
 
 export async function POST(req: Request) {
+    // Auth guard
+    const token = extractBearerToken(req.headers.get('Authorization'));
+    if (!token || !verifyAdminToken(token)) {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     try {
         const formData = await req.formData();
         const file = formData.get('file') as File;
