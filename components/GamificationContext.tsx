@@ -44,7 +44,7 @@ const GamificationContext = createContext<GamificationContextType | null>(null);
 export function GamificationProvider({ children }: { children: ReactNode }) {
     const [medals, setMedals] = useState<MedalId[]>([]);
     const [visitStreak, setVisitStreak] = useState(0);
-    const [isLoaded, setIsLoaded] = useState(false);
+    const [_isLoaded, setIsLoaded] = useState(false);
 
     // Load from localStorage on mount
     useEffect(() => {
