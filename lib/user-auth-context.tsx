@@ -98,17 +98,30 @@ export function UserAuthProvider({ children }: { children: ReactNode }) {
     // Listen to Firebase auth state
     useEffect(() => {
         const auth = getFirebaseAuth();
+        const isAuthPending = sessionStorage.getItem('brofit_auth_in_progress') === 'true';
 
-        // Primary Redirect Handler for Mobile
+        // Check specifically for redirect result
         getRedirectResult(auth)
             .then(async (result) => {
+                sessionStorage.removeItem('brofit_auth_in_progress'); // Clear flag directly
+
                 if (result?.user) {
                     console.log('Auth: Redirect successful', result.user.uid);
                     setShowWelcome(true);
                     toast.success('Successfully signed in!');
+                } else if (isAuthPending) {
+                    // Result came back null, but we expected a login
+                    console.warn('Auth: Redirect returned null despite pending flag.');
+                    // This often happens if user backs out, or the redirect state was lost (e.g. private tab mixed mode)
+                    // We won't show an error here to avoid false positives on normal reloads, 
+                    // unless we utilize a timer or strictly rely on the flag.
+                    // Let's show a mild error or just log it. 
+                    // Actually, if user expects feedback, we should give it.
+                    toast.error("Login incomplete or disrupted. Please try again.");
                 }
             })
             .catch((error) => {
+                sessionStorage.removeItem('brofit_auth_in_progress');
                 console.error('Auth: Redirect error', error);
                 const code = error?.code;
                 if (code === 'auth/unauthorized-domain') {
@@ -128,7 +141,7 @@ export function UserAuthProvider({ children }: { children: ReactNode }) {
             } else {
                 localStorage.removeItem('brofit_user_id');
                 setUser(null);
-                setIsLoading(false); // Only set to false here if no user
+                setIsLoading(false);
             }
         });
 
@@ -315,10 +328,12 @@ export function UserAuthProvider({ children }: { children: ReactNode }) {
             if (isMobile) {
                 const toastId = toast.loading("Redirecting to Google...", { duration: 10000 });
                 try {
+                    sessionStorage.setItem('brofit_auth_in_progress', 'true');
                     await signInWithRedirect(auth, provider);
                     // The page will unload here, so success/loading state persists
                     return { success: true };
                 } catch (e) {
+                    sessionStorage.removeItem('brofit_auth_in_progress');
                     toast.dismiss(toastId);
                     console.error("Redirect Error:", e);
                     const msg = e instanceof Error ? e.message : "Redirect failed";
@@ -339,6 +354,7 @@ export function UserAuthProvider({ children }: { children: ReactNode }) {
 
                     if (code === 'auth/popup-blocked' || code === 'auth/popup-closed-by-user' || code === 'auth/cancelled-popup-request') {
                         toast.info("Popup blocked. Redirecting instead...", { duration: 4000 });
+                        sessionStorage.setItem('brofit_auth_in_progress', 'true');
                         await signInWithRedirect(auth, provider);
                         return { success: true };
                     } else {
