@@ -117,162 +117,160 @@ export function UserAuthProvider({ children }: { children: ReactNode }) {
     }, []);
 
     const loadUserProfile = async (fbUser: FirebaseUser) => {
+        console.log('Auth Transition: UID detected. Starting profile load...');
         const supabase = getSupabase();
         const db = getFirestoreDb();
         const today = new Date().toISOString().split('T')[0];
 
-        let supabaseUser: UserProfile | null = null;
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        let firestoreUser: any = null;
-
         try {
-            // 1. Try fetching from Supabase
-            const { data: existingUser, error: supabaseError } = await supabase
+            console.log('Auth Step 1: Querying Supabase...');
+            const { data: supabaseUser, error: supabaseError } = await supabase
                 .from('users')
                 .select('*')
                 .eq('firebase_uid', fbUser.uid)
                 .single();
 
-            if (!supabaseError && existingUser) {
-                supabaseUser = existingUser;
-            }
+            if (!supabaseError && supabaseUser) {
+                console.log('Auth Success: Supabase profile found.');
+                // Determine if reset is needed
+                const updates: Record<string, any> = {};
+                let currentCredits = supabaseUser.daily_credits;
 
-            // 2. Try fetching from Firestore (Secondary/Fallback)
-            try {
-                // Check if navigator says we're online, though Firestore has its own sync
-                const isOnline = typeof navigator !== 'undefined' ? navigator.onLine : true;
-
-                if (isOnline) {
-                    const userDoc = await getDoc(doc(db, 'users', fbUser.uid));
-                    if (userDoc.exists()) {
-                        firestoreUser = userDoc.data();
-                    }
-                } else {
-                    console.log('Firestore: Skipping initial fetch while offline.');
-                }
-            } catch (fsError) {
-                // Ignore "offline" errors as they are expected in flaky networks
-                if (fsError instanceof Error && fsError.message.includes('offline')) {
-                    console.log('Firestore: Client is offline, skipping sync.');
-                } else {
-                    console.error('Firestore read error:', fsError);
-                }
-            }
-
-            // 3. Logic for existing user (found in either or both)
-            if (supabaseUser || firestoreUser) {
-                // Use Supabase as primary, Firestore as fallback for missing fields
-                const mergedUser = {
-                    ...(firestoreUser || {}),
-                    ...(supabaseUser || {}),
-                    firebase_uid: fbUser.uid // Ensure UID is correct
-                };
-
-                const updates: Record<string, unknown> = {};
-
-                // Check and reset daily credits if needed
-                if (mergedUser.last_credit_reset !== today) {
+                if (supabaseUser.last_credit_reset !== today) {
                     updates.daily_credits = MAX_DAILY_CREDITS;
                     updates.last_credit_reset = today;
-                } else if (mergedUser.daily_credits > MAX_DAILY_CREDITS) {
-                    updates.daily_credits = MAX_DAILY_CREDITS;
+                    currentCredits = MAX_DAILY_CREDITS;
                 }
 
-                // Sync missing data from Google
-                if (!mergedUser.photo_url && fbUser.photoURL) updates.photo_url = fbUser.photoURL;
-                if (!mergedUser.email && fbUser.email) updates.email = fbUser.email;
-                if (!mergedUser.full_name && fbUser.displayName) updates.full_name = fbUser.displayName;
+                // Sync basic info if missing
+                if (!supabaseUser.photo_url && fbUser.photoURL) updates.photo_url = fbUser.photoURL;
+                if (!supabaseUser.email && fbUser.email) updates.email = fbUser.email;
+                if (!supabaseUser.full_name && fbUser.displayName) updates.full_name = fbUser.displayName;
 
-                const finalUser = { ...mergedUser, ...updates };
-
-                // 4. Synchronize back to both if needed
-                if (supabaseUser) {
-                    if (Object.keys(updates).length > 0) {
-                        await supabase.from('users').update(updates).eq('firebase_uid', fbUser.uid);
-                    }
-                } else {
-                    // Create in Supabase if it was only in Firestore
-                    // Filter fields to match Supabase schema
-                    const supabasePayload = {
-                        firebase_uid: fbUser.uid,
-                        email: finalUser.email || null,
-                        full_name: finalUser.full_name || null,
-                        photo_url: finalUser.photo_url || null,
-                        date_of_birth: finalUser.date_of_birth || null,
-                        height_cm: finalUser.height_cm || null,
-                        weight_kg: finalUser.weight_kg || null,
-                        gender: finalUser.gender || null,
-                        daily_credits: finalUser.daily_credits ?? MAX_DAILY_CREDITS,
-                        last_credit_reset: finalUser.last_credit_reset || today,
-                        mobile: finalUser.mobile || ""
-                    };
-                    await supabase.from('users').insert(supabasePayload);
-                }
-
-                // Always sync to Firestore to ensure it's up to date
-                try {
-                    // Filter out any complex Supabase objects if they exist
-                    const { id: _, ...firestorePayload } = finalUser;
-                    await setDoc(doc(db, 'users', fbUser.uid), {
-                        ...firestorePayload,
-                        updated_at: serverTimestamp()
-                    }, { merge: true });
-                } catch (fsError) {
-                    console.error('Firestore sync error:', fsError);
-                }
-
+                const finalUser = { ...supabaseUser, ...updates };
+                console.log('Auth Update: Setting user and clearing loading state.');
                 setUser(finalUser as UserProfile);
-            } else {
-                // 5. Create new user in both
-                const newUserPayload = {
+                setIsLoading(false); // UI is now ready
+
+                // Secondary: Async Background Sync to Firestore & Supabase Updates
+                console.log('Auth Sync: Triggering background sync...');
+                (async () => {
+                    try {
+                        if (Object.keys(updates).length > 0) {
+                            await supabase.from('users').update(updates).eq('firebase_uid', fbUser.uid);
+                        }
+                        const { id: _, ...firestorePayload } = finalUser;
+                        await setDoc(doc(db, 'users', fbUser.uid), {
+                            ...firestorePayload,
+                            updated_at: serverTimestamp()
+                        }, { merge: true });
+                    } catch (fsError) {
+                        console.log('Background sync skipped/failed:', fsError);
+                    }
+                })();
+
+                return; // Exit early
+            }
+
+            // 2. Fallback: Try Firestore if Supabase fails or user not found
+            console.log('Auth Fallback: Checking Firestore...');
+            let firestoreUser: any = null;
+            try {
+                const userDoc = await getDoc(doc(db, 'users', fbUser.uid));
+                if (userDoc.exists()) {
+                    console.log('Auth Success: Firestore profile found.');
+                    firestoreUser = userDoc.data();
+                }
+            } catch (fsError) {
+                console.log('Initial Firestore fallback failed:', fsError);
+            }
+
+            if (firestoreUser) {
+                // Map Firestore back to UserProfile structure
+                const mappedUser: UserProfile = {
+                    id: fbUser.uid,
                     firebase_uid: fbUser.uid,
-                    email: fbUser.email || null,
-                    full_name: fbUser.displayName || null,
-                    photo_url: fbUser.photoURL || null,
-                    daily_credits: MAX_DAILY_CREDITS,
-                    last_credit_reset: today,
-                    mobile: ""
+                    email: firestoreUser.email || fbUser.email,
+                    full_name: firestoreUser.full_name || fbUser.displayName,
+                    photo_url: firestoreUser.photo_url || fbUser.photoURL,
+                    date_of_birth: firestoreUser.date_of_birth || null,
+                    height_cm: firestoreUser.height_cm || null,
+                    weight_kg: firestoreUser.weight_kg || null,
+                    gender: firestoreUser.gender || null,
+                    daily_credits: firestoreUser.daily_credits ?? MAX_DAILY_CREDITS,
+                    last_credit_reset: firestoreUser.last_credit_reset || today
                 };
 
-                // Create in Supabase
-                const { data: newUser, error: insertError } = await supabase
-                    .from('users')
-                    .insert(newUserPayload)
-                    .select()
-                    .single();
-
-                // Create in Firestore
-                try {
-                    await setDoc(doc(db, 'users', fbUser.uid), {
-                        ...newUserPayload,
-                        created_at: serverTimestamp(),
-                        updated_at: serverTimestamp()
-                    });
-                } catch (fsError) {
-                    console.error('Firestore creation error:', fsError);
+                // Apply reset logic to fallback
+                if (mappedUser.last_credit_reset !== today) {
+                    mappedUser.daily_credits = MAX_DAILY_CREDITS;
+                    mappedUser.last_credit_reset = today;
                 }
 
-                if (newUser && !insertError) {
-                    setUser(newUser);
-                    setShowWelcome(true);
-                } else {
-                    // Minimal fallback
-                    setUser({
-                        id: fbUser.uid,
-                        ...newUserPayload,
-                        date_of_birth: null,
-                        height_cm: null,
-                        weight_kg: null,
-                        gender: null
-                    });
-                    setShowWelcome(true);
-                }
+                setUser(mappedUser);
+                setIsLoading(false);
+
+                // Background: Create in Supabase since it was missing
+                (async () => {
+                    try {
+                        await supabase.from('users').insert({
+                            ...mappedUser,
+                            mobile: ""
+                        });
+                    } catch (sbError) { console.log('Background Supabase creation failed:', sbError); }
+                })();
+                return;
             }
+
+            // 3. New User: Create in both
+            console.log('Auth Flow: No profile found. Initializing new user sequence...');
+            const newUserPayload = {
+                firebase_uid: fbUser.uid,
+                email: fbUser.email || null,
+                full_name: fbUser.displayName || null,
+                photo_url: fbUser.photoURL || null,
+                daily_credits: MAX_DAILY_CREDITS,
+                last_credit_reset: today,
+                mobile: ""
+            };
+
+            console.log('Auth Progress: Creating Supabase record...');
+            const { data: newUser, error: insertError } = await supabase
+                .from('users')
+                .insert(newUserPayload)
+                .select()
+                .single();
+
+            if (newUser && !insertError) {
+                console.log('Auth Success: New Supabase user created.');
+                setUser(newUser);
+                setShowWelcome(true);
+            } else {
+                console.warn('Auth Warning: Supabase creation failed, using fallback.');
+                // Extreme fallback
+                setUser({
+                    id: fbUser.uid,
+                    ...newUserPayload,
+                    date_of_birth: null,
+                    height_cm: null,
+                    weight_kg: null,
+                    gender: null
+                });
+                setShowWelcome(true);
+            }
+            setIsLoading(false);
+
+            console.log('Auth Sync: Scheduling Firestore creation...');
+            setDoc(doc(db, 'users', fbUser.uid), {
+                ...newUserPayload,
+                created_at: serverTimestamp(),
+                updated_at: serverTimestamp()
+            }).catch(() => { });
+
         } catch (err) {
-            console.error('Error loading user profile:', err);
-            // Minimal fallback from Firebase
+            console.error('Fatal error loading user profile:', err);
             setUser({
-                id: fbUser.uid, // Use UID as standardized local ID
+                id: fbUser.uid,
                 firebase_uid: fbUser.uid,
                 email: fbUser.email,
                 full_name: fbUser.displayName,
@@ -284,8 +282,7 @@ export function UserAuthProvider({ children }: { children: ReactNode }) {
                 daily_credits: MAX_DAILY_CREDITS,
                 last_credit_reset: today
             });
-        } finally {
-            setIsLoading(false); // Ensure loading state is cleared regardless of success or failure
+            setIsLoading(false);
         }
     };
 
