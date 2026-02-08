@@ -94,9 +94,22 @@ export function UserAuthProvider({ children }: { children: ReactNode }) {
     useEffect(() => {
         const auth = getFirebaseAuth();
 
-        getRedirectResult(auth).catch((error) => {
-            console.error('Google Sign-In redirect error:', error);
-        });
+        // Primary Redirect Handler for Mobile
+        getRedirectResult(auth)
+            .then(async (result) => {
+                if (result?.user) {
+                    console.log('Mobile Auth: Redirect result captured successfully.', result.user.uid);
+                    // result.user will trigger onAuthStateChanged, but we can proactively log here
+                }
+            })
+            .catch((error) => {
+                console.error('Mobile Auth: Redirect error caught:', error);
+                // Check for unauthorized domains or blocked context
+                const code = error?.code;
+                if (code === 'auth/unauthorized-domain') {
+                    console.error('CRITICAL: Current domain is not authorized in Firebase Console.');
+                }
+            });
 
         const unsubscribe = onAuthStateChanged(auth, async (fbUser) => {
             setFirebaseUser(fbUser);
@@ -290,7 +303,11 @@ export function UserAuthProvider({ children }: { children: ReactNode }) {
             const auth = getFirebaseAuth();
             const provider = getGoogleProvider();
 
-            const isMobile = typeof window !== 'undefined' && /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+            const isMobile = typeof window !== 'undefined' && (
+                /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent) ||
+                (navigator.maxTouchPoints > 0) ||
+                (window.innerWidth <= 768)
+            );
 
             if (isMobile) {
                 await signInWithRedirect(auth, provider);
@@ -329,7 +346,13 @@ export function UserAuthProvider({ children }: { children: ReactNode }) {
 
     const updateProfile = async (data: ProfileUpdateData): Promise<{ success: boolean; error?: string }> => {
         console.log('Profile Sync: Update initiated...', data);
-        try {
+
+        // Timeout promise
+        const timeoutPromise = new Promise<{ success: boolean; error: string }>((_, reject) => {
+            setTimeout(() => reject(new Error('Update timed out after 7 seconds')), 7000);
+        });
+
+        const updateOperation = async () => {
             if (!user) {
                 console.warn('Profile Sync: No user in state.');
                 return { success: false, error: 'Not authenticated' };
@@ -362,22 +385,21 @@ export function UserAuthProvider({ children }: { children: ReactNode }) {
 
             if (sbError) {
                 console.error('Profile Sync: Supabase error:', sbError);
-                // We continue to Firestore even if Supabase fails to maintain best-effort sync
             } else {
                 console.log('Profile Sync: Supabase update successful.');
             }
 
             // 2. Update Firestore
             try {
-                await updateDoc(doc(db, 'users', uid), {
+                await setDoc(doc(db, 'users', uid), {
                     ...data,
                     updated_at: serverTimestamp()
-                });
+                }, { merge: true });
                 console.log('Profile Sync: Firestore update successful.');
-            } catch (fsError) {
+            } catch (fsError: unknown) {
                 console.error('Profile Sync: Firestore error:', fsError);
-                // If both fail, we return error
-                if (sbError) return { success: false, error: 'Database sync failed' };
+                const message = fsError instanceof Error ? fsError.message : 'Unknown error';
+                return { success: false, error: 'Firebase update failed: ' + message };
             }
 
             // Update local state
@@ -385,9 +407,14 @@ export function UserAuthProvider({ children }: { children: ReactNode }) {
             setUser(prev => prev ? { ...prev, ...data } : null);
 
             return { success: true };
-        } catch (error) {
-            console.error('Profile Sync: Critical error:', error);
-            return { success: false, error: 'Update failed' };
+        };
+
+        try {
+            return await Promise.race([updateOperation(), timeoutPromise]) as { success: boolean; error?: string };
+        } catch (error: unknown) {
+            console.error('Profile Sync: Critical error or timeout:', error);
+            const message = error instanceof Error ? error.message : 'Update failed';
+            return { success: false, error: message };
         }
     };
 
