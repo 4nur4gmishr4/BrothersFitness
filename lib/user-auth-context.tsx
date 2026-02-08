@@ -310,7 +310,15 @@ export function UserAuthProvider({ children }: { children: ReactNode }) {
             );
 
             if (isMobile) {
-                await signInWithRedirect(auth, provider);
+                toast.loading("Redirecting to Google Login...");
+                try {
+                    await signInWithRedirect(auth, provider);
+                } catch (e) {
+                    toast.error("Redirect failed. Check console.");
+                    console.error(e);
+                    throw e;
+                }
+                return { success: true }; // Page will unload
             } else {
                 try {
                     await signInWithPopup(auth, provider);
@@ -320,7 +328,9 @@ export function UserAuthProvider({ children }: { children: ReactNode }) {
                         ? String((error as { code?: string }).code)
                         : '';
                     if (code === 'auth/popup-blocked' || code === 'auth/popup-closed-by-user') {
+                        toast.loading("Popup blocked. Switching to Redirect...");
                         await signInWithRedirect(auth, provider);
+                        return { success: true };
                     } else {
                         throw error;
                     }
