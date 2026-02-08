@@ -73,9 +73,6 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="dark">
-      <head>
-        <meta httpEquiv="Permissions-Policy" content="accelerometer=(), camera=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), payment=(), usb=()" />
-      </head>
       <body className={`${inter.variable} ${dotGothic.variable} font-sans bg-black text-white antialiased`}>
         <ReadingProgressBar />
         <Toaster
