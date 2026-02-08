@@ -63,7 +63,7 @@ export default function ProfileModal({ isOpen, onClose }: ProfileModalProps) {
                 setSuccess(true);
                 setTimeout(() => setSuccess(false), 2500);
             } else {
-                setError(result.error || "Uplink Error: Deployment failed.");
+                setError(result.error || "Failed to update profile. Please try again.");
             }
         } catch (err: unknown) {
             console.error('Profile Modal: Save exception:', err);

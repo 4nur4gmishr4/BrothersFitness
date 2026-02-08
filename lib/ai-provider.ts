@@ -26,32 +26,11 @@ interface ModelConfig {
     description?: string;
 }
 
-// Unified Model Stack - Ranked by Intelligence/Capability as requested
+// Unified Model Stack - Final Simplified Configuration
 export const MODEL_STACK: ModelConfig[] = [
-    // Tier 1: Reasoning & High Intelligence
-    { id: "deepseek-reasoner", provider: "deepseek", name: "DeepSeek R1 (Reasoning)" },
-    { id: "gemini-1.5-pro", provider: "google", name: "Gemini 1.5 Pro (Complex)" },
-    { id: "deepseek-chat", provider: "deepseek", name: "DeepSeek V3 (High Intel)" },
-
-    // Tier 1.5: High Performance Open Source (Groq)
     { id: "llama-3.3-70b-versatile", provider: "groq", name: "Llama 3.3 70B (Groq)" },
-    { id: "openai/gpt-oss-120b", provider: "groq", name: "GPT-OSS 120B (Groq)" },
-    { id: "meta-llama/llama-4-maverick-17b-128e-instruct", provider: "groq", name: "Llama 4 Maverick (Groq)" },
-    { id: "meta-llama/llama-4-scout-17b-16e-instruct", provider: "groq", name: "Llama 4 Scout (Groq)" },
-
-    // Tier 2: Strong General Purpose
-    { id: "gemini-2.0-flash", provider: "google", name: "Gemini 2.0 Flash (Balanced)" },
-    { id: "qwen/qwen3-32b", provider: "groq", name: "Qwen 3 32B (Groq)" },
-    { id: "moonshotai/kimi-k2-instruct", provider: "groq", name: "Kimi K2 Instruct (Groq)" },
-
-    // Tier 3: Speed & Efficiency Fallbacks
-    { id: "deepseek-r1-distill-llama-70b", provider: "groq", name: "DeepSeek R1 Distill (Groq)" },
-    { id: "llama-3.1-8b-instant", provider: "groq", name: "Llama 3.1 8B (Groq Instant)" },
-    { id: "groq/compound", provider: "groq", name: "Groq Compound" },
-    { id: "groq/compound-mini", provider: "groq", name: "Groq Compound Mini" },
-    { id: "moonshotai/kimi-k2-instruct-0905", provider: "groq", name: "Kimi K2 0905 (Groq)" },
-    { id: "openai/gpt-oss-20b", provider: "groq", name: "GPT-OSS 20B (Groq)" },
-    { id: "gemini-1.5-flash", provider: "google", name: "Gemini 1.5 Flash (Backup)" },
+    { id: "llama-3.1-8b-instant", provider: "groq", name: "Llama 3.1 8B (Groq)" },
+    { id: "gemini-2.0-flash", provider: "google", name: "Gemini 2.0 Flash (Google)" },
 ];
 
 // Initialize Clients (Lazy)
@@ -100,7 +79,7 @@ export async function generateTextWithFallback(config: AIRequestConfig): Promise
 
     for (const model of MODEL_STACK) {
         try {
-            console.log(`[AI] Attempting generation with ${model.name} (${model.provider})...`);
+            console.log(`AI: Initializing ${model.name}...`);
 
             let resultText = "";
 
@@ -164,7 +143,7 @@ export async function generateTextWithFallback(config: AIRequestConfig): Promise
 
         } catch (error) {
             const errorMsg = (error as Error)?.message || "Unknown error";
-            console.warn(`[AI] Failed with ${model.name}: ${errorMsg}`);
+            console.warn(`AI: Failed with ${model.name}: ${errorMsg}`);
             errors.push(`${model.name}: ${errorMsg}`);
 
             // Check for specific fatal errors (like invalid API key format) vs retryable (rate limits)

@@ -12,7 +12,7 @@ export async function POST(req: Request) {
     if (!supabaseUrl || !supabaseServiceKey) {
         logger.error("Missing Supabase Configuration", { url: !!supabaseUrl, key: !!supabaseServiceKey });
         return NextResponse.json(
-            { error: "System Configuration Error: Nutrition Uplink Offline." },
+            { error: "System Configuration Error: API service offline." },
             { status: 500 }
         );
     }
@@ -22,7 +22,7 @@ export async function POST(req: Request) {
 
     if (!headerUserId || headerUserId === 'unknown') {
         return NextResponse.json(
-            { error: "Authentication required. Please login to use Tactical Diet Generator." },
+            { error: "Authentication required. Please login to use the Diet Generator." },
             { status: 401 }
         );
     }
@@ -37,7 +37,7 @@ export async function POST(req: Request) {
 
         if (userError || !userProfile) {
             console.error('Diet API: Profile Fetch Error:', userError);
-            return NextResponse.json({ error: "Tactical Profile not synchronized. Please update profile first." }, { status: 403 });
+            return NextResponse.json({ error: "User profile not found. Please complete your profile." }, { status: 403 });
         }
 
         const today = new Date().toISOString().split('T')[0];
@@ -49,7 +49,7 @@ export async function POST(req: Request) {
 
         if (credits <= 0) {
             return NextResponse.json(
-                { error: `Daily tactical credits depleted (0/${MAX_DAILY_CREDITS}). Refreshing tomorrow at 0000 hours.` },
+                { error: `Daily credits depleted (0/${MAX_DAILY_CREDITS}). Resets tomorrow.` },
                 { status: 429 }
             );
         }
@@ -86,9 +86,9 @@ export async function POST(req: Request) {
         const calorieAdjustment = Math.round(rateNum * 1100);
 
         const prompt = `
-      You are a tactical fitness nutritionist for 'BroFit', a high-performance system optimizing for an **Indian User**.
+      You are an expert fitness nutritionist for 'BroFit', optimizing for an **Indian User**.
       
-      **MISSION PROFILE // USER BIOMETRICS**
+      **User Biometrics**
       - Gender: ${gender}
       - Age: ${age} years
       - Height: ${height} cm
@@ -97,15 +97,14 @@ export async function POST(req: Request) {
       - Activity Level: ${activityLevel}
       - Weight Change Rate: ${rateNum} kg/week
       
-      **OPERATIONAL PARAMETERS**
-      - Daily Calorie Target: ${calories ? calories + " kcal (PRE-CALCULATED)" : "CALCULATE OPTIMAL TDEE"}
-      - Calorie Adjustment: ${calorieAdjustment} kcal/day (${rateNum} kg/week × 1100)
-      - Training Mode: ${mode} (${parseFloat(String(targetWeight)) > parseFloat(String(currentWeight)) ? "BULK - Add calories" : "CUT - Subtract calories"})
+      **Parameters**
+      - Daily Calorie Target: ${calories ? calories + " kcal" : "Calculate TDEE"}
+      - Calorie Adjustment: ${calorieAdjustment} kcal/day
       - Diet Preference: ${dietType}
       - Budget: ${budget}
       - Primary Objective: ${goal_description}
 
-      **TACTICAL INSTRUCTIONS**:
+      **Instructions**:
       1.  **CALORIE CALCULATION**: 
           - If Daily Calorie Target is provided, USE IT EXACTLY.
           - Otherwise, calculate TDEE using Mifflin-St Jeor formula.
@@ -133,7 +132,7 @@ export async function POST(req: Request) {
       6.  **CATEGORIZATION**: Split shopping list into 'Home_Essentials' (Spices, Oil, common staples likely at home) and 'Market_Purchase' (Fresh produce, specific proteins, perishables).
       7.  **RECIPES**: For each meal, include full recipe instructions, complete ingredient list with quantities, and detailed macros.
       8.  **TIMELINE**: Calculate realistic "estimated_duration" based on ${rateNum} kg/week rate. Provide total_days and total_weeks.
-      9.  **TACTICAL BRIEF**: Write a DETAILED summary explaining the strategy for the user.
+      10. **Summary**: Write a detailed explanation of the plan.
       
       **STRICT OUTPUT FORMAT**:
       Return ONLY valid JSON. No Markdown. No pre-text. Matches this schema EXACTLY:
