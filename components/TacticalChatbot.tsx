@@ -1,8 +1,15 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { motion, AnimatePresence, useDragControls, PanInfo } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { Cpu, X, Send, Dumbbell, Utensils, Zap, Languages } from "lucide-react";
+import { useUserAuth } from "@/lib/user-auth-context";
+import { MAX_DAILY_CREDITS } from "@/lib/config";
+import dynamic from "next/dynamic";
+import { usePathname } from "next/navigation";
+
+// Lazy load LoginModal to avoid SSR issues
+const LoginModal = dynamic(() => import("@/components/LoginModal"), { ssr: false });
 
 type ChatMessage = {
     role: "user" | "model";
@@ -25,58 +32,19 @@ const SUGGESTIONS = {
 };
 
 export default function TacticalChatbot() {
+    const { isLoggedIn, remainingCredits, deductCredit, refreshCredits, showWelcome, setShowWelcome } = useUserAuth();
+    const pathname = usePathname();
+
+    // Simplified positioning - Fixed Bottom Right
+    // Removing complex drag/storage logic to ensure visibility
     const [isOpen, setIsOpen] = useState(false);
     const [messages, setMessages] = useState<ChatMessage[]>([]);
     const [input, setInput] = useState("");
     const [loading, setLoading] = useState(false);
     const [language, setLanguage] = useState<"en" | "hi" | null>(null);
-    const [rateLimitRemaining, setRateLimitRemaining] = useState<number | null>(null);
+    const [showLoginModal, setShowLoginModal] = useState(false);
 
     const scrollRef = useRef<HTMLDivElement>(null);
-    const isDragging = useRef(false);
-    const controls = useDragControls();
-
-    const [position, setPosition] = useState({ bottom: "100px", right: "24px" });
-    const [isLoaded, setIsLoaded] = useState(false);
-
-    // Initialize position and load from storage safely
-    useEffect(() => {
-        setIsLoaded(true);
-        const isMobile = window.innerWidth < 768;
-        const defaultPos = isMobile ? { bottom: "80px", right: "24px" } : { bottom: "100px", right: "24px" };
-
-        try {
-            const saved = localStorage.getItem('brofit_chatbot_pos');
-            if (saved) {
-                const parsed = JSON.parse(saved);
-                // Validate bounds (simple check) to prevent off-screen button
-                const botVal = parseInt(parsed.bottom);
-                const rightVal = parseInt(parsed.right);
-
-                // If values are unreasonably large (off-screen) or negative, reset
-                if (botVal > window.innerHeight - 50 || botVal < 0 || rightVal > window.innerWidth - 50 || rightVal < 0) {
-                    setPosition(defaultPos);
-                } else {
-                    setPosition(parsed);
-                }
-            } else {
-                setPosition(defaultPos);
-            }
-        } catch {
-            setPosition(defaultPos);
-        }
-    }, []);
-
-    const updatePosition = (info: PanInfo) => {
-        if (typeof window !== 'undefined') {
-            const newPos = {
-                bottom: `${Math.max(20, window.innerHeight - info.point.y - 28)}px`,
-                right: `${Math.max(20, window.innerWidth - info.point.x - 28)}px`
-            };
-            setPosition(newPos);
-            localStorage.setItem('brofit_chatbot_pos', JSON.stringify(newPos));
-        }
-    };
 
     // Load language from localStorage on mount
     useEffect(() => {
@@ -98,27 +66,65 @@ export default function TacticalChatbot() {
         }
     }, [messages, language]);
 
-    // Fetch rate limit status
-    const fetchRateLimit = async () => {
-        try {
-            const res = await fetch('/api/rate-limit-status');
-            if (res.ok) {
-                const data = await res.json();
-                setRateLimitRemaining(data.ai.remaining);
-            }
-        } catch (err) {
-            console.error('Failed to fetch rate limit:', err);
-        }
-    };
+    // Note: fetchRateLimit removed - now using user credits from useUserAuth
 
     useEffect(() => {
-        if (isOpen && rateLimitRemaining === null) {
-            fetchRateLimit();
+        if (isOpen && isLoggedIn) {
+            refreshCredits();
         }
-    }, [isOpen, rateLimitRemaining]);
+    }, [isOpen, isLoggedIn, refreshCredits]);
+
+    // Welcome Popup for new users
+    useEffect(() => {
+        if (showWelcome) {
+            // Show a temporary message
+            setMessages(prev => [...prev, {
+                role: "model",
+                text: `Welcome to BroFit AI! You have ${MAX_DAILY_CREDITS} FREE AI credits for today. Credits reset daily at midnight.`,
+                isError: false
+            }]);
+
+            // Clear the flag after handling
+            const timer = setTimeout(() => setShowWelcome(false), 5000);
+            return () => clearTimeout(timer);
+        }
+    }, [showWelcome, setShowWelcome]);
+
+    // Calculate stroke dash for credit ring
+    // 5 credits = 100%, 0 credits = 0%
+    const radius = 22;
+    const circumference = 2 * Math.PI * radius;
+    const progress = remainingCredits / MAX_DAILY_CREDITS;
+    const strokeDashoffset = circumference - (progress * circumference);
+
+    // Google colors for the ring
+    const getRingColor = () => {
+        if (remainingCredits === MAX_DAILY_CREDITS) return "#0F9D58"; // Green
+        if (remainingCredits >= 2) return "#4285F4"; // Blue
+        if (remainingCredits === 1) return "#F4B400"; // Yellow
+        return "#DB4437"; // Red
+    };
 
     const handleSend = async (text: string) => {
         if (!text.trim()) return;
+
+        // Check if user is logged in
+        if (!isLoggedIn) {
+            setShowLoginModal(true);
+            return;
+        }
+
+        // Check if user has credits
+        if (remainingCredits <= 0) {
+            setMessages((prev) => [...prev, {
+                role: "model",
+                text: language === "hi"
+                    ? "Aapke aaj ke AI credits khatam ho gaye. Kal phir koshish karein!"
+                    : `You've used all ${MAX_DAILY_CREDITS} daily AI credits. Credits reset at midnight!`,
+                isError: true
+            }]);
+            return;
+        }
 
         const userMsg: ChatMessage = { role: "user", text };
         setMessages((prev) => [...prev, userMsg]);
@@ -157,7 +163,8 @@ export default function TacticalChatbot() {
                 }]);
             } else {
                 setMessages((prev) => [...prev, { role: "model", text: data.response || (language === "hi" ? "Sampark toot gaya." : "Connection Severed.") }]);
-                fetchRateLimit(); // Update remaining count
+                // Credit deduction is now handled by backend, but we refresh local state
+                await refreshCredits();
             }
         } catch {
             setMessages((prev) => [...prev, {
@@ -171,7 +178,8 @@ export default function TacticalChatbot() {
         }
     };
 
-    if (!isLoaded) return null; // Prevent hydration mismatch
+    // Force visibility everywhere for debugging/reliability
+    // if (pathname !== "/") return null;
 
     return (
         <>
@@ -179,32 +187,41 @@ export default function TacticalChatbot() {
                 {!isOpen && (
                     <motion.button
                         id="tactical-chatbot-button"
-                        className="fixed z-[9999] w-12 h-12 min-[350px]:w-14 min-[350px]:h-14 bg-gym-red rounded-full flex items-center justify-center shadow-[0_0_20px_rgba(215,25,33,0.5)] border-2 border-white/20"
-                        initial={{ scale: 0, opacity: 0, ...position }}
-                        animate={{ scale: 1, opacity: 1, ...position }}
-                        exit={{ scale: 0, opacity: 0, transition: { duration: 0.2 } }}
-
-                        whileHover={{ scale: 1.1 }}
-                        whileTap={{ scale: 0.9 }}
-                        drag
-                        dragMomentum={false}
-                        onDragStart={() => { isDragging.current = true; }}
-                        onDragEnd={(_, info) => {
-                            setTimeout(() => { isDragging.current = false; }, 100);
-                            updatePosition(info);
-                        }}
-                        onClick={() => { if (!isDragging.current) setIsOpen(true); }}
-                        whileDrag={{ scale: 1.2, cursor: "grabbing" }}
+                        className="fixed bottom-6 right-6 z-[9999] w-14 h-14 bg-gym-red rounded-full flex items-center justify-center shadow-[0_0_20px_rgba(215,25,33,0.5)] border-2 border-transparent cursor-pointer hover:scale-110 active:scale-95 transition-transform"
+                        initial={{ scale: 0, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        exit={{ scale: 0, opacity: 0 }}
+                        onClick={() => setIsOpen(true)}
                         aria-label="Open BroFit AI chat"
-                        tabIndex={0}
-                        onKeyDown={(e) => {
-                            if (e.key === 'Enter' || e.key === ' ') {
-                                e.preventDefault();
-                                setIsOpen(true);
-                            }
-                        }}
                     >
-                        <Cpu className="w-6 h-6 text-white animate-pulse" />
+                        <Cpu className="w-6 h-6 text-white animate-pulse relative z-10" />
+
+                        {/* Google Colored Credit Ring */}
+                        {isLoggedIn && (
+                            <svg className="absolute inset-0 w-full h-full -rotate-90 pointer-events-none" viewBox="0 0 48 48">
+                                <circle
+                                    cx="24"
+                                    cy="24"
+                                    r={radius}
+                                    fill="none"
+                                    stroke="#333"
+                                    strokeWidth="3"
+                                    opacity="0.3"
+                                />
+                                <circle
+                                    cx="24"
+                                    cy="24"
+                                    r={radius}
+                                    fill="none"
+                                    stroke={getRingColor()}
+                                    strokeWidth="3"
+                                    strokeDasharray={circumference}
+                                    strokeDashoffset={strokeDashoffset}
+                                    strokeLinecap="round"
+                                    className="transition-all duration-1000 ease-out"
+                                />
+                            </svg>
+                        )}
                     </motion.button>
                 )}
             </AnimatePresence>
@@ -212,31 +229,28 @@ export default function TacticalChatbot() {
             <AnimatePresence>
                 {isOpen && (
                     <motion.div
-                        className="fixed z-[999] w-[90vw] md:w-[380px] h-[550px] bg-black border border-white/20 rounded-2xl overflow-hidden flex flex-col shadow-2xl"
-                        initial={{ opacity: 0, scale: 0.95, bottom: "24px", right: "24px" }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        exit={{ opacity: 0, scale: 0.95, transition: { duration: 0.2 } }}
-                        drag
-                        dragListener={false}
-                        dragControls={controls}
-                        dragMomentum={false}
+                        className="fixed bottom-6 right-6 z-[99999] w-[95vw] sm:w-[380px] h-[500px] sm:h-[600px] bg-black border border-white/20 rounded-2xl overflow-hidden flex flex-col shadow-2xl"
+                        initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                        animate={{ opacity: 1, scale: 1, y: 0 }}
+                        exit={{ opacity: 0, scale: 0.9, y: 20 }}
                     >
-                        {/* Header - Drag Handle */}
-                        <div
-                            className="bg-gym-red p-4 flex justify-between items-center cursor-move touch-none"
-                            onPointerDown={(e) => controls.start(e)}
-                        >
-                            <div className="flex items-center gap-3 pointer-events-none">
+                        {/* Header */}
+                        <div className="bg-gym-red p-4 flex justify-between items-center">
+                            <div className="flex items-center gap-3">
                                 <Cpu className="w-5 h-5 text-white" />
                                 <span className="font-black uppercase tracking-widest text-sm text-white">BroFit AI</span>
-                                {rateLimitRemaining !== null && (
+                                {isLoggedIn ? (
                                     <span className="text-xs bg-white/20 px-2 py-0.5 rounded-full font-bold">
-                                        {rateLimitRemaining}/5
+                                        {remainingCredits}/{MAX_DAILY_CREDITS}
+                                    </span>
+                                ) : (
+                                    <span className="text-xs bg-yellow-500/20 text-yellow-400 px-2 py-0.5 rounded-full font-bold">
+                                        Login
                                     </span>
                                 )}
                             </div>
                             <button
-                                onClick={(e) => { e.stopPropagation(); setIsOpen(false); }}
+                                onClick={() => setIsOpen(false)}
                                 className="text-white hover:text-black transition-colors p-1 rounded-full hover:bg-white/20"
                                 aria-label="Close chat"
                             >
@@ -372,6 +386,13 @@ export default function TacticalChatbot() {
                     </motion.div>
                 )}
             </AnimatePresence>
+
+            {/* Login Modal */}
+            <LoginModal
+                isOpen={showLoginModal}
+                onClose={() => setShowLoginModal(false)}
+                onSuccess={() => setShowLoginModal(false)}
+            />
         </>
     );
 }

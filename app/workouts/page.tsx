@@ -1,5 +1,5 @@
 import { Suspense } from "react";
-import WorkoutManager from "@/components/WorkoutManager";
+import WorkoutLibrary from "@/components/WorkoutLibrary";
 import Navbar from "@/components/Navbar";
 import TacticalStopwatch from "@/components/TacticalStopwatch";
 import Footer from "@/components/Footer";
@@ -19,7 +19,7 @@ export default function WorkoutsPage() {
                 </div>
 
                 <Suspense fallback={<div className="text-center text-gym-red animate-pulse font-mono">ESTABLISHING UPLINK...</div>}>
-                    <WorkoutManager />
+                    <WorkoutLibrary />
                 </Suspense>
             </div>
 

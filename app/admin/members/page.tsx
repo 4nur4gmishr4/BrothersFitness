@@ -31,6 +31,10 @@ const AnalyticsPanel = dynamic(() => import('@/components/admin/AnalyticsPanel')
 const ActivityLogPanel = dynamic(() => import('@/components/admin/ActivityLogPanel'));
 const LeadsInbox = dynamic(() => import('@/components/admin/LeadsInbox'));
 import DeploymentAlerts from '@/components/admin/DeploymentAlerts';
+const ExpiringMembersTable = dynamic(() => import('@/components/admin/ExpiringMembersTable'), {
+    loading: () => <div className="h-48 bg-white/5 animate-pulse rounded-xl mb-8" />
+});
+import IncompleteProfiles from '@/components/admin/IncompleteProfiles';
 
 // Helper to calculate status
 const getMemberStatus = (endDateString: string | null) => {
@@ -70,6 +74,8 @@ const getDaysUntil = (dateString: string): number => {
     return Math.ceil((target.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
 };
 
+type FilterStatus = 'all' | 'active' | 'expiring' | 'expired' | 'incomplete';
+
 export default function MembersPage() {
     const router = useRouter();
     const { isAdmin, isLoading, logout } = useAdmin();
@@ -78,7 +84,7 @@ export default function MembersPage() {
     const [showForm, setShowForm] = useState(false);
     const [editingMember, setEditingMember] = useState<GymMember | null>(null);
     const [searchQuery, setSearchQuery] = useState('');
-    const [filterStatus, setFilterStatus] = useState<'all' | 'active' | 'expiring' | 'expired'>('all');
+    const [filterStatus, setFilterStatus] = useState<FilterStatus>('all');
     const [sortBy, setSortBy] = useState<'newest' | 'oldest' | 'a-z' | 'z-a'>('newest');
     const [error, setError] = useState('');
     const cameraInputRef = useRef<HTMLInputElement>(null);
@@ -94,6 +100,7 @@ export default function MembersPage() {
     const [showActivityLog, setShowActivityLog] = useState(false);
     const [showLeadsInbox, setShowLeadsInbox] = useState(false);
     const [unreadLeadsCount, setUnreadLeadsCount] = useState(0);
+    const [showExpiringSoon, setShowExpiringSoon] = useState(false); // NEW: Toggle state
 
     // Fetch unread leads count
     const fetchUnreadCount = useCallback(async () => {
@@ -135,7 +142,6 @@ export default function MembersPage() {
     // Form state
     const [formData, setFormData] = useState<Partial<GymMember>>({
         full_name: '',
-        email: '',
         mobile: '',
         address: '',
         date_of_birth: '',
@@ -145,7 +151,6 @@ export default function MembersPage() {
         membership_type: 'Monthly',
         membership_start: new Date().toISOString().split('T')[0],
         membership_end: '',
-        emergency_contact: '',
         notes: ''
     });
 
@@ -298,11 +303,10 @@ export default function MembersPage() {
 
     // Export members to CSV
     const exportToCSV = useCallback(() => {
-        const headers = ['Name', 'Mobile', 'Email', 'Plan', 'Start Date', 'End Date', 'Status'];
+        const headers = ['Name', 'Mobile', 'Plan', 'Start Date', 'End Date', 'Status'];
         const rows = members.map(m => [
             m.full_name || '',
             m.mobile || '',
-            m.email || '',
             m.membership_type || '',
             m.membership_start || '',
             m.membership_end || '',
@@ -445,7 +449,6 @@ export default function MembersPage() {
         setEditingMember(member);
         setFormData({
             full_name: member.full_name || '',
-            email: member.email || '',
             mobile: member.mobile || '',
             address: member.address || '',
             date_of_birth: member.date_of_birth || '',
@@ -455,7 +458,6 @@ export default function MembersPage() {
             membership_type: member.membership_type || 'Monthly',
             membership_start: member.membership_start || new Date().toISOString().split('T')[0],
             membership_end: member.membership_end || '',
-            emergency_contact: member.emergency_contact || '',
             notes: member.notes || ''
         });
         setPhotoPreview(member.photo_url);
@@ -467,7 +469,6 @@ export default function MembersPage() {
         const today = new Date().toISOString().split('T')[0];
         setFormData({
             full_name: member.full_name || '',
-            email: member.email || '',
             mobile: member.mobile || '',
             address: member.address || '',
             date_of_birth: member.date_of_birth || '',
@@ -477,7 +478,6 @@ export default function MembersPage() {
             membership_type: member.membership_type || 'Monthly',
             membership_start: today, // Start from today
             membership_end: '', // Will be calculated by useEffect
-            emergency_contact: member.emergency_contact || '',
             notes: member.notes || ''
         });
         setPhotoPreview(member.photo_url);
@@ -488,7 +488,6 @@ export default function MembersPage() {
     const resetForm = () => {
         setFormData({
             full_name: '',
-            email: '',
             mobile: '',
             address: '',
             date_of_birth: '',
@@ -498,7 +497,6 @@ export default function MembersPage() {
             membership_type: 'Monthly',
             membership_start: new Date().toISOString().split('T')[0],
             membership_end: '',
-            emergency_contact: '',
             notes: ''
         });
         setEditingMember(null);
@@ -512,7 +510,7 @@ export default function MembersPage() {
         let searchResults = members;
         if (debouncedSearch.trim()) {
             const results = fuzzysort.go(debouncedSearch, members, {
-                keys: ['full_name', 'mobile', 'email'],
+                keys: ['full_name', 'mobile'],
                 threshold: -10000, // Lower = more lenient
                 limit: 100
             });
@@ -521,8 +519,9 @@ export default function MembersPage() {
 
         // Apply status filter
         let filtered = searchResults.filter(m => {
-            const status = getMemberStatus(m.membership_end);
             if (filterStatus === 'all') return true;
+            if (filterStatus === 'incomplete') return true; // Pass all searched members to IncompleteProfiles component for internal filtering
+            const status = getMemberStatus(m.membership_end);
             if (filterStatus === 'active') return status === 'active' || status === 'expiring';
             return status === filterStatus;
         });
@@ -572,6 +571,20 @@ export default function MembersPage() {
                             </div>
                         </div>
                         <div className="flex items-center gap-2 ml-auto flex-wrap">
+                            {/* Expiring Soon Toggle */}
+                            <button
+                                onClick={() => setShowExpiringSoon(!showExpiringSoon)}
+                                className={`px-4 py-2 rounded-lg font-bold transition-all flex items-center gap-2 shadow-lg border ${showExpiringSoon
+                                    ? 'bg-yellow-500 text-black border-yellow-400 hover:bg-yellow-400'
+                                    : 'bg-white/5 text-white border-white/10 hover:bg-white/10'
+                                    }`}
+                            >
+                                <AlertTriangle className={`w-4 h-4 ${showExpiringSoon ? 'fill-black stroke-black' : 'text-yellow-500'}`} />
+                                Expiring Soon
+                            </button>
+
+                            <div className="w-px h-8 bg-white/10 mx-2" />
+
                             <button
                                 onClick={() => setShowBulkMessage(true)}
                                 className="bg-green-600/20 text-green-400 px-3 py-2 rounded hover:bg-green-600/30 transition-colors flex items-center gap-2"
@@ -672,80 +685,18 @@ export default function MembersPage() {
                     </div>
                 </div>
 
-                {/* Birthday & Expiry Alerts */}
-                {(stats.alerts.birthdays.length > 0 || stats.alerts.expiringToday.length > 0 || stats.alerts.upcomingBirthdays.length > 0) && (
-                    <div className="mb-6 space-y-3">
-                        {stats.alerts.birthdays.length > 0 && (
-                            <div className="bg-gradient-to-r from-pink-500/10 to-purple-500/10 border border-pink-500/30 rounded-xl p-4 flex items-start gap-3">
-                                <div className="text-3xl">🎂</div>
-                                <div className="flex-1">
-                                    <h3 className="font-bold text-pink-300 mb-1">Birthday Today!</h3>
-                                    <p className="text-sm text-gray-300 mb-2">
-                                        {stats.alerts.birthdays.map(m => m.full_name).join(', ')}
-                                    </p>
-                                    <div className="flex flex-wrap gap-2">
-                                        {stats.alerts.birthdays.map(m => (
-                                            <button
-                                                key={m.id}
-                                                onClick={() => {
-                                                    const msg = encodeURIComponent(`🎂 Happy Birthday ${m.full_name}! 🎉\n\nWishing you strength, health, and gains! May this year bring you closer to all your fitness goals! 💪\n\n- Brother's Fitness Family`);
-                                                    window.open(`https://wa.me/91${m.mobile?.replace(/\D/g, '')}?text=${msg}`, '_blank');
-                                                }}
-                                                className="bg-pink-500/20 hover:bg-pink-500/30 text-pink-200 px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-colors"
-                                            >
-                                                <MessageCircle className="w-3 h-3" /> Wish {m.full_name?.split(' ')[0]}
-                                            </button>
-                                        ))}
-                                    </div>
-                                </div>
-                            </div>
-                        )}
-                        {stats.alerts.expiringToday.length > 0 && (
-                            <div className="bg-gradient-to-r from-red-500/10 to-orange-500/10 border border-red-500/30 rounded-xl p-4 flex items-start gap-3">
-                                <div className="text-3xl">⏰</div>
-                                <div className="flex-1">
-                                    <h3 className="font-bold text-red-300 mb-1">
-                                        {stats.alerts.expiringToday.length} Membership{stats.alerts.expiringToday.length > 1 ? 's' : ''} Expiring Today
-                                    </h3>
-                                    <p className="text-sm text-gray-300 mb-2">
-                                        {stats.alerts.expiringToday.map(m => m.full_name).join(', ')}
-                                    </p>
-                                    <div className="flex flex-wrap gap-2">
-                                        {stats.alerts.expiringToday.map(m => (
-                                            <button
-                                                key={m.id}
-                                                onClick={() => {
-                                                    const msg = encodeURIComponent(`Hi ${m.full_name}! 👋\n\nYour Brother's Fitness membership expires TODAY. Renew now to continue your fitness journey without interruption! 💪\n\nVisit us or reply to renew.\n\n- Brother's Fitness`);
-                                                    window.open(`https://wa.me/91${m.mobile?.replace(/\D/g, '')}?text=${msg}`, '_blank');
-                                                }}
-                                                className="bg-red-500/20 hover:bg-red-500/30 text-red-200 px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-colors"
-                                            >
-                                                <MessageCircle className="w-3 h-3" /> Remind {m.full_name?.split(' ')[0]}
-                                            </button>
-                                        ))}
-                                    </div>
-                                </div>
-                            </div>
-                        )}
-                        {stats.alerts.upcomingBirthdays.length > 0 && (
-                            <div className="bg-gradient-to-r from-purple-500/10 to-indigo-500/10 border border-purple-500/30 rounded-xl p-4 flex items-start gap-3">
-                                <div className="text-3xl"><Gift className="w-8 h-8 text-purple-400" /></div>
-                                <div className="flex-1">
-                                    <h3 className="font-bold text-purple-300 mb-1">🎁 Upcoming Birthdays (Next 7 Days)</h3>
-                                    <div className="flex flex-wrap gap-2 mt-2">
-                                        {stats.alerts.upcomingBirthdays.map(m => (
-                                            <span key={m.id} className="bg-purple-500/20 text-purple-200 px-2 py-1 rounded text-xs">
-                                                {m.full_name} <span className="text-purple-400">({m.daysUntil}d)</span>
-                                            </span>
-                                        ))}
-                                    </div>
-                                </div>
-                            </div>
-                        )}
-                    </div>
+                {/* Expiring Members Table - Controlled by Toggle */}
+                {showExpiringSoon && (
+                    <motion.div
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: 'auto' }}
+                        className="overflow-hidden mb-8"
+                    >
+                        <ExpiringMembersTable members={members} />
+                    </motion.div>
                 )}
 
-                {/* Deployment Alerts (Tactical) */}
+                {/* Deployment Alerts (Birthdays Only) */}
                 <DeploymentAlerts members={members} />
 
                 {/* Analytics Panel */}
@@ -842,11 +793,12 @@ export default function MembersPage() {
                                 { id: 'all', label: 'All' },
                                 { id: 'active', label: 'Active' },
                                 { id: 'expiring', label: 'Expiring' },
-                                { id: 'expired', label: 'Expired' }
+                                { id: 'expired', label: 'Expired' },
+                                { id: 'incomplete', label: 'Incomplete' }
                             ].map((tab) => (
                                 <button
                                     key={tab.id}
-                                    onClick={() => setFilterStatus(tab.id as 'all' | 'active' | 'expiring' | 'expired')}
+                                    onClick={() => setFilterStatus(tab.id as FilterStatus)}
                                     className={`px-3 py-1.5 rounded text-xs font-bold transition-all ${filterStatus === tab.id
                                         ? 'bg-gym-red text-white shadow-lg'
                                         : 'text-gray-400 hover:text-white hover:bg-white/5'
@@ -893,8 +845,30 @@ export default function MembersPage() {
                     </div>
                 )}
 
-                {/* Members Grid */}
-                {loading ? (
+                {/* Members Grid or Incomplete List */}
+                {filterStatus === 'incomplete' ? (
+                    <IncompleteProfiles
+                        members={filteredMembers}
+                        onEdit={(m) => {
+                            setEditingMember(m);
+                            setFormData({
+                                full_name: m.full_name,
+                                mobile: m.mobile,
+                                address: m.address,
+                                date_of_birth: m.date_of_birth,
+                                gender: m.gender,
+                                height_cm: m.height_cm,
+                                weight_kg: m.weight_kg,
+                                photo_url: m.photo_url,
+                                membership_type: m.membership_type,
+                                membership_start: m.membership_start,
+                                membership_end: m.membership_end,
+                                notes: m.notes
+                            });
+                            setShowForm(true);
+                        }}
+                    />
+                ) : loading ? (
                     <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
                         {[...Array(6)].map((_, i) => (
                             <div key={i} className="bg-zinc-900/50 border border-white/10 rounded-xl p-4">
@@ -1136,16 +1110,6 @@ export default function MembersPage() {
                                                     />
                                                 </div>
                                                 <div>
-                                                    <label className="block text-xs font-medium text-gray-300 mb-1.5">Email Address</label>
-                                                    <input
-                                                        type="email"
-                                                        value={formData.email || ''}
-                                                        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                                                        className="w-full bg-black border border-white/20 rounded-lg p-2.5 text-white focus:border-gym-red focus:outline-none transition-colors"
-                                                        placeholder="Optional"
-                                                    />
-                                                </div>
-                                                <div>
                                                     <label className="block text-xs font-medium text-gray-300 mb-1.5">Date of Birth *</label>
                                                     <input
                                                         type="date"
@@ -1261,16 +1225,7 @@ export default function MembersPage() {
                                             />
                                         </div>
 
-                                        <div className="md:col-span-2">
-                                            <label className="block text-xs font-medium text-gray-300 mb-1.5">Emergency Contact</label>
-                                            <input
-                                                type="tel"
-                                                value={formData.emergency_contact || ''}
-                                                onChange={e => setFormData({ ...formData, emergency_contact: e.target.value })}
-                                                className="w-full bg-black border border-white/20 rounded-lg p-2.5 text-white focus:border-gym-red focus:outline-none transition-colors"
-                                                placeholder="Name & Number"
-                                            />
-                                        </div>
+
                                     </div>
                                 </form>
                             </div>

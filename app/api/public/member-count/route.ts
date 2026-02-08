@@ -9,14 +9,12 @@ export async function GET() {
 
         if (error) throw error;
 
-        // Inflate count by 85 as per user request
-        const realCount = count || 0;
-        const displayCount = realCount + 85;
+        // Return real count
+        const displayCount = count || 0;
 
         return NextResponse.json({ count: displayCount });
     } catch (error) {
         console.error('Error fetching member count:', error);
-        // Return 85 + 0 as fallback
-        return NextResponse.json({ count: 85 });
+        return NextResponse.json({ count: 0 });
     }
 }

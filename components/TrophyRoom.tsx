@@ -79,8 +79,8 @@ function ProgressRing({ progress, size = 80 }: { progress: number; size?: number
     );
 }
 
-export default function TrophyRoom() {
-    const [isOpen, setIsOpen] = useState(false);
+export default function TrophyRoom({ isModal = false, onClose }: { isModal?: boolean; onClose?: () => void } = {}) {
+    const [isOpen, setIsOpen] = useState(isModal); // Start open if modal mode
     const [hasViewed, setHasViewed] = useState(true);
     const { medals, visitStreak } = useGamification();
 
@@ -96,6 +96,11 @@ export default function TrophyRoom() {
         const viewed = localStorage.getItem('brofit_trophy_seen');
         if (!viewed) setHasViewed(false);
     }, []);
+
+    // Sync with isModal prop
+    useEffect(() => {
+        if (isModal) setIsOpen(true);
+    }, [isModal]);
 
     useEffect(() => {
         const chatbotBtn = document.getElementById('tactical-chatbot-button');
@@ -120,25 +125,32 @@ export default function TrophyRoom() {
         }
     };
 
+    const handleClose = () => {
+        setIsOpen(false);
+        if (onClose) onClose();
+    };
+
     return (
         <>
-            {/* Trophy Button - Enhanced with glow effect */}
-            <button
-                onClick={handleOpen}
-                className="relative p-2.5 text-gray-400 hover:text-yellow-400 transition-all group"
-                title="Trophy Room"
-            >
-                <Trophy className="w-4 h-4 sm:w-5 sm:h-5 group-hover:scale-110 transition-transform" />
-                {!hasViewed && (
-                    <motion.span
-                        initial={{ scale: 0 }}
-                        animate={{ scale: 1 }}
-                        className="absolute -top-1 -right-1 w-4 h-4 bg-gradient-to-r from-yellow-400 to-amber-500 text-black text-[10px] font-bold rounded-full flex items-center justify-center shadow-lg shadow-yellow-500/50"
-                    >
-                        !
-                    </motion.span>
-                )}
-            </button>
+            {/* Trophy Button - Only show when not in modal mode */}
+            {!isModal && (
+                <button
+                    onClick={handleOpen}
+                    className="relative p-2.5 text-gray-400 hover:text-yellow-400 transition-all group"
+                    title="Trophy Room"
+                >
+                    <Trophy className="w-4 h-4 sm:w-5 sm:h-5 group-hover:scale-110 transition-transform" />
+                    {!hasViewed && (
+                        <motion.span
+                            initial={{ scale: 0 }}
+                            animate={{ scale: 1 }}
+                            className="absolute -top-1 -right-1 w-4 h-4 bg-gradient-to-r from-yellow-400 to-amber-500 text-black text-[10px] font-bold rounded-full flex items-center justify-center shadow-lg shadow-yellow-500/50"
+                        >
+                            !
+                        </motion.span>
+                    )}
+                </button>
+            )}
 
             {/* Trophy Room Modal - Premium Design */}
             <AnimatePresence>
@@ -188,7 +200,7 @@ export default function TrophyRoom() {
                                                 </div>
                                             </div>
                                             <button
-                                                onClick={() => setIsOpen(false)}
+                                                onClick={handleClose}
                                                 className="p-2 hover:bg-white/10 rounded-xl transition-colors text-gray-400 hover:text-white"
                                             >
                                                 <X className="w-5 h-5" />
@@ -198,23 +210,24 @@ export default function TrophyRoom() {
 
                                     {/* Stats Row */}
                                     <div className="px-6 pb-4">
-                                        <div className="flex gap-4">
+                                        <div className="flex flex-col sm:flex-row gap-4">
                                             {/* Streak Card */}
                                             <motion.div
                                                 initial={{ x: -20, opacity: 0 }}
                                                 animate={{ x: 0, opacity: 1 }}
                                                 transition={{ delay: 0.1 }}
-                                                className="flex-1 bg-gradient-to-br from-orange-500/20 to-red-600/10 border border-orange-500/30 rounded-2xl p-4"
+                                                className="flex-1 bg-gradient-to-br from-orange-500/20 to-red-600/10 border border-orange-500/30 rounded-2xl p-4 relative overflow-hidden group"
                                             >
-                                                <div className="flex items-center gap-3">
-                                                    <div className="p-2.5 bg-orange-500/20 rounded-xl">
+                                                <div className="absolute inset-0 bg-orange-500/5 group-hover:bg-orange-500/10 transition-colors" />
+                                                <div className="flex items-center gap-3 relative z-10">
+                                                    <div className="p-2.5 bg-orange-500/20 rounded-xl shadow-inner shadow-orange-500/20">
                                                         <Flame className="w-5 h-5 text-orange-400" />
                                                     </div>
                                                     <div>
-                                                        <p className="text-[10px] text-gray-400 uppercase tracking-wider">Streak</p>
+                                                        <p className="text-[10px] text-gray-400 uppercase tracking-wider font-bold">Streak</p>
                                                         <p className="text-xl font-black text-orange-400">
                                                             {visitStreak}
-                                                            <span className="text-xs ml-1">days</span>
+                                                            <span className="text-xs ml-1 text-orange-500/70 font-bold">DAYS</span>
                                                         </p>
                                                     </div>
                                                 </div>
@@ -225,20 +238,21 @@ export default function TrophyRoom() {
                                                 initial={{ x: 20, opacity: 0 }}
                                                 animate={{ x: 0, opacity: 1 }}
                                                 transition={{ delay: 0.2 }}
-                                                className="flex-1 bg-gradient-to-br from-yellow-500/20 to-amber-600/10 border border-yellow-500/30 rounded-2xl p-4"
+                                                className="flex-1 bg-gradient-to-br from-yellow-500/20 to-amber-600/10 border border-yellow-500/30 rounded-2xl p-4 relative overflow-hidden group"
                                             >
-                                                <div className="flex items-center gap-3">
+                                                <div className="absolute inset-0 bg-yellow-500/5 group-hover:bg-yellow-500/10 transition-colors" />
+                                                <div className="flex items-center gap-3 relative z-10">
                                                     <div className="relative">
                                                         <ProgressRing progress={progress} size={44} />
                                                         <div className="absolute inset-0 flex items-center justify-center">
-                                                            <Star className="w-4 h-4 text-yellow-400" />
+                                                            <Star className="w-4 h-4 text-yellow-400 fill-yellow-400/20" />
                                                         </div>
                                                     </div>
                                                     <div>
-                                                        <p className="text-[10px] text-gray-400 uppercase tracking-wider">Progress</p>
+                                                        <p className="text-[10px] text-gray-400 uppercase tracking-wider font-bold">Rank</p>
                                                         <p className="text-xl font-black text-yellow-400">
                                                             {medals.length}
-                                                            <span className="text-xs text-gray-500">/{allMedals.length}</span>
+                                                            <span className="text-xs text-gray-500 font-bold">/{allMedals.length}</span>
                                                         </p>
                                                     </div>
                                                 </div>
@@ -318,7 +332,7 @@ export default function TrophyRoom() {
                                             <Flame className="w-3 h-3 text-orange-400" />
                                         </p>
                                         <button
-                                            onClick={() => setIsOpen(false)}
+                                            onClick={handleClose}
                                             className="w-full py-3 bg-zinc-800 hover:bg-zinc-700 text-gray-300 hover:text-white rounded-xl font-bold text-sm transition-colors"
                                         >
                                             Close Trophy Room

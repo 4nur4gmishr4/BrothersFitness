@@ -13,6 +13,18 @@ export default function PageWrapper({ children }: { children: React.ReactNode })
     const [showContent, setShowContent] = useState(true);
     const [videoEnded, setVideoEnded] = useState(false);
 
+    const handleVideoComplete = () => {
+        if (videoEnded) return;
+        setVideoEnded(true);
+
+        setTimeout(() => {
+            setShowLoader(false);
+            setShowContent(true);
+            document.body.style.overflow = "";
+            sessionStorage.setItem("brofit_loaded", JSON.stringify({ timestamp: Date.now() }));
+        }, 500);
+    };
+
     useEffect(() => {
         // Check if returning user synchronously
         const hasLoadedData = sessionStorage.getItem("brofit_loaded");
@@ -63,19 +75,9 @@ export default function PageWrapper({ children }: { children: React.ReactNode })
             clearTimeout(failSafe);
         };
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
+    }, [handleVideoComplete]);
 
-    const handleVideoComplete = () => {
-        if (videoEnded) return;
-        setVideoEnded(true);
 
-        setTimeout(() => {
-            setShowLoader(false);
-            setShowContent(true);
-            document.body.style.overflow = "";
-            sessionStorage.setItem("brofit_loaded", JSON.stringify({ timestamp: Date.now() }));
-        }, 500);
-    };
 
     return (
         <>

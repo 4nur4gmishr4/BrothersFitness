@@ -24,3 +24,5 @@ export const CONTACT_INFO = {
 export const WHATSAPP_COUNTRY_CODE = '91';
 
 export const GYM_NAME = "Brother's Fitness";
+
+export const MAX_DAILY_CREDITS = 3;
