@@ -10,10 +10,18 @@ import { MAX_DAILY_CREDITS } from "@/lib/config";
 // moved inside handler to avoid build-time errors
 
 export async function POST(req: Request) {
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-    const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!; // Use Service Role Key for backend checks
-    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
+    if (!supabaseUrl || !supabaseServiceKey) {
+        logger.error("Missing Supabase Configuration", { url: !!supabaseUrl, key: !!supabaseServiceKey });
+        return NextResponse.json(
+            { error: "System Configuration Error: Security Uplink Offline." },
+            { status: 500 }
+        );
+    }
+
+    const supabase = createClient(supabaseUrl, supabaseServiceKey);
     const headerUserId = req.headers.get("x-brofit-user-id");
 
     if (!headerUserId || headerUserId === 'unknown') {
@@ -23,56 +31,58 @@ export async function POST(req: Request) {
         );
     }
 
-    // 1. Check Credits
-    const { data: userProfile, error: userError } = await supabase
-        .from('users')
-        .select('daily_credits, last_credit_reset')
-        .eq('firebase_uid', headerUserId)
-        .single();
-
-    if (userError || !userProfile) {
-        return NextResponse.json({ error: "User profile not found." }, { status: 403 });
-    }
-
-    const today = new Date().toISOString().split('T')[0];
-    let credits = userProfile.daily_credits;
-
-    // Reset logic (mirroring context)
-    if (userProfile.last_credit_reset !== today) {
-        credits = MAX_DAILY_CREDITS; // Reset to Max
-        // We implicitly reset here for the check, but will update DB only on deduction
-    }
-
-    if (credits <= 0) {
-        return NextResponse.json(
-            { error: `Daily tactical credits depleted (0/${MAX_DAILY_CREDITS}). Refreshing tomorrow at 0000 hours.` },
-            { status: 429 }
-        );
-    }
-
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 60000); // 60s timeout for chat
-
     try {
-        const body = await req.json();
+        // 1. Check Credits
+        const { data: userProfile, error: userError } = await supabase
+            .from('users')
+            .select('daily_credits, last_credit_reset')
+            .eq('firebase_uid', headerUserId)
+            .single();
 
-        // Validate with Zod
-        const parsed = ChatSchema.safeParse(body);
-        if (!parsed.success) {
+        if (userError || !userProfile) {
+            console.error('Chat API: Profile Fetch Error:', userError);
+            return NextResponse.json({ error: "Tactical Profile not synchronized. Please update profile first." }, { status: 403 });
+        }
+
+        const today = new Date().toISOString().split('T')[0];
+        let credits = userProfile.daily_credits;
+
+        // Reset logic (mirroring context)
+        if (userProfile.last_credit_reset !== today) {
+            credits = MAX_DAILY_CREDITS; // Reset to Max
+            // We implicitly reset here for the check, but will update DB only on deduction
+        }
+
+        if (credits <= 0) {
             return NextResponse.json(
-                { error: parsed.error.issues[0]?.message || 'Invalid request' },
-                { status: 400 }
+                { error: `Daily tactical credits depleted (0/${MAX_DAILY_CREDITS}). Refreshing tomorrow at 0000 hours.` },
+                { status: 429 }
             );
         }
 
-        const { message, context } = parsed.data;
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 60000); // 60s timeout for chat
 
-        // Contextual System Prompt
-        const languageInstruction = context.language === "hi"
-            ? "CRITICAL RULE: Respond ONLY in informal Hindi (Hinglish) suitable for Indian gym bros. Use words like 'Bhai', 'Tag da', 'Focus kar'. Do not speak pure English."
-            : "Respond in English.";
+        try {
+            const body = await req.json();
 
-        const systemPrompt = `
+            // Validate with Zod
+            const parsed = ChatSchema.safeParse(body);
+            if (!parsed.success) {
+                return NextResponse.json(
+                    { error: parsed.error.issues[0]?.message || 'Invalid request' },
+                    { status: 400 }
+                );
+            }
+
+            const { message, context } = parsed.data;
+
+            // Contextual System Prompt
+            const languageInstruction = context.language === "hi"
+                ? "CRITICAL RULE: Respond ONLY in informal Hindi (Hinglish) suitable for Indian gym bros. Use words like 'Bhai', 'Tag da', 'Focus kar'. Do not speak pure English."
+                : "Respond in English.";
+
+            const systemPrompt = `
             You are 'BroFit AI', an expert tactical fitness and health assistant designed for Indian users.
             The user is seeking expert advice on fitness, nutrition, physical health, and the human body.
             
@@ -101,37 +111,42 @@ export async function POST(req: Request) {
             - Use numbers for lists (e.g., "1. First step, 2. Second step")
         `;
 
-        const aiResponse = await generateTextWithFallback({
-            prompt: message,
-            systemPrompt: systemPrompt,
-            jsonMode: false,
-            temperature: 0.7
-        });
+            const aiResponse = await generateTextWithFallback({
+                prompt: message,
+                systemPrompt: systemPrompt,
+                jsonMode: false,
+                temperature: 0.7
+            });
 
-        // Deduct Credit on Success
-        await supabase
-            .from('users')
-            .update({
-                daily_credits: credits - 1,
-                last_credit_reset: today
-            })
-            .eq('firebase_uid', headerUserId);
+            // Deduct Credit on Success
+            await supabase
+                .from('users')
+                .update({
+                    daily_credits: credits - 1,
+                    last_credit_reset: today
+                })
+                .eq('firebase_uid', headerUserId);
 
-        clearTimeout(timeoutId);
-        return NextResponse.json({
-            response: aiResponse.text,
-            meta: { model: aiResponse.modelUsed, provider: aiResponse.providerUsed }
-        });
-    } catch (error: unknown) {
-        clearTimeout(timeoutId);
-        const err = error as { name?: string; message?: string };
+            clearTimeout(timeoutId);
+            return NextResponse.json({
+                response: aiResponse.text,
+                meta: { model: aiResponse.modelUsed, provider: aiResponse.providerUsed }
+            });
+        } catch (error: unknown) {
+            clearTimeout(timeoutId);
+            const err = error as { name?: string; message?: string };
 
-        if (err.name === 'AbortError') {
-            return NextResponse.json({ error: "Timeout: Chat took too long. Please retry." }, { status: 408 });
+            if (err.name === 'AbortError') {
+                return NextResponse.json({ error: "Timeout: Chat took too long. Please retry." }, { status: 408 });
+            }
+
+            // Sanitized error logging (no API keys)
+            logger.error("Chat Error", { error: err?.message || "Unknown error" });
+            return NextResponse.json({ error: "System Busy. All tactical uplinks failed." }, { status: 500 });
         }
-
-        // Sanitized error logging (no API keys)
-        logger.error("Chat Error", { error: err?.message || "Unknown error" });
-        return NextResponse.json({ error: "System Busy. All tactical uplinks failed." }, { status: 500 });
+    } catch (error: unknown) {
+        const err = error as Error;
+        logger.error("Fatal API Error", { error: err.message });
+        return NextResponse.json({ error: "Major System Failure: Uplink Desynchronized." }, { status: 500 });
     }
 }

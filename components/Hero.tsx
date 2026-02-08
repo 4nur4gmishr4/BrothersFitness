@@ -7,16 +7,16 @@ import QuoteCycler from "./QuoteCycler";
 import CurvedLoop from "@/components/react-bits/CurvedLoop";
 
 export default function Hero() {
-  const [isMobile, setIsMobile] = useState(true);
+  const [isMobile, setIsMobile] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const [memberCount, setMemberCount] = useState(0);
 
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      setIsMobile(window.innerWidth < 768);
-      const handleResize = () => setIsMobile(window.innerWidth < 768);
-      window.addEventListener('resize', handleResize);
-      return () => window.removeEventListener('resize', handleResize);
-    }
+    setMounted(true);
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
   // Fetch member count
@@ -36,7 +36,7 @@ export default function Hero() {
   return (
     <section className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden bg-black text-white py-16 md:py-0">
       {/* Background grid animation - desktop only */}
-      {!isMobile && (
+      {mounted && !isMobile && (
         <div className="absolute inset-0 opacity-20">
           <motion.div
             className="absolute inset-0"
@@ -67,7 +67,7 @@ export default function Hero() {
       )}
 
       {/* Glow blobs - desktop only */}
-      {!isMobile && (
+      {mounted && !isMobile && (
         <>
           <motion.div
             className="absolute top-1/4 left-1/4 w-96 h-96 bg-gym-red rounded-full blur-[120px] opacity-20"
@@ -151,7 +151,7 @@ export default function Hero() {
               transition={{ duration: 2, repeat: Infinity }}
             />
             <motion.button
-              className="relative bg-gym-red text-white px-8 md:px-14 py-4 md:py-6 font-mono font-bold text-xs md:text-base uppercase tracking-widest hover:bg-white hover:text-black transition-all duration-300 overflow-hidden"
+              className="relative bg-gym-red text-white px-8 md:px-14 py-4 md:py-6 font-mono font-bold text-xs md:text-base uppercase tracking-widest hover:bg-white hover:text-black transition-all duration-300 rounded-md shadow-[0_6px_0_#991218] active:shadow-none active:translate-y-[2px] overflow-hidden"
               whileHover={{
                 boxShadow: "0 0 30px rgba(215, 25, 33, 0.6)",
               }}

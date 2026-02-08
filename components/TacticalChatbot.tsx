@@ -89,20 +89,6 @@ export default function TacticalChatbot() {
         }
     }, [showWelcome, setShowWelcome]);
 
-    // Calculate stroke dash for credit ring
-    // 5 credits = 100%, 0 credits = 0%
-    const radius = 22;
-    const circumference = 2 * Math.PI * radius;
-    const progress = remainingCredits / MAX_DAILY_CREDITS;
-    const strokeDashoffset = circumference - (progress * circumference);
-
-    // Google colors for the ring
-    const getRingColor = () => {
-        if (remainingCredits === MAX_DAILY_CREDITS) return "#0F9D58"; // Green
-        if (remainingCredits >= 2) return "#4285F4"; // Blue
-        if (remainingCredits === 1) return "#F4B400"; // Yellow
-        return "#DB4437"; // Red
-    };
 
     const handleSend = async (text: string) => {
         if (!text.trim()) return;
@@ -165,10 +151,12 @@ export default function TacticalChatbot() {
                 // Credit deduction is now handled by backend, but we refresh local state
                 await refreshCredits();
             }
-        } catch {
+        } catch (error: unknown) {
+            console.error("Chat Error:", error);
+            const message = error instanceof Error ? error.message : "System offline.";
             setMessages((prev) => [...prev, {
                 role: "model",
-                text: language === "hi" ? "System offline hai." : "Error: System Offline.",
+                text: language === "hi" ? "System offline hai." : `Error: ${message}`,
                 isError: true,
                 retryText: text
             }]);
@@ -195,201 +183,199 @@ export default function TacticalChatbot() {
                     >
                         <Cpu className="w-6 h-6 text-white animate-pulse relative z-10" />
 
-                        {/* Google Colored Credit Ring */}
-                        {isLoggedIn && (
-                            <svg className="absolute inset-0 w-full h-full -rotate-90 pointer-events-none" viewBox="0 0 48 48">
-                                <circle
-                                    cx="24"
-                                    cy="24"
-                                    r={radius}
-                                    fill="none"
-                                    stroke="#333"
-                                    strokeWidth="3"
-                                    opacity="0.3"
-                                />
-                                <circle
-                                    cx="24"
-                                    cy="24"
-                                    r={radius}
-                                    fill="none"
-                                    stroke={getRingColor()}
-                                    strokeWidth="3"
-                                    strokeDasharray={circumference}
-                                    strokeDashoffset={strokeDashoffset}
-                                    strokeLinecap="round"
-                                    className="transition-all duration-1000 ease-out"
-                                />
-                            </svg>
-                        )}
+                        {/* Rotating White Circle Ring */}
+                        <motion.div
+                            className="absolute inset-0 border-2 border-white/20 rounded-full"
+                            style={{ margin: "-4px" }}
+                        />
+                        <motion.div
+                            className="absolute inset-0 border-t-2 border-white rounded-full"
+                            style={{ margin: "-4px" }}
+                            animate={{ rotate: 360 }}
+                            transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+                        />
                     </motion.button>
                 )}
             </AnimatePresence>
 
             <AnimatePresence>
                 {isOpen && (
-                    <motion.div
-                        className="fixed bottom-6 right-6 z-[99999] w-[95vw] sm:w-[380px] h-[500px] sm:h-[600px] bg-black border border-white/20 rounded-2xl overflow-hidden flex flex-col shadow-2xl"
-                        initial={{ opacity: 0, scale: 0.9, y: 20 }}
-                        animate={{ opacity: 1, scale: 1, y: 0 }}
-                        exit={{ opacity: 0, scale: 0.9, y: 20 }}
-                    >
-                        {/* Header */}
-                        <div className="bg-gym-red p-4 flex justify-between items-center">
-                            <div className="flex items-center gap-3">
-                                <Cpu className="w-5 h-5 text-white" />
-                                <span className="font-black uppercase tracking-widest text-sm text-white">BroFit AI</span>
-                                {isLoggedIn ? (
-                                    <span className="text-xs bg-white/20 px-2 py-0.5 rounded-full font-bold">
-                                        {remainingCredits}/{MAX_DAILY_CREDITS}
-                                    </span>
-                                ) : (
-                                    <span className="text-xs bg-yellow-500/20 text-yellow-400 px-2 py-0.5 rounded-full font-bold">
-                                        Login
-                                    </span>
-                                )}
-                            </div>
-                            <button
-                                onClick={() => setIsOpen(false)}
-                                className="text-white hover:text-black transition-colors p-1 rounded-full hover:bg-white/20"
-                                aria-label="Close chat"
-                            >
-                                <X className="w-5 h-5" />
-                            </button>
-                        </div>
+                    <div className="fixed inset-0 z-[99999] flex items-center justify-center p-4">
+                        {/* Backdrop for centering and low-end support (simple opacity) */}
+                        <motion.div
+                            className="absolute inset-0 bg-black/60 backdrop-blur-[2px]"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            onClick={() => setIsOpen(false)}
+                        />
 
-                        {/* Language Selection Mode */}
-                        {!language ? (
-                            <div className="flex-1 bg-black/95 flex flex-col items-center justify-center p-6 space-y-6 text-center">
-                                <Languages className="w-12 h-12 text-gym-red" />
-                                <div>
-                                    <h3 className="text-white font-bold text-lg">Select Language</h3>
-                                    <p className="text-gray-400 text-xs">Bhasha chunein</p>
-                                </div>
-                                <div className="grid grid-cols-2 gap-4 w-full">
-                                    <button
-                                        onClick={() => handleLanguageChange("en")}
-                                        className="bg-white/10 border border-white/20 p-4 rounded-xl hover:bg-gym-red hover:border-gym-red transition-all group"
-                                    >
-                                        <span className="block text-xl font-black text-white group-hover:text-white">EN</span>
-                                        <span className="text-[10px] uppercase tracking-widest text-gray-400 group-hover:text-white/80">English</span>
-                                    </button>
-                                    <button
-                                        onClick={() => handleLanguageChange("hi")}
-                                        className="bg-white/10 border border-white/20 p-4 rounded-xl hover:bg-gym-red hover:border-gym-red transition-all group"
-                                    >
-                                        <span className="block text-xl font-black text-white group-hover:text-white">HI</span>
-                                        <span className="text-[10px] uppercase tracking-widest text-gray-400 group-hover:text-white/80">Hindi</span>
-                                    </button>
-                                </div>
-                            </div>
-                        ) : (
-                            /* Chat Interface */
-                            <>
-                                <div
-                                    className="flex-1 overflow-y-auto p-4 space-y-4 bg-black/95 relative cursor-auto"
-                                    ref={scrollRef}
-                                    onPointerDownCapture={(e) => e.stopPropagation()}
-                                >
-                                    {messages.length === 0 && (
-                                        <div className="absolute inset-0 flex flex-col justify-center items-center p-6 space-y-4 opacity-70 pointer-events-none">
-                                            <Cpu className="w-12 h-12 text-white/10" />
-                                            <div className="grid gap-2 w-full pointer-events-auto">
-                                                {SUGGESTIONS[language].map((s, i) => (
-                                                    <button
-                                                        key={i}
-                                                        onClick={() => handleSend(s.text)}
-                                                        className="flex items-center gap-3 p-3 border border-white/10 hover:bg-white/10 hover:border-gym-red/50 text-left transition-colors rounded-xl backdrop-blur-sm bg-black/50"
-                                                    >
-                                                        <s.icon className="w-4 h-4 text-gym-red shrink-0" />
-                                                        <span className="text-xs font-bold text-gray-200">{s.text}</span>
-                                                    </button>
-                                                ))}
-                                            </div>
-                                        </div>
+                        <motion.div
+                            className="relative w-full max-w-[420px] h-full max-h-[85vh] sm:max-h-[650px] bg-black border border-white/20 rounded-2xl overflow-hidden flex flex-col shadow-2xl"
+                            initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.95, y: 20 }}
+                            transition={{ duration: 0.3, ease: "easeOut" }}
+                        >
+                            {/* Header */}
+                            <div className="bg-gym-red p-4 flex justify-between items-center shadow-lg">
+                                <div className="flex items-center gap-3">
+                                    <Cpu className="w-5 h-5 text-white" />
+                                    <span className="font-black uppercase tracking-widest text-sm text-white">BroFit AI</span>
+                                    {isLoggedIn ? (
+                                        <span className="text-xs bg-white/20 px-2 py-0.5 rounded-full font-bold">
+                                            {remainingCredits}/{MAX_DAILY_CREDITS}
+                                        </span>
+                                    ) : (
+                                        <span className="text-xs bg-yellow-500/20 text-yellow-400 px-2 py-0.5 rounded-full font-bold">
+                                            Login
+                                        </span>
                                     )}
+                                </div>
+                                <button
+                                    onClick={() => setIsOpen(false)}
+                                    className="text-white hover:text-black transition-colors p-1 rounded-full hover:bg-white/20"
+                                    aria-label="Close chat"
+                                >
+                                    <X className="w-5 h-5" />
+                                </button>
+                            </div>
 
-                                    {messages.map((msg, i) => (
-                                        <motion.div
-                                            key={i}
-                                            initial={{ opacity: 0, scale: 0.9, y: 10 }}
-                                            animate={{ opacity: 1, scale: 1, y: 0 }}
-                                            className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
+                            {/* Language Selection Mode */}
+                            {!language ? (
+                                <div className="flex-1 bg-black/95 flex flex-col items-center justify-center p-6 space-y-6 text-center">
+                                    <Languages className="w-12 h-12 text-gym-red" />
+                                    <div>
+                                        <h3 className="text-white font-bold text-lg">Select Language</h3>
+                                        <p className="text-gray-400 text-xs">Bhasha chunein</p>
+                                    </div>
+                                    <div className="grid grid-cols-2 gap-4 w-full">
+                                        <button
+                                            onClick={() => handleLanguageChange("en")}
+                                            className="bg-white/10 border border-white/20 p-4 rounded-xl hover:bg-gym-red hover:border-gym-red transition-all group"
                                         >
-                                            <div className={`max-w-[85%] ${msg.role === "user"
-                                                ? ""
-                                                : "space-y-2"
-                                                }`}>
-                                                <div className={`p-3 text-sm rounded-2xl shadow-sm ${msg.role === "user"
-                                                    ? "bg-gym-red text-white font-medium rounded-tr-none"
-                                                    : `${msg.isError ? "bg-red-900/20 border-red-500/30" : "bg-white/10"} text-gray-100 border border-white/10 rounded-tl-none`
-                                                    }`}>
-                                                    {msg.text}
-                                                </div>
-                                                {msg.isError && msg.retryText && (
-                                                    <button
-                                                        onClick={() => handleSend(msg.retryText!)}
-                                                        className="text-xs text-gym-red hover:text-white border border-gym-red/30 hover:border-gym-red px-3 py-1 rounded-full transition-colors"
-                                                        aria-label="Retry failed message"
-                                                    >
-                                                        Retry
-                                                    </button>
-                                                )}
-                                            </div>
-                                        </motion.div>
-                                    ))}
-                                    {loading && (
-                                        <div className="flex justify-start">
-                                            <div className="bg-white/5 p-3 rounded-2xl rounded-tl-none border border-white/5">
-                                                <div className="flex gap-1">
-                                                    <motion.div animate={{ scale: [1, 1.2, 1] }} transition={{ repeat: Infinity, duration: 0.6 }} className="w-1.5 h-1.5 bg-gym-red rounded-full" />
-                                                    <motion.div animate={{ scale: [1, 1.2, 1] }} transition={{ repeat: Infinity, duration: 0.6, delay: 0.2 }} className="w-1.5 h-1.5 bg-gym-red rounded-full" />
-                                                    <motion.div animate={{ scale: [1, 1.2, 1] }} transition={{ repeat: Infinity, duration: 0.6, delay: 0.4 }} className="w-1.5 h-1.5 bg-gym-red rounded-full" />
-                                                </div>
-                                            </div>
-                                        </div>
-                                    )}
+                                            <span className="block text-xl font-black text-white group-hover:text-white">EN</span>
+                                            <span className="text-[10px] uppercase tracking-widest text-gray-400 group-hover:text-white/80">English</span>
+                                        </button>
+                                        <button
+                                            onClick={() => handleLanguageChange("hi")}
+                                            className="bg-white/10 border border-white/20 p-4 rounded-xl hover:bg-gym-red hover:border-gym-red transition-all group"
+                                        >
+                                            <span className="block text-xl font-black text-white group-hover:text-white">HI</span>
+                                            <span className="text-[10px] uppercase tracking-widest text-gray-400 group-hover:text-white/80">Hindi</span>
+                                        </button>
+                                    </div>
                                 </div>
+                            ) : (
+                                /* Chat Interface */
+                                <>
+                                    <div
+                                        className="flex-1 overflow-y-auto p-4 space-y-4 bg-black/95 relative cursor-auto"
+                                        ref={scrollRef}
+                                        onPointerDownCapture={(e) => e.stopPropagation()}
+                                    >
+                                        {messages.length === 0 && (
+                                            <div className="absolute inset-0 flex flex-col justify-center items-center p-6 space-y-4 opacity-70 pointer-events-none">
+                                                <Cpu className="w-12 h-12 text-white/10" />
+                                                <div className="grid gap-2 w-full pointer-events-auto">
+                                                    {SUGGESTIONS[language].map((s, i) => (
+                                                        <button
+                                                            key={i}
+                                                            onClick={() => handleSend(s.text)}
+                                                            className="flex items-center gap-3 p-3 border border-white/10 hover:bg-white/10 hover:border-gym-red/50 text-left transition-colors rounded-xl backdrop-blur-sm bg-black/50"
+                                                        >
+                                                            <s.icon className="w-4 h-4 text-gym-red shrink-0" />
+                                                            <span className="text-xs font-bold text-gray-200">{s.text}</span>
+                                                        </button>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        )}
 
-                                {/* Input */}
-                                <form
-                                    onSubmit={(e) => { e.preventDefault(); handleSend(input); }}
-                                    className="p-3 border-t border-white/10 bg-black flex gap-2 cursor-auto"
-                                    onPointerDownCapture={(e) => e.stopPropagation()}
-                                >
-                                    <button
-                                        type="button"
-                                        onClick={() => setLanguage(null)}
-                                        className="p-2 text-gray-500 hover:text-white transition-colors"
-                                        title="Change Language"
-                                        aria-label="Change language"
+                                        {messages.map((msg, i) => (
+                                            <motion.div
+                                                key={i}
+                                                initial={{ opacity: 0, scale: 0.9, y: 10 }}
+                                                animate={{ opacity: 1, scale: 1, y: 0 }}
+                                                className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
+                                            >
+                                                <div className={`max-w-[85%] ${msg.role === "user"
+                                                    ? ""
+                                                    : "space-y-2"
+                                                    }`}>
+                                                    <div className={`p-3 text-sm rounded-2xl shadow-sm ${msg.role === "user"
+                                                        ? "bg-gym-red text-white font-medium rounded-tr-none"
+                                                        : `${msg.isError ? "bg-red-900/20 border-red-500/30" : "bg-white/10"} text-gray-100 border border-white/10 rounded-tl-none`
+                                                        }`}>
+                                                        {msg.text}
+                                                    </div>
+                                                    {msg.isError && msg.retryText && (
+                                                        <button
+                                                            onClick={() => handleSend(msg.retryText!)}
+                                                            className="text-xs text-gym-red hover:text-white border border-gym-red/30 hover:border-gym-red px-3 py-1 rounded-full transition-colors"
+                                                            aria-label="Retry failed message"
+                                                        >
+                                                            Retry
+                                                        </button>
+                                                    )}
+                                                </div>
+                                            </motion.div>
+                                        ))}
+                                        {loading && (
+                                            <div className="flex justify-start">
+                                                <div className="bg-white/5 p-3 rounded-2xl rounded-tl-none border border-white/5">
+                                                    <div className="flex gap-1">
+                                                        <motion.div animate={{ scale: [1, 1.2, 1] }} transition={{ repeat: Infinity, duration: 0.6 }} className="w-1.5 h-1.5 bg-gym-red rounded-full" />
+                                                        <motion.div animate={{ scale: [1, 1.2, 1] }} transition={{ repeat: Infinity, duration: 0.6, delay: 0.2 }} className="w-1.5 h-1.5 bg-gym-red rounded-full" />
+                                                        <motion.div animate={{ scale: [1, 1.2, 1] }} transition={{ repeat: Infinity, duration: 0.6, delay: 0.4 }} className="w-1.5 h-1.5 bg-gym-red rounded-full" />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    {/* Input */}
+                                    <form
+                                        onSubmit={(e) => { e.preventDefault(); handleSend(input); }}
+                                        className="p-3 border-t border-white/10 bg-black flex gap-2 cursor-auto"
+                                        onPointerDownCapture={(e) => e.stopPropagation()}
                                     >
-                                        <Languages className="w-5 h-5" />
-                                    </button>
-                                    <input
-                                        value={input}
-                                        onChange={(e) => setInput(e.target.value)}
-                                        placeholder={language === "hi" ? "Poochhein..." : "Ask BroFit..."}
-                                        className="flex-1 bg-white/5 border border-white/10 rounded-xl px-4 py-2 text-sm text-white focus:outline-none focus:border-gym-red transition-colors placeholder:text-gray-600"
-                                    />
-                                    <button
-                                        type="submit"
-                                        disabled={loading || !input.trim()}
-                                        className="bg-gym-red p-2 rounded-xl text-white hover:bg-white hover:text-black disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                                        aria-label="Send message"
-                                    >
-                                        <Send className="w-5 h-5" />
-                                    </button>
-                                </form>
-                            </>
-                        )}
-                    </motion.div>
+                                        <button
+                                            type="button"
+                                            onClick={() => setLanguage(null)}
+                                            className="p-2 text-gray-500 hover:text-white transition-colors"
+                                            title="Change Language"
+                                            aria-label="Change language"
+                                        >
+                                            <Languages className="w-5 h-5" />
+                                        </button>
+                                        <input
+                                            value={input}
+                                            onChange={(e) => setInput(e.target.value)}
+                                            placeholder={language === "hi" ? "Poochhein..." : "Ask BroFit..."}
+                                            className="flex-1 bg-white/5 border border-white/10 rounded-xl px-4 py-2 text-sm text-white focus:outline-none focus:border-gym-red transition-colors placeholder:text-gray-600"
+                                        />
+                                        <button
+                                            type="submit"
+                                            disabled={loading || !input.trim()}
+                                            className="bg-gym-red p-2 rounded-xl text-white hover:bg-white hover:text-black disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                                            aria-label="Send message"
+                                        >
+                                            <Send className="w-5 h-5" />
+                                        </button>
+                                    </form>
+                                </>
+                            )}
+                        </motion.div>
+                    </div>
                 )}
-            </AnimatePresence>
+            </AnimatePresence >
 
             {/* Login Modal */}
-            <LoginModal
+            < LoginModal
                 isOpen={showLoginModal}
-                onClose={() => setShowLoginModal(false)}
+                onClose={() => setShowLoginModal(false)
+                }
                 onSuccess={() => setShowLoginModal(false)}
             />
         </>

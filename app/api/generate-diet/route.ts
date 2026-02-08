@@ -5,14 +5,19 @@ import { generateTextWithFallback } from "@/lib/ai-provider";
 import { createClient } from "@supabase/supabase-js";
 import { MAX_DAILY_CREDITS } from "@/lib/config";
 
-// Initialize Supabase Admin Client
-// moved inside handler
-
 export async function POST(req: Request) {
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-    const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
-    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
+    if (!supabaseUrl || !supabaseServiceKey) {
+        logger.error("Missing Supabase Configuration", { url: !!supabaseUrl, key: !!supabaseServiceKey });
+        return NextResponse.json(
+            { error: "System Configuration Error: Nutrition Uplink Offline." },
+            { status: 500 }
+        );
+    }
+
+    const supabase = createClient(supabaseUrl, supabaseServiceKey);
     const headerUserId = req.headers.get("x-brofit-user-id");
 
     if (!headerUserId || headerUserId === 'unknown') {
@@ -22,32 +27,33 @@ export async function POST(req: Request) {
         );
     }
 
-    // 1. Check Credits
-    const { data: userProfile, error: userError } = await supabase
-        .from('users')
-        .select('daily_credits, last_credit_reset')
-        .eq('firebase_uid', headerUserId)
-        .single();
-
-    if (userError || !userProfile) {
-        return NextResponse.json({ error: "User profile not found." }, { status: 403 });
-    }
-
-    const today = new Date().toISOString().split('T')[0];
-    let credits = userProfile.daily_credits;
-
-    if (userProfile.last_credit_reset !== today) {
-        credits = MAX_DAILY_CREDITS;
-    }
-
-    if (credits <= 0) {
-        return NextResponse.json(
-            { error: `Daily tactical credits depleted (0/${MAX_DAILY_CREDITS}). Refreshing tomorrow at 0000 hours.` },
-            { status: 429 }
-        );
-    }
-
     try {
+        // 1. Check Credits
+        const { data: userProfile, error: userError } = await supabase
+            .from('users')
+            .select('daily_credits, last_credit_reset')
+            .eq('firebase_uid', headerUserId)
+            .single();
+
+        if (userError || !userProfile) {
+            console.error('Diet API: Profile Fetch Error:', userError);
+            return NextResponse.json({ error: "Tactical Profile not synchronized. Please update profile first." }, { status: 403 });
+        }
+
+        const today = new Date().toISOString().split('T')[0];
+        let credits = userProfile.daily_credits;
+
+        if (userProfile.last_credit_reset !== today) {
+            credits = MAX_DAILY_CREDITS;
+        }
+
+        if (credits <= 0) {
+            return NextResponse.json(
+                { error: `Daily tactical credits depleted (0/${MAX_DAILY_CREDITS}). Refreshing tomorrow at 0000 hours.` },
+                { status: 429 }
+            );
+        }
+
         const body = await req.json();
 
         // Validate with Zod
@@ -223,6 +229,8 @@ export async function POST(req: Request) {
                 last_credit_reset: today
             })
             .eq('firebase_uid', headerUserId);
+
+        return NextResponse.json(parsedResponse);
 
     } catch (error) {
         const errorMessage = error instanceof Error ? error.message : 'Unknown error';
