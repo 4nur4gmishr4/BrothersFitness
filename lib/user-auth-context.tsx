@@ -110,14 +110,8 @@ export function UserAuthProvider({ children }: { children: ReactNode }) {
                     setShowWelcome(true);
                     toast.success('Successfully signed in!');
                 } else if (isAuthPending) {
-                    // Result came back null, but we expected a login
                     console.warn('Auth: Redirect returned null despite pending flag.');
-                    // This often happens if user backs out, or the redirect state was lost (e.g. private tab mixed mode)
-                    // We won't show an error here to avoid false positives on normal reloads, 
-                    // unless we utilize a timer or strictly rely on the flag.
-                    // Let's show a mild error or just log it. 
-                    // Actually, if user expects feedback, we should give it.
-                    toast.error("Login incomplete or disrupted. Please try again.");
+                    toast.error("Login incomplete. If using Incognito/Private mode, try a normal tab.", { duration: 6000 });
                 }
             })
             .catch((error) => {
