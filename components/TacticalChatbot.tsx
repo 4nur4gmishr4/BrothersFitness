@@ -32,8 +32,7 @@ const SUGGESTIONS = {
 };
 
 export default function TacticalChatbot() {
-    const { isLoggedIn, remainingCredits, deductCredit, refreshCredits, showWelcome, setShowWelcome } = useUserAuth();
-    const pathname = usePathname();
+    const { isLoggedIn, remainingCredits, refreshCredits, showWelcome, setShowWelcome } = useUserAuth();
 
     // Simplified positioning - Fixed Bottom Right
     // Removing complex drag/storage logic to ensure visibility

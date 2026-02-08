@@ -47,21 +47,22 @@ export default function ProfileModal({ isOpen, onClose }: ProfileModalProps) {
         setSuccess(false);
 
         const data: ProfileUpdateData = {
-            full_name: fullName || undefined,
-            photo_url: photoUrl || undefined,
+            full_name: fullName.trim() || undefined,
+            photo_url: photoUrl.trim() || undefined,
             date_of_birth: dateOfBirth || undefined,
             height_cm: heightCm ? parseInt(heightCm) : undefined,
             weight_kg: weightKg ? parseInt(weightKg) : undefined,
             gender: gender
         };
 
+        console.log('Profile Modal: Saving data...', data);
         const result = await updateProfile(data);
 
         if (result.success) {
             setSuccess(true);
-            setTimeout(() => setSuccess(false), 2000);
+            setTimeout(() => setSuccess(false), 2500);
         } else {
-            setError(result.error || "Failed to update profile");
+            setError(result.error || "Uplink Error: Deployment failed.");
         }
 
         setLoading(false);

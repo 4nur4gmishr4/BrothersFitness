@@ -133,13 +133,11 @@ export function UserAuthProvider({ children }: { children: ReactNode }) {
             if (!supabaseError && supabaseUser) {
                 console.log('Auth Success: Supabase profile found.');
                 // Determine if reset is needed
-                const updates: Record<string, any> = {};
-                let currentCredits = supabaseUser.daily_credits;
+                const updates: Record<string, unknown> = {};
 
                 if (supabaseUser.last_credit_reset !== today) {
                     updates.daily_credits = MAX_DAILY_CREDITS;
                     updates.last_credit_reset = today;
-                    currentCredits = MAX_DAILY_CREDITS;
                 }
 
                 // Sync basic info if missing
@@ -159,7 +157,7 @@ export function UserAuthProvider({ children }: { children: ReactNode }) {
                         if (Object.keys(updates).length > 0) {
                             await supabase.from('users').update(updates).eq('firebase_uid', fbUser.uid);
                         }
-                        const { id: _, ...firestorePayload } = finalUser;
+                        const { id: _id, ...firestorePayload } = finalUser;
                         await setDoc(doc(db, 'users', fbUser.uid), {
                             ...firestorePayload,
                             updated_at: serverTimestamp()
@@ -174,7 +172,7 @@ export function UserAuthProvider({ children }: { children: ReactNode }) {
 
             // 2. Fallback: Try Firestore if Supabase fails or user not found
             console.log('Auth Fallback: Checking Firestore...');
-            let firestoreUser: any = null;
+            let firestoreUser: Record<string, unknown> | null = null;
             try {
                 const userDoc = await getDoc(doc(db, 'users', fbUser.uid));
                 if (userDoc.exists()) {
@@ -187,18 +185,19 @@ export function UserAuthProvider({ children }: { children: ReactNode }) {
 
             if (firestoreUser) {
                 // Map Firestore back to UserProfile structure
+                const fsData = firestoreUser as Record<string, unknown>;
                 const mappedUser: UserProfile = {
                     id: fbUser.uid,
                     firebase_uid: fbUser.uid,
-                    email: firestoreUser.email || fbUser.email,
-                    full_name: firestoreUser.full_name || fbUser.displayName,
-                    photo_url: firestoreUser.photo_url || fbUser.photoURL,
-                    date_of_birth: firestoreUser.date_of_birth || null,
-                    height_cm: firestoreUser.height_cm || null,
-                    weight_kg: firestoreUser.weight_kg || null,
-                    gender: firestoreUser.gender || null,
-                    daily_credits: firestoreUser.daily_credits ?? MAX_DAILY_CREDITS,
-                    last_credit_reset: firestoreUser.last_credit_reset || today
+                    email: (fsData.email as string | null) || fbUser.email,
+                    full_name: (fsData.full_name as string | null) || fbUser.displayName,
+                    photo_url: (fsData.photo_url as string | null) || fbUser.photoURL,
+                    date_of_birth: (fsData.date_of_birth as string | null) || null,
+                    height_cm: (fsData.height_cm as number | null) || null,
+                    weight_kg: (fsData.weight_kg as number | null) || null,
+                    gender: (fsData.gender as string | null) || null,
+                    daily_credits: (fsData.daily_credits as number) ?? MAX_DAILY_CREDITS,
+                    last_credit_reset: (fsData.last_credit_reset as string | null) || today
                 };
 
                 // Apply reset logic to fallback
@@ -329,16 +328,26 @@ export function UserAuthProvider({ children }: { children: ReactNode }) {
     };
 
     const updateProfile = async (data: ProfileUpdateData): Promise<{ success: boolean; error?: string }> => {
+        console.log('Profile Sync: Update initiated...', data);
         try {
             if (!user) {
+                console.warn('Profile Sync: No user in state.');
                 return { success: false, error: 'Not authenticated' };
             }
 
             const supabase = getSupabase();
             const db = getFirestoreDb();
+            const uid = user.firebase_uid || user.id;
+
+            if (!uid) {
+                console.error('Profile Sync: No UID found for update.');
+                return { success: false, error: 'User identifier identification failed' };
+            }
+
+            console.log(`Profile Sync: Target UID ${uid}`);
 
             // 1. Update Supabase
-            const { error } = await supabase
+            const { error: sbError } = await supabase
                 .from('users')
                 .update({
                     full_name: data.full_name ?? user.full_name,
@@ -349,28 +358,35 @@ export function UserAuthProvider({ children }: { children: ReactNode }) {
                     photo_url: data.photo_url ?? user.photo_url,
                     updated_at: new Date().toISOString()
                 })
-                .eq('firebase_uid', user.firebase_uid);
+                .eq('firebase_uid', uid);
 
-            if (error) {
-                console.error('Supabase profile update error:', error);
+            if (sbError) {
+                console.error('Profile Sync: Supabase error:', sbError);
+                // We continue to Firestore even if Supabase fails to maintain best-effort sync
+            } else {
+                console.log('Profile Sync: Supabase update successful.');
             }
 
             // 2. Update Firestore
             try {
-                await updateDoc(doc(db, 'users', user.firebase_uid), {
+                await updateDoc(doc(db, 'users', uid), {
                     ...data,
                     updated_at: serverTimestamp()
                 });
+                console.log('Profile Sync: Firestore update successful.');
             } catch (fsError) {
-                console.error('Firestore profile update error:', fsError);
+                console.error('Profile Sync: Firestore error:', fsError);
+                // If both fail, we return error
+                if (sbError) return { success: false, error: 'Database sync failed' };
             }
 
             // Update local state
+            console.log('Profile Sync: Updating local state.');
             setUser(prev => prev ? { ...prev, ...data } : null);
 
             return { success: true };
         } catch (error) {
-            console.error('Update profile error:', error);
+            console.error('Profile Sync: Critical error:', error);
             return { success: false, error: 'Update failed' };
         }
     };

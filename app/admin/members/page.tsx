@@ -7,7 +7,7 @@ import {
     Plus, Search, Edit2, Trash2, Camera, X, Save,
     User, Phone, Shield,
     Users, LogOut, TrendingUp, AlertTriangle, AlertCircle, CheckCircle,
-    Download, MessageCircle, IndianRupee, FileText, Send, Gift, BarChart3,
+    Download, MessageCircle, IndianRupee, FileText, Send, BarChart3,
     Clock, Mail
 } from 'lucide-react';
 import { toast } from 'sonner';
