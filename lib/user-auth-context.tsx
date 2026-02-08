@@ -110,8 +110,23 @@ export function UserAuthProvider({ children }: { children: ReactNode }) {
                     setShowWelcome(true);
                     toast.success('Successfully signed in!');
                 } else if (isAuthPending) {
-                    console.warn('Auth: Redirect returned null despite pending flag.');
-                    toast.error("Login incomplete. If using Incognito/Private mode, try a normal tab.", { duration: 6000 });
+                    // Double check if auth.currentUser is actually set (Race condition safety)
+                    if (auth.currentUser) {
+                        console.log('Auth: Recovered via persistence despite null redirect.');
+                        return;
+                    }
+
+                    // Check for Local IP usage which is the #1 cause of this on mobile dev
+                    const hostname = window.location.hostname;
+                    const isLocalIP = /^(\d{1,3}\.){3}\d{1,3}$/.test(hostname);
+
+                    console.warn('Auth: Redirect incomplete. Flag exists but no result.');
+
+                    if (isLocalIP) {
+                        toast.error(`Login Failed: Local IP (${hostname}) not authorized in Firebase? Add to console.`, { duration: 8000 });
+                    } else {
+                        toast.error("Login incomplete. Try disabling Pop-up Blockers or using a standard tab.", { duration: 6000 });
+                    }
                 }
             })
             .catch((error) => {
