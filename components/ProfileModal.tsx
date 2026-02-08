@@ -46,26 +46,32 @@ export default function ProfileModal({ isOpen, onClose }: ProfileModalProps) {
         setError("");
         setSuccess(false);
 
-        const data: ProfileUpdateData = {
-            full_name: fullName.trim() || undefined,
-            photo_url: photoUrl.trim() || undefined,
-            date_of_birth: dateOfBirth || undefined,
-            height_cm: heightCm ? parseInt(heightCm) : undefined,
-            weight_kg: weightKg ? parseInt(weightKg) : undefined,
-            gender: gender
-        };
+        try {
+            const data: ProfileUpdateData = {
+                full_name: fullName.trim() || undefined,
+                photo_url: photoUrl.trim() || undefined,
+                date_of_birth: dateOfBirth || undefined,
+                height_cm: heightCm ? parseInt(heightCm) : undefined,
+                weight_kg: weightKg ? parseInt(weightKg) : undefined,
+                gender: gender
+            };
 
-        console.log('Profile Modal: Saving data...', data);
-        const result = await updateProfile(data);
+            console.log('Profile Modal: Saving data...', data);
+            const result = await updateProfile(data);
 
-        if (result.success) {
-            setSuccess(true);
-            setTimeout(() => setSuccess(false), 2500);
-        } else {
-            setError(result.error || "Uplink Error: Deployment failed.");
+            if (result.success) {
+                setSuccess(true);
+                setTimeout(() => setSuccess(false), 2500);
+            } else {
+                setError(result.error || "Uplink Error: Deployment failed.");
+            }
+        } catch (err: unknown) {
+            console.error('Profile Modal: Save exception:', err);
+            const message = err instanceof Error ? err.message : "An unexpected error occurred.";
+            setError(message);
+        } finally {
+            setLoading(false);
         }
-
-        setLoading(false);
     };
 
     const handleLogout = async () => {
@@ -254,11 +260,19 @@ export default function ProfileModal({ isOpen, onClose }: ProfileModalProps) {
                         {/* Save Button */}
                         <button
                             onClick={handleSave}
-                            disabled={loading}
-                            className="w-full bg-gym-red text-white font-bold py-3 rounded-lg hover:bg-white hover:text-black transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                            disabled={loading || success}
+                            className={`w-full font-bold py-3 rounded-lg transition-all flex items-center justify-center gap-2 ${success
+                                ? "bg-green-500 text-white cursor-default"
+                                : "bg-gym-red text-white hover:bg-white hover:text-black disabled:opacity-50 disabled:cursor-not-allowed"
+                                }`}
                         >
                             {loading ? (
                                 <Loader2 className="w-5 h-5 animate-spin" />
+                            ) : success ? (
+                                <>
+                                    <CheckCircle className="w-5 h-5" />
+                                    Details Saved
+                                </>
                             ) : (
                                 <>
                                     <CheckCircle className="w-5 h-5" />
