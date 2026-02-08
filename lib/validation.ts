@@ -66,3 +66,14 @@ export const DietResponseSchema = z.object({
     }).passthrough().optional(),
     meal_plan: z.array(z.any()).optional(),
 }).passthrough(); // Allow extra fields from AI
+
+// --- Profile Update ---
+export const ProfileUpdateSchema = z.object({
+    full_name: z.string().min(1, 'Name is required').optional(),
+    date_of_birth: z.string().optional(),
+    height_cm: z.number().optional(),
+    weight_kg: z.number().optional(),
+    gender: z.string().optional(),
+    photo_url: z.string().url().optional(),
+});
+export type ProfileUpdatePayload = z.infer<typeof ProfileUpdateSchema>;

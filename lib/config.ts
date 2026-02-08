@@ -3,10 +3,21 @@
 
 export const PLAN_PRICES = {
     '1 Month': 700,
+    'Monthly': 700,
     '3 Months': 1800,
+    'Quarterly': 1800,
     '6 Months': 3300,
+    'Half-Yearly': 3300,
     '15 Days': 350
 } as const;
+
+/**
+ * Get price for a plan, defaulting to Monthly if not found
+ */
+export function getPlanPrice(planName?: string | null): number {
+    if (!planName) return PLAN_PRICES['Monthly'];
+    return (PLAN_PRICES as any)[planName] ?? PLAN_PRICES['Monthly'];
+}
 
 export const CONTACT_INFO = {
     aman: {

@@ -9,6 +9,7 @@ import { useAdmin } from "@/lib/auth-context";
 import { useUserAuth } from "@/lib/user-auth-context";
 import TrophyRoom from "@/components/TrophyRoom";
 import dynamic from "next/dynamic";
+import WelcomeModal from './WelcomeModal';
 import Image from "next/image";
 
 // Lazy load modals
@@ -20,7 +21,7 @@ export default function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
-  const [showLoginModal, setShowLoginModal] = useState(false);
+  const { showLoginModal, setShowLoginModal, showWelcome, setShowWelcome } = useUserAuth();
   const [showTrophyRoom, setShowTrophyRoom] = useState(false);
   const { scrollY } = useScroll();
   const { soundEnabled, toggleSound } = useTacticalSound();
@@ -398,6 +399,7 @@ export default function Navbar() {
       {/* Modals */}
       <ProfileModal isOpen={showProfileModal} onClose={() => setShowProfileModal(false)} />
       <LoginModal isOpen={showLoginModal} onClose={() => setShowLoginModal(false)} />
+      <WelcomeModal isOpen={showWelcome} onClose={() => setShowWelcome(false)} />
       {showTrophyRoom && <TrophyRoom isModal onClose={() => setShowTrophyRoom(false)} />}
     </>
   );

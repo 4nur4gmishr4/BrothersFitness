@@ -16,7 +16,7 @@ export async function POST(req: Request) {
     if (!supabaseUrl || !supabaseServiceKey) {
         logger.error("Missing Supabase Configuration", { url: !!supabaseUrl, key: !!supabaseServiceKey });
         return NextResponse.json(
-            { error: "System Configuration Error: Security Uplink Offline." },
+            { error: "System Configuration Error: API service offline." },
             { status: 500 }
         );
     }
@@ -41,7 +41,7 @@ export async function POST(req: Request) {
 
         if (userError || !userProfile) {
             console.error('Chat API: Profile Fetch Error:', userError);
-            return NextResponse.json({ error: "Tactical Profile not synchronized. Please update profile first." }, { status: 403 });
+            return NextResponse.json({ error: "User profile not found. Please complete your profile." }, { status: 403 });
         }
 
         const today = new Date().toISOString().split('T')[0];
@@ -55,7 +55,7 @@ export async function POST(req: Request) {
 
         if (credits <= 0) {
             return NextResponse.json(
-                { error: `Daily tactical credits depleted (0/${MAX_DAILY_CREDITS}). Refreshing tomorrow at 0000 hours.` },
+                { error: `Daily credits depleted (0/${MAX_DAILY_CREDITS}). Resets tomorrow.` },
                 { status: 429 }
             );
         }
@@ -83,32 +83,25 @@ export async function POST(req: Request) {
                 : "Respond in English.";
 
             const systemPrompt = `
-            You are 'BroFit AI', an expert tactical fitness and health assistant designed for Indian users.
-            The user is seeking expert advice on fitness, nutrition, physical health, and the human body.
+            You are 'BroFit AI', an expert fitness and health assistant for Indian users.
+            Provide expert advice on fitness, nutrition, and wellness.
             
             User Context:
             ${JSON.stringify(context)}
 
-            Your Expertise Areas:
-            1. **Fitness & Training**: Workout plans, exercise form, muscle building, strength training, cardio, HIIT, recovery
-            2. **Nutrition**: Diet planning, macro/micro nutrients, meal timing, supplements, Indian foods, weight management
-            3. **Physical Health**: Injury prevention, mobility, flexibility, posture, sleep, stress management
-            4. **Body Science**: Muscle groups, metabolism, hormones, body composition, biomechanics
-            5. **Sports Performance**: Athletic training, endurance, power, speed, agility
-            
-            Your Mission:
-            1. Provide accurate, evidence-based answers on ALL fitness and health topics
-            2. Be specific and actionable - give concrete steps, numbers, and methods
-            3. Keep answers concise (2-4 sentences max) but comprehensive
-            4. Use motivational, tactical language ("Deploy", "Execute", "Protocol", "Systems")
-            5. For Indian users: recommend local foods, understand cultural context (vegetarian options, budget constraints)
+            Guidelines:
+            1. Provide accurate, evidence-based answers on fitness and health.
+            2. Be specific and actionable with concrete steps and numbers.
+            3. Keep answers concise (2-4 sentences max).
+            4. Maintain a professional, motivational tone.
+            5. For Indian users: suggest local foods and culturally appropriate options.
             6. ${languageInstruction}
 
-            STRICT FORMATTING RULES:
-            - Do NOT use markdown (no asterisks **, no hashes #)
-            - Do NOT use quotation marks within the text
-            - Keep paragraphs short and scannable
-            - Use numbers for lists (e.g., "1. First step, 2. Second step")
+            Formatting:
+            - No markdown (no ** or #).
+            - No quotation marks.
+            - Short, scannable paragraphs.
+            - Use numbered lists.
         `;
 
             const aiResponse = await generateTextWithFallback({
@@ -142,11 +135,11 @@ export async function POST(req: Request) {
 
             // Sanitized error logging (no API keys)
             logger.error("Chat Error", { error: err?.message || "Unknown error" });
-            return NextResponse.json({ error: "System Busy. All tactical uplinks failed." }, { status: 500 });
+            return NextResponse.json({ error: "Service temporarily unavailable. Please try again." }, { status: 500 });
         }
     } catch (error: unknown) {
         const err = error as Error;
         logger.error("Fatal API Error", { error: err.message });
-        return NextResponse.json({ error: "Major System Failure: Uplink Desynchronized." }, { status: 500 });
+        return NextResponse.json({ error: "An unexpected error occurred." }, { status: 500 });
     }
 }

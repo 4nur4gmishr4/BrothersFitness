@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { supabase, type GymMember } from '@/lib/supabase';
-import { getPlanPrice } from '@/lib/pricing-config';
+import { getPlanPrice } from '@/lib/config';
 import { logger } from '@/lib/logger';
 
 export const maxDuration = 30;

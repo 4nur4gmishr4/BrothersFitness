@@ -42,6 +42,8 @@ type UserAuthContextType = {
     remainingCredits: number;
     showWelcome: boolean;
     setShowWelcome: (show: boolean) => void;
+    showLoginModal: boolean;
+    setShowLoginModal: (show: boolean) => void;
     // Auth actions
     signInWithGoogle: () => Promise<{ success: boolean; error?: string }>;
     logout: () => Promise<void>;
@@ -89,6 +91,7 @@ export function UserAuthProvider({ children }: { children: ReactNode }) {
     const [firebaseUser, setFirebaseUser] = useState<FirebaseUser | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [showWelcome, setShowWelcome] = useState(false);
+    const [showLoginModal, setShowLoginModal] = useState(false);
 
     // Listen to Firebase auth state
     useEffect(() => {
@@ -98,16 +101,15 @@ export function UserAuthProvider({ children }: { children: ReactNode }) {
         getRedirectResult(auth)
             .then(async (result) => {
                 if (result?.user) {
-                    console.log('Mobile Auth: Redirect result captured successfully.', result.user.uid);
-                    // result.user will trigger onAuthStateChanged, but we can proactively log here
+                    console.log('Auth: Redirect successful', result.user.uid);
+                    setShowWelcome(true);
                 }
             })
             .catch((error) => {
-                console.error('Mobile Auth: Redirect error caught:', error);
-                // Check for unauthorized domains or blocked context
+                console.error('Auth: Redirect error', error);
                 const code = error?.code;
                 if (code === 'auth/unauthorized-domain') {
-                    console.error('CRITICAL: Current domain is not authorized in Firebase Console.');
+                    console.error('Auth: Domain not authorized');
                 }
             });
 
@@ -115,9 +117,7 @@ export function UserAuthProvider({ children }: { children: ReactNode }) {
             setFirebaseUser(fbUser);
 
             if (fbUser) {
-                // Persist UID for API headers immediately
                 localStorage.setItem('brofit_user_id', fbUser.uid);
-                // User is signed in, fetch or create user profile
                 await loadUserProfile(fbUser);
             } else {
                 localStorage.removeItem('brofit_user_id');
@@ -130,13 +130,11 @@ export function UserAuthProvider({ children }: { children: ReactNode }) {
     }, []);
 
     const loadUserProfile = async (fbUser: FirebaseUser) => {
-        console.log('Auth Transition: UID detected. Starting profile load...');
         const supabase = getSupabase();
         const db = getFirestoreDb();
         const today = new Date().toISOString().split('T')[0];
 
         try {
-            console.log('Auth Step 1: Querying Supabase...');
             const { data: supabaseUser, error: supabaseError } = await supabase
                 .from('users')
                 .select('*')
@@ -144,8 +142,7 @@ export function UserAuthProvider({ children }: { children: ReactNode }) {
                 .single();
 
             if (!supabaseError && supabaseUser) {
-                console.log('Auth Success: Supabase profile found.');
-                // Determine if reset is needed
+                console.info('Auth: Supabase profile found.');
                 const updates: Record<string, unknown> = {};
 
                 if (supabaseUser.last_credit_reset !== today) {
@@ -246,7 +243,6 @@ export function UserAuthProvider({ children }: { children: ReactNode }) {
                 mobile: ""
             };
 
-            console.log('Auth Progress: Creating Supabase record...');
             const { data: newUser, error: insertError } = await supabase
                 .from('users')
                 .insert(newUserPayload)
@@ -254,11 +250,9 @@ export function UserAuthProvider({ children }: { children: ReactNode }) {
                 .single();
 
             if (newUser && !insertError) {
-                console.log('Auth Success: New Supabase user created.');
                 setUser(newUser);
                 setShowWelcome(true);
             } else {
-                console.warn('Auth Warning: Supabase creation failed, using fallback.');
                 // Extreme fallback
                 setUser({
                     id: fbUser.uid,
@@ -272,7 +266,6 @@ export function UserAuthProvider({ children }: { children: ReactNode }) {
             }
             setIsLoading(false);
 
-            console.log('Auth Sync: Scheduling Firestore creation...');
             setDoc(doc(db, 'users', fbUser.uid), {
                 ...newUserPayload,
                 created_at: serverTimestamp(),
@@ -314,6 +307,7 @@ export function UserAuthProvider({ children }: { children: ReactNode }) {
             } else {
                 try {
                     await signInWithPopup(auth, provider);
+                    setShowWelcome(true);
                 } catch (error) {
                     const code = typeof error === 'object' && error && 'code' in error
                         ? String((error as { code?: string }).code)
@@ -544,6 +538,8 @@ export function UserAuthProvider({ children }: { children: ReactNode }) {
             remainingCredits: user?.daily_credits ?? MAX_DAILY_CREDITS,
             showWelcome,
             setShowWelcome,
+            showLoginModal,
+            setShowLoginModal,
             signInWithGoogle,
             logout,
             updateProfile,
