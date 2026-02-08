@@ -1,92 +1,51 @@
-import { GoogleGenerativeAI } from "@google/generative-ai";
-import OpenAI from "openai";
 import { NextResponse } from "next/server";
-import { checkRateLimit, RATE_LIMITS } from "@/lib/rate-limit";
 import { ChatSchema } from "@/lib/validation";
 import { logger } from "@/lib/logger";
+import { generateTextWithFallback } from "@/lib/ai-provider";
+import { createClient } from "@supabase/supabase-js";
 
-const apiKey = process.env.GEMINI_API_KEY!;
-const genAI = new GoogleGenerativeAI(apiKey);
+import { MAX_DAILY_CREDITS } from "@/lib/config";
 
-// Lazy initialization to avoid build-time crash when OPENAI_API_KEY is not set
-let openaiClient: OpenAI | null = null;
-function getOpenAI(): OpenAI {
-    if (!openaiClient) {
-        openaiClient = new OpenAI({
-            apiKey: process.env.OPENAI_API_KEY,
-        });
-    }
-    return openaiClient;
-}
-
-/**
- * Hybrid Generation Strategy:
- * 1. Primary: Gemini 2.5 Flash (Fast, Efficient)
- * 2. Secondary: Gemini 2.5 Flash Lite (Backup)
- * 3. Tertiary: OpenAI GPT-4o-Mini (High Reliability / Rate Limit Absorber)
- */
-async function generateWithFallback(message: string, systemPrompt: string, signal?: AbortSignal) {
-    // 1. Try Gemini Models
-    const geminiModels = ["gemini-2.5-flash", "gemini-2.5-flash-lite"];
-
-    for (const modelName of geminiModels) {
-        try {
-            const model = genAI.getGenerativeModel({ model: modelName });
-            const chat = model.startChat({
-                history: [
-                    { role: "user", parts: [{ text: systemPrompt }] },
-                    { role: "model", parts: [{ text: "Affirmative. Systems Online. Ready to assist." }] },
-                ],
-            });
-
-            const result = await chat.sendMessage(message);
-            return result.response.text();
-        } catch (error: unknown) {
-            const err = error as { message?: string; status?: number };
-            const isRateLimit = err.message?.includes("429") || err.status === 429 || err.status === 503;
-            if (isRateLimit) {
-                console.warn(`[Gemini] Model ${modelName} hit rate limit. Switching backup...`);
-                continue;
-            }
-            console.warn(`[Gemini] Model ${modelName} error: ${err.message}.`);
-        }
-    }
-
-    // 2. Fallback to OpenAI (GPT-4o-Mini)
-    try {
-        console.log("[System] Engaging OpenAI Backup (GPT-4o-Mini)...");
-        const completion = await getOpenAI().chat.completions.create({
-            messages: [
-                { role: "system", content: systemPrompt },
-                { role: "assistant", content: "Affirmative. Systems Online. Ready to assist." },
-                { role: "user", content: message },
-            ],
-            model: "gpt-4o-mini"
-        }, { signal });
-        return completion.choices[0].message.content || "System Malfunction.";
-    } catch (error: unknown) {
-        const err = error as { message?: string };
-        console.error("[System] OpenAI Fallback Failed:", err?.message || "Unknown");
-        throw new Error("All tactical models exhausted. Application Offline.");
-    }
-}
+// Initialize Supabase Admin Client (for reliable credit checks)
+// moved inside handler to avoid build-time errors
 
 export async function POST(req: Request) {
-    // Rate limit check - Combined 5 AI requests per day per IP (diet + chatbot)
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+    const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!; // Use Service Role Key for backend checks
+    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
     const headerUserId = req.headers.get("x-brofit-user-id");
-    const forwarded = req.headers.get("x-forwarded-for");
-    const ip = forwarded?.split(",")[0]?.trim() || "unknown";
 
-    // Prioritize User ID (Browser UUID), fallback to IP
-    const identifier = (headerUserId && headerUserId !== 'unknown') ? `user_${headerUserId}` : `ai_${ip}`;
-
-    const rateCheck = checkRateLimit(identifier, RATE_LIMITS.AI_COMBINED);
-
-    if (!rateCheck.allowed) {
+    if (!headerUserId || headerUserId === 'unknown') {
         return NextResponse.json(
-            {
-                error: "Daily AI limit reached. You can use AI features (diet + chatbot) up to 5 times per day. Please try again tomorrow."
-            },
+            { error: "Authentication required. Please login to use Tactical Chat." },
+            { status: 401 }
+        );
+    }
+
+    // 1. Check Credits
+    const { data: userProfile, error: userError } = await supabase
+        .from('users')
+        .select('daily_credits, last_credit_reset')
+        .eq('firebase_uid', headerUserId)
+        .single();
+
+    if (userError || !userProfile) {
+        return NextResponse.json({ error: "User profile not found." }, { status: 403 });
+    }
+
+    const today = new Date().toISOString().split('T')[0];
+    let credits = userProfile.daily_credits;
+
+    // Reset logic (mirroring context)
+    if (userProfile.last_credit_reset !== today) {
+        credits = MAX_DAILY_CREDITS; // Reset to Max
+        // We implicitly reset here for the check, but will update DB only on deduction
+    }
+
+    if (credits <= 0) {
+        return NextResponse.json(
+            { error: `Daily tactical credits depleted (0/${MAX_DAILY_CREDITS}). Refreshing tomorrow at 0000 hours.` },
             { status: 429 }
         );
     }
@@ -142,10 +101,27 @@ export async function POST(req: Request) {
             - Use numbers for lists (e.g., "1. First step, 2. Second step")
         `;
 
-        const response = await generateWithFallback(message, systemPrompt, controller.signal);
+        const aiResponse = await generateTextWithFallback({
+            prompt: message,
+            systemPrompt: systemPrompt,
+            jsonMode: false,
+            temperature: 0.7
+        });
+
+        // Deduct Credit on Success
+        await supabase
+            .from('users')
+            .update({
+                daily_credits: credits - 1,
+                last_credit_reset: today
+            })
+            .eq('firebase_uid', headerUserId);
 
         clearTimeout(timeoutId);
-        return NextResponse.json({ response });
+        return NextResponse.json({
+            response: aiResponse.text,
+            meta: { model: aiResponse.modelUsed, provider: aiResponse.providerUsed }
+        });
     } catch (error: unknown) {
         clearTimeout(timeoutId);
         const err = error as { name?: string; message?: string };

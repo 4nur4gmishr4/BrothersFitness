@@ -21,6 +21,11 @@ const nextConfig = {
         hostname: 'auoljtzkmfnmwzfbwdwq.supabase.co',
         pathname: '/storage/v1/object/public/member-photos/**',
       },
+      {
+        protocol: 'https',
+        hostname: 'lh3.googleusercontent.com',
+        pathname: '**',
+      },
     ],
   },
 };

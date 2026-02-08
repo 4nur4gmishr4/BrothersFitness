@@ -9,6 +9,7 @@
  * TODO: For production, integrate Upstash Redis for persistent, distributed rate limiting.
  * See: https://upstash.com/docs/redis/sdks/ratelimit-ts/overview
  */
+import { MAX_DAILY_CREDITS } from "@/lib/config";
 
 interface RateLimitEntry {
     count: number;
@@ -84,9 +85,9 @@ export function checkRateLimit(
 
 // Preset configurations
 export const RATE_LIMITS = {
-    // Combined AI limit: 5 requests per day per IP (diet + chatbot)
+    // Combined AI limit: daily credits per day per IP (diet + chatbot)
     AI_COMBINED: {
-        maxRequests: 5,
+        maxRequests: MAX_DAILY_CREDITS,
         windowMs: 24 * 60 * 60 * 1000 // 24 hours
     },
     // Login attempts: 5 per 15 minutes

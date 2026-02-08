@@ -7,6 +7,7 @@ import { TacticalSoundProvider } from "@/components/TacticalSoundContext";
 import ReadingProgressBar from "@/components/ReadingProgressBar";
 import PageTransition from "@/components/PageTransition";
 import { AdminProvider } from "@/lib/auth-context";
+import { UserAuthProvider } from "@/lib/user-auth-context";
 import { Toaster } from "sonner";
 
 const inter = Inter({
@@ -86,15 +87,17 @@ export default function RootLayout({
           }}
         />
         <AdminProvider>
-          <GamificationProvider>
-            <TacticalSoundProvider>
-              <PageWrapper>
-                <PageTransition>
-                  {children}
-                </PageTransition>
-              </PageWrapper>
-            </TacticalSoundProvider>
-          </GamificationProvider>
+          <UserAuthProvider>
+            <GamificationProvider>
+              <TacticalSoundProvider>
+                <PageWrapper>
+                  <PageTransition>
+                    {children}
+                  </PageTransition>
+                </PageWrapper>
+              </TacticalSoundProvider>
+            </GamificationProvider>
+          </UserAuthProvider>
         </AdminProvider>
       </body>
     </html>

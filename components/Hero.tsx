@@ -8,7 +8,7 @@ import CurvedLoop from "@/components/react-bits/CurvedLoop";
 
 export default function Hero() {
   const [isMobile, setIsMobile] = useState(true);
-  const [memberCount, setMemberCount] = useState(85);
+  const [memberCount, setMemberCount] = useState(0);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -27,7 +27,7 @@ export default function Hero() {
         const data = await res.json();
         setMemberCount(data.count);
       } catch {
-        setMemberCount(85); // Fallback
+        setMemberCount(0); // Fallback
       }
     };
     fetchMemberCount();

@@ -3,18 +3,29 @@
 import { useState, useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { motion, AnimatePresence, useScroll, useMotionValueEvent } from "framer-motion";
-import { Menu, X, ArrowRight, Volume2, VolumeX, Instagram, MessageCircle } from "lucide-react";
+import { Menu, X, ArrowRight, Volume2, VolumeX, Instagram, MessageCircle, User, Trophy } from "lucide-react";
 import { useTacticalSound } from "@/components/TacticalSoundContext";
 import { useAdmin } from "@/lib/auth-context";
+import { useUserAuth } from "@/lib/user-auth-context";
 import TrophyRoom from "@/components/TrophyRoom";
+import dynamic from "next/dynamic";
+import Image from "next/image";
+
+// Lazy load modals
+const ProfileModal = dynamic(() => import("@/components/ProfileModal"), { ssr: false });
+const LoginModal = dynamic(() => import("@/components/LoginModal"), { ssr: false });
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const [showProfileModal, setShowProfileModal] = useState(false);
+  const [showLoginModal, setShowLoginModal] = useState(false);
+  const [showTrophyRoom, setShowTrophyRoom] = useState(false);
   const { scrollY } = useScroll();
   const { soundEnabled, toggleSound } = useTacticalSound();
-  useAdmin(); // Keep the hook call for context, but don't destructure unused values
+  const { user, isLoggedIn, isLoading } = useUserAuth();
+  useAdmin(); // Keep the hook call for context
   const pathname = usePathname();
   const router = useRouter();
 
@@ -157,8 +168,34 @@ export default function Navbar() {
                 <MessageCircle className="w-4 h-4 sm:w-6 sm:h-6" />
               </motion.a>
 
-              {/* Trophy Room (Gamification) */}
-              <TrophyRoom />
+              {/* Profile Button (replaces Trophy) */}
+              <motion.button
+                onClick={() => {
+                  if (isLoggedIn) {
+                    setShowProfileModal(true);
+                  } else {
+                    setShowLoginModal(true);
+                  }
+                }}
+                className="p-2.5 sm:p-2.5 text-gray-400 hover:text-gym-red transition-colors"
+                aria-label="Profile"
+                whileHover={!isMobile ? { scale: 1.1 } : undefined}
+                whileTap={{ scale: 0.9 }}
+              >
+                {isLoading ? (
+                  <div className="w-4 h-4 sm:w-6 sm:h-6 rounded-full bg-gray-600 animate-pulse" />
+                ) : isLoggedIn && user?.photo_url ? (
+                  <Image
+                    src={user.photo_url}
+                    alt="Profile"
+                    width={24}
+                    height={24}
+                    className="w-6 h-6 rounded-full object-cover border border-gym-red"
+                  />
+                ) : (
+                  <User className="w-4 h-4 sm:w-6 sm:h-6" />
+                )}
+              </motion.button>
 
               {/* Hamburger Menu */}
               <motion.button
@@ -263,6 +300,22 @@ export default function Navbar() {
                   transition={{ delay: 0.5 }}
                   className="mt-8 pt-6 border-t border-white/10 space-y-6"
                 >
+                  {/* Trophy Room Button */}
+                  <div className="flex justify-center">
+                    <button
+                      onClick={() => {
+                        setShowTrophyRoom(true);
+                        setIsOpen(false);
+                      }}
+                      className="flex items-center gap-2 px-6 py-3 bg-yellow-500/10 border border-yellow-500/30 rounded-full hover:bg-yellow-500/20 transition-colors"
+                    >
+                      <Trophy className="w-5 h-5 text-yellow-500" />
+                      <span className="text-sm font-mono text-yellow-500 uppercase tracking-widest">
+                        Trophy Room
+                      </span>
+                    </button>
+                  </div>
+
                   {/* Sound Toggle in Menu */}
                   <div className="flex justify-center">
                     <button
@@ -341,6 +394,11 @@ export default function Navbar() {
           </>
         )}
       </AnimatePresence>
+
+      {/* Modals */}
+      <ProfileModal isOpen={showProfileModal} onClose={() => setShowProfileModal(false)} />
+      <LoginModal isOpen={showLoginModal} onClose={() => setShowLoginModal(false)} />
+      {showTrophyRoom && <TrophyRoom isModal onClose={() => setShowTrophyRoom(false)} />}
     </>
   );
 }
