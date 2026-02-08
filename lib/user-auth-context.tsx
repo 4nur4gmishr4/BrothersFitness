@@ -65,6 +65,7 @@ export type ProfileUpdateData = {
 
 const UserAuthContext = createContext<UserAuthContextType | undefined>(undefined);
 
+import { toast } from "sonner";
 import { MAX_DAILY_CREDITS } from '@/lib/config';
 
 const getAuthErrorMessage = (error: unknown): string => {
@@ -75,13 +76,14 @@ const getAuthErrorMessage = (error: unknown): string => {
     if (code === 'auth/unauthorized-domain') {
         const domain = typeof window !== 'undefined' ? window.location.hostname : 'this domain';
         console.error(`FirebaseAuth Error: Domain '${domain}' is not authorized.`);
-        return `Google Sign-In is not enabled for '${domain}'. Add it in Firebase Console > Authentication > Settings > Authorized domains.`;
+        const msg = `Domain '${domain}' is not authorized. Add it in Firebase Console.`;
+        toast.error(msg);
+        return msg;
     }
     if (code === 'auth/popup-blocked') {
-        return 'Popup blocked by the browser. Please allow popups or try again.';
-    }
-    if (code === 'auth/popup-closed-by-user') {
-        return 'Popup closed before completing sign-in.';
+        const msg = 'Popup blocked. Please allow popups or use the Redirect method.';
+        toast.error(msg);
+        return msg;
     }
     return error instanceof Error ? error.message : 'Sign-in failed';
 };
@@ -103,13 +105,17 @@ export function UserAuthProvider({ children }: { children: ReactNode }) {
                 if (result?.user) {
                     console.log('Auth: Redirect successful', result.user.uid);
                     setShowWelcome(true);
+                    toast.success('Successfully signed in!');
                 }
             })
             .catch((error) => {
                 console.error('Auth: Redirect error', error);
                 const code = error?.code;
                 if (code === 'auth/unauthorized-domain') {
-                    console.error('Auth: Domain not authorized');
+                    const domain = window.location.hostname;
+                    toast.error(`Login Failed: Domain '${domain}' not authorized in Firebase.`);
+                } else {
+                    toast.error(`Login Failed: ${error.message}`);
                 }
             });
 
