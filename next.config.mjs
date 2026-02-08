@@ -2,7 +2,7 @@ import withPWA from '@ducanh2912/next-pwa';
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  reactStrictMode: true,
+  reactStrictMode: false,
   outputFileTracingRoot: undefined,
   images: {
     remotePatterns: [
