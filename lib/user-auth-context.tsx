@@ -303,32 +303,42 @@ export function UserAuthProvider({ children }: { children: ReactNode }) {
             const auth = getFirebaseAuth();
             const provider = getGoogleProvider();
 
+            // Enhanced Mobile Detection
             const isMobile = typeof window !== 'undefined' && (
-                /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent) ||
+                /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
                 (navigator.maxTouchPoints > 0) ||
-                (window.innerWidth <= 768)
+                (window.matchMedia("(max-width: 768px)").matches)
             );
 
+            console.log("Auth: Device detected as", isMobile ? "Mobile" : "Desktop");
+
             if (isMobile) {
-                toast.loading("Redirecting to Google Login...");
+                const toastId = toast.loading("Redirecting to Google...", { duration: 10000 });
                 try {
                     await signInWithRedirect(auth, provider);
+                    // The page will unload here, so success/loading state persists
+                    return { success: true };
                 } catch (e) {
-                    toast.error("Redirect failed. Check console.");
-                    console.error(e);
-                    throw e;
+                    toast.dismiss(toastId);
+                    console.error("Redirect Error:", e);
+                    const msg = e instanceof Error ? e.message : "Redirect failed";
+                    toast.error(`Login Error: ${msg}`, { duration: 6000 });
+                    return { success: false, error: msg };
                 }
-                return { success: true }; // Page will unload
             } else {
                 try {
                     await signInWithPopup(auth, provider);
                     setShowWelcome(true);
+                    toast.success("Signed in successfully!");
                 } catch (error) {
                     const code = typeof error === 'object' && error && 'code' in error
                         ? String((error as { code?: string }).code)
                         : '';
-                    if (code === 'auth/popup-blocked' || code === 'auth/popup-closed-by-user') {
-                        toast.loading("Popup blocked. Switching to Redirect...");
+
+                    console.log("Popup failed with code:", code);
+
+                    if (code === 'auth/popup-blocked' || code === 'auth/popup-closed-by-user' || code === 'auth/cancelled-popup-request') {
+                        toast.info("Popup blocked. Redirecting instead...", { duration: 4000 });
                         await signInWithRedirect(auth, provider);
                         return { success: true };
                     } else {
