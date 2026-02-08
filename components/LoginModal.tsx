@@ -101,7 +101,10 @@ export default function LoginModal({ isOpen, onClose, onSuccess }: LoginModalPro
                             className="w-full flex items-center justify-center gap-3 bg-white text-black font-bold py-3 px-6 rounded-xl hover:bg-gray-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                             {loading ? (
-                                <Loader2 className="w-5 h-5 animate-spin" />
+                                <div className="flex items-center gap-2">
+                                    <Loader2 className="w-5 h-5 animate-spin" />
+                                    <span>Fetching Profile...</span>
+                                </div>
                             ) : (
                                 <>
                                     <svg className="w-5 h-5" viewBox="0 0 24 24">

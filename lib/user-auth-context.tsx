@@ -104,13 +104,13 @@ export function UserAuthProvider({ children }: { children: ReactNode }) {
             if (fbUser) {
                 // Persist UID for API headers immediately
                 localStorage.setItem('brofit_user_id', fbUser.uid);
-                // User is signed in, fetch or create user profile from Supabase
+                // User is signed in, fetch or create user profile
                 await loadUserProfile(fbUser);
             } else {
                 localStorage.removeItem('brofit_user_id');
                 setUser(null);
+                setIsLoading(false); // Only set to false here if no user
             }
-            setIsLoading(false);
         });
 
         return () => unsubscribe();
@@ -260,7 +260,7 @@ export function UserAuthProvider({ children }: { children: ReactNode }) {
             console.error('Error loading user profile:', err);
             // Minimal fallback from Firebase
             setUser({
-                id: fbUser.uid,
+                id: fbUser.uid, // Use UID as standardized local ID
                 firebase_uid: fbUser.uid,
                 email: fbUser.email,
                 full_name: fbUser.displayName,
@@ -272,6 +272,8 @@ export function UserAuthProvider({ children }: { children: ReactNode }) {
                 daily_credits: MAX_DAILY_CREDITS,
                 last_credit_reset: today
             });
+        } finally {
+            setIsLoading(false); // Ensure loading state is cleared regardless of success or failure
         }
     };
 
