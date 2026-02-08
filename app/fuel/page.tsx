@@ -125,7 +125,7 @@ function FuelSynthesizerContent() {
     const [budget, setBudget] = useState("Standard");
     const [lang, setLang] = useState<"en" | "hi">("en");
 
-    const { user, isLoggedIn, checkCredit, deductCredit, signInWithGoogle } = useUserAuth();
+    const { user, isLoggedIn, checkCredit, deductCredit } = useUserAuth();
 
     // New Biometric States - Initialized to empty strings for placeholders
     const [currentWeight, setCurrentWeight] = useState("");
@@ -153,13 +153,11 @@ function FuelSynthesizerContent() {
     const [pdfLoading, setPdfLoading] = useState(false);
     const [timelineUnit, setTimelineUnit] = useState<"days" | "weeks" | "months" | "years">("weeks");
 
-    const [hasCredits, setHasCredits] = useState(true);
 
     useEffect(() => {
         const verifyCredits = async () => {
             if (isLoggedIn) {
-                const available = await checkCredit();
-                setHasCredits(available);
+                await checkCredit();
             }
         };
         verifyCredits();
@@ -380,7 +378,7 @@ function FuelSynthesizerContent() {
             setData(result);
             await deductCredit();
             // Refresh credit state
-            await checkCredit().then(setHasCredits);
+            await checkCredit();
 
         } catch (err: unknown) {
             const message = err instanceof Error ? err.message : 'Unknown error';

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -13,7 +13,7 @@ export default function PageWrapper({ children }: { children: React.ReactNode })
     const [showContent, setShowContent] = useState(true);
     const [videoEnded, setVideoEnded] = useState(false);
 
-    const handleVideoComplete = () => {
+    const handleVideoComplete = useCallback(() => {
         if (videoEnded) return;
         setVideoEnded(true);
 
@@ -23,7 +23,7 @@ export default function PageWrapper({ children }: { children: React.ReactNode })
             document.body.style.overflow = "";
             sessionStorage.setItem("brofit_loaded", JSON.stringify({ timestamp: Date.now() }));
         }, 500);
-    };
+    }, [videoEnded]);
 
     useEffect(() => {
         // Check if returning user synchronously
@@ -74,7 +74,6 @@ export default function PageWrapper({ children }: { children: React.ReactNode })
             clearTimeout(timer);
             clearTimeout(failSafe);
         };
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [handleVideoComplete]);
 
 
