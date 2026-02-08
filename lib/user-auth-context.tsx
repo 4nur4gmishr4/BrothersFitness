@@ -139,12 +139,24 @@ export function UserAuthProvider({ children }: { children: ReactNode }) {
 
             // 2. Try fetching from Firestore (Secondary/Fallback)
             try {
-                const userDoc = await getDoc(doc(db, 'users', fbUser.uid));
-                if (userDoc.exists()) {
-                    firestoreUser = userDoc.data();
+                // Check if navigator says we're online, though Firestore has its own sync
+                const isOnline = typeof navigator !== 'undefined' ? navigator.onLine : true;
+
+                if (isOnline) {
+                    const userDoc = await getDoc(doc(db, 'users', fbUser.uid));
+                    if (userDoc.exists()) {
+                        firestoreUser = userDoc.data();
+                    }
+                } else {
+                    console.log('Firestore: Skipping initial fetch while offline.');
                 }
             } catch (fsError) {
-                console.error('Firestore read error:', fsError);
+                // Ignore "offline" errors as they are expected in flaky networks
+                if (fsError instanceof Error && fsError.message.includes('offline')) {
+                    console.log('Firestore: Client is offline, skipping sync.');
+                } else {
+                    console.error('Firestore read error:', fsError);
+                }
             }
 
             // 3. Logic for existing user (found in either or both)
