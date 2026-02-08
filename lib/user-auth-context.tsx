@@ -167,6 +167,7 @@ export function UserAuthProvider({ children }: { children: ReactNode }) {
                         if (Object.keys(updates).length > 0) {
                             await supabase.from('users').update(updates).eq('firebase_uid', fbUser.uid);
                         }
+                        // eslint-disable-next-line @typescript-eslint/no-unused-vars
                         const { id: _id, ...firestorePayload } = finalUser;
                         await setDoc(doc(db, 'users', fbUser.uid), {
                             ...firestorePayload,

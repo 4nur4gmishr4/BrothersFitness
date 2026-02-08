@@ -209,7 +209,7 @@ export async function POST(req: Request) {
             // Clean markdown code blocks if any (e.g. ```json ... ```)
             const cleanJson = aiResponse.text.replace(/```json/g, "").replace(/```/g, "").trim();
             parsedResponse = JSON.parse(cleanJson);
-        } catch (jsonError) {
+        } catch {
             console.error("Failed to parse AI response as JSON", aiResponse.text);
             throw new Error(`AI returned invalid JSON: ${aiResponse.modelUsed}`);
         }
@@ -248,11 +248,14 @@ export async function POST(req: Request) {
         } else if (errorMessage.includes('JSON')) {
             userMessage = "Data Corruption: AI Returned Invalid Protocol Structure.";
         } else {
-            userMessage += errorMessage; // Show actual error for debugging
+            userMessage += errorMessage;
         }
 
         return NextResponse.json(
-            { error: userMessage, debug: process.env.NODE_ENV === 'development' ? errorMessage : undefined },
+            {
+                error: userMessage,
+                details: errorMessage
+            },
             { status: 500 }
         );
     }

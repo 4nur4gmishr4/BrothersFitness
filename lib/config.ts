@@ -16,7 +16,7 @@ export const PLAN_PRICES = {
  */
 export function getPlanPrice(planName?: string | null): number {
     if (!planName) return PLAN_PRICES['Monthly'];
-    return (PLAN_PRICES as any)[planName] ?? PLAN_PRICES['Monthly'];
+    return (PLAN_PRICES as Record<string, number>)[planName] ?? PLAN_PRICES['Monthly'];
 }
 
 export const CONTACT_INFO = {

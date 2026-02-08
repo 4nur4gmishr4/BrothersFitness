@@ -6,7 +6,6 @@ import { Cpu, X, Send, Dumbbell, Utensils, Zap, Languages } from "lucide-react";
 import { useUserAuth } from "@/lib/user-auth-context";
 import { MAX_DAILY_CREDITS } from "@/lib/config";
 import dynamic from "next/dynamic";
-import { usePathname } from "next/navigation";
 
 const LoginModal = dynamic(() => import("@/components/LoginModal"), { ssr: false });
 
@@ -31,7 +30,7 @@ const SUGGESTIONS = {
 };
 
 export default function TacticalChatbot() {
-    const { isLoggedIn, remainingCredits, refreshCredits, showWelcome, setShowWelcome } = useUserAuth();
+    const { isLoggedIn, remainingCredits, refreshCredits } = useUserAuth();
 
     const [isOpen, setIsOpen] = useState(false);
     const [messages, setMessages] = useState<ChatMessage[]>([]);
