@@ -60,7 +60,7 @@ export default function WelcomeModal({ isOpen, onClose }: WelcomeModalProps) {
                                 </div>
 
                                 <p className="text-xs text-gray-500 font-mono uppercase tracking-widest pt-2">
-                  // Credits reset daily at 00:00 IST
+                                    {"// Credits reset daily at 00:00 IST"}
                                 </p>
                             </div>
 
