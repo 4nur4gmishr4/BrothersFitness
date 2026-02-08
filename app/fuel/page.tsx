@@ -10,7 +10,6 @@ import MissionDirective from "@/components/MissionDirective";
 import Navbar from "@/components/Navbar";
 import { useUserAuth } from "@/lib/user-auth-context";
 
-// Types for our API response
 type LocalizedText = { en: string; hi: string };
 
 type DietPlan = {
@@ -119,15 +118,12 @@ function FuelSynthesizerContent() {
     const missionRef = useRef<HTMLDivElement>(null);
 
     const [calories] = useState(searchParams.get("calories") || "");
-    // Mode is now dynamically calculated based on weight comparison
-    // Removed: const [mode] = useState(searchParams.get("mode") || "bulk");
     const [dietType, setDietType] = useState("Everything");
     const [budget, setBudget] = useState("Standard");
     const [lang, setLang] = useState<"en" | "hi">("en");
 
-    const { user, isLoggedIn, checkCredit, deductCredit } = useUserAuth();
+    const { user, isLoggedIn, checkCredit, deductCredit, setShowLoginModal } = useUserAuth();
 
-    // New Biometric States - Initialized to empty strings for placeholders
     const [currentWeight, setCurrentWeight] = useState("");
     const [targetWeight, setTargetWeight] = useState("");
     const [age, setAge] = useState("");
@@ -137,7 +133,6 @@ function FuelSynthesizerContent() {
     const [weightChangeRate, setWeightChangeRate] = useState("0.5"); // kg per week
     const [calculatedCalories, setCalculatedCalories] = useState<number | null>(null);
 
-    // Dynamically calculate mode based on current vs target weight
     const mode = useMemo(() => {
         const current = parseFloat(currentWeight);
         const target = parseFloat(targetWeight);
@@ -175,7 +170,6 @@ function FuelSynthesizerContent() {
         return mapping[level] || 1.55;
     };
 
-    // Calculate TDEE using Mifflin-St Jeor equation (same as Diagnostics.tsx)
     const calculateTDEE = useCallback((): number | null => {
         const w = parseFloat(currentWeight);
         const h = parseFloat(height);
@@ -194,7 +188,6 @@ function FuelSynthesizerContent() {
         return Math.round(bmr * act);
     }, [currentWeight, height, age, gender, activityLevel]);
 
-    // Calculate target calories based on weight goal
     const calculateTargetCalories = useCallback((): number | null => {
         const tdee = calculateTDEE();
         if (tdee === null) return null;
@@ -285,7 +278,7 @@ function FuelSynthesizerContent() {
 
         // 1. Check Login
         if (!isLoggedIn) {
-            setError("ACCESS DENIED: PLEASE LOGIN TO USE TACTICAL AI");
+            setShowLoginModal(true);
             return;
         }
 
@@ -516,74 +509,29 @@ function FuelSynthesizerContent() {
                             <div className="border-t border-white/10 pt-6 mt-6">
                                 <h3 className="text-gym-red font-dot text-sm uppercase tracking-widest mb-4">Weight Goal & Calorie Target</h3>
 
-                                <div className="grid md:grid-cols-2 gap-6">
+                                <div className="max-w-md">
                                     {/* Rate Selection */}
-                                    <div>
-                                        <label className="block text-xs font-dot text-gray-500 uppercase tracking-widest mb-3">Rate of Change (per week) <span className="text-gym-red">*</span></label>
-                                        <div className="space-y-2">
-                                            {[
-                                                { value: "0.25", label: "0.25 kg/week (Slow & Steady)" },
-                                                { value: "0.5", label: "0.5 kg/week (Recommended)" },
-                                                { value: "1", label: "1 kg/week (Aggressive)" }
-                                            ].map((option) => (
-                                                <label key={option.value} className="flex items-center gap-3 cursor-pointer group">
-                                                    <input
-                                                        type="radio"
-                                                        name="weightChangeRate"
-                                                        value={option.value}
-                                                        checked={weightChangeRate === option.value}
-                                                        onChange={(e) => setWeightChangeRate(e.target.value)}
-                                                        className="w-4 h-4 accent-gym-red cursor-pointer"
-                                                    />
-                                                    <span className="text-sm font-medium group-hover:text-gym-red transition-colors">
-                                                        {option.label}
-                                                    </span>
-                                                </label>
-                                            ))}
-                                        </div>
-                                    </div>
-
-                                    {/* Calculated Calories Display */}
-                                    <div className="flex flex-col justify-center">
-                                        <label className="block text-xs font-dot text-gray-500 uppercase tracking-widest mb-2">Calculated Daily Calories</label>
-                                        <div className="bg-gym-red/10 border-2 border-gym-red p-4 text-center">
-                                            {calculatedCalories !== null ? (
-                                                <>
-                                                    <p className="text-4xl font-black text-gym-red">{calculatedCalories}</p>
-                                                    <p className="text-xs text-gray-400 uppercase mt-1">KCAL/DAY</p>
-                                                    <p className="text-[10px] text-gray-500 mt-2 mb-3">
-                                                        {parseFloat(targetWeight) < parseFloat(currentWeight)
-                                                            ? `Deficit for ${weightChangeRate} kg/week loss`
-                                                            : parseFloat(targetWeight) > parseFloat(currentWeight)
-                                                                ? `Surplus for ${weightChangeRate} kg/week gain`
-                                                                : "Maintenance calories"}
-                                                    </p>
-                                                    <button
-                                                        onClick={handleCalculateCalories}
-                                                        className="text-[10px] font-dot font-bold uppercase text-gray-500 hover:text-gym-red border border-gray-700 hover:border-gym-red px-3 py-1 transition-colors"
-                                                    >
-                                                        Recalculate
-                                                    </button>
-                                                </>
-                                            ) : (
-                                                <div className="py-2">
-                                                    <p className="text-sm text-gray-500 mb-3">Enter methodology above</p>
-                                                    <button
-                                                        onClick={handleCalculateCalories}
-                                                        className="bg-white text-black text-xs font-bold px-4 py-2 uppercase hover:bg-gym-red hover:text-white transition-colors"
-                                                    >
-                                                        Calculate Target
-                                                    </button>
-                                                </div>
-                                            )}
-                                        </div>
-                                        <p className="text-[10px] text-gray-400 mt-2 leading-relaxed">
-                                            💡 Calories calculated using the TDEE formula from our{" "}
-                                            <a href="/calculators" className="text-gym-red hover:underline font-bold">
-                                                Calculator page
-                                            </a>
-                                            . Visit for detailed breakdown.
-                                        </p>
+                                    <label className="block text-xs font-dot text-gray-500 uppercase tracking-widest mb-3">Rate of Change (per week) <span className="text-gym-red">*</span></label>
+                                    <div className="space-y-2">
+                                        {[
+                                            { value: "0.25", label: "0.25 kg/week (Slow & Steady)" },
+                                            { value: "0.5", label: "0.5 kg/week (Recommended)" },
+                                            { value: "1", label: "1 kg/week (Aggressive)" }
+                                        ].map((option) => (
+                                            <label key={option.value} className="flex items-center gap-3 cursor-pointer group">
+                                                <input
+                                                    type="radio"
+                                                    name="weightChangeRate"
+                                                    value={option.value}
+                                                    checked={weightChangeRate === option.value}
+                                                    onChange={(e) => setWeightChangeRate(e.target.value)}
+                                                    className="w-4 h-4 accent-gym-red cursor-pointer"
+                                                />
+                                                <span className="text-sm font-medium group-hover:text-gym-red transition-colors">
+                                                    {option.label}
+                                                </span>
+                                            </label>
+                                        ))}
                                     </div>
                                 </div>
                             </div>
@@ -600,9 +548,6 @@ function FuelSynthesizerContent() {
                                             <option>Athlete (2x Training)</option>
                                         </select>
                                     </div>
-                                </div>
-
-                                <div className="space-y-6">
                                     <div>
                                         <label className="block text-xs font-dot text-gray-500 uppercase tracking-widest mb-2">Diet Preference</label>
                                         <select
@@ -628,6 +573,60 @@ function FuelSynthesizerContent() {
                                             <option value="Budget">Budget Friendly (Low Cost)</option>
                                             <option value="Premium">Premium (Organic/High End)</option>
                                         </select>
+                                    </div>
+
+                                    {/* Calculated Calories Button moved here */}
+                                    <div className="pt-2">
+                                        <div className="bg-gym-red/10 border-2 border-gym-red p-4 text-center">
+                                            {calculatedCalories !== null ? (
+                                                <>
+                                                    <p className="text-4xl font-black text-gym-red">{calculatedCalories}</p>
+                                                    <p className="text-xs text-gray-400 uppercase mt-1">KCAL/DAY</p>
+                                                    <button
+                                                        onClick={handleCalculateCalories}
+                                                        className="text-[10px] font-dot font-bold uppercase text-gray-500 hover:text-gym-red border border-gray-700 hover:border-gym-red px-3 py-1 mt-3 transition-colors"
+                                                    >
+                                                        Recalculate
+                                                    </button>
+                                                </>
+                                            ) : (
+                                                <div className="py-2">
+                                                    <p className="text-sm text-gray-500 mb-3 text-center uppercase font-dot tracking-widest">Target Estimation</p>
+                                                    <button
+                                                        onClick={handleCalculateCalories}
+                                                        className="bg-white text-black text-xs font-bold px-4 py-3 w-full uppercase hover:bg-gym-red hover:text-white transition-colors"
+                                                    >
+                                                        Calculate Calorie
+                                                    </button>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="mt-8 md:mt-0">
+                                    <div className="bg-white/5 border border-white/10 p-6 h-full flex flex-col justify-center">
+                                        <div className="flex items-center gap-2 mb-4">
+                                            <Calculator className="w-5 h-5 text-gym-red" />
+                                            <h4 className="font-dot text-xs uppercase tracking-widest text-white">System Estimation</h4>
+                                        </div>
+                                        <p className="text-sm text-gray-400 leading-relaxed mb-4">
+                                            Our Tactical AI uses the Mifflin-St Jeor equation to precisely estimate your Total Daily Energy Expenditure (TDEE).
+                                        </p>
+                                        <ul className="space-y-2 text-xs text-gray-500">
+                                            <li className="flex gap-2">
+                                                <span className="text-gym-red">/</span>
+                                                Automatic Deficit/Surplus Scaling
+                                            </li>
+                                            <li className="flex gap-2">
+                                                <span className="text-gym-red">/</span>
+                                                Activity Multiplier Calibration
+                                            </li>
+                                            <li className="flex gap-2">
+                                                <span className="text-gym-red">/</span>
+                                                Real-time Goal Adjustment
+                                            </li>
+                                        </ul>
                                     </div>
                                 </div>
                             </div>

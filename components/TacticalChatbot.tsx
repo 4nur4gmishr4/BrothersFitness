@@ -8,7 +8,6 @@ import { MAX_DAILY_CREDITS } from "@/lib/config";
 import dynamic from "next/dynamic";
 import { usePathname } from "next/navigation";
 
-// Lazy load LoginModal to avoid SSR issues
 const LoginModal = dynamic(() => import("@/components/LoginModal"), { ssr: false });
 
 type ChatMessage = {
@@ -34,8 +33,6 @@ const SUGGESTIONS = {
 export default function TacticalChatbot() {
     const { isLoggedIn, remainingCredits, refreshCredits, showWelcome, setShowWelcome } = useUserAuth();
 
-    // Simplified positioning - Fixed Bottom Right
-    // Removing complex drag/storage logic to ensure visibility
     const [isOpen, setIsOpen] = useState(false);
     const [messages, setMessages] = useState<ChatMessage[]>([]);
     const [input, setInput] = useState("");
@@ -72,23 +69,6 @@ export default function TacticalChatbot() {
             refreshCredits();
         }
     }, [isOpen, isLoggedIn, refreshCredits]);
-
-    // Welcome Popup for new users
-    useEffect(() => {
-        if (showWelcome) {
-            // Show a temporary message
-            setMessages(prev => [...prev, {
-                role: "model",
-                text: `Welcome to BroFit AI! You have ${MAX_DAILY_CREDITS} FREE AI credits for today. Credits reset daily at midnight.`,
-                isError: false
-            }]);
-
-            // Clear the flag after handling
-            const timer = setTimeout(() => setShowWelcome(false), 5000);
-            return () => clearTimeout(timer);
-        }
-    }, [showWelcome, setShowWelcome]);
-
 
     const handleSend = async (text: string) => {
         if (!text.trim()) return;
@@ -129,9 +109,6 @@ export default function TacticalChatbot() {
                     context: {
                         source: "floating_chat",
                         language: language || "en",
-                        developer: "Anurag Mishra",
-                        contact: "+91 91311 79343",
-                        owner: "Anurag Mishra",
                         gym_name: "Brother's Fitness"
                     }
                 }),
@@ -142,13 +119,12 @@ export default function TacticalChatbot() {
                 // Add error message with retry capability
                 setMessages((prev) => [...prev, {
                     role: "model",
-                    text: data.error || (language === "hi" ? "Sampark toot gaya." : "Connection Severed."),
+                    text: data.error || (language === "hi" ? "Connection failed." : "Connection failed."),
                     isError: true,
                     retryText: text
                 }]);
             } else {
-                setMessages((prev) => [...prev, { role: "model", text: data.response || (language === "hi" ? "Sampark toot gaya." : "Connection Severed.") }]);
-                // Credit deduction is now handled by backend, but we refresh local state
+                setMessages((prev) => [...prev, { role: "model", text: data.response || (language === "hi" ? "Connection failed." : "Connection failed.") }]);
                 await refreshCredits();
             }
         } catch (error: unknown) {

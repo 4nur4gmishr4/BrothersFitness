@@ -1,61 +1,80 @@
-# Brother's Fitness - Gym Management System 💪
+<div align="center">
+  <img src="https://raw.githubusercontent.com/4nur4gmishr4/BrothersFitness/main/public/assets/favicon.png" width="100" height="100" alt="Brother's Fitness Logo">
+  
+  <h1 style="color: #D71921; border-bottom: none;">BROTHER'S FITNESS</h1>
+  
+  <p><strong>PAIN IS TEMPORARY. PRIDE IS FOREVER.</strong></p>
 
-A modern, high-performance Gym Management System tailored for Indian gyms. Built to streamline operations, manage members, and track growth with style.
+  <div>
+    <img src="https://img.shields.io/badge/Next.js-15-black?style=flat-square&logo=next.js" alt="Next.js">
+    <img src="https://img.shields.io/badge/Supabase-Database-black?style=flat-square&logo=supabase" alt="Supabase">
+    <img src="https://img.shields.io/badge/Vitest-Tested-black?style=flat-square&logo=vitest" alt="Vitest">
+    <img src="https://img.shields.io/badge/CI/CD-Active-black?style=flat-square&logo=github-actions" alt="CI/CD">
+  </div>
+</div>
 
-## 🚀 Key Features
+---
 
-### 👑 Admin Dashboard
-- **Comprehensive Analytics**: Track monthly growth, revenue projections, and plan popularity at a glance.
-- **Member Management**: Add, edit, and manage member profiles with ease.
-- **Smart Alerts**: Get notified about upcoming birthdays (7-day forecast) and expiring memberships.
-- **Financial Tracking**: Visual charts for revenue and growth trends.
+## What is Brother's Fitness?
+This is a custom-built Gym Management System designed for Aman and Pradeep to run their gym with professional-grade tools. It is not just a website; it is an industrial tool that handles everything from member registrations to AI-powered diet planning.
 
-### 📱 Digital & Connected
-- **Bulk WhatsApp Messaging**: Send updates to all active members in one click.
-- **Digital Receipts**: Generate professional PDF receipts and send them instantly via WhatsApp.
-- **PWA Support**: Install the app on your phone for a native experience.
-- **Live Member Count**: Show off your active member count directly on the homepage.
+## Master Features
 
-### 🛡️ Secure & Scalable
-- **Role-Based Access**: Secure admin login with session management.
-- **Cloud Storage**: Member photos are securely stored and managed in Supabase.
-- **Modern Tech Stack**: Built for speed and reliability.
+### 🏢 The Admin Command Center
+The dashboard is built for speed. It allows the team to:
+* **Track Revenue**: See monthly growth and projected income instantly.
+* **Manage Members**: Add new people, upload photos via camera or gallery, and keep notes on their progress.
+* **Automated Alerts**: The system reminds you about upcoming birthdays and memberships that are about to expire.
+* **One-Click Logic**: Send bulk WhatsApp messages or generate PDF receipts for payments in seconds.
 
-## 🛠️ Tech Stack
-- **Framework**: Next.js 15 (App Router)
-- **Database**: Supabase (PostgreSQL)
-- **Styling**: Tailwind CSS + Framer Motion
-- **Icons**: Lucide React
-- **Notifications**: Sonner
-- **PDF Generation**: jsPDF + html2canvas
+### 🍱 The AI Diet Engine
+We built a redundant AI stack to make sure the diet generator never goes offline.
+* **Active Models**: Llama 3.3 70B (Groq), Llama 3.1 8B (Groq), and Gemini 2.0 Flash (Google).
+* **Smart Fallback**: If one model is busy or hits a limit, the system automatically tries the next one.
 
-## ⚡ Getting Started
+### 🛡️ Production Standards
+The code is built to industry standards:
+* **Automated Testing**: We use **Vitest** to run unit tests on all core logic (validation, rate-limiting, and AI).
+* **Continuous Integration**: Every time code is pushed to GitHub, an automated pipeline runs tests and linting to ensure nothing is broken.
+* **Fast & PWA**: The site is optimized for speed and can be "installed" on any phone like a native app.
 
-1.  **Clone the repository**:
-    ```bash
-    git clone https://github.com/4nur4gmishr4/BrothersFitness.git
-    cd BrothersFitness
-    ```
+## Tech Specs
+* **Frontend**: Next.js 15 (App Router) + Framer Motion
+* **Database**: Supabase + Firebase Firestore
+* **Security**: Role-based admin access + Zod validation
+* **Infrastructure**: GitHub Actions CI + Vitest
 
-2.  **Install dependencies**:
-    ```bash
-    npm install
-    ```
+## Setup for Development
 
-3.  **Set up Environment Variables**:
-    Create a `.env.local` file with the following:
-    ```env
-    NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
-    NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
-    ADMIN_PASSWORD=your_secure_password
-    GEMINI_API_KEY=your_gemini_key
-    ```
+1. **Get the Code**
+   ```bash
+   git clone https://github.com/4nur4gmishr4/BrothersFitness.git
+   cd BrothersFitness
+   npm install
+   ```
 
-4.  **Run the development server**:
-    ```bash
-    npm run dev
-    ```
+2. **Environment Variables**
+   Create a `.env.local` file with your keys for Supabase, Firebase, and whichever AI providers you are using (Groq/Google).
 
-## 📄 License
-Pain is Temporary. Pride is Forever.
+3. **Run Locally**
+   ```bash
+   npm run dev
+   ```
+
+4. **Run Tests**
+   ```bash
+   npm test
+   ```
+
+---
+
+## THE DEVELOPER
+High-performance code engineered by:
+*   **Anurag Mishra** ([@4nur4gmishr4](https://github.com/4nur4gmishr4))
+
+## THE ARCHITECTS
+Concept and training protocols designed by:
+*   **Aman**: Founder & Elite Strength Coach
+*   **Pradeep**: Head of Performance & Conditioning
+
 © 2024 Brother's Fitness. All rights reserved.
