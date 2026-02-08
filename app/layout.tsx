@@ -77,13 +77,16 @@ export default function RootLayout({
         <ReadingProgressBar />
         <Toaster
           theme="dark"
-          position="top-right"
+          position="top-center"
+          richColors
+          style={{ zIndex: 9999999 }}
           toastOptions={{
             style: {
               background: '#1a1a1a',
               border: '1px solid rgba(255,255,255,0.1)',
-              color: '#fff'
-            }
+              color: '#fff',
+            },
+            duration: 5000
           }}
         />
         <AdminProvider>
