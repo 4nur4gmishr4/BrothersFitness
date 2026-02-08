@@ -16,6 +16,7 @@
     "bcryptjs": "^3.0.3",
     "browser-image-compression": "^2.0.2",
     "clsx": "^2.1.1",
+    "firebase": "^12.8.0",
     "framer-motion": "^12.18.1",
     "fuzzysort": "^3.1.0",
     "html2canvas": "^1.4.1",

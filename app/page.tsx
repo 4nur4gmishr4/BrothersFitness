@@ -66,7 +66,7 @@ export default function Home() {
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.8, y: 20 }}
             transition={{ duration: 0.3 }}
-            className="fixed bottom-6 right-6 z-[9998] group"
+            className="fixed bottom-6 left-6 z-[9998] group"
             aria-label="Go to top"
           >
             {/* Circular Progress Background */}

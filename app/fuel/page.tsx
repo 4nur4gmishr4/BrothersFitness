@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, Suspense, useRef, useCallback } from "react";
+import { useState, useEffect, Suspense, useRef, useCallback, useMemo } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { ArrowLeft, RefreshCw, Cpu, ShoppingCart, Utensils, IndianRupee, Globe, Home, Store, Calculator } from "lucide-react";
@@ -8,6 +8,7 @@ import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
 import MissionDirective from "@/components/MissionDirective";
 import Navbar from "@/components/Navbar";
+import { useUserAuth } from "@/lib/user-auth-context";
 
 // Types for our API response
 type LocalizedText = { en: string; hi: string };
@@ -118,10 +119,13 @@ function FuelSynthesizerContent() {
     const missionRef = useRef<HTMLDivElement>(null);
 
     const [calories] = useState(searchParams.get("calories") || "");
-    const [mode] = useState(searchParams.get("mode") || "bulk");
+    // Mode is now dynamically calculated based on weight comparison
+    // Removed: const [mode] = useState(searchParams.get("mode") || "bulk");
     const [dietType, setDietType] = useState("Everything");
     const [budget, setBudget] = useState("Standard");
     const [lang, setLang] = useState<"en" | "hi">("en");
+
+    const { user, isLoggedIn, checkCredit, deductCredit, signInWithGoogle } = useUserAuth();
 
     // New Biometric States - Initialized to empty strings for placeholders
     const [currentWeight, setCurrentWeight] = useState("");
@@ -133,29 +137,33 @@ function FuelSynthesizerContent() {
     const [weightChangeRate, setWeightChangeRate] = useState("0.5"); // kg per week
     const [calculatedCalories, setCalculatedCalories] = useState<number | null>(null);
 
+    // Dynamically calculate mode based on current vs target weight
+    const mode = useMemo(() => {
+        const current = parseFloat(currentWeight);
+        const target = parseFloat(targetWeight);
+        if (isNaN(current) || isNaN(target) || current === target) {
+            return "bulk"; // Default to bulk if weights are equal or invalid
+        }
+        return target < current ? "cut" : "bulk";
+    }, [currentWeight, targetWeight]);
+
     const [loading, setLoading] = useState(false);
     const [data, setData] = useState<DietPlan | null>(null);
     const [error, setError] = useState("");
     const [pdfLoading, setPdfLoading] = useState(false);
     const [timelineUnit, setTimelineUnit] = useState<"days" | "weeks" | "months" | "years">("weeks");
-    const [rateLimitRemaining, setRateLimitRemaining] = useState<number | null>(null);
 
-    // Fetch rate limit status
-    const fetchRateLimit = async () => {
-        try {
-            const res = await fetch('/api/rate-limit-status');
-            if (res.ok) {
-                const data = await res.json();
-                setRateLimitRemaining(data.ai.remaining);
-            }
-        } catch (err) {
-            console.error('Failed to fetch rate limit:', err);
-        }
-    };
+    const [hasCredits, setHasCredits] = useState(true);
 
     useEffect(() => {
-        fetchRateLimit();
-    }, []);
+        const verifyCredits = async () => {
+            if (isLoggedIn) {
+                const available = await checkCredit();
+                setHasCredits(available);
+            }
+        };
+        verifyCredits();
+    }, [isLoggedIn, checkCredit]);
 
     // Activity level multiplier mapping
     const getActivityMultiplier = (level: string): number => {
@@ -275,6 +283,21 @@ function FuelSynthesizerContent() {
     };
 
     const generateProtocol = async () => {
+        setError("");
+
+        // 1. Check Login
+        if (!isLoggedIn) {
+            setError("ACCESS DENIED: PLEASE LOGIN TO USE TACTICAL AI");
+            return;
+        }
+
+        // 2. Check Credits (Local Check)
+        const canProceed = await checkCredit();
+        if (!canProceed) {
+            setError("INSUFFICIENT CREDITS: DAILY LIMIT REACHED. REFRESH TOMORROW.");
+            return;
+        }
+
         // Comprehensive validation check
         const validation = validateInputs();
         if (!validation.valid) {
@@ -306,7 +329,6 @@ function FuelSynthesizerContent() {
         }
 
         setLoading(true);
-        setError("");
         setData(null);
 
         // Create AbortController for timeout
@@ -314,7 +336,9 @@ function FuelSynthesizerContent() {
         const timeoutId = setTimeout(() => controller.abort(), 90000); // 90 second timeout
 
         try {
-            const userId = localStorage.getItem('brofit_user_id') || 'unknown';
+            // Using Firebase UID as identifiers for better tracking if available, else localStorage
+            const userId = user?.firebase_uid || localStorage.getItem('brofit_user_id') || 'unknown';
+
             const res = await fetch("/api/generate-diet", {
                 method: "POST",
                 headers: {
@@ -322,7 +346,7 @@ function FuelSynthesizerContent() {
                     "x-brofit-user-id": userId
                 },
                 body: JSON.stringify({
-                    calories: calculatedCalories?.toString() || calories,
+                    calories: calculatedCalories ? calculatedCalories : (calories ? parseFloat(calories) : undefined),
                     mode,
                     dietType,
                     budget,
@@ -340,7 +364,10 @@ function FuelSynthesizerContent() {
 
             clearTimeout(timeoutId);
 
-            if (!res.ok) throw new Error("Synthesis Failed");
+            if (!res.ok) {
+                const errorData = await res.json().catch(() => ({}));
+                throw new Error(errorData.error || "Synthesis Failed");
+            }
 
             const result = await res.json();
 
@@ -349,14 +376,19 @@ function FuelSynthesizerContent() {
                 throw new Error("Malformed AI Response");
             }
 
+            // SUCCESS: Setup Data & Deduct Credit
             setData(result);
-            fetchRateLimit(); // Update remaining count after generation
+            await deductCredit();
+            // Refresh credit state
+            await checkCredit().then(setHasCredits);
+
         } catch (err: unknown) {
             const message = err instanceof Error ? err.message : 'Unknown error';
             if (message.includes('abort') || (err instanceof Error && err.name === 'AbortError')) {
                 setError("TIMEOUT: AI UPLINK TOOK TOO LONG (>90s). RETRY ADVISED.");
             } else {
-                setError("SYSTEM FAILURE: CONNECTION SEVERED");
+                // Show the actual error message from backend (e.g. Rate limit, API key)
+                setError(message.toUpperCase());
             }
         } finally {
             clearTimeout(timeoutId);
@@ -431,11 +463,11 @@ function FuelSynthesizerContent() {
                             <ArrowLeft className="w-5 h-5" />
                             <span className="font-dot text-[10px] uppercase tracking-widest hidden sm:inline">Back</span>
                         </button>
-                        {rateLimitRemaining !== null && (
+                        {isLoggedIn && user && (
                             <div className="flex items-center gap-1.5 bg-white/5 border border-white/10 px-3 py-1.5 rounded-full">
                                 <Cpu className="w-3 h-3 text-gym-red" />
-                                <span className="text-xs font-bold">
-                                    {rateLimitRemaining}/5 AI
+                                <span className={`text-xs font-bold ${user.daily_credits > 0 ? "text-white" : "text-red-500"}`}>
+                                    {user.daily_credits}/3 CREDITS
                                 </span>
                             </div>
                         )}

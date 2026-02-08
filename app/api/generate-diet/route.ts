@@ -1,38 +1,48 @@
-import { GoogleGenerativeAI } from "@google/generative-ai";
-import OpenAI from "openai";
 import { NextResponse } from "next/server";
-import { checkRateLimit, RATE_LIMITS } from "@/lib/rate-limit";
 import { GenerateDietSchema, DietResponseSchema } from "@/lib/validation";
 import { logger } from "@/lib/logger";
+import { generateTextWithFallback } from "@/lib/ai-provider";
+import { createClient } from "@supabase/supabase-js";
+import { MAX_DAILY_CREDITS } from "@/lib/config";
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
-
-// Lazy initialization to avoid build-time crash when OPENAI_API_KEY is not set
-let openaiClient: OpenAI | null = null;
-function getOpenAI(): OpenAI {
-    if (!openaiClient) {
-        openaiClient = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-    }
-    return openaiClient;
-}
+// Initialize Supabase Admin Client
+// moved inside handler
 
 export async function POST(req: Request) {
-    // Rate limit check - 5 combined AI requests per day per IP (diet + chatbot)
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+    const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
     const headerUserId = req.headers.get("x-brofit-user-id");
-    const forwarded = req.headers.get("x-forwarded-for");
-    const ip = forwarded?.split(",")[0]?.trim() || "unknown";
 
-    // Prioritize User ID (Browser UUID), fallback to IP
-    const identifier = (headerUserId && headerUserId !== 'unknown') ? `user_${headerUserId}` : `ai_${ip}`;
-
-    const rateCheck = checkRateLimit(identifier, RATE_LIMITS.AI_COMBINED);
-
-    if (!rateCheck.allowed) {
+    if (!headerUserId || headerUserId === 'unknown') {
         return NextResponse.json(
-            {
-                error: "Daily AI limit reached. You can use AI features (diet + chatbot) up to 5 times per day. Please try again tomorrow.",
-                resetIn: rateCheck.resetIn
-            },
+            { error: "Authentication required. Please login to use Tactical Diet Generator." },
+            { status: 401 }
+        );
+    }
+
+    // 1. Check Credits
+    const { data: userProfile, error: userError } = await supabase
+        .from('users')
+        .select('daily_credits, last_credit_reset')
+        .eq('firebase_uid', headerUserId)
+        .single();
+
+    if (userError || !userProfile) {
+        return NextResponse.json({ error: "User profile not found." }, { status: 403 });
+    }
+
+    const today = new Date().toISOString().split('T')[0];
+    let credits = userProfile.daily_credits;
+
+    if (userProfile.last_credit_reset !== today) {
+        credits = MAX_DAILY_CREDITS;
+    }
+
+    if (credits <= 0) {
+        return NextResponse.json(
+            { error: `Daily tactical credits depleted (0/${MAX_DAILY_CREDITS}). Refreshing tomorrow at 0000 hours.` },
             { status: 429 }
         );
     }
@@ -181,71 +191,61 @@ export async function POST(req: Request) {
       }
     `;
 
-        // Unified AI Fallback Chain: Smartest -> Fastest
-        const modelChain = [
-            { provider: "google", name: "gemini-1.5-pro" },      // Smartest Google
-            { provider: "openai", name: "gpt-4o" },              // Smartest OpenAI
-            { provider: "google", name: "gemini-1.5-flash" },    // Fast & Smart
-            { provider: "openai", name: "gpt-4-turbo" },         // Balanced
-            { provider: "google", name: "gemini-pro" },          // Legacy Stable
-            { provider: "openai", name: "gpt-4o-mini" },         // Ultra-fast efficiency
-            { provider: "openai", name: "gpt-3.5-turbo" }         // Last resort fallback
-        ];
+        const aiResponse = await generateTextWithFallback({
+            prompt: prompt,
+            systemPrompt: "You are a JSON-only API. You must return valid JSON matching the user's schema. Do not include markdown formatting.",
+            jsonMode: true,
+            temperature: 0.2 // Lower temperature for consistent JSON
+        });
 
-        for (const entry of modelChain) {
-            try {
-                logger.info(`Attempting AI synthesis`, { model: entry.name, provider: entry.provider });
-
-                if (entry.provider === "google") {
-                    const model = genAI.getGenerativeModel({
-                        model: entry.name,
-                        generationConfig: { responseMimeType: "application/json" }
-                    });
-                    const result = await model.generateContent(prompt);
-                    const text = result.response.text();
-                    const cleanJson = text.replace(/```json/g, "").replace(/```/g, "").trim();
-                    const parsedResponse = JSON.parse(cleanJson);
-
-                    // Validate AI response structure (lenient)
-                    const validated = DietResponseSchema.safeParse(parsedResponse);
-                    if (!validated.success) {
-                        logger.warn('AI response structure mismatch', { issues: validated.error.issues.length });
-                    }
-                    return NextResponse.json(parsedResponse);
-                } else {
-                    const completion = await getOpenAI().chat.completions.create({
-                        messages: [
-                            { role: "system", content: "You are a JSON-only API. You must return valid JSON matching the user's schema. Do not include markdown formatting." },
-                            { role: "user", content: prompt }
-                        ],
-                        model: entry.name,
-                        response_format: { type: "json_object" }
-                    });
-
-                    const content = completion.choices[0].message.content;
-                    if (!content) throw new Error("OpenAI returned empty response");
-                    const parsedResponse = JSON.parse(content);
-
-                    // Validate AI response structure (lenient)
-                    const validated = DietResponseSchema.safeParse(parsedResponse);
-                    if (!validated.success) {
-                        logger.warn('AI response structure mismatch', { issues: validated.error.issues.length });
-                    }
-                    return NextResponse.json(parsedResponse);
-                }
-            } catch (error: unknown) {
-                const err = error as { message?: string; status?: number };
-                logger.warn(`Model failed, trying next`, { model: entry.name, error: err.message || 'Unknown' });
-                continue; // Move to the next model in the chain
-            }
+        // Parse JSON from text response
+        let parsedResponse;
+        try {
+            // Clean markdown code blocks if any (e.g. ```json ... ```)
+            const cleanJson = aiResponse.text.replace(/```json/g, "").replace(/```/g, "").trim();
+            parsedResponse = JSON.parse(cleanJson);
+        } catch (jsonError) {
+            console.error("Failed to parse AI response as JSON", aiResponse.text);
+            throw new Error(`AI returned invalid JSON: ${aiResponse.modelUsed}`);
         }
 
-        // If all fail
-        throw new Error("All AI Strategic Units Exhausted");
+        // Validate AI response structure (lenient)
+        const validated = DietResponseSchema.safeParse(parsedResponse);
+        if (!validated.success) {
+            logger.warn('AI response structure mismatch', { issues: validated.error.issues.length });
+        }
+
+        // Deduct Credit on Success (Post-Generation)
+        await supabase
+            .from('users')
+            .update({
+                daily_credits: credits - 1,
+                last_credit_reset: today
+            })
+            .eq('firebase_uid', headerUserId);
+
     } catch (error) {
-        logger.error("Fatal API Error", { error: error instanceof Error ? error.message : 'Unknown' });
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+        const errorStack = error instanceof Error ? error.stack : undefined;
+
+        logger.error("Fatal API Error in Generate Diet", { error: errorMessage, stack: errorStack });
+
+        // Provide more helpful error message to the user
+        let userMessage = "Detailed Synthesis Failure: ";
+        if (errorMessage.includes('API key') || errorMessage.includes('authentication') || errorMessage.includes('401')) {
+            userMessage = "Access Denied: API Key or Authentication validity expired.";
+        } else if (errorMessage.includes('quota') || errorMessage.includes('rate') || errorMessage.includes('429')) {
+            userMessage = "Resource Exhausted: AI Daily Quota reached.";
+        } else if (errorMessage.includes('timeout') || errorMessage.includes('ECONNREFUSED')) {
+            userMessage = "Network Interruption: Uplink timed out.";
+        } else if (errorMessage.includes('JSON')) {
+            userMessage = "Data Corruption: AI Returned Invalid Protocol Structure.";
+        } else {
+            userMessage += errorMessage; // Show actual error for debugging
+        }
+
         return NextResponse.json(
-            { error: "Failed to synthesize protocol. Systems Overloaded. Please try again later." },
+            { error: userMessage, debug: process.env.NODE_ENV === 'development' ? errorMessage : undefined },
             { status: 500 }
         );
     }
