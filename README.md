@@ -431,7 +431,7 @@ const withPWA = require('next-pwa')({
 | Rate limiting | Redis (Upstash) + in-memory fallback | Distributed when `UPSTASH_REDIS_REST_URL`/`TOKEN` set; falls back to per-instance memory in dev |
 | PWA | Dev disabled | Service worker only registers on production builds; update toast in `PwaUpdateToast` |
 | Admin revocation | Redis-backed | Nonce blacklist in Upstash Redis when configured, in-memory otherwise |
-| AI timeout | 30s/provider, 90s total | Adjust in `lib/ai-provider.ts` if needed |
+| AI timeout | 8s/provider, 60s total | Tightened for serverless budgets in `lib/ai-provider.ts` |
 | Test env | `NODE_ENV=production` inherited | Use `VITEST===true` for test guards (see memory) |
 
 ---
