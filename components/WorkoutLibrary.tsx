@@ -13,6 +13,7 @@ export default function WorkoutLibrary() {
     const [page, setPage] = useState(1);
     const [search, setSearch] = useState("");
     const [category, setCategory] = useState<string>("");
+    const [selectedMuscle, setSelectedMuscle] = useState<string>("");
 
     const { data: allExercises, error, isLoading } = useSWR('free-exercise-db', fetcher);
 
@@ -42,11 +43,15 @@ export default function WorkoutLibrary() {
 
     const exercises = allExercises || [];
 
-    // Filter by search & category
+    // Filter by search, category & individual muscle
     const filteredExercises = exercises.filter((ex: FreeExercise) => {
         const matchesSearch = !search || ex.name.toLowerCase().includes(search.toLowerCase()) || ex.primaryMuscles.some(m => m.toLowerCase().includes(search.toLowerCase()));
         const matchesCategory = !category || ex.category.toLowerCase() === category.toLowerCase();
-        return matchesSearch && matchesCategory;
+        const matchesMuscle = !selectedMuscle || 
+            (ex.primaryMuscles && ex.primaryMuscles.some(m => m.toLowerCase().includes(selectedMuscle.toLowerCase()))) ||
+            (ex.secondaryMuscles && ex.secondaryMuscles.some(m => m.toLowerCase().includes(selectedMuscle.toLowerCase())));
+
+        return matchesSearch && matchesCategory && matchesMuscle;
     });
 
     const pageSize = 18;
@@ -57,8 +62,46 @@ export default function WorkoutLibrary() {
     // Extract categories
     const categories = Array.from(new Set(exercises.map(ex => ex.category))).sort();
 
+    // Muscle Group Pills
+    const muscleGroups = [
+        { label: "ALL MUSCLES", value: "" },
+        { label: "CHEST", value: "chest" },
+        { label: "TRICEPS", value: "triceps" },
+        { label: "BICEPS", value: "biceps" },
+        { label: "BACK / LATS", value: "lats" },
+        { label: "SHOULDERS", value: "shoulders" },
+        { label: "LEGS / QUADS", value: "quadriceps" },
+        { label: "ABS / CORE", value: "abdominis" },
+        { label: "GLUTES", value: "glutes" },
+        { label: "HAMSTRINGS", value: "hamstrings" },
+        { label: "FOREARMS", value: "forearms" },
+    ];
+
     return (
         <div className="space-y-8">
+            {/* Muscle Group Pills */}
+            <div className="flex flex-wrap gap-2 pb-2 overflow-x-auto scrollbar-none">
+                {muscleGroups.map((m) => {
+                    const isActive = selectedMuscle === m.value;
+                    return (
+                        <button
+                            key={m.label}
+                            onClick={() => {
+                                setSelectedMuscle(m.value);
+                                setPage(1);
+                            }}
+                            className={`px-4 py-2 rounded-lg text-xs font-mono tracking-wider transition-all border ${
+                                isActive
+                                    ? "bg-gym-red text-white border-gym-red shadow-[0_0_15px_rgba(239,68,68,0.5)] font-bold scale-105"
+                                    : "bg-black/60 text-gray-400 border-white/10 hover:border-white/30 hover:text-white"
+                            }`}
+                        >
+                            {m.label}
+                        </button>
+                    );
+                })}
+            </div>
+
             {/* Controls */}
             <div className="flex flex-col md:flex-row gap-4 bg-white/5 p-6 border border-white/10 rounded-xl">
                 {/* Search */}
