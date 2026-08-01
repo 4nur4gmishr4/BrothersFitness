@@ -250,6 +250,9 @@ export default function ProfileModal({ isOpen, onClose }: ProfileModalProps) {
                                             value={weightKg}
                                             onChange={(e) => setWeightKg(e.target.value)}
                                             placeholder="kg"
+                                            min={20}
+                                            max={300}
+                                            step={0.1}
                                             className="w-full bg-white/5 border border-white/20 rounded-lg pl-10 pr-3 py-3 text-white focus:border-gym-red focus:outline-none placeholder:text-gray-600 text-sm transition-colors"
                                         />
                                     </div>
