@@ -1,11 +1,7 @@
-/**
- * User Authentication Context for BroFit customers
- * Uses Firebase Google Sign-In for authentication
- * Supabase for user profile and daily credits
- */
 "use client";
 
 import { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
+import { supabase } from '@/lib/supabase';
 import {
     getFirebaseAuth,
     getGoogleProvider,
@@ -322,67 +318,31 @@ export function UserAuthProvider({ children }: { children: ReactNode }) {
 
     const signInWithGoogle = async (): Promise<{ success: boolean; error?: string }> => {
         try {
-            const auth = getFirebaseAuth();
-            const provider = getGoogleProvider();
-
-            // Enhanced Mobile Detection
-            const isMobile = typeof window !== 'undefined' && (
-                /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
-                (navigator.maxTouchPoints > 0) ||
-                (window.matchMedia("(max-width: 768px)").matches)
-            );
-
-            console.log("Auth: Device detected as", isMobile ? "Mobile" : "Desktop");
-
-            if (isMobile) {
-                const toastId = toast.loading("Redirecting to Google...", { duration: 10000 });
-                try {
-                    sessionStorage.setItem('brofit_auth_in_progress', 'true');
-                    await signInWithRedirect(auth, provider);
-                    // The page will unload here, so success/loading state persists
-                    return { success: true };
-                } catch (e) {
-                    sessionStorage.removeItem('brofit_auth_in_progress');
-                    toast.dismiss(toastId);
-                    console.error("Redirect Error:", e);
-                    const msg = e instanceof Error ? e.message : "Redirect failed";
-                    toast.error(`Login Error: ${msg}`, { duration: 6000 });
-                    return { success: false, error: msg };
+            const toastId = toast.loading("Redirecting to Google...", { duration: 5000 });
+            const { error } = await supabase.auth.signInWithOAuth({
+                provider: 'google',
+                options: {
+                    redirectTo: `${window.location.origin}/`
                 }
-            } else {
-                try {
-                    await signInWithPopup(auth, provider);
-                    setShowWelcome(true);
-                    toast.success("Signed in successfully!");
-                } catch (error) {
-                    const code = typeof error === 'object' && error && 'code' in error
-                        ? String((error as { code?: string }).code)
-                        : '';
+            });
 
-                    console.log("Popup failed with code:", code);
-
-                    if (code === 'auth/popup-blocked' || code === 'auth/popup-closed-by-user' || code === 'auth/cancelled-popup-request') {
-                        toast.info("Popup blocked. Redirecting instead...", { duration: 4000 });
-                        sessionStorage.setItem('brofit_auth_in_progress', 'true');
-                        await signInWithRedirect(auth, provider);
-                        return { success: true };
-                    } else {
-                        throw error;
-                    }
-                }
+            if (error) {
+                toast.dismiss(toastId);
+                toast.error(`Login Error: ${error.message}`);
+                return { success: false, error: error.message };
             }
+
             return { success: true };
         } catch (error) {
-            console.error('Google Sign-In error:', error);
-            const errorMessage = getAuthErrorMessage(error);
-            return { success: false, error: errorMessage };
+            const msg = error instanceof Error ? error.message : "Failed to sign in with Google";
+            toast.error(msg);
+            return { success: false, error: msg };
         }
     };
 
     const logout = async () => {
         try {
-            const auth = getFirebaseAuth();
-            await signOut(auth);
+            await supabase.auth.signOut();
             setUser(null);
             setFirebaseUser(null);
         } catch (error) {
