@@ -5,52 +5,18 @@ import useSWR from "swr";
 import { motion, AnimatePresence } from "framer-motion";
 import { Search, Filter, ChevronLeft, ChevronRight, Dumbbell } from "lucide-react";
 import Image from "next/image";
+import { fetchFreeExerciseDb, FreeExercise } from "@/lib/fitness-data-service";
 
-const API_KEY = process.env.NEXT_PUBLIC_WGER_API_KEY; // Must be set in .env.local
-const BASE_URL = "https://wger.de/api/v2";
-
-const fetcher = (url: string) => fetch(url, {
-    headers: API_KEY ? { 'Authorization': `Token ${API_KEY}` } : {}
-}).then(res => res.json());
-
-// Helper to strip HTML tags and get plain text
-const stripHtml = (html: string): string => {
-    if (!html) return '';
-    return html.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
-};
-
-interface Exercise {
-    id: number;
-    name: string;
-    description?: string;
-    category?: { id: number; name: string };
-    images?: { image: string }[];
-    videos?: { video: string }[];
-    muscles?: { id: number; name: string }[];
-}
-
-interface Category {
-    id: number;
-    name: string;
-}
+const fetcher = () => fetchFreeExerciseDb();
 
 export default function WorkoutLibrary() {
     const [page, setPage] = useState(1);
     const [search, setSearch] = useState("");
-    const [category, setCategory] = useState<number | null>(null);
+    const [category, setCategory] = useState<string>("");
 
-    // Fetch exercises (using exerciseinfo for better details/images)
-    // We use `exerciseinfo` endpoint which aggregates images and descriptions nicely
-    const { data, error, isLoading } = useSWR(
-        `${BASE_URL}/exerciseinfo/?limit=20&offset=${(page - 1) * 20}&language=2${category ? `&category=${category}` : ''}`, // language=2 is English
-        fetcher
-    );
+    const { data: allExercises, error, isLoading } = useSWR('free-exercise-db', fetcher);
 
-    // Fetch Categories
-    const { data: categories } = useSWR(`${BASE_URL}/exercisecategory/`, fetcher);
-
-    // Initial Loading State - Skeleton Loading
-    if (isLoading && !data) return (
+    if (isLoading && !allExercises) return (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {[...Array(6)].map((_, i) => (
                 <div key={i} className="bg-white/5 border border-white/10 rounded-xl overflow-hidden">
@@ -70,18 +36,26 @@ export default function WorkoutLibrary() {
 
     if (error) return (
         <div className="text-center p-10 border border-red-500/50 bg-red-500/10 text-red-500 font-mono">
-            UPLINK FAILURE: UNABLE TO RETRIEVE TACTICAL DATA.
+            UPLINK FAILURE: UNABLE TO RETRIEVE TACTICAL EXERCISE DATA.
         </div>
     );
 
-    const exercises = data?.results || [];
-    const totalCount = data?.count || 0;
-    const maxPage = Math.ceil(totalCount / 20);
+    const exercises = allExercises || [];
 
-    // Filter by search locally since API search can be restrictive/slow on free tier or tricky with 'exerciseinfo'
-    const filteredExercises = search
-        ? exercises.filter((ex: Exercise) => ex.name?.toLowerCase().includes(search.toLowerCase()))
-        : exercises;
+    // Filter by search & category
+    const filteredExercises = exercises.filter((ex: FreeExercise) => {
+        const matchesSearch = !search || ex.name.toLowerCase().includes(search.toLowerCase()) || ex.primaryMuscles.some(m => m.toLowerCase().includes(search.toLowerCase()));
+        const matchesCategory = !category || ex.category.toLowerCase() === category.toLowerCase();
+        return matchesSearch && matchesCategory;
+    });
+
+    const pageSize = 18;
+    const totalCount = filteredExercises.length;
+    const maxPage = Math.max(1, Math.ceil(totalCount / pageSize));
+    const paginatedExercises = filteredExercises.slice((page - 1) * pageSize, page * pageSize);
+
+    // Extract categories
+    const categories = Array.from(new Set(exercises.map(ex => ex.category))).sort();
 
     return (
         <div className="space-y-8">
@@ -92,9 +66,12 @@ export default function WorkoutLibrary() {
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
                     <input
                         type="text"
-                        placeholder="SEARCH DATABASE..."
+                        placeholder="SEARCH DATABASE (EXERCISE OR MUSCLE)..."
                         value={search}
-                        onChange={(e) => setSearch(e.target.value)}
+                        onChange={(e) => {
+                            setSearch(e.target.value);
+                            setPage(1);
+                        }}
                         className="w-full bg-black border border-white/20 pl-10 pr-4 py-3 text-white focus:border-gym-red focus:outline-none rounded-lg font-mono text-sm placeholder:text-gray-600"
                     />
                 </div>
@@ -105,14 +82,14 @@ export default function WorkoutLibrary() {
                     <select
                         className="w-full bg-black border border-white/20 pl-10 pr-8 py-3 text-white focus:border-gym-red focus:outline-none rounded-lg font-mono text-sm appearance-none cursor-pointer"
                         onChange={(e) => {
-                            setCategory(e.target.value ? parseInt(e.target.value) : null);
-                            setPage(1); // Reset to page 1 on filter
+                            setCategory(e.target.value);
+                            setPage(1);
                         }}
-                        value={category || ""}
+                        value={category}
                     >
                         <option value="">ALL DIVISIONS</option>
-                        {categories?.results?.map((cat: Category) => (
-                            <option key={cat.id} value={cat.id}>{cat.name.toUpperCase()}</option>
+                        {categories.map((cat: string) => (
+                            <option key={cat} value={cat}>{cat.toUpperCase()}</option>
                         ))}
                     </select>
                 </div>
@@ -121,7 +98,7 @@ export default function WorkoutLibrary() {
             {/* Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 <AnimatePresence mode="popLayout">
-                    {filteredExercises.map((exercise: Exercise) => (
+                    {paginatedExercises.map((exercise: FreeExercise) => (
                         <motion.div
                             key={exercise.id}
                             initial={{ opacity: 0, scale: 0.95 }}
@@ -130,19 +107,12 @@ export default function WorkoutLibrary() {
                             layout
                             className="bg-black border border-white/10 rounded-xl overflow-hidden hover:border-gym-red/50 transition-all group flex flex-col h-full"
                         >
-                            {/* Media Section: Priority to Video, then Image */}
+                            {/* Image Section */}
                             <div className="aspect-video bg-white/5 relative overflow-hidden">
-                                {exercise.videos && exercise.videos.length > 0 ? (
-                                    <video
-                                        src={exercise.videos[0].video}
-                                        controls
-                                        className="w-full h-full object-cover"
-                                        poster={exercise.images?.[0]?.image}
-                                    />
-                                ) : exercise.images && exercise.images.length > 0 ? (
+                                {exercise.images && exercise.images.length > 0 ? (
                                     <Image
-                                        src={exercise.images[0].image}
-                                        alt={exercise.name || "Workout exercise demonstration"}
+                                        src={exercise.images[0]}
+                                        alt={exercise.name}
                                         fill
                                         className="object-cover opacity-80 group-hover:opacity-100 group-hover:scale-105 transition-all duration-500"
                                         sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
@@ -155,7 +125,7 @@ export default function WorkoutLibrary() {
 
                                 <div className="absolute top-2 right-2 bg-black/80 px-2 py-1 rounded border border-white/10 z-10">
                                     <span className="text-[10px] font-mono text-gym-red uppercase">
-                                        {exercise.category?.name || "TACTICAL"}
+                                        {exercise.category || "STRENGTH"}
                                     </span>
                                 </div>
                             </div>
@@ -165,21 +135,20 @@ export default function WorkoutLibrary() {
                                     {exercise.name}
                                 </h3>
 
-                                <p
-                                    className="text-gray-400 text-xs font-sans line-clamp-4 mb-4"
-                                >
-                                    {stripHtml(exercise.description || '') || 'NO STRATEGIC DATA AVAILABLE.'}
+                                <p className="text-gray-400 text-xs font-sans line-clamp-3 mb-4">
+                                    {exercise.instructions?.[0] || 'NO STRATEGIC DATA AVAILABLE.'}
                                 </p>
 
                                 <div className="mt-auto pt-4 border-t border-white/10 flex flex-wrap gap-2">
-                                    {exercise.muscles && exercise.muscles.length > 0 ? (
-                                        exercise.muscles.map((m: { id: number; name: string }) => (
-                                            <span key={m.id} className="text-[10px] bg-white/10 px-2 py-1 rounded text-gray-300 uppercase">
-                                                {m.name}
-                                            </span>
-                                        )).slice(0, 3)
-                                    ) : (
-                                        <span className="text-[10px] text-gray-600 uppercase">COMPOUND</span>
+                                    {exercise.primaryMuscles.map((m: string) => (
+                                        <span key={m} className="text-[10px] bg-gym-red/20 border border-gym-red/30 px-2 py-1 rounded text-gym-red uppercase font-mono">
+                                            {m}
+                                        </span>
+                                    ))}
+                                    {exercise.equipment && (
+                                        <span className="text-[10px] bg-white/10 px-2 py-1 rounded text-gray-300 uppercase font-mono">
+                                            {exercise.equipment}
+                                        </span>
                                     )}
                                 </div>
                             </div>
