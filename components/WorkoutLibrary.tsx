@@ -91,25 +91,25 @@ export default function WorkoutLibrary() {
 
     return (
         <div className="space-y-8">
-            {/* Controls Header with Search & 2 Dropdowns */}
-            <div className="grid grid-cols-1 md:grid-cols-12 gap-4 bg-white/5 p-6 border border-white/10 rounded-xl">
-                {/* Search Input */}
-                <div className="relative md:col-span-6">
-                    <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
+            {/* Controls Header with Adaptive Search & Auto-Sized Dropdowns */}
+            <div className="flex flex-col md:flex-row gap-4 bg-white/5 p-5 border border-white/10 rounded-xl items-stretch md:items-center">
+                {/* Search Input (Flex Grow) */}
+                <div className="relative flex-1 min-w-[240px]">
+                    <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                     <input
                         type="text"
-                        placeholder="SEARCH EXERCISES OR MUSCLES..."
+                        placeholder="Search exercises or muscles..."
                         value={search}
                         onChange={(e) => {
                             setSearch(e.target.value);
                             setPage(1);
                         }}
-                        className="w-full bg-black border border-white/20 pl-11 pr-4 py-3.5 text-white focus:border-gym-red focus:outline-none rounded-lg font-mono text-sm placeholder:text-gray-600 shadow-inner"
+                        className="w-full bg-black border border-white/20 pl-11 pr-4 py-3 text-white focus:border-gym-red focus:outline-none rounded-lg text-sm placeholder:text-gray-500 shadow-inner"
                     />
                 </div>
 
-                {/* Dropdown 1: Target Muscle Group */}
-                <div className="relative md:col-span-3">
+                {/* Dropdown 1: Target Muscle Group (Adaptable Width) */}
+                <div className="relative w-full md:w-auto min-w-[210px]">
                     <Filter className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gym-red" />
                     <select
                         value={selectedMuscle}
@@ -117,19 +117,19 @@ export default function WorkoutLibrary() {
                             setSelectedMuscle(e.target.value);
                             setPage(1);
                         }}
-                        className="w-full bg-black border border-white/20 pl-10 pr-8 py-3.5 text-white focus:border-gym-red focus:outline-none rounded-lg font-mono text-xs tracking-wider appearance-none cursor-pointer uppercase"
+                        className="w-full bg-black border border-white/20 pl-10 pr-9 py-3 text-white focus:border-gym-red focus:outline-none rounded-lg font-mono text-xs tracking-wider appearance-none cursor-pointer uppercase font-semibold text-ellipsis"
                     >
                         {muscleGroups.map((m) => (
-                            <option key={m.label} value={m.value} className="bg-black text-white py-2">
+                            <option key={m.label} value={m.value} className="bg-zinc-900 text-white font-sans text-sm py-2">
                                 {m.label}
                             </option>
                         ))}
                     </select>
-                    <div className="absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none text-gray-500 text-xs">▼</div>
+                    <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400 text-xs">▼</div>
                 </div>
 
-                {/* Dropdown 2: Exercise Type / Category */}
-                <div className="relative md:col-span-3">
+                {/* Dropdown 2: Exercise Type / Discipline (Adaptable Width) */}
+                <div className="relative w-full md:w-auto min-w-[210px]">
                     <Dumbbell className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gym-red" />
                     <select
                         value={category}
@@ -137,15 +137,15 @@ export default function WorkoutLibrary() {
                             setCategory(e.target.value);
                             setPage(1);
                         }}
-                        className="w-full bg-black border border-white/20 pl-10 pr-8 py-3.5 text-white focus:border-gym-red focus:outline-none rounded-lg font-mono text-xs tracking-wider appearance-none cursor-pointer uppercase"
+                        className="w-full bg-black border border-white/20 pl-10 pr-9 py-3 text-white focus:border-gym-red focus:outline-none rounded-lg font-mono text-xs tracking-wider appearance-none cursor-pointer uppercase font-semibold text-ellipsis"
                     >
                         {disciplines.map((d) => (
-                            <option key={d.label} value={d.value} className="bg-black text-white py-2">
+                            <option key={d.label} value={d.value} className="bg-zinc-900 text-white font-sans text-sm py-2">
                                 {d.label}
                             </option>
                         ))}
                     </select>
-                    <div className="absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none text-gray-500 text-xs">▼</div>
+                    <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400 text-xs">▼</div>
                 </div>
             </div>
 
