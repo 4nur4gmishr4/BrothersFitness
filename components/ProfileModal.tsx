@@ -234,6 +234,9 @@ export default function ProfileModal({ isOpen, onClose }: ProfileModalProps) {
                                             value={heightCm}
                                             onChange={(e) => setHeightCm(e.target.value)}
                                             placeholder="cm"
+                                            min={50}
+                                            max={300}
+                                            step={1}
                                             className="w-full bg-white/5 border border-white/20 rounded-lg pl-10 pr-3 py-3 text-white focus:border-gym-red focus:outline-none placeholder:text-gray-600 text-sm transition-colors"
                                         />
                                     </div>
