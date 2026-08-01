@@ -77,7 +77,6 @@ export default function ProfileModal({ isOpen, onClose }: ProfileModalProps) {
                 gender: gender
             };
 
-            console.log('Profile Modal: Saving data...', data);
             const result = await updateProfile(data);
 
             if (result.success) {
