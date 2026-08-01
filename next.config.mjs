@@ -1,9 +1,13 @@
 import withPWA from '@ducanh2912/next-pwa';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  reactStrictMode: false,
-  outputFileTracingRoot: undefined,
+  reactStrictMode: true,
+  outputFileTracingRoot: path.resolve(__dirname),
   images: {
     remotePatterns: [
       {
@@ -24,6 +28,11 @@ const nextConfig = {
       {
         protocol: 'https',
         hostname: 'lh3.googleusercontent.com',
+        pathname: '**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'raw.githubusercontent.com',
         pathname: '**',
       },
     ],
