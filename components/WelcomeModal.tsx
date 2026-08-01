@@ -32,6 +32,7 @@ export default function WelcomeModal({ isOpen, onClose }: WelcomeModalProps) {
 
                         <button
                             onClick={onClose}
+                            aria-label="Close welcome message"
                             className="absolute top-4 right-4 p-2 text-gray-500 hover:text-white transition-colors"
                         >
                             <X className="w-5 h-5" />
@@ -42,7 +43,7 @@ export default function WelcomeModal({ isOpen, onClose }: WelcomeModalProps) {
                                 <div className="p-2 bg-gym-red/20 rounded-lg">
                                     <ShieldCheck className="w-6 h-6 text-gym-red" />
                                 </div>
-                                <h2 className="text-xl font-display font-black uppercase tracking-tight text-white">
+                                <h2 className="text-xl font-display font-black uppercase tracking-wide text-white">
                                     Access Granted
                                 </h2>
                             </div>
@@ -53,7 +54,7 @@ export default function WelcomeModal({ isOpen, onClose }: WelcomeModalProps) {
                                 </p>
 
                                 <div className="bg-white/5 border border-white/10 p-4 rounded-lg flex gap-4">
-                                    <Zap className="w-6 h-6 text-yellow-500 shrink-0 mt-1" />
+                                    <Zap className="w-6 h-6 text-gym-red shrink-0 mt-1" />
                                     <p className="text-sm text-gray-400">
                                         Your <span className="text-white font-bold">3 Daily Tactical Credits</span> are now available. You can use them across both the <span className="text-gym-red font-bold underline underline-offset-4">AI Chatbot</span> and <span className="text-gym-red font-bold underline underline-offset-4">Diet Generation</span> services.
                                     </p>

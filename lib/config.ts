@@ -36,4 +36,33 @@ export const WHATSAPP_COUNTRY_CODE = '91';
 
 export const GYM_NAME = "Brother's Fitness";
 
-export const MAX_DAILY_CREDITS = 3;
+// Daily AI credit cap per user, configurable via env so each deployment can
+// tune it without a code change. The DB side is coupled: the users table
+// CHECK upper bound and the app_settings.max_daily_credits value used by
+// reset_daily_credits() must be raised to match (see the
+// configurable-credits migration) before bumping this beyond 5.
+const CREDITS_FROM_ENV = Number(process.env.MAX_DAILY_CREDITS);
+export const MAX_DAILY_CREDITS =
+    Number.isInteger(CREDITS_FROM_ENV) && CREDITS_FROM_ENV >= 1 ? CREDITS_FROM_ENV : 5;
+
+// Single source of truth for valid membership plans. Used by both the
+// Zod member schema (lib/validation.ts) and price lookups above.
+export const MEMBERSHIP_PLANS = [
+    '15 Days',
+    '1 Month',
+    'Monthly',
+    '3 Months',
+    'Quarterly',
+    '6 Months',
+    'Half-Yearly',
+] as const;
+
+// The selectable plans shown in the registration form, with their display
+// labels. Stored values ('1 Month' etc.) are the canonical membership_type
+// keys; labels are the friendlier strings shown to the admin.
+export const MEMBERSHIP_PLAN_DETAILS = [
+    { value: '15 Days', label: '15 Days' },
+    { value: '1 Month', label: 'Monthly' },
+    { value: '3 Months', label: 'Quarterly' },
+    { value: '6 Months', label: 'Half-Yearly' },
+] as const;

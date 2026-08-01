@@ -47,7 +47,7 @@ const features = [
         title: "Membership Pricing",
         description: "View our flexible membership plans.",
         link: "/pricing",
-        color: "text-yellow-400"
+        color: "text-gym-red"
     },
     {
         icon: <MessageCircle className="w-6 h-6" />,
@@ -76,8 +76,8 @@ export default function FeaturesOverview() {
                         </span>
                         <Sparkles className="w-5 h-5 text-gym-red" />
                     </div>
-                    <h2 className="text-3xl md:text-5xl font-black uppercase mb-4">
-                        What Can You Do Here?
+                    <h2 className="text-3xl md:text-5xl font-display uppercase tracking-wide mb-4">
+                        What Can You <span className="text-gym-red italic">Do</span> Here?
                     </h2>
                     <p className="text-gray-400 max-w-2xl mx-auto">
                         Brother&apos;s Fitness is more than just a gym. We provide tools to help you

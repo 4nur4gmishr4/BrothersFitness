@@ -1,5 +1,5 @@
 ﻿import type { Metadata, Viewport } from "next";
-import { Inter, DotGothic16 } from "next/font/google";
+import { Inter, DotGothic16, Anton, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import PageWrapper from "@/components/PageWrapper";
 import { GamificationProvider } from "@/components/GamificationContext";
@@ -19,6 +19,18 @@ const dotGothic = DotGothic16({
   weight: "400",
   subsets: ["latin"],
   variable: "--font-dot"
+});
+
+// Heavy, ultra-condensed display face for hero + section headlines.
+const anton = Anton({
+  weight: "400",
+  subsets: ["latin"],
+  variable: "--font-display"
+});
+
+const jetBrainsMono = JetBrains_Mono({
+  subsets: ["latin"],
+  variable: "--font-mono"
 });
 
 export const viewport: Viewport = {
@@ -73,7 +85,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="dark">
-      <body className={`${inter.variable} ${dotGothic.variable} font-sans bg-black text-white antialiased`}>
+      <body className={`${inter.variable} ${dotGothic.variable} ${anton.variable} ${jetBrainsMono.variable} font-sans bg-black text-white antialiased`}>
         <ReadingProgressBar />
         <Toaster
           theme="dark"

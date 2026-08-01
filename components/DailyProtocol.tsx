@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Crosshair, Layers } from "lucide-react";
+import { TracingBeam } from "@/components/ui/tracing-beam";
 
 
 
@@ -45,7 +46,9 @@ export default function DailyProtocol() {
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
         >
-          <h2 className="text-4xl md:text-6xl font-black uppercase mb-4 font-sans">DAILY PROTOCOL</h2>
+          <h2 className="heading-display text-4xl md:text-6xl mb-4">
+            DAILY <span className="text-gym-red italic">PROTOCOL</span>
+          </h2>
           <p className="text-lg text-gray-400 font-dot">LIVE TRAINING SCHEDULE</p>
         </motion.div>
 
@@ -64,15 +67,16 @@ export default function DailyProtocol() {
           />
         </div>
 
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={activeSplit}
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -20 }}
-            transition={{ duration: 0.3 }}
-            className="grid gap-3 md:gap-5"
-          >
+        <TracingBeam className="max-w-none">
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={activeSplit}
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              transition={{ duration: 0.3 }}
+              className="grid gap-3 md:gap-5"
+            >
             {SPLITS[activeSplit].map((item, idx) => {
               const isToday = currentDay === idx;
               return (
@@ -102,7 +106,7 @@ export default function DailyProtocol() {
                       ACTIVE
                     </motion.div>
                   )}
-                  <h3 className="text-2xl md:text-3xl font-black font-sans mb-2">{item.day}</h3>
+                  <h3 className="text-2xl md:text-3xl font-display font-black uppercase tracking-wide mb-2">{item.day}</h3>
                   <p className="text-xl md:text-2xl text-gym-red font-bold mb-1">{item.focus}</p>
                   <p className="text-sm text-gray-400 font-dot">{item.type}</p>
                 </motion.div>
@@ -110,6 +114,7 @@ export default function DailyProtocol() {
             })}
           </motion.div>
         </AnimatePresence>
+        </TracingBeam>
       </div>
     </section>
   );

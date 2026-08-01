@@ -3,6 +3,7 @@
 import { MapPin, Phone, Mail, Sparkles, Instagram, MessageCircle } from "lucide-react";
 import { motion, AnimatePresence, useInView } from "framer-motion";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState, useEffect, useRef } from "react";
 
 const taglines = [
@@ -33,30 +34,32 @@ export default function Footer() {
   }, []);
 
   const quickLinks = [
-    { name: "Home", href: "/", external: true },
-    { name: "Workouts", href: "/workouts", external: true },
-    { name: "Diet Planner", href: "/fuel", external: true },
-    { name: "Calculators", href: "/calculators", external: true },
-    { name: "Pricing", href: "/pricing", external: true },
-    { name: "Quotes", href: "/quotes", external: true },
+    { name: "Home", href: "/" },
+    { name: "Workouts", href: "/workouts" },
+    { name: "Diet Planner", href: "/fuel" },
+    { name: "Calculators", href: "/calculators" },
+    { name: "Pricing", href: "/pricing" },
+    { name: "Quotes", href: "/quotes" },
   ];
 
   const devPhone = "9302786886";
   const devWhatsApp = "919302786886";
 
-  const scrollToSection = (href: string) => {
-    if (href.startsWith('/')) {
-      // External route
-      window.location.href = href;
-    } else {
-      // Hash link - scroll to section
-      const element = document.getElementById(href.replace('#', ''));
+  const router = useRouter();
+
+  const navigateTo = (href: string) => {
+    if (href.startsWith('/#')) {
+      // Hash link - scroll to section on the current page
+      const element = document.getElementById(href.replace('/#', ''));
       if (element) {
         element.scrollIntoView({ behavior: "smooth" });
       } else {
-        // If not found, redirect to home with hash
-        window.location.href = `/${href}`;
+        // If not found, navigate home with the hash
+        router.push(`/${href.replace('/#', '')}`);
       }
+    } else {
+      // Route link - client-side navigation
+      router.push(href);
     }
   };
 
@@ -81,7 +84,7 @@ export default function Footer() {
             transition={{ duration: 0.6 }}
           >
             <motion.h3
-              className="text-2xl font-display font-black tracking-tight mb-4"
+              className="text-2xl font-display font-black tracking-wide mb-4"
               animate={{
                 textShadow: [
                   "0 0 0px rgba(215, 25, 33, 0)",
@@ -140,40 +143,23 @@ export default function Footer() {
                   viewport={{ once: true }}
                   transition={{ delay: index * 0.05 }}
                 >
-                  {link.external ? (
-                    <Link href={link.href} target="_blank">
-                      <motion.span
-                        className="text-sm hover:text-gym-red transition-colors inline-block relative group cursor-pointer"
-                        whileHover={{ x: 5 }}
-                      >
-                        {link.name}
-                        <motion.span
-                          className="absolute bottom-0 left-0 h-0.5 bg-gym-red"
-                          initial={{ width: "0%" }}
-                          whileHover={{ width: "100%" }}
-                          transition={{ duration: 0.3 }}
-                        />
-                      </motion.span>
-                    </Link>
-                  ) : (
-                    <motion.a
-                      href={link.href}
-                      onClick={(e) => {
-                        e.preventDefault();
-                        scrollToSection(link.href);
-                      }}
-                      className="text-sm hover:text-gym-red transition-colors inline-block relative group cursor-pointer"
-                      whileHover={{ x: 5 }}
-                    >
-                      {link.name}
-                      <motion.span
-                        className="absolute bottom-0 left-0 h-0.5 bg-gym-red"
-                        initial={{ width: "0%" }}
-                        whileHover={{ width: "100%" }}
-                        transition={{ duration: 0.3 }}
-                      />
-                    </motion.a>
-                  )}
+                  <motion.a
+                    href={link.href}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      navigateTo(link.href);
+                    }}
+                    className="text-sm hover:text-gym-red transition-colors inline-block relative group cursor-pointer"
+                    whileHover={{ x: 5 }}
+                  >
+                    {link.name}
+                    <motion.span
+                      className="absolute bottom-0 left-0 h-0.5 bg-gym-red"
+                      initial={{ width: "0%" }}
+                      whileHover={{ width: "100%" }}
+                      transition={{ duration: 0.3 }}
+                    />
+                  </motion.a>
                 </motion.li>
               ))}
             </ul>
@@ -335,7 +321,7 @@ function DeveloperSection({ devPhone, devWhatsApp }: { devPhone: string; devWhat
                   <h3 className="text-xs md:text-sm font-mono text-gray-400 uppercase tracking-wider">
                     Designed, Developed & Managed By <span className="text-gym-red mx-1 hidden md:inline">–</span>
                   </h3>
-                  <h3 className="text-base md:text-lg font-display font-black text-white tracking-tight">
+                  <h3 className="text-base md:text-lg font-display font-black text-white tracking-wide">
                     ANURAG MISHRA
                   </h3>
                 </div>

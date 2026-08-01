@@ -61,6 +61,14 @@ export function AdminProvider({ children }: { children: ReactNode }) {
     };
 
     const logout = () => {
+        // Revoke the token server-side before clearing it locally.
+        const token = sessionStorage.getItem('admin_token');
+        if (token) {
+            fetch('/api/admin/logout', {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${token}` }
+            }).catch(() => { /* revocation is best-effort */ });
+        }
         sessionStorage.removeItem('admin_token');
         setIsAdmin(false);
     };

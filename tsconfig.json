@@ -30,7 +30,6 @@
   },
   "include": [
     "next-env.d.ts",
-    "next-overrides.d.ts",
     "**/*.ts",
     "**/*.tsx",
     ".next/types/**/*.ts"

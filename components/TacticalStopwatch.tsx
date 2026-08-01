@@ -17,35 +17,28 @@ export default function TacticalStopwatch() {
 
         if (isRunning) {
             interval = setInterval(() => {
-                if (mode === "countdown") {
-                    setTime(prevTime => {
-                        const newTime = prevTime - 1;
-
-                        // Alert when countdown reaches 0
-                        if (newTime === 0 && !hasAlerted) {
-                            setIsRunning(false);
-                            setHasAlerted(true);
-                            // Play alert sound and vibrate
-                            if (typeof window !== 'undefined') {
-                                const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDVeHpHg==');
-                                audio.play().catch(() => { }); // Ignore errors
-                                navigator.vibrate?.(200);
-                            }
-                            return 0;
-                        }
-
-                        return newTime > 0 ? newTime : 0;
-                    });
-                } else {
-                    setTime(prevTime => prevTime + 1);
-                }
+                // Pure updater: no side effects inside the setState function.
+                setTime(prevTime => mode === "countdown" ? Math.max(prevTime - 1, 0) : prevTime + 1);
             }, 1000);
         }
 
         return () => {
             if (interval) clearInterval(interval);
         };
-    }, [isRunning, mode, hasAlerted]);
+    }, [isRunning, mode]);
+
+    // Fire the alert as a reaction to time hitting 0, not inside the tick updater.
+    useEffect(() => {
+        if (mode === "countdown" && isRunning && time === 0 && !hasAlerted) {
+            setIsRunning(false);
+            setHasAlerted(true);
+            if (typeof window !== 'undefined') {
+                const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDVeHpHg==');
+                audio.play().catch(() => { }); // Ignore errors
+                navigator.vibrate?.(200);
+            }
+        }
+    }, [time, mode, isRunning, hasAlerted]);
 
     const formatTime = useCallback((seconds: number) => {
         const mins = Math.floor(seconds / 60);

@@ -40,13 +40,6 @@ export default function Navbar() {
       const handleResize = () => setIsMobile(window.innerWidth < 768);
       window.addEventListener('resize', handleResize);
 
-      // Ensure Rate Limit ID exists
-      if (!localStorage.getItem('brofit_user_id')) {
-        // Fallback for environments where crypto.randomUUID is not available (insecure contexts)
-        const uniqueId = Date.now().toString(36) + Math.random().toString(36).substr(2);
-        localStorage.setItem('brofit_user_id', uniqueId);
-      }
-
       return () => window.removeEventListener('resize', handleResize);
     }
   }, []);
@@ -98,8 +91,8 @@ export default function Navbar() {
 
   const handleMenuClick = (item: typeof menuItems[0]) => {
     if (item.isRoute) {
-      // Internal route navigation
-      window.location.href = item.id;
+      // Internal route navigation — router.push avoids a full page reload.
+      router.push(item.id);
       setIsOpen(false);
     } else {
       scrollToSection(item.id);
@@ -130,12 +123,12 @@ export default function Navbar() {
               whileHover={!isMobile ? { scale: 1.05 } : undefined}
               whileTap={{ scale: 0.95 }}
             >
-              <span className="text-base sm:text-lg md:text-xl lg:text-3xl font-display font-black uppercase tracking-tighter">
-                <span className="text-white group-hover:text-gym-red transition-colors duration-300">
+              <span className="text-base sm:text-lg md:text-xl lg:text-3xl font-sans uppercase tracking-tight">
+                <span className="font-extrabold text-white group-hover:text-gym-red transition-colors duration-300">
                   BROTHER&apos;S
                 </span>
-                <span className="text-gym-red">_</span>
-                <span className="text-white group-hover:text-gym-red transition-colors duration-300">
+                <span className="font-light text-gym-red">_</span>
+                <span className="font-light text-white group-hover:text-gym-red transition-colors duration-300">
                   FITNESS
                 </span>
               </span>
@@ -308,10 +301,10 @@ export default function Navbar() {
                         setShowTrophyRoom(true);
                         setIsOpen(false);
                       }}
-                      className="flex items-center gap-2 px-6 py-3 bg-yellow-500/10 border border-yellow-500/30 rounded-full hover:bg-yellow-500/20 transition-colors"
+                      className="flex items-center gap-2 px-6 py-3 bg-gym-red/10 border border-gym-red/30 rounded-full hover:bg-gym-red/20 transition-colors"
                     >
-                      <Trophy className="w-5 h-5 text-yellow-500" />
-                      <span className="text-sm font-mono text-yellow-500 uppercase tracking-widest">
+                      <Trophy className="w-5 h-5 text-gym-red" />
+                      <span className="text-sm font-mono text-gym-red uppercase tracking-widest">
                         Trophy Room
                       </span>
                     </button>

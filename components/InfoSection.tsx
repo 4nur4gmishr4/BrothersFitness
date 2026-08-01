@@ -64,7 +64,7 @@ export default function InfoSection() {
                     MORNING SESSION
                   </h3>
                   <motion.p
-                    className="text-xl md:text-2xl font-display font-bold tracking-tight"
+                    className="text-xl md:text-2xl font-display font-bold tracking-wide"
                     animate={{ opacity: [0.7, 1, 0.7] }}
                     transition={{ duration: 3, repeat: Infinity }}
                   >
@@ -81,7 +81,7 @@ export default function InfoSection() {
                     WOMEN-ONLY SESSION
                   </h3>
                   <motion.p
-                    className="text-xl md:text-2xl font-display font-bold tracking-tight text-gym-red"
+                    className="text-xl md:text-2xl font-display font-bold tracking-wide text-gym-red"
                     animate={{ opacity: [0.7, 1, 0.7] }}
                     transition={{ duration: 3, repeat: Infinity, delay: 0.5 }}
                   >
@@ -98,7 +98,7 @@ export default function InfoSection() {
                     EVENING SESSION
                   </h3>
                   <motion.p
-                    className="text-xl md:text-2xl font-display font-bold tracking-tight"
+                    className="text-xl md:text-2xl font-display font-bold tracking-wide"
                     animate={{ opacity: [0.7, 1, 0.7] }}
                     transition={{ duration: 3, repeat: Infinity, delay: 1 }}
                   >

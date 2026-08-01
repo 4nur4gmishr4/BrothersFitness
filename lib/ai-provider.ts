@@ -7,12 +7,29 @@ export interface AIRequestConfig {
     jsonMode?: boolean;
     maxTokens?: number;
     temperature?: number;
+    /** Per-provider timeout in ms (default 30s). Guards against hung providers. */
+    timeoutMs?: number;
+    /** Hard cap for the whole fallback walk in ms (default 90s). */
+    totalTimeoutMs?: number;
 }
 
 export interface AIResponse {
     text: string;
     modelUsed: string;
     providerUsed: string;
+}
+
+export const DEFAULT_TIMEOUT_MS = 30_000;
+export const DEFAULT_TOTAL_TIMEOUT_MS = 90_000;
+
+/** AbortController tied to a timer; `clear()` must run in a finally block. */
+function createAbort(timeoutMs: number): { signal: AbortSignal; clear: () => void } {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), timeoutMs);
+    return {
+        signal: controller.signal,
+        clear: () => clearTimeout(timer),
+    };
 }
 
 // Active Verified Working Provider Types
@@ -93,8 +110,28 @@ function isProviderConfigured(provider: Provider): boolean {
     }
 }
 
+const PROVIDER_ENV_KEY: Record<Provider, string> = {
+    groq: "GROQ_API_KEY",
+    mistral: "MISTRAL_API_KEY",
+    openrouter: "OPENROUTER_API_KEY",
+    cohere: "COHERE_API_KEY",
+};
+
+/**
+ * Fail fast when NO provider key is configured. Without this, the fallback
+ * walk logs a "Skipped (API Key missing)" warning per model — 15 identical
+ * warns that drown out real errors and cost a full 90s deadline before
+ * surfacing a generic failure. A clear, immediate config error is far more
+ * actionable for the operator.
+ */
+export function getMissingProviderKeys(): Provider[] {
+    return (Object.keys(PROVIDER_ENV_KEY) as Provider[]).filter(
+        (provider) => !isProviderConfigured(provider)
+    );
+}
+
 // Cohere Direct Chat Runner
-async function generateCohereText(config: AIRequestConfig, modelId: string): Promise<string> {
+async function generateCohereText(config: AIRequestConfig, modelId: string, signal: AbortSignal): Promise<string> {
     const apiKey = process.env.COHERE_API_KEY;
     if (!apiKey) throw new Error("Cohere API Key missing");
 
@@ -105,6 +142,7 @@ async function generateCohereText(config: AIRequestConfig, modelId: string): Pro
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${apiKey}`
         },
+        signal,
         body: JSON.stringify({
             model: modelId,
             message: promptText,
@@ -124,6 +162,15 @@ async function generateCohereText(config: AIRequestConfig, modelId: string): Pro
 // Main Generation Function
 export async function generateTextWithFallback(config: AIRequestConfig): Promise<AIResponse> {
     const errors: string[] = [];
+    const deadline = Date.now() + (config.totalTimeoutMs ?? DEFAULT_TOTAL_TIMEOUT_MS);
+
+    // Fail fast (instead of silently walking all 15 models with "Skipped"
+    // warns) when the deployment has no AI provider keys configured at all.
+    const configured = MODEL_STACK.filter((m) => isProviderConfigured(m.provider));
+    if (configured.length === 0) {
+        const missing = getMissingProviderKeys().map((p) => PROVIDER_ENV_KEY[p]).join(", ");
+        throw new Error(`No AI provider configured. Set one of: ${missing}`);
+    }
 
     for (const model of MODEL_STACK) {
         if (!isProviderConfigured(model.provider)) {
@@ -132,38 +179,51 @@ export async function generateTextWithFallback(config: AIRequestConfig): Promise
         }
 
         try {
-            console.log(`AI: Initializing ${model.name}...`);
+            // Enforce a hard cap across the whole fallback walk so a series of
+            // hung providers can't hold the request until the platform timeout.
+            const remainingMs = deadline - Date.now();
+            if (remainingMs <= 0) throw new Error("Total request time budget exhausted");
+
+            const perCallMs = Math.min(config.timeoutMs ?? DEFAULT_TIMEOUT_MS, remainingMs);
+            const { signal, clear } = createAbort(perCallMs);
+
             let resultText = "";
-
-            // --- Cohere Provider ---
-            if (model.provider === "cohere") {
-                resultText = await generateCohereText(config, model.id);
-            }
-
-            // --- OpenAI Compatible Providers (Groq, Mistral, OpenRouter) ---
-            else {
-                let client: OpenAI | null = null;
-
-                if (model.provider === "groq") client = getGroqClient();
-                else if (model.provider === "mistral") client = getMistralClient();
-                else if (model.provider === "openrouter") client = getOpenRouterClient();
-
-                if (!client) throw new Error(`${model.provider} API Key missing`);
-
-                const messages: OpenAI.Chat.Completions.ChatCompletionMessageParam[] = [];
-                if (config.systemPrompt) {
-                    messages.push({ role: "system", content: config.systemPrompt });
+            try {
+                // --- Cohere Provider ---
+                if (model.provider === "cohere") {
+                    resultText = await generateCohereText(config, model.id, signal);
                 }
-                messages.push({ role: "user", content: config.prompt });
 
-                const completion = await client.chat.completions.create({
-                    model: model.id,
-                    messages,
-                    response_format: config.jsonMode ? { type: "json_object" } : { type: "text" },
-                    temperature: config.temperature,
-                });
+                // --- OpenAI Compatible Providers (Groq, Mistral, OpenRouter) ---
+                else {
+                    let client: OpenAI | null = null;
 
-                resultText = completion.choices[0].message.content || "";
+                    if (model.provider === "groq") client = getGroqClient();
+                    else if (model.provider === "mistral") client = getMistralClient();
+                    else if (model.provider === "openrouter") client = getOpenRouterClient();
+
+                    if (!client) throw new Error(`${model.provider} API Key missing`);
+
+                    const messages: OpenAI.Chat.Completions.ChatCompletionMessageParam[] = [];
+                    if (config.systemPrompt) {
+                        messages.push({ role: "system", content: config.systemPrompt });
+                    }
+                    messages.push({ role: "user", content: config.prompt });
+
+                    const completion = await client.chat.completions.create(
+                        {
+                            model: model.id,
+                            messages,
+                            response_format: config.jsonMode ? { type: "json_object" } : { type: "text" },
+                            temperature: config.temperature,
+                        },
+                        { signal }
+                    );
+
+                    resultText = completion.choices[0].message.content || "";
+                }
+            } finally {
+                clear();
             }
 
             if (!resultText) throw new Error("Empty response");

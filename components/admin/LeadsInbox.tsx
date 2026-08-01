@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Mail, Phone, Trash2, User, MessageSquare, Lock, MessageCircle } from 'lucide-react';
 import { toast } from 'sonner';
@@ -28,11 +28,14 @@ export default function LeadsInbox({
     const [selectedLeadId, setSelectedLeadId] = useState<string | null>(null);
     const [readLeads, setReadLeads] = useState<string[]>([]);
     const [searchQuery, setSearchQuery] = useState('');
+    // Ref (not leads.length) so fetchLeads stays stable and the polling
+    // interval isn't torn down every time the list updates.
+    const hasLoadedRef = useRef(false);
 
     const fetchLeads = useCallback(async () => {
         try {
             // Only show loading spinner on first load, not polling
-            if (leads.length === 0) setLoading(true);
+            if (!hasLoadedRef.current) setLoading(true);
 
             const token = sessionStorage.getItem('admin_token') || localStorage.getItem('admin_token');
             const res = await fetch('/api/admin/leads?t=' + Date.now(), { // Cache bust
@@ -46,21 +49,30 @@ export default function LeadsInbox({
                     new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
                 );
                 setLeads(sorted);
+                hasLoadedRef.current = true;
             }
         } catch {
             // Silent fail on polling
-            if (leads.length === 0) toast.error('Could not load inbox');
+            if (!hasLoadedRef.current) toast.error('Could not load inbox');
         } finally {
             setLoading(false);
         }
-    }, [leads.length]);
+    }, []);
 
     useEffect(() => {
         if (isOpen) {
             fetchLeads();
             // Load read status from local storage
             const saved = localStorage.getItem('brofit_admin_read_leads');
-            if (saved) setReadLeads(JSON.parse(saved));
+            if (saved) {
+                // A corrupt value must not crash the inbox.
+                try {
+                    const parsed = JSON.parse(saved);
+                    if (Array.isArray(parsed)) setReadLeads(parsed.filter((id): id is string => typeof id === 'string'));
+                } catch {
+                    setReadLeads([]);
+                }
+            }
 
             // Poll for new messages every 10 seconds while open
             const interval = setInterval(fetchLeads, 10000);

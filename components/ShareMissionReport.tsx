@@ -2,6 +2,7 @@
 
 import html2canvas from "html2canvas";
 import { Share2 } from "lucide-react";
+import { toast } from "sonner";
 
 interface ShareButtonProps {
     targetRef: React.RefObject<HTMLElement | null>;
@@ -43,7 +44,7 @@ export default function ShareMissionReport({ targetRef, filename = "mission-repo
             link.click();
         } catch (err) {
             console.error("Mission Report generation failed:", err);
-            alert("Failed to generate Mission Report. Please try again.");
+            toast.error("Failed to generate Mission Report. Please try again.");
         }
     };
 

@@ -201,6 +201,7 @@ export default function TrophyRoom({ isModal = false, onClose }: { isModal?: boo
                                             </div>
                                             <button
                                                 onClick={handleClose}
+                                                aria-label="Close trophy room"
                                                 className="p-2 hover:bg-white/10 rounded-xl transition-colors text-gray-400 hover:text-white"
                                             >
                                                 <X className="w-5 h-5" />

@@ -1,13 +1,29 @@
 import { NextResponse } from "next/server";
-import { checkRateLimit, RATE_LIMITS } from "@/lib/rate-limit";
+import { peekRateLimit, RATE_LIMITS, getClientIp } from "@/lib/rate-limit";
+import { verifyUserToken } from "@/lib/credit-service";
 
 export async function GET(req: Request) {
     try {
-        const forwarded = req.headers.get("x-forwarded-for");
-        const ip = forwarded?.split(",")[0]?.trim() || "unknown";
+        // Key by the authenticated user when possible, so the counter matches
+        // the one the AI routes enforce; otherwise fall back to the client IP.
+        let key: string;
+        const authHeader = req.headers.get("Authorization");
 
-        // Check AI combined limit (diet + chatbot)
-        const aiCheck = checkRateLimit(`ai_${ip}`, RATE_LIMITS.AI_COMBINED);
+        if (authHeader?.startsWith("Bearer ")) {
+            try {
+                const identity = await verifyUserToken(req);
+                key = identity instanceof NextResponse
+                    ? `ip:${getClientIp(req)}`
+                    : `user:${identity.userId}`;
+            } catch {
+                key = `ip:${getClientIp(req)}`;
+            }
+        } else {
+            key = `ip:${getClientIp(req)}`;
+        }
+
+        // peekRateLimit is non-destructive: reading status must not consume a slot.
+        const aiCheck = await peekRateLimit(key, RATE_LIMITS.AI_COMBINED);
 
         return NextResponse.json({
             ai: {
