@@ -14,7 +14,7 @@ export default function WorkoutsPage() {
                         TACTICAL ARMORY
                     </h1>
                     <p className="text-gray-400 font-dot uppercase tracking-widest text-sm md:text-base">
-                        CLASSIFIED EXERCISE DATABASE // WGER.DE UPLINK ESTABLISHED
+                        CLASSIFIED EXERCISE DATABASE // OPEN INTEL DATASET ESTABLISHED
                     </p>
                 </div>
 
