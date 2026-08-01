@@ -18,15 +18,20 @@ interface RateLimitEntry {
 
 const rateLimitMap = new Map<string, RateLimitEntry>();
 
-// Cleanup old entries every 5 minutes
-setInterval(() => {
-    const now = Date.now();
-    for (const [key, entry] of rateLimitMap.entries()) {
-        if (entry.resetTime < now) {
-            rateLimitMap.delete(key);
+// Lazy cleanup for serverless environments (prevents background timers)
+let lastCleanupTime = Date.now();
+const CLEANUP_INTERVAL_MS = 5 * 60 * 1000;
+
+function lazyCleanup(now: number) {
+    if (now - lastCleanupTime > CLEANUP_INTERVAL_MS) {
+        lastCleanupTime = now;
+        for (const [key, entry] of rateLimitMap.entries()) {
+            if (entry.resetTime < now) {
+                rateLimitMap.delete(key);
+            }
         }
     }
-}, 5 * 60 * 1000);
+}
 
 export interface RateLimitConfig {
     maxRequests: number;      // Maximum requests allowed
@@ -50,6 +55,7 @@ export function checkRateLimit(
     config: RateLimitConfig
 ): RateLimitResult {
     const now = Date.now();
+    lazyCleanup(now);
     const entry = rateLimitMap.get(identifier);
 
     // No existing entry - create new one
