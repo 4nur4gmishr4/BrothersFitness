@@ -48,6 +48,14 @@ export default function ProfileModal({ isOpen, onClose }: ProfileModalProps) {
     }, [isOpen, user]);
 
     const handleSave = async () => {
+        // Frontend bounds guard: reject implausible height/weight before submit
+        if (heightCm) {
+            const h = parseInt(heightCm, 10);
+            if (isNaN(h) || h < 50 || h > 300) {
+                setError("Height must be between 50 and 300 cm.");
+                return;
+            }
+        }
         setLoading(true);
         setError("");
         setSuccess(false);
