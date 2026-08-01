@@ -1,20 +1,7 @@
 "use client";
 
 import { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
-import { supabase } from '@/lib/supabase';
-import {
-    getFirebaseAuth,
-    getGoogleProvider,
-    getFirestoreDb,
-    signInWithPopup,
-    signInWithRedirect,
-    getRedirectResult,
-    signOut,
-    onAuthStateChanged,
-    type FirebaseUser
-} from '@/lib/firebase';
-import { doc, getDoc, setDoc, updateDoc, serverTimestamp } from 'firebase/firestore';
-import { getSupabase } from '@/lib/supabase';
+import { supabase, getSupabase } from '@/lib/supabase';
 
 export type UserProfile = {
     id: string;
@@ -32,7 +19,6 @@ export type UserProfile = {
 
 type UserAuthContextType = {
     user: UserProfile | null;
-    firebaseUser: FirebaseUser | null;
     isLoading: boolean;
     isLoggedIn: boolean;
     remainingCredits: number;
@@ -64,29 +50,8 @@ const UserAuthContext = createContext<UserAuthContextType | undefined>(undefined
 import { toast } from "sonner";
 import { MAX_DAILY_CREDITS } from '@/lib/config';
 
-const getAuthErrorMessage = (error: unknown): string => {
-    const code = typeof error === 'object' && error && 'code' in error
-        ? String((error as { code?: string }).code)
-        : '';
-
-    if (code === 'auth/unauthorized-domain') {
-        const domain = typeof window !== 'undefined' ? window.location.hostname : 'this domain';
-        console.error(`FirebaseAuth Error: Domain '${domain}' is not authorized.`);
-        const msg = `Domain '${domain}' is not authorized. Add it in Firebase Console.`;
-        toast.error(msg);
-        return msg;
-    }
-    if (code === 'auth/popup-blocked') {
-        const msg = 'Popup blocked. Please allow popups or use the Redirect method.';
-        toast.error(msg);
-        return msg;
-    }
-    return error instanceof Error ? error.message : 'Sign-in failed';
-};
-
 export function UserAuthProvider({ children }: { children: ReactNode }) {
     const [user, setUser] = useState<UserProfile | null>(null);
-    const [firebaseUser, setFirebaseUser] = useState<FirebaseUser | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [showWelcome, setShowWelcome] = useState(false);
     const [showLoginModal, setShowLoginModal] = useState(false);
@@ -137,169 +102,6 @@ export function UserAuthProvider({ children }: { children: ReactNode }) {
         };
     }, []);
 
-    const loadUserProfile = async (fbUser: FirebaseUser) => {
-        const supabase = getSupabase();
-        const db = getFirestoreDb();
-        const today = new Date().toISOString().split('T')[0];
-
-        try {
-            const { data: supabaseUser, error: supabaseError } = await supabase
-                .from('users')
-                .select('*')
-                .eq('firebase_uid', fbUser.uid)
-                .single();
-
-            if (!supabaseError && supabaseUser) {
-                console.info('Auth: Supabase profile found.');
-                const updates: Record<string, unknown> = {};
-
-                if (supabaseUser.last_credit_reset !== today) {
-                    updates.daily_credits = MAX_DAILY_CREDITS;
-                    updates.last_credit_reset = today;
-                }
-
-                // Sync basic info if missing
-                if (!supabaseUser.photo_url && fbUser.photoURL) updates.photo_url = fbUser.photoURL;
-                if (!supabaseUser.email && fbUser.email) updates.email = fbUser.email;
-                if (!supabaseUser.full_name && fbUser.displayName) updates.full_name = fbUser.displayName;
-
-                const finalUser = { ...supabaseUser, ...updates };
-                console.log('Auth Update: Setting user and clearing loading state.');
-                setUser(finalUser as UserProfile);
-                setIsLoading(false); // UI is now ready
-
-                // Secondary: Async Background Sync to Firestore & Supabase Updates
-                console.log('Auth Sync: Triggering background sync...');
-                (async () => {
-                    try {
-                        if (Object.keys(updates).length > 0) {
-                            await supabase.from('users').update(updates).eq('firebase_uid', fbUser.uid);
-                        }
-                        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-                        const { id: _id, ...firestorePayload } = finalUser;
-                        await setDoc(doc(db, 'users', fbUser.uid), {
-                            ...firestorePayload,
-                            updated_at: serverTimestamp()
-                        }, { merge: true });
-                    } catch (fsError) {
-                        console.log('Background sync skipped/failed:', fsError);
-                    }
-                })();
-
-                return; // Exit early
-            }
-
-            // 2. Fallback: Try Firestore if Supabase fails or user not found
-            console.log('Auth Fallback: Checking Firestore...');
-            let firestoreUser: Record<string, unknown> | null = null;
-            try {
-                const userDoc = await getDoc(doc(db, 'users', fbUser.uid));
-                if (userDoc.exists()) {
-                    console.log('Auth Success: Firestore profile found.');
-                    firestoreUser = userDoc.data();
-                }
-            } catch (fsError) {
-                console.log('Initial Firestore fallback failed:', fsError);
-            }
-
-            if (firestoreUser) {
-                // Map Firestore back to UserProfile structure
-                const fsData = firestoreUser as Record<string, unknown>;
-                const mappedUser: UserProfile = {
-                    id: fbUser.uid,
-                    firebase_uid: fbUser.uid,
-                    email: (fsData.email as string | null) || fbUser.email,
-                    full_name: (fsData.full_name as string | null) || fbUser.displayName,
-                    photo_url: (fsData.photo_url as string | null) || fbUser.photoURL,
-                    date_of_birth: (fsData.date_of_birth as string | null) || null,
-                    height_cm: (fsData.height_cm as number | null) || null,
-                    weight_kg: (fsData.weight_kg as number | null) || null,
-                    gender: (fsData.gender as string | null) || null,
-                    daily_credits: (fsData.daily_credits as number) ?? MAX_DAILY_CREDITS,
-                    last_credit_reset: (fsData.last_credit_reset as string | null) || today
-                };
-
-                // Apply reset logic to fallback
-                if (mappedUser.last_credit_reset !== today) {
-                    mappedUser.daily_credits = MAX_DAILY_CREDITS;
-                    mappedUser.last_credit_reset = today;
-                }
-
-                setUser(mappedUser);
-                setIsLoading(false);
-
-                // Background: Create in Supabase since it was missing
-                (async () => {
-                    try {
-                        await supabase.from('users').insert({
-                            ...mappedUser,
-                            mobile: ""
-                        });
-                    } catch (sbError) { console.log('Background Supabase creation failed:', sbError); }
-                })();
-                return;
-            }
-
-            // 3. New User: Create in both
-            console.log('Auth Flow: No profile found. Initializing new user sequence...');
-            const newUserPayload = {
-                firebase_uid: fbUser.uid,
-                email: fbUser.email || null,
-                full_name: fbUser.displayName || null,
-                photo_url: fbUser.photoURL || null,
-                daily_credits: MAX_DAILY_CREDITS,
-                last_credit_reset: today,
-                mobile: ""
-            };
-
-            const { data: newUser, error: insertError } = await supabase
-                .from('users')
-                .insert(newUserPayload)
-                .select()
-                .single();
-
-            if (newUser && !insertError) {
-                setUser(newUser);
-                setShowWelcome(true);
-            } else {
-                // Extreme fallback
-                setUser({
-                    id: fbUser.uid,
-                    ...newUserPayload,
-                    date_of_birth: null,
-                    height_cm: null,
-                    weight_kg: null,
-                    gender: null
-                });
-                setShowWelcome(true);
-            }
-            setIsLoading(false);
-
-            setDoc(doc(db, 'users', fbUser.uid), {
-                ...newUserPayload,
-                created_at: serverTimestamp(),
-                updated_at: serverTimestamp()
-            }).catch(() => { });
-
-        } catch (err) {
-            console.error('Fatal error loading user profile:', err);
-            setUser({
-                id: fbUser.uid,
-                firebase_uid: fbUser.uid,
-                email: fbUser.email,
-                full_name: fbUser.displayName,
-                photo_url: fbUser.photoURL,
-                date_of_birth: null,
-                height_cm: null,
-                weight_kg: null,
-                gender: null,
-                daily_credits: MAX_DAILY_CREDITS,
-                last_credit_reset: today
-            });
-            setIsLoading(false);
-        }
-    };
-
     const signInWithGoogle = async (): Promise<{ success: boolean; error?: string }> => {
         try {
             const toastId = toast.loading("Redirecting to Google...", { duration: 5000 });
@@ -328,7 +130,6 @@ export function UserAuthProvider({ children }: { children: ReactNode }) {
         try {
             await supabase.auth.signOut();
             setUser(null);
-            setFirebaseUser(null);
         } catch (error) {
             console.error('Logout error:', error);
         }
@@ -348,18 +149,6 @@ export function UserAuthProvider({ children }: { children: ReactNode }) {
                 return { success: false, error: 'Not authenticated' };
             }
 
-            const supabase = getSupabase();
-            const db = getFirestoreDb();
-            const uid = user.firebase_uid || user.id;
-
-            if (!uid) {
-                console.error('Profile Sync: No UID found for update.');
-                return { success: false, error: 'User identifier identification failed' };
-            }
-
-            console.log(`Profile Sync: Target UID ${uid}`);
-
-            // 1. Update Supabase
             const { error: sbError } = await supabase
                 .from('users')
                 .update({
@@ -371,25 +160,11 @@ export function UserAuthProvider({ children }: { children: ReactNode }) {
                     photo_url: data.photo_url ?? user.photo_url,
                     updated_at: new Date().toISOString()
                 })
-                .eq('firebase_uid', uid);
+                .eq('id', user.id);
 
             if (sbError) {
                 console.error('Profile Sync: Supabase error:', sbError);
-            } else {
-                console.log('Profile Sync: Supabase update successful.');
-            }
-
-            // 2. Update Firestore
-            try {
-                await setDoc(doc(db, 'users', uid), {
-                    ...data,
-                    updated_at: serverTimestamp()
-                }, { merge: true });
-                console.log('Profile Sync: Firestore update successful.');
-            } catch (fsError: unknown) {
-                console.error('Profile Sync: Firestore error:', fsError);
-                const message = fsError instanceof Error ? fsError.message : 'Unknown error';
-                return { success: false, error: 'Firebase update failed: ' + message };
+                return { success: false, error: sbError.message };
             }
 
             // Update local state
@@ -423,13 +198,10 @@ export function UserAuthProvider({ children }: { children: ReactNode }) {
     }, [user]);
 
     const useCredit = useCallback(async (): Promise<boolean> => {
-        if (!user || !firebaseUser) return false;
+        if (!user) return false;
 
         try {
-            const supabase = getSupabase();
-            const db = getFirestoreDb();
             const today = new Date().toISOString().split('T')[0];
-
             let credits = user.daily_credits;
 
             if (user.last_credit_reset !== today) {
@@ -440,50 +212,34 @@ export function UserAuthProvider({ children }: { children: ReactNode }) {
 
             const newCredits = credits - 1;
 
-            // Update Supabase (don't fail if this fails)
             try {
                 await supabase
                     .from('users')
                     .update({ daily_credits: newCredits, last_credit_reset: today })
-                    .eq('firebase_uid', user.firebase_uid);
+                    .eq('id', user.id);
             } catch (err) {
                 console.error('Supabase credit deduction error:', err);
             }
 
-            // Update Firestore
-            try {
-                await updateDoc(doc(db, 'users', user.firebase_uid || user.id), {
-                    daily_credits: newCredits,
-                    last_credit_reset: today,
-                    updated_at: serverTimestamp()
-                });
-            } catch (fsError) {
-                console.error('Firestore credit deduction error:', fsError);
-            }
-
-            // Always update local state
             setUser(prev => prev ? { ...prev, daily_credits: newCredits, last_credit_reset: today } : null);
             return true;
         } catch {
-            // Even if DB update fails, allow the credit to be used locally
             const newCredits = Math.max(0, user.daily_credits - 1);
             setUser(prev => prev ? { ...prev, daily_credits: newCredits } : null);
             return true;
         }
-    }, [user, firebaseUser]);
+    }, [user]);
 
     const refreshCredits = useCallback(async (): Promise<void> => {
         if (!user) return;
 
         try {
-            const supabase = getSupabase();
-            const db = getFirestoreDb();
             const today = new Date().toISOString().split('T')[0];
 
             const { data } = await supabase
                 .from('users')
                 .select('daily_credits, last_credit_reset')
-                .eq('firebase_uid', user.firebase_uid)
+                .eq('id', user.id)
                 .single();
 
             if (data) {
@@ -500,22 +256,10 @@ export function UserAuthProvider({ children }: { children: ReactNode }) {
                 }
 
                 if (resetNeeded) {
-                    // Update Supabase
                     await supabase
                         .from('users')
                         .update({ daily_credits: credits, last_credit_reset: today })
-                        .eq('firebase_uid', user.firebase_uid);
-
-                    // Update Firestore
-                    try {
-                        await updateDoc(doc(db, 'users', user.firebase_uid || user.id), {
-                            daily_credits: credits,
-                            last_credit_reset: today,
-                            updated_at: serverTimestamp()
-                        });
-                    } catch (fsError) {
-                        console.error('Firestore credit reset error:', fsError);
-                    }
+                        .eq('id', user.id);
                 }
 
                 setUser(prev => prev ? { ...prev, daily_credits: credits, last_credit_reset: today } : null);
@@ -528,9 +272,8 @@ export function UserAuthProvider({ children }: { children: ReactNode }) {
     return (
         <UserAuthContext.Provider value={{
             user,
-            firebaseUser,
             isLoading,
-            isLoggedIn: !!user && !!firebaseUser,
+            isLoggedIn: !!user,
             remainingCredits: user?.daily_credits ?? MAX_DAILY_CREDITS,
             showWelcome,
             setShowWelcome,
