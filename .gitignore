@@ -26,6 +26,7 @@ yarn-error.log*
 .env
 .env.local
 .env.*.local
+.env.production
 .env.production.local
 
 # IDE
@@ -48,3 +49,9 @@ public/workbox-*.js.map
 public/swe-worker-*.js
 public/swe-worker-*.js.map
 public/fallback-*.js
+
+# Vercel
+.vercel
+
+# Turbo
+.turbo
