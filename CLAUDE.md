@@ -54,7 +54,7 @@ The Diet generator (`app/api/generate-diet/route.ts`) prompts the model for a la
 
 ## Known gotchas
 
-- **Rate limiting is in-memory** (`lib/rate-limit.ts`) — not reliable in serverless; documented TODO to move to Upstash Redis.
+- **Rate limiting** (`lib/rate-limit.ts`) — Upstash Redis when `UPSTASH_REDIS_REST_URL` + `UPSTASH_REDIS_REST_TOKEN` are set (production), per-instance in-memory Map otherwise (dev/tests). AI provider calls use an 8s per-provider timeout (60s total fallback budget) to stay within serverless execution limits.
 - **`.env.local.example`** documents all env vars with placeholders — copy it to `.env.local` and fill in real keys.
 - **`npm run lint` runs `eslint .`** (flat config in `eslint.config.mjs`); it ignores `.next`, `next-env.d.ts`, and the PWA service-worker artifacts in `public/`.
 - **CI** (`.github/workflows/ci.yml`) runs `npm run lint` + `npm test` on push/PR to `main`.
