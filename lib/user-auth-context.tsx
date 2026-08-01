@@ -105,10 +105,11 @@ export function UserAuthProvider({ children }: { children: ReactNode }) {
     const signInWithGoogle = async (): Promise<{ success: boolean; error?: string }> => {
         try {
             const toastId = toast.loading("Redirecting to Google...", { duration: 5000 });
+            const redirectUrl = typeof window !== 'undefined' ? `${window.location.origin}/` : undefined;
             const { error } = await supabase.auth.signInWithOAuth({
                 provider: 'google',
                 options: {
-                    redirectTo: `${window.location.origin}/`
+                    redirectTo: redirectUrl
                 }
             });
 
