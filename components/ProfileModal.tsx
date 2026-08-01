@@ -72,8 +72,8 @@ export default function ProfileModal({ isOpen, onClose }: ProfileModalProps) {
                 full_name: fullName.trim() || undefined,
                 photo_url: photoUrl.trim() || undefined,
                 date_of_birth: dateOfBirth || undefined,
-                height_cm: heightCm ? parseInt(heightCm) : undefined,
-                weight_kg: weightKg ? parseInt(weightKg) : undefined,
+                height_cm: heightCm ? parseInt(heightCm, 10) : undefined,
+                weight_kg: weightKg ? parseInt(weightKg, 10) : undefined,
                 gender: gender
             };
 
