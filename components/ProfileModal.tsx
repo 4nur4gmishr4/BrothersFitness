@@ -56,6 +56,13 @@ export default function ProfileModal({ isOpen, onClose }: ProfileModalProps) {
                 return;
             }
         }
+        if (weightKg) {
+            const w = parseInt(weightKg, 10);
+            if (isNaN(w) || w < 20 || w > 300) {
+                setError("Weight must be between 20 and 300 kg.");
+                return;
+            }
+        }
         setLoading(true);
         setError("");
         setSuccess(false);
