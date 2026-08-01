@@ -6,6 +6,7 @@ import { GamificationProvider } from "@/components/GamificationContext";
 import { TacticalSoundProvider } from "@/components/TacticalSoundContext";
 import ReadingProgressBar from "@/components/ReadingProgressBar";
 import PageTransition from "@/components/PageTransition";
+import PwaUpdateToast from "@/components/PwaUpdateToast";
 import { AdminProvider } from "@/lib/auth-context";
 import { UserAuthProvider } from "@/lib/user-auth-context";
 import { Toaster } from "sonner";
