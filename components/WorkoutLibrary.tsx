@@ -62,7 +62,7 @@ export default function WorkoutLibrary() {
     // Extract categories
     const categories = Array.from(new Set(exercises.map(ex => ex.category))).sort();
 
-    // Muscle Group Pills
+    // Muscle Group Options
     const muscleGroups = [
         { label: "ALL MUSCLES", value: "" },
         { label: "CHEST", value: "chest" },
@@ -77,64 +77,93 @@ export default function WorkoutLibrary() {
         { label: "FOREARMS", value: "forearms" },
     ];
 
+    // Discipline / Exercise Type Options
+    const disciplines = [
+        { label: "ALL TYPES", value: "" },
+        { label: "STRENGTH", value: "strength" },
+        { label: "CARDIO", value: "cardio" },
+        { label: "STRETCHING", value: "stretching" },
+        { label: "POWERLIFTING", value: "powerlifting" },
+        { label: "PLYOMETRICS", value: "plyometrics" },
+        { label: "STRONGMAN", value: "strongman" },
+        { label: "WEIGHTLIFTING", value: "olympic weightlifting" },
+    ];
+
     return (
         <div className="space-y-8">
-            {/* Muscle Group Pills */}
-            <div className="flex flex-wrap gap-2 pb-2 overflow-x-auto scrollbar-none">
-                {muscleGroups.map((m) => {
-                    const isActive = selectedMuscle === m.value;
-                    return (
-                        <button
-                            key={m.label}
-                            onClick={() => {
-                                setSelectedMuscle(m.value);
-                                setPage(1);
-                            }}
-                            className={`px-4 py-2 rounded-lg text-xs font-mono tracking-wider transition-all border ${
-                                isActive
-                                    ? "bg-gym-red text-white border-gym-red shadow-[0_0_15px_rgba(239,68,68,0.5)] font-bold scale-105"
-                                    : "bg-black/60 text-gray-400 border-white/10 hover:border-white/30 hover:text-white"
-                            }`}
-                        >
-                            {m.label}
-                        </button>
-                    );
-                })}
-            </div>
-
-            {/* Controls */}
-            <div className="flex flex-col md:flex-row gap-4 bg-white/5 p-6 border border-white/10 rounded-xl">
-                {/* Search */}
-                <div className="relative flex-1">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
+            {/* Dual Filter Control Section */}
+            <div className="bg-white/5 p-6 border border-white/10 rounded-xl space-y-6">
+                {/* Search Bar */}
+                <div className="relative">
+                    <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
                     <input
                         type="text"
-                        placeholder="SEARCH DATABASE (EXERCISE OR MUSCLE)..."
+                        placeholder="SEARCH DATABASE (EXERCISE NAME OR KEYWORD)..."
                         value={search}
                         onChange={(e) => {
                             setSearch(e.target.value);
                             setPage(1);
                         }}
-                        className="w-full bg-black border border-white/20 pl-10 pr-4 py-3 text-white focus:border-gym-red focus:outline-none rounded-lg font-mono text-sm placeholder:text-gray-600"
+                        className="w-full bg-black border border-white/20 pl-11 pr-4 py-3.5 text-white focus:border-gym-red focus:outline-none rounded-lg font-mono text-sm placeholder:text-gray-600 shadow-inner"
                     />
                 </div>
 
-                {/* Filter */}
-                <div className="relative md:w-64">
-                    <Filter className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
-                    <select
-                        className="w-full bg-black border border-white/20 pl-10 pr-8 py-3 text-white focus:border-gym-red focus:outline-none rounded-lg font-mono text-sm appearance-none cursor-pointer"
-                        onChange={(e) => {
-                            setCategory(e.target.value);
-                            setPage(1);
-                        }}
-                        value={category}
-                    >
-                        <option value="">ALL DIVISIONS</option>
-                        {categories.map((cat: string) => (
-                            <option key={cat} value={cat}>{cat.toUpperCase()}</option>
-                        ))}
-                    </select>
+                {/* Filter 1: Target Muscle Group */}
+                <div className="space-y-2">
+                    <div className="flex items-center gap-2 text-xs font-mono text-gray-400 uppercase tracking-widest">
+                        <Filter className="w-3.5 h-3.5 text-gym-red" />
+                        <span>FILTER 1: TARGET MUSCLE GROUP</span>
+                    </div>
+                    <div className="flex flex-wrap gap-2 pb-1">
+                        {muscleGroups.map((m) => {
+                            const isActive = selectedMuscle === m.value;
+                            return (
+                                <button
+                                    key={m.label}
+                                    onClick={() => {
+                                        setSelectedMuscle(m.value);
+                                        setPage(1);
+                                    }}
+                                    className={`px-3.5 py-1.5 rounded-lg text-xs font-mono tracking-wider transition-all border ${
+                                        isActive
+                                            ? "bg-gym-red text-white border-gym-red shadow-[0_0_12px_rgba(239,68,68,0.5)] font-bold scale-105"
+                                            : "bg-black/70 text-gray-400 border-white/10 hover:border-white/30 hover:text-white"
+                                    }`}
+                                >
+                                    {m.label}
+                                </button>
+                            );
+                        })}
+                    </div>
+                </div>
+
+                {/* Filter 2: Exercise Type / Discipline */}
+                <div className="space-y-2 pt-2 border-t border-white/10">
+                    <div className="flex items-center gap-2 text-xs font-mono text-gray-400 uppercase tracking-widest">
+                        <Dumbbell className="w-3.5 h-3.5 text-gym-red" />
+                        <span>FILTER 2: EXERCISE TYPE / DISCIPLINE (CARDIO, STRENGTH, ETC.)</span>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                        {disciplines.map((d) => {
+                            const isActive = category === d.value;
+                            return (
+                                <button
+                                    key={d.label}
+                                    onClick={() => {
+                                        setCategory(d.value);
+                                        setPage(1);
+                                    }}
+                                    className={`px-3.5 py-1.5 rounded-lg text-xs font-mono tracking-wider transition-all border ${
+                                        isActive
+                                            ? "bg-white text-black border-white font-bold shadow-[0_0_12px_rgba(255,255,255,0.4)] scale-105"
+                                            : "bg-black/70 text-gray-400 border-white/10 hover:border-white/30 hover:text-white"
+                                    }`}
+                                >
+                                    {d.label}
+                                </button>
+                            );
+                        })}
+                    </div>
                 </div>
             </div>
 
