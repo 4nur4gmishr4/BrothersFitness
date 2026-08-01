@@ -91,14 +91,14 @@ export default function WorkoutLibrary() {
 
     return (
         <div className="space-y-8">
-            {/* Dual Filter Control Section */}
-            <div className="bg-white/5 p-6 border border-white/10 rounded-xl space-y-6">
-                {/* Search Bar */}
-                <div className="relative">
+            {/* Controls Header with Search & 2 Dropdowns */}
+            <div className="grid grid-cols-1 md:grid-cols-12 gap-4 bg-white/5 p-6 border border-white/10 rounded-xl">
+                {/* Search Input */}
+                <div className="relative md:col-span-6">
                     <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
                     <input
                         type="text"
-                        placeholder="SEARCH DATABASE (EXERCISE NAME OR KEYWORD)..."
+                        placeholder="SEARCH EXERCISES OR MUSCLES..."
                         value={search}
                         onChange={(e) => {
                             setSearch(e.target.value);
@@ -108,62 +108,44 @@ export default function WorkoutLibrary() {
                     />
                 </div>
 
-                {/* Filter 1: Target Muscle Group */}
-                <div className="space-y-2">
-                    <div className="flex items-center gap-2 text-xs font-mono text-gray-400 uppercase tracking-widest">
-                        <Filter className="w-3.5 h-3.5 text-gym-red" />
-                        <span>FILTER 1: TARGET MUSCLE GROUP</span>
-                    </div>
-                    <div className="flex flex-wrap gap-2 pb-1">
-                        {muscleGroups.map((m) => {
-                            const isActive = selectedMuscle === m.value;
-                            return (
-                                <button
-                                    key={m.label}
-                                    onClick={() => {
-                                        setSelectedMuscle(m.value);
-                                        setPage(1);
-                                    }}
-                                    className={`px-3.5 py-1.5 rounded-lg text-xs font-mono tracking-wider transition-all border ${
-                                        isActive
-                                            ? "bg-gym-red text-white border-gym-red shadow-[0_0_12px_rgba(239,68,68,0.5)] font-bold scale-105"
-                                            : "bg-black/70 text-gray-400 border-white/10 hover:border-white/30 hover:text-white"
-                                    }`}
-                                >
-                                    {m.label}
-                                </button>
-                            );
-                        })}
-                    </div>
+                {/* Dropdown 1: Target Muscle Group */}
+                <div className="relative md:col-span-3">
+                    <Filter className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gym-red" />
+                    <select
+                        value={selectedMuscle}
+                        onChange={(e) => {
+                            setSelectedMuscle(e.target.value);
+                            setPage(1);
+                        }}
+                        className="w-full bg-black border border-white/20 pl-10 pr-8 py-3.5 text-white focus:border-gym-red focus:outline-none rounded-lg font-mono text-xs tracking-wider appearance-none cursor-pointer uppercase"
+                    >
+                        {muscleGroups.map((m) => (
+                            <option key={m.label} value={m.value} className="bg-black text-white py-2">
+                                {m.label}
+                            </option>
+                        ))}
+                    </select>
+                    <div className="absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none text-gray-500 text-xs">▼</div>
                 </div>
 
-                {/* Filter 2: Exercise Type / Discipline */}
-                <div className="space-y-2 pt-2 border-t border-white/10">
-                    <div className="flex items-center gap-2 text-xs font-mono text-gray-400 uppercase tracking-widest">
-                        <Dumbbell className="w-3.5 h-3.5 text-gym-red" />
-                        <span>FILTER 2: EXERCISE TYPE / DISCIPLINE (CARDIO, STRENGTH, ETC.)</span>
-                    </div>
-                    <div className="flex flex-wrap gap-2">
-                        {disciplines.map((d) => {
-                            const isActive = category === d.value;
-                            return (
-                                <button
-                                    key={d.label}
-                                    onClick={() => {
-                                        setCategory(d.value);
-                                        setPage(1);
-                                    }}
-                                    className={`px-3.5 py-1.5 rounded-lg text-xs font-mono tracking-wider transition-all border ${
-                                        isActive
-                                            ? "bg-white text-black border-white font-bold shadow-[0_0_12px_rgba(255,255,255,0.4)] scale-105"
-                                            : "bg-black/70 text-gray-400 border-white/10 hover:border-white/30 hover:text-white"
-                                    }`}
-                                >
-                                    {d.label}
-                                </button>
-                            );
-                        })}
-                    </div>
+                {/* Dropdown 2: Exercise Type / Category */}
+                <div className="relative md:col-span-3">
+                    <Dumbbell className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gym-red" />
+                    <select
+                        value={category}
+                        onChange={(e) => {
+                            setCategory(e.target.value);
+                            setPage(1);
+                        }}
+                        className="w-full bg-black border border-white/20 pl-10 pr-8 py-3.5 text-white focus:border-gym-red focus:outline-none rounded-lg font-mono text-xs tracking-wider appearance-none cursor-pointer uppercase"
+                    >
+                        {disciplines.map((d) => (
+                            <option key={d.label} value={d.value} className="bg-black text-white py-2">
+                                {d.label}
+                            </option>
+                        ))}
+                    </select>
+                    <div className="absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none text-gray-500 text-xs">▼</div>
                 </div>
             </div>
 
