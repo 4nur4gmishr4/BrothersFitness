@@ -1,38 +1,78 @@
 import { NextResponse } from 'next/server';
-import { supabase, type GymMember } from '@/lib/supabase';
+import { timingSafeEqual } from 'crypto';
+import { getServiceSupabase } from '@/lib/server-supabase';
+import type { GymMember } from '@/lib/supabase';
 import { getPlanPrice } from '@/lib/config';
 import { logger } from '@/lib/logger';
+import { retryableQuery } from '@/lib/retry';
+import { getRequestId, withRequestId } from '@/lib/request-id';
 
 export const maxDuration = 30;
 export const dynamic = 'force-dynamic';
 
+/** YYYY-MM-DD date-only key in India Standard Time. */
+function istDateKey(d: Date): string {
+    return new Intl.DateTimeFormat('en-CA', {
+        timeZone: 'Asia/Kolkata',
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+    }).format(d);
+}
+
+/** Parse a 'YYYY-MM-DD' (or full ISO) value as a UTC date-only millisecond value. */
+function dateOnlyMs(value: string): number {
+    const key = value.slice(0, 10);
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(key)) return NaN;
+    return Date.parse(`${key}T00:00:00Z`);
+}
+
 export async function GET(req: Request) {
+    const requestId = getRequestId(req);
+    const log = logger.child({ requestId });
     try {
-        // Verify cron secret
-        const authHeader = req.headers.get('authorization');
-        if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
-            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        // Fail CLOSED when CRON_SECRET is unset, and compare constant-time.
+        const cronSecret = process.env.CRON_SECRET;
+        if (!cronSecret) {
+            log.error('CRON_SECRET environment variable is not set');
+            return withRequestId(NextResponse.json({ error: 'Server configuration error' }, { status: 503 }), requestId);
+        }
+        const authHeader = req.headers.get('authorization') || '';
+        const expected = `Bearer ${cronSecret}`;
+        const a = Buffer.from(authHeader);
+        const b = Buffer.from(expected);
+        const valid = a.length === b.length && timingSafeEqual(a, b);
+        if (!valid) {
+            return withRequestId(NextResponse.json({ error: 'Unauthorized' }, { status: 401 }), requestId);
         }
 
         const now = new Date();
-        const lastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
-        const lastMonthEnd = new Date(now.getFullYear(), now.getMonth(), 0);
-        const lastMonthStr = lastMonth.toLocaleString('default', { month: 'long', year: 'numeric' });
+        const todayKey = istDateKey(now);
+        const [ty, tm] = todayKey.split('-').map(Number);
 
-        // Fetch all members
-        const { data: rawMembers, error } = await supabase
-            .from('gym_members')
-            .select('*');
+        // Previous calendar month as UTC date-only boundaries so the comparison
+        // is timezone-independent (a member joining on the last day is included).
+        const prevMonthStart = Date.UTC(ty, tm - 1 - 1, 1);
+        const prevMonthEnd = Date.UTC(ty, tm - 1, 0);
+        const lastMonthStr = new Date(prevMonthStart)
+            .toLocaleString('en', { month: 'long', year: 'numeric', timeZone: 'UTC' });
+
+        // Fetch all members via the service client (bypasses RLS like the admin routes).
+        // Idempotent read → safe to retry on transient network failures.
+        const { data: rawMembers, error } = await retryableQuery(() =>
+            getServiceSupabase().from('gym_members').select('*')
+        );
 
         if (error) throw error;
 
-        const members = rawMembers as GymMember[];
+        const members = (rawMembers || []) as GymMember[];
 
-        // Calculate last month's stats
+        // Last month's new members (date-only compare, TZ-safe)
         const lastMonthMembers = (members || []).filter((m: GymMember) => {
             if (!m.membership_start) return false;
-            const start = new Date(m.membership_start);
-            return start >= lastMonth && start <= lastMonthEnd;
+            const start = dateOnlyMs(m.membership_start);
+            if (Number.isNaN(start)) return false;
+            return start >= prevMonthStart && start <= prevMonthEnd;
         });
 
         // Revenue calculation
@@ -47,10 +87,13 @@ export async function GET(req: Request) {
             planBreakdown[plan] = (planBreakdown[plan] || 0) + 1;
         });
 
-        // Active members count
+        // Active members: still within their membership through today (date-only)
+        const todayMs = dateOnlyMs(todayKey);
         const activeMembers = (members || []).filter((m: GymMember) => {
             if (!m.membership_end) return true;
-            return new Date(m.membership_end) >= now;
+            const end = dateOnlyMs(m.membership_end);
+            if (Number.isNaN(end)) return false;
+            return end >= todayMs;
         }).length;
 
         // Build report
@@ -70,7 +113,7 @@ export async function GET(req: Request) {
         };
 
         // Log report
-        logger.info(`Monthly Report for ${lastMonthStr}`, { report });
+        log.info(`Monthly Report for ${lastMonthStr}`, { report });
 
         // Send to Discord/Telegram if webhook configured
         if (process.env.DISCORD_WEBHOOK_URL) {
@@ -89,15 +132,21 @@ export async function GET(req: Request) {
             });
         }
 
-        return NextResponse.json({
-            success: true,
-            report
-        });
+        return withRequestId(
+            NextResponse.json({
+                success: true,
+                report
+            }),
+            requestId
+        );
     } catch (error) {
-        logger.error('CRON Revenue Error', { error: error instanceof Error ? error.message : 'Unknown' });
-        return NextResponse.json(
-            { error: 'Report generation failed' },
-            { status: 500 }
+        log.error('CRON Revenue Error', { error: error instanceof Error ? error.message : 'Unknown' });
+        return withRequestId(
+            NextResponse.json(
+                { error: 'Report generation failed' },
+                { status: 500 }
+            ),
+            requestId
         );
     }
 }

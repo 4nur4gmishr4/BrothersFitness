@@ -18,6 +18,8 @@ export default function ProfileModal({ isOpen, onClose }: ProfileModalProps) {
     const [loading, setLoading] = useState(false);
     const [success, setSuccess] = useState(false);
     const [error, setError] = useState("");
+    // Set after mount so SSR and hydration render the same empty value.
+    const [todayMax, setTodayMax] = useState("");
 
     // Form state
     const [fullName, setFullName] = useState("");
@@ -26,6 +28,10 @@ export default function ProfileModal({ isOpen, onClose }: ProfileModalProps) {
     const [heightCm, setHeightCm] = useState("");
     const [weightKg, setWeightKg] = useState("");
     const [gender, setGender] = useState<"Male" | "Female" | "Other">("Male");
+
+    useEffect(() => {
+        setTodayMax(new Date().toISOString().split("T")[0]);
+    }, []);
 
     // Load user data when modal opens
     useEffect(() => {
@@ -198,7 +204,7 @@ export default function ProfileModal({ isOpen, onClose }: ProfileModalProps) {
                                         value={dateOfBirth}
                                         onChange={(e) => setDateOfBirth(e.target.value)}
                                         className="w-full bg-white/5 border border-white/20 rounded-lg pl-10 pr-4 py-3 text-white focus:border-gym-red focus:outline-none [color-scheme:dark] transition-colors"
-                                        max={new Date().toISOString().split("T")[0]}
+                                        max={todayMax}
                                     />
                                 </div>
                             </div>

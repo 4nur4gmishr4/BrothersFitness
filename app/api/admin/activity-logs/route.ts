@@ -1,20 +1,16 @@
-
 import { NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
-import { verifyAdminToken, extractBearerToken } from '@/lib/auth';
+import { getServiceSupabase } from '@/lib/server-supabase';
+import { requireAdminToken } from '@/lib/admin-auth';
 
 export const dynamic = 'force-dynamic';
 
 export async function GET(req: Request) {
-    try {
-        // Verify auth
-        const token = extractBearerToken(req.headers.get('Authorization'));
-        if (!token || !verifyAdminToken(token)) {
-            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-        }
+    const auth = await requireAdminToken(req);
+    if (auth instanceof NextResponse) return auth;
 
+    try {
         // Fetch logs
-        const { data, error } = await supabase
+        const { data, error } = await getServiceSupabase()
             .from('admin_activity_logs')
             .select('*')
             .order('created_at', { ascending: false })

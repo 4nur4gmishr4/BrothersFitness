@@ -14,7 +14,7 @@ export async function GET(req: Request) {
         }
 
         // Verify against stored tokens
-        if (verifyAdminToken(token)) {
+        if (await verifyAdminToken(token)) {
             return NextResponse.json({
                 valid: true,
                 message: 'Session valid'

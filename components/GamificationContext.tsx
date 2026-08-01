@@ -53,7 +53,14 @@ export function GamificationProvider({ children }: { children: ReactNode }) {
         const storedStreak = localStorage.getItem("brofit_streak");
         const lastVisit = localStorage.getItem("brofit_last_visit");
 
-        let currentMedals: MedalId[] = storedMedals ? JSON.parse(storedMedals) : [];
+        // Corrupt localStorage (e.g. an old version) must not crash the app.
+        let currentMedals: MedalId[] = [];
+        try {
+            const parsed = storedMedals ? JSON.parse(storedMedals) : [];
+            if (Array.isArray(parsed)) currentMedals = parsed;
+        } catch {
+            currentMedals = [];
+        }
         let currentStreak = storedStreak ? parseInt(storedStreak) : 0;
 
         // Check visit streak

@@ -1,21 +1,27 @@
 import { NextResponse } from 'next/server';
 import { timingSafeEqual } from 'crypto';
 import { generateAdminToken } from '@/lib/auth';
-import { checkRateLimit, RATE_LIMITS } from '@/lib/rate-limit';
+import { checkRateLimit, RATE_LIMITS, getClientIp } from '@/lib/rate-limit';
 import { LoginSchema } from '@/lib/validation';
+import { getServiceSupabase } from '@/lib/server-supabase';
 import { logger } from '@/lib/logger';
+import { getRequestId, withRequestId } from '@/lib/request-id';
 
 export async function POST(req: Request) {
+    const requestId = getRequestId(req);
+    const log = logger.child({ requestId });
     try {
-        // Rate limit: 5 login attempts per 15 minutes per IP
-        const forwarded = req.headers.get('x-forwarded-for');
-        const ip = forwarded?.split(',')[0]?.trim() || 'unknown';
-        const rateCheck = checkRateLimit(`login_${ip}`, RATE_LIMITS.LOGIN);
+        // Rate limit: 5 login attempts per 15 minutes per IP (trusted IP source)
+        const ip = getClientIp(req);
+        const rateCheck = await checkRateLimit(`login_${ip}`, RATE_LIMITS.LOGIN);
 
         if (!rateCheck.allowed) {
-            return NextResponse.json(
-                { error: `Too many login attempts. Try again in ${rateCheck.resetIn} seconds.` },
-                { status: 429 }
+            return withRequestId(
+                NextResponse.json(
+                    { error: `Too many login attempts. Try again in ${rateCheck.resetIn} seconds.` },
+                    { status: 429 }
+                ),
+                requestId
             );
         }
 
@@ -24,9 +30,12 @@ export async function POST(req: Request) {
         // Validate with Zod
         const parsed = LoginSchema.safeParse(body);
         if (!parsed.success) {
-            return NextResponse.json(
-                { error: parsed.error.issues[0]?.message || 'Invalid request' },
-                { status: 400 }
+            return withRequestId(
+                NextResponse.json(
+                    { error: parsed.error.issues[0]?.message || 'Invalid request' },
+                    { status: 400 }
+                ),
+                requestId
             );
         }
 
@@ -35,10 +44,13 @@ export async function POST(req: Request) {
 
         // Ensure ADMIN_PASSWORD is set
         if (!adminPassword) {
-            logger.error('ADMIN_PASSWORD environment variable is not set');
-            return NextResponse.json(
-                { error: 'Server configuration error' },
-                { status: 500 }
+            log.error('ADMIN_PASSWORD environment variable is not set');
+            return withRequestId(
+                NextResponse.json(
+                    { error: 'Server configuration error' },
+                    { status: 500 }
+                ),
+                requestId
             );
         }
 
@@ -57,25 +69,48 @@ export async function POST(req: Request) {
         }
 
         if (!isValid) {
-            return NextResponse.json(
-                { error: 'Invalid credentials' },
-                { status: 401 }
+            // Audit failed logins (best-effort, never blocks the attempt)
+            log.warn('Admin login failed', { ip });
+            return withRequestId(
+                NextResponse.json(
+                    { error: 'Invalid credentials' },
+                    { status: 401 }
+                ),
+                requestId
             );
         }
 
         // Generate a stateless session token
         const token = generateAdminToken();
 
-        return NextResponse.json({
-            success: true,
-            token,
-            message: 'Welcome, Aman!'
-        });
+        // Audit successful login (fails silently if the table doesn't exist yet)
+        try {
+            await getServiceSupabase().from('admin_activity_logs').insert([{
+                action_type: 'LOGIN',
+                member_id: null,
+                member_name: 'admin',
+                details: { ip }
+            }]);
+        } catch (logError) {
+            log.warn('Failed to log admin login', { error: logError instanceof Error ? logError.message : 'Unknown' });
+        }
+
+        return withRequestId(
+            NextResponse.json({
+                success: true,
+                token,
+                message: 'Welcome, Aman!'
+            }),
+            requestId
+        );
     } catch (error) {
-        logger.error('Login error', { error: error instanceof Error ? error.message : 'Unknown' });
-        return NextResponse.json(
-            { error: 'Authentication failed' },
-            { status: 500 }
+        log.error('Login error', { error: error instanceof Error ? error.message : 'Unknown' });
+        return withRequestId(
+            NextResponse.json(
+                { error: 'Authentication failed' },
+                { status: 500 }
+            ),
+            requestId
         );
     }
 }

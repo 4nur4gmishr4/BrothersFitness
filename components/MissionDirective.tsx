@@ -1,6 +1,6 @@
 "use client";
 
-import React, { forwardRef } from 'react';
+import React, { forwardRef, useState, useEffect } from 'react';
 import { ShoppingCart, Utensils, Zap } from 'lucide-react';
 
 // Reusing types from page.tsx (ideally move to a types.ts file)
@@ -40,6 +40,14 @@ interface MissionDirectiveProps {
 }
 
 const MissionDirective = forwardRef<HTMLDivElement, MissionDirectiveProps>(({ data, lang, biometrics }, ref) => {
+    // Compute the mission ID after mount so SSR and hydration render the same
+    // initial output (new Date()/Math.random() differ per render otherwise).
+    const [missionId, setMissionId] = useState("");
+
+    useEffect(() => {
+        setMissionId(`${new Date().toLocaleDateString().replace(/\//g, '')}-${Math.floor(Math.random() * 9999)}`);
+    }, []);
+
     // Sanitize HTML to prevent XSS in PDF
     const sanitizeHTML = (text: string): string => {
         return text
@@ -61,7 +69,7 @@ const MissionDirective = forwardRef<HTMLDivElement, MissionDirectiveProps>(({ da
                 </div>
                 <div className="text-right">
                     <p className="font-bold text-lg">PROT: {biometrics.goal.toUpperCase().slice(0, 10)}...</p>
-                    <p className="text-xs">ID: {new Date().toLocaleDateString().replace(/\//g, '')}-{Math.floor(Math.random() * 9999)}</p>
+                    <p className="text-xs">ID: {missionId}</p>
                 </div>
             </div>
 

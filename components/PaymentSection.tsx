@@ -122,8 +122,8 @@ Please activate my membership. Thank you!`;
             <CreditCard className="w-4 h-4 text-gym-red" />
             <span className="text-xs font-mono uppercase tracking-wider text-gym-red">Secure Payment</span>
           </div>
-          <h2 className="text-4xl sm:text-5xl lg:text-6xl font-display font-black uppercase tracking-tighter mb-4">
-            JOIN THE BROTHERHOOD
+          <h2 className="text-4xl sm:text-5xl lg:text-6xl font-display font-black uppercase tracking-wide mb-4">
+            JOIN THE <span className="text-gym-red italic">BROTHERHOOD</span>
           </h2>
           <p className="text-gray-300 font-mono text-sm uppercase tracking-wide">
             {step === "plan" && "Select Your Plan"}
@@ -192,13 +192,13 @@ Please activate my membership. Thank you!`;
                 {/* Selected Plan Summary */}
                 <div className="bg-gym-red/10 border border-gym-red/20 rounded-lg p-4 mb-6 text-center">
                   <p className="text-xs font-mono uppercase text-gray-400 mb-1">Selected Plan</p>
-                  <p className="text-2xl font-display font-black text-gym-red">
+                  <p className="text-2xl font-display font-black tracking-wide text-gym-red">
                     {selectedPlanData?.label} - ₹{selectedPlanData?.price}
                   </p>
                   <p className="text-xs text-gray-400 mt-1">{selectedPlanData?.duration}</p>
                 </div>
 
-                <h3 className="text-2xl font-display font-bold uppercase tracking-tight mb-6 text-center">
+                <h3 className="text-2xl font-display font-bold uppercase tracking-wide mb-6 text-center">
                   Membership Details
                 </h3>
 
@@ -304,7 +304,7 @@ Please activate my membership. Thank you!`;
                     <div className="w-20 h-20 mx-auto mb-6 bg-gym-red/10 rounded-full flex items-center justify-center group-hover:bg-gym-red/20 transition-colors">
                       <Smartphone className="w-10 h-10 text-gym-red" />
                     </div>
-                    <h3 className="text-2xl font-display font-bold uppercase mb-3">
+                    <h3 className="text-2xl font-display font-bold uppercase tracking-wide mb-3">
                       Pay via UPI App
                     </h3>
                     <p className="text-gray-400 text-sm mb-4">
@@ -326,7 +326,7 @@ Please activate my membership. Thank you!`;
                     <div className="w-20 h-20 mx-auto mb-6 bg-gym-red/10 rounded-full flex items-center justify-center group-hover:bg-gym-red/20 transition-colors">
                       <QrCode className="w-10 h-10 text-gym-red" />
                     </div>
-                    <h3 className="text-2xl font-display font-bold uppercase mb-3">
+                    <h3 className="text-2xl font-display font-bold uppercase tracking-wide mb-3">
                       Pay via QR Code
                     </h3>
                     <p className="text-gray-400 text-sm mb-4">
@@ -383,7 +383,7 @@ Please activate my membership. Thank you!`;
                   <div className="w-20 h-20 mx-auto mb-4 bg-gym-red/10 rounded-full flex items-center justify-center">
                     <QrCode className="w-10 h-10 text-gym-red" />
                   </div>
-                  <h3 className="text-3xl font-display font-black uppercase mb-2">
+                  <h3 className="text-3xl font-display font-black uppercase tracking-wide mb-2">
                     Scan & Pay ₹{selectedPlanData?.price}
                   </h3>
                   <p className="text-gray-400 font-mono text-sm">

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import useSWR from "swr";
 import { motion, AnimatePresence } from "framer-motion";
 import { Search, Filter, ChevronLeft, ChevronRight, Dumbbell } from "lucide-react";
@@ -16,6 +16,31 @@ export default function WorkoutLibrary() {
     const [selectedMuscle, setSelectedMuscle] = useState<string>("");
 
     const { data: allExercises, error, isLoading } = useSWR('free-exercise-db', fetcher);
+
+    // Stable array reference so the filter memo below doesn't churn every render.
+    const exercises = useMemo(() => allExercises || [], [allExercises]);
+
+    // Filter by search, category & individual muscle (memoized so typing in
+    // the search box doesn't re-run the filter for unrelated state changes).
+    const filteredExercises = useMemo(() => {
+        return exercises.filter((ex: FreeExercise) => {
+            const matchesSearch = !search || ex.name.toLowerCase().includes(search.toLowerCase()) || ex.primaryMuscles.some(m => m.toLowerCase().includes(search.toLowerCase()));
+            const matchesCategory = !category || ex.category.toLowerCase() === category.toLowerCase();
+            const matchesMuscle = !selectedMuscle ||
+                (ex.primaryMuscles && ex.primaryMuscles.some(m => m.toLowerCase().includes(selectedMuscle.toLowerCase()))) ||
+                (ex.secondaryMuscles && ex.secondaryMuscles.some(m => m.toLowerCase().includes(selectedMuscle.toLowerCase())));
+
+            return matchesSearch && matchesCategory && matchesMuscle;
+        });
+    }, [exercises, search, category, selectedMuscle]);
+
+    const pageSize = 18;
+    const totalCount = filteredExercises.length;
+    const maxPage = Math.max(1, Math.ceil(totalCount / pageSize));
+    const paginatedExercises = useMemo(
+        () => filteredExercises.slice((page - 1) * pageSize, page * pageSize),
+        [filteredExercises, page]
+    );
 
     if (isLoading && !allExercises) return (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -40,27 +65,6 @@ export default function WorkoutLibrary() {
             UPLINK FAILURE: UNABLE TO RETRIEVE TACTICAL EXERCISE DATA.
         </div>
     );
-
-    const exercises = allExercises || [];
-
-    // Filter by search, category & individual muscle
-    const filteredExercises = exercises.filter((ex: FreeExercise) => {
-        const matchesSearch = !search || ex.name.toLowerCase().includes(search.toLowerCase()) || ex.primaryMuscles.some(m => m.toLowerCase().includes(search.toLowerCase()));
-        const matchesCategory = !category || ex.category.toLowerCase() === category.toLowerCase();
-        const matchesMuscle = !selectedMuscle || 
-            (ex.primaryMuscles && ex.primaryMuscles.some(m => m.toLowerCase().includes(selectedMuscle.toLowerCase()))) ||
-            (ex.secondaryMuscles && ex.secondaryMuscles.some(m => m.toLowerCase().includes(selectedMuscle.toLowerCase())));
-
-        return matchesSearch && matchesCategory && matchesMuscle;
-    });
-
-    const pageSize = 18;
-    const totalCount = filteredExercises.length;
-    const maxPage = Math.max(1, Math.ceil(totalCount / pageSize));
-    const paginatedExercises = filteredExercises.slice((page - 1) * pageSize, page * pageSize);
-
-    // Extract categories
-    const categories = Array.from(new Set(exercises.map(ex => ex.category))).sort();
 
     // Muscle Group Options
     const muscleGroups = [

@@ -1,17 +1,15 @@
 import { NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
-import { verifyAdminToken, extractBearerToken } from '@/lib/auth';
+import { getServiceSupabase } from '@/lib/server-supabase';
+import { requireAdminToken } from '@/lib/admin-auth';
 
-export async function GET(req: Request) {
-    // Verify admin auth
-    const token = extractBearerToken(req.headers.get('Authorization'));
-    if (!token || !verifyAdminToken(token)) {
-        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+// POST (not GET) so a crawled/CSRF'd GET can't trigger a data dump side-effect.
+export async function POST(req: Request) {
+    const auth = await requireAdminToken(req);
+    if (auth instanceof NextResponse) return auth;
 
     try {
         // Fetch all members
-        const { data: members, error } = await supabase
+        const { data: members, error } = await getServiceSupabase()
             .from('gym_members')
             .select('*')
             .order('created_at', { ascending: false });
@@ -27,10 +25,11 @@ export async function GET(req: Request) {
             members: members || []
         }, null, 2);
 
-        // Try to upload to Supabase Storage
+        // Try to upload to Supabase Storage (fails gracefully if the bucket
+        // is not public / missing — the response data is the download source).
         let storageUrl = null;
         try {
-            const { data: uploadData, error: uploadError } = await supabase
+            const { data: uploadData, error: uploadError } = await getServiceSupabase()
                 .storage
                 .from('backups')
                 .upload(filename, backupData, {
@@ -39,7 +38,7 @@ export async function GET(req: Request) {
                 });
 
             if (!uploadError && uploadData) {
-                const { data: urlData } = supabase
+                const { data: urlData } = getServiceSupabase()
                     .storage
                     .from('backups')
                     .getPublicUrl(filename);
@@ -47,6 +46,18 @@ export async function GET(req: Request) {
             }
         } catch (storageError) {
             console.warn('Storage upload failed (bucket may not exist):', storageError);
+        }
+
+        // Audit the backup
+        try {
+            await getServiceSupabase().from('admin_activity_logs').insert([{
+                action_type: 'BACKUP',
+                member_id: null,
+                member_name: 'admin',
+                details: { filename, total_members: members?.length || 0 }
+            }]);
+        } catch (logError) {
+            console.warn('Failed to log backup:', logError);
         }
 
         return NextResponse.json({

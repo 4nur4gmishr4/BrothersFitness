@@ -23,19 +23,6 @@ export interface ApiNinjasExercise {
     instructions: string;
 }
 
-export interface UsdaFoodItem {
-    fdcId: number;
-    description: string;
-    dataType?: string;
-    brandOwner?: string;
-    foodNutrients?: {
-        nutrientId: number;
-        nutrientName: string;
-        value: number;
-        unitName: string;
-    }[];
-}
-
 const FREE_EXERCISE_DB_URL = "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/dist/exercises.json";
 const FREE_EXERCISE_IMAGE_BASE = "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/";
 
@@ -76,23 +63,6 @@ export async function fetchApiNinjasExercises(muscle?: string): Promise<ApiNinja
         return data.exercises || [];
     } catch (err) {
         console.error("ApiNinjas fetch error:", err);
-        return [];
-    }
-}
-
-/**
- * Search USDA FoodData Central for real nutrient and calorie data
- */
-export async function searchUsdaFoodData(query: string): Promise<UsdaFoodItem[]> {
-    if (!query || query.trim().length < 2) return [];
-
-    try {
-        const res = await fetch(`/api/food/usda?query=${encodeURIComponent(query)}`);
-        if (!res.ok) return [];
-        const data = await res.json();
-        return data.foods || [];
-    } catch (err) {
-        console.error("USDA FoodData search error:", err);
         return [];
     }
 }

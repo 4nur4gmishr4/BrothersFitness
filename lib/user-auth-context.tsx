@@ -1,7 +1,7 @@
 "use client";
 
 import { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
-import { supabase, getSupabase } from '@/lib/supabase';
+import { supabase } from '@/lib/supabase';
 
 export type UserProfile = {
     id: string;
@@ -19,6 +19,8 @@ export type UserProfile = {
 
 type UserAuthContextType = {
     user: UserProfile | null;
+    /** Supabase access token for server-side session verification (Authorization header). */
+    accessToken: string | null;
     isLoading: boolean;
     isLoggedIn: boolean;
     remainingCredits: number;
@@ -50,11 +52,75 @@ const UserAuthContext = createContext<UserAuthContextType | undefined>(undefined
 import { toast } from "sonner";
 import { MAX_DAILY_CREDITS } from '@/lib/config';
 
+/** YYYY-MM-DD in India Standard Time (credit day boundary is IST midnight). */
+function istToday(): string {
+    return new Intl.DateTimeFormat('en-CA', {
+        timeZone: 'Asia/Kolkata',
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+    }).format(new Date());
+}
+
 export function UserAuthProvider({ children }: { children: ReactNode }) {
     const [user, setUser] = useState<UserProfile | null>(null);
+    const [accessToken, setAccessToken] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [showWelcome, setShowWelcome] = useState(false);
     const [showLoginModal, setShowLoginModal] = useState(false);
+
+    /**
+     * Load the user's `users` row (or create it the first time) and populate
+     * local state. users.id == auth uid so ownership RLS allows the upsert.
+     */
+    const loadUserFromSession = useCallback(async (session: { user: { id: string; email?: string | null; user_metadata?: Record<string, unknown> }; access_token: string }) => {
+        const authId = session.user.id;
+        setAccessToken(session.access_token);
+
+        let { data: row } = await supabase
+            .from('users')
+            .select('*')
+            .eq('id', authId)
+            .single();
+
+        // First sign-in: create the row. RLS INSERT policy requires id == auth.uid().
+        if (!row) {
+            const fallbackName =
+                (session.user.user_metadata?.full_name as string) ||
+                session.user.email?.split('@')[0] ||
+                'Member';
+            const { data: inserted } = await supabase
+                .from('users')
+                .insert({
+                    id: authId,
+                    firebase_uid: authId, // legacy column, kept in sync
+                    email: session.user.email || null,
+                    full_name: fallbackName,
+                    daily_credits: MAX_DAILY_CREDITS,
+                    last_credit_reset: istToday(),
+                })
+                .select('*')
+                .single();
+            row = inserted;
+        }
+
+        if (!row) return;
+
+        const today = istToday();
+        setUser({
+            id: row.id,
+            firebase_uid: row.firebase_uid || row.id,
+            email: row.email || session.user.email || null,
+            full_name: row.full_name || (session.user.user_metadata?.full_name as string) || 'Member',
+            photo_url: row.photo_url ?? null,
+            date_of_birth: row.date_of_birth ?? null,
+            height_cm: row.height_cm ?? null,
+            weight_kg: row.weight_kg ?? null,
+            gender: row.gender ?? null,
+            daily_credits: row.last_credit_reset === today ? row.daily_credits : MAX_DAILY_CREDITS,
+            last_credit_reset: today,
+        });
+    }, []);
 
     // Listen to Supabase auth state
     useEffect(() => {
@@ -64,13 +130,7 @@ export function UserAuthProvider({ children }: { children: ReactNode }) {
             try {
                 const { data: { session } } = await supabase.auth.getSession();
                 if (session?.user && isMounted) {
-                    setUser({
-                        id: session.user.id,
-                        full_name: session.user.user_metadata?.full_name || session.user.email?.split('@')[0] || 'Member',
-                        email: session.user.email || null,
-                        daily_credits: MAX_DAILY_CREDITS,
-                        last_credit_reset: new Date().toISOString().split('T')[0]
-                    });
+                    await loadUserFromSession(session);
                 }
             } catch (err) {
                 console.error("Auth init error:", err);
@@ -81,17 +141,12 @@ export function UserAuthProvider({ children }: { children: ReactNode }) {
 
         initAuth();
 
-        const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
+        const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
             if (session?.user && isMounted) {
-                setUser({
-                    id: session.user.id,
-                    full_name: session.user.user_metadata?.full_name || session.user.email?.split('@')[0] || 'Member',
-                    email: session.user.email || null,
-                    daily_credits: MAX_DAILY_CREDITS,
-                    last_credit_reset: new Date().toISOString().split('T')[0]
-                });
+                await loadUserFromSession(session);
             } else if (isMounted) {
                 setUser(null);
+                setAccessToken(null);
             }
             if (isMounted) setIsLoading(false);
         });
@@ -100,7 +155,7 @@ export function UserAuthProvider({ children }: { children: ReactNode }) {
             isMounted = false;
             subscription.unsubscribe();
         };
-    }, []);
+    }, [loadUserFromSession]);
 
     const signInWithGoogle = async (): Promise<{ success: boolean; error?: string }> => {
         try {
@@ -131,14 +186,13 @@ export function UserAuthProvider({ children }: { children: ReactNode }) {
         try {
             await supabase.auth.signOut();
             setUser(null);
+            setAccessToken(null);
         } catch (error) {
             console.error('Logout error:', error);
         }
     };
 
     const updateProfile = async (data: ProfileUpdateData): Promise<{ success: boolean; error?: string }> => {
-        console.log('Profile Sync: Update initiated...', data);
-
         // Timeout promise
         const timeoutPromise = new Promise<{ success: boolean; error: string }>((_, reject) => {
             setTimeout(() => reject(new Error('Update timed out after 7 seconds')), 7000);
@@ -146,7 +200,6 @@ export function UserAuthProvider({ children }: { children: ReactNode }) {
 
         const updateOperation = async () => {
             if (!user) {
-                console.warn('Profile Sync: No user in state.');
                 return { success: false, error: 'Not authenticated' };
             }
 
@@ -164,12 +217,10 @@ export function UserAuthProvider({ children }: { children: ReactNode }) {
                 .eq('id', user.id);
 
             if (sbError) {
-                console.error('Profile Sync: Supabase error:', sbError);
                 return { success: false, error: sbError.message };
             }
 
             // Update local state
-            console.log('Profile Sync: Updating local state.');
             setUser(prev => prev ? { ...prev, ...data } : null);
 
             return { success: true };
@@ -178,64 +229,32 @@ export function UserAuthProvider({ children }: { children: ReactNode }) {
         try {
             return await Promise.race([updateOperation(), timeoutPromise]) as { success: boolean; error?: string };
         } catch (error: unknown) {
-            console.error('Profile Sync: Critical error or timeout:', error);
             const message = error instanceof Error ? error.message : 'Update failed';
             return { success: false, error: message };
         }
     };
 
-    // Check if user has enough credits without deducting
+    // Check if user has enough credits without deducting (client is optimistic;
+    // the server enforces the real, atomic deduction).
     const checkCredit = useCallback(async (): Promise<boolean> => {
         if (!user) return false;
-
-        const today = new Date().toISOString().split('T')[0];
-        let credits = user.daily_credits;
-
-        if (user.last_credit_reset !== today) {
-            credits = MAX_DAILY_CREDITS;
-        }
-
-        return credits > 0;
+        return (user.daily_credits ?? 0) > 0;
     }, [user]);
 
+    // Local-only optimistic deduction. The server is the source of truth and
+    // deducts atomically; we never write credits from the client (this also
+    // removes the old double-deduct where client AND server both decremented).
     const useCredit = useCallback(async (): Promise<boolean> => {
-        if (!user) return false;
-
-        try {
-            const today = new Date().toISOString().split('T')[0];
-            let credits = user.daily_credits;
-
-            if (user.last_credit_reset !== today) {
-                credits = MAX_DAILY_CREDITS;
-            }
-
-            if (credits <= 0) return false;
-
-            const newCredits = credits - 1;
-
-            try {
-                await supabase
-                    .from('users')
-                    .update({ daily_credits: newCredits, last_credit_reset: today })
-                    .eq('id', user.id);
-            } catch (err) {
-                console.error('Supabase credit deduction error:', err);
-            }
-
-            setUser(prev => prev ? { ...prev, daily_credits: newCredits, last_credit_reset: today } : null);
-            return true;
-        } catch {
-            const newCredits = Math.max(0, user.daily_credits - 1);
-            setUser(prev => prev ? { ...prev, daily_credits: newCredits } : null);
-            return true;
-        }
+        if (!user || user.daily_credits <= 0) return false;
+        setUser(prev => prev ? { ...prev, daily_credits: prev.daily_credits - 1 } : null);
+        return true;
     }, [user]);
 
     const refreshCredits = useCallback(async (): Promise<void> => {
         if (!user) return;
 
         try {
-            const today = new Date().toISOString().split('T')[0];
+            const today = istToday();
 
             const { data } = await supabase
                 .from('users')
@@ -245,21 +264,20 @@ export function UserAuthProvider({ children }: { children: ReactNode }) {
 
             if (data) {
                 let credits = data.daily_credits;
-                let resetNeeded = false;
 
                 if (data.last_credit_reset !== today) {
+                    // New IST day: grant a fresh quota.
                     credits = MAX_DAILY_CREDITS;
-                    resetNeeded = true;
-                } else if (data.daily_credits > MAX_DAILY_CREDITS) {
-                    // Strict Cap for current day
-                    credits = MAX_DAILY_CREDITS;
-                    resetNeeded = true;
-                }
-
-                if (resetNeeded) {
                     await supabase
                         .from('users')
                         .update({ daily_credits: credits, last_credit_reset: today })
+                        .eq('id', user.id);
+                } else if (data.daily_credits > MAX_DAILY_CREDITS) {
+                    // Strict cap for the current day
+                    credits = MAX_DAILY_CREDITS;
+                    await supabase
+                        .from('users')
+                        .update({ daily_credits: credits })
                         .eq('id', user.id);
                 }
 
@@ -273,6 +291,7 @@ export function UserAuthProvider({ children }: { children: ReactNode }) {
     return (
         <UserAuthContext.Provider value={{
             user,
+            accessToken,
             isLoading,
             isLoggedIn: !!user,
             remainingCredits: user?.daily_credits ?? MAX_DAILY_CREDITS,
@@ -284,7 +303,6 @@ export function UserAuthProvider({ children }: { children: ReactNode }) {
             logout,
             updateProfile,
             checkCredit,
-
             deductCredit: useCredit,
             refreshCredits
         }}>

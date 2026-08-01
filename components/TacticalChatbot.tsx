@@ -30,7 +30,7 @@ const SUGGESTIONS = {
 };
 
 export default function TacticalChatbot() {
-    const { isLoggedIn, remainingCredits, refreshCredits } = useUserAuth();
+    const { isLoggedIn, remainingCredits, refreshCredits, accessToken } = useUserAuth();
 
     const [isOpen, setIsOpen] = useState(false);
     const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -83,8 +83,8 @@ export default function TacticalChatbot() {
             setMessages((prev) => [...prev, {
                 role: "model",
                 text: language === "hi"
-                    ? "Aapke aaj ke AI credits khatam ho gaye. Kal phir koshish karein!"
-                    : `You've used all ${MAX_DAILY_CREDITS} daily AI credits. Credits reset at midnight!`,
+                    ? "Aapke aaj ke AI credits khatam ho gaye. Kal subah 5:30 baje phir milenge!"
+                    : `You've used all ${MAX_DAILY_CREDITS} daily AI credits. Credits reset at 5:30 AM IST!`,
                 isError: true
             }]);
             return;
@@ -96,12 +96,11 @@ export default function TacticalChatbot() {
         setLoading(true);
 
         try {
-            const userId = localStorage.getItem('brofit_user_id') || 'unknown';
             const res = await fetch("/api/chat", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
-                    "x-brofit-user-id": userId
+                    "Authorization": `Bearer ${accessToken ?? ''}`
                 },
                 body: JSON.stringify({
                     message: text,
@@ -202,7 +201,7 @@ export default function TacticalChatbot() {
                                             {remainingCredits}/{MAX_DAILY_CREDITS}
                                         </span>
                                     ) : (
-                                        <span className="text-xs bg-yellow-500/20 text-yellow-400 px-2 py-0.5 rounded-full font-bold">
+                                        <span className="text-xs bg-gym-red/20 text-gym-red px-2 py-0.5 rounded-full font-bold">
                                             Login
                                         </span>
                                     )}

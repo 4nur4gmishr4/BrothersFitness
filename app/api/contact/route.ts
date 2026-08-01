@@ -1,20 +1,25 @@
 ﻿import { NextResponse } from "next/server";
 import { supabase } from "@/lib/supabase";
-import { checkRateLimit, RATE_LIMITS } from "@/lib/rate-limit";
+import { checkRateLimit, RATE_LIMITS, getClientIp } from "@/lib/rate-limit";
 import { ContactSchema } from "@/lib/validation";
 import { logger } from "@/lib/logger";
+import { getRequestId, withRequestId } from "@/lib/request-id";
 
 export async function POST(req: Request) {
+  const requestId = getRequestId(req);
+  const log = logger.child({ requestId });
   try {
     // Rate limit: 3 contact submissions per hour per IP
-    const forwarded = req.headers.get("x-forwarded-for");
-    const ip = forwarded?.split(",")[0]?.trim() || "unknown";
-    const rateCheck = checkRateLimit(ip, RATE_LIMITS.CONTACT);
+    const ip = getClientIp(req);
+    const rateCheck = await checkRateLimit(ip, RATE_LIMITS.CONTACT);
 
     if (!rateCheck.allowed) {
-      return NextResponse.json(
-        { error: "Too many requests. Please try again later." },
-        { status: 429 }
+      return withRequestId(
+        NextResponse.json(
+          { error: "Too many requests. Please try again later." },
+          { status: 429 }
+        ),
+        requestId
       );
     }
 
@@ -26,12 +31,15 @@ export async function POST(req: Request) {
       const firstError = parsed.error.issues[0];
       // If honeypot was filled, silently accept (don't let bot know it was detected)
       if (firstError?.path[0] === '_honeypot') {
-        logger.warn('Bot detected via honeypot', { ip });
-        return NextResponse.json({ success: true }, { status: 200 });
+        log.warn('Bot detected via honeypot', { ip });
+        return withRequestId(NextResponse.json({ success: true }, { status: 200 }), requestId);
       }
-      return NextResponse.json(
-        { error: firstError?.message || "Invalid request" },
-        { status: 400 }
+      return withRequestId(
+        NextResponse.json(
+          { error: firstError?.message || "Invalid request" },
+          { status: 400 }
+        ),
+        requestId
       );
     }
 
@@ -46,7 +54,7 @@ export async function POST(req: Request) {
     }]);
 
     if (dbError) {
-      logger.warn('Failed to store contact submission', { error: dbError.message });
+      log.warn('Failed to store contact submission', { error: dbError.message });
     }
 
     // Send Discord webhook notification (if configured)
@@ -71,13 +79,13 @@ export async function POST(req: Request) {
           })
         });
       } catch (webhookError) {
-        logger.warn('Discord webhook failed', { error: webhookError instanceof Error ? webhookError.message : 'Unknown' });
+        log.warn('Discord webhook failed', { error: webhookError instanceof Error ? webhookError.message : 'Unknown' });
       }
     }
 
-    return NextResponse.json({ success: true }, { status: 200 });
+    return withRequestId(NextResponse.json({ success: true }, { status: 200 }), requestId);
   } catch (error) {
-    logger.error("Contact submission error", { error: error instanceof Error ? error.message : 'Unknown' });
-    return NextResponse.json({ error: "Server error" }, { status: 500 });
+    log.error("Contact submission error", { error: error instanceof Error ? error.message : 'Unknown' });
+    return withRequestId(NextResponse.json({ error: "Server error" }, { status: 500 }), requestId);
   }
 }
