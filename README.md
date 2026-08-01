@@ -219,7 +219,7 @@ export const MAX_DAILY_CREDITS = parseInt(process.env.MAX_DAILY_CREDITS || '5', 
 │  │  if (UPSTASH_REDIS_REST_URL && UPSTASH_REDIS_REST_TOKEN)│   │
 │  │     → Distributed Redis (Upstash)                       │   │
 │  │  else                                                    │   │
-│  │     → In-memory Map (per-instance, dev only)            │   │
+│  │     → In-memory Map (per-instance, dev/tests/fallback)  │   │
 │  └─────────────────────────────────────────────────────────┘   │
 │         │                                                       │
 │         ▼                                                       │
