@@ -60,9 +60,6 @@ export async function POST(req: Request) {
             );
         }
 
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 60000); // 60s timeout for chat
-
         try {
             const body = await req.json();
 
@@ -120,18 +117,12 @@ export async function POST(req: Request) {
                 })
                 .eq('firebase_uid', headerUserId);
 
-            clearTimeout(timeoutId);
             return NextResponse.json({
                 response: aiResponse.text,
                 meta: { model: aiResponse.modelUsed, provider: aiResponse.providerUsed }
             });
         } catch (error: unknown) {
-            clearTimeout(timeoutId);
             const err = error as { name?: string; message?: string };
-
-            if (err.name === 'AbortError') {
-                return NextResponse.json({ error: "Timeout: Chat took too long. Please retry." }, { status: 408 });
-            }
 
             // Sanitized error logging (no API keys)
             logger.error("Chat Error", { error: err?.message || "Unknown error" });
