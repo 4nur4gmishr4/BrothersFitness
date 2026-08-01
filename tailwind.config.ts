@@ -13,7 +13,7 @@ const config: Config = {
       },
       fontFamily: {
         sans: [
-          "Inter",
+          "var(--font-inter)",
           "-apple-system",
           "BlinkMacSystemFont",
           "Segoe UI",
@@ -24,12 +24,13 @@ const config: Config = {
           "sans-serif",
         ],
         display: [
-          "Inter",
-          "-apple-system",
-          "BlinkMacSystemFont",
+          "var(--font-display)",
+          "Anton",
+          "Impact",
           "sans-serif",
         ],
         mono: [
+          "var(--font-mono)",
           "JetBrains Mono",
           "Fira Code",
           "Consolas",

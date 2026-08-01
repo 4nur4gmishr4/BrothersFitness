@@ -112,7 +112,7 @@ export default function ContactForm() {
                     <h3 className="text-[10px] md:text-xs font-mono font-bold text-gray-500 uppercase tracking-widest mb-1 md:mb-2">
                       PHONE (AMAN)
                     </h3>
-                    <p className="text-xl md:text-2xl font-display font-bold text-white mb-4 md:mb-5">
+                    <p className="text-xl md:text-2xl font-display font-bold tracking-wide text-white mb-4 md:mb-5">
                       +91 91311 79343
                     </p>
 
@@ -146,7 +146,7 @@ export default function ContactForm() {
                     <h3 className="text-[10px] md:text-xs font-mono font-bold text-gray-500 uppercase tracking-widest mb-1 md:mb-2">
                       PHONE (PRADEEP)
                     </h3>
-                    <p className="text-xl md:text-2xl font-display font-bold text-white mb-4 md:mb-5">
+                    <p className="text-xl md:text-2xl font-display font-bold tracking-wide text-white mb-4 md:mb-5">
                       +91 91312 72754
                     </p>
 
@@ -199,7 +199,7 @@ export default function ContactForm() {
                 <motion.div initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} transition={{ delay: 0.2 }}>
                   <div className="flex items-center gap-2 mb-6">
                     <MessageCircle className="w-5 h-5 text-white" />
-                    <h3 className="text-xl font-display font-bold text-white">SEND A MESSAGE</h3>
+                    <h3 className="text-xl font-display font-bold tracking-wide text-white">SEND A MESSAGE</h3>
                   </div>
                   <ContactFormLogic />
                 </motion.div>

@@ -1,67 +1,70 @@
 import { NextResponse } from "next/server";
 import { GenerateDietSchema, DietResponseSchema } from "@/lib/validation";
 import { logger } from "@/lib/logger";
-import { generateTextWithFallback } from "@/lib/ai-provider";
-import { createClient } from "@supabase/supabase-js";
-import { MAX_DAILY_CREDITS } from "@/lib/config";
+import { generateTextWithFallback, type AIRequestConfig } from "@/lib/ai-provider";
+import { verifyUserToken, getUserCreditState, spendUserCredit } from "@/lib/credit-service";
+import { checkRateLimit, RATE_LIMITS } from "@/lib/rate-limit";
+import { getRequestId, withRequestId } from "@/lib/request-id";
+
+/** Strip ```json / ``` code fences the model sometimes wraps JSON in. */
+function stripJsonFences(text: string): string {
+    return text.replace(/```json/gi, "").replace(/```/g, "").trim();
+}
+
+/**
+ * Ask the model for JSON, retrying once if the first attempt is malformed.
+ * Throws a clear 'invalid JSON' error only after both attempts fail.
+ */
+async function requestDietJson(aiConfig: AIRequestConfig, originalPrompt: string, log: typeof logger): Promise<unknown> {
+    for (let attempt = 0; attempt < 2; attempt++) {
+        const aiResponse = await generateTextWithFallback(aiConfig);
+        try {
+            return JSON.parse(stripJsonFences(aiResponse.text));
+        } catch {
+            if (attempt === 1) throw new Error(`AI returned invalid JSON: ${aiResponse.modelUsed}`);
+            log.warn('Diet AI returned malformed JSON, retrying once');
+            aiConfig.prompt = originalPrompt +
+                '\n\nIMPORTANT: Your previous output was not valid JSON. Return ONLY the raw JSON object — no markdown, no commentary.';
+        }
+    }
+    throw new Error("AI returned invalid JSON");
+}
 
 export async function POST(req: Request) {
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-    const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-
-    if (!supabaseUrl || !supabaseServiceKey) {
-        logger.error("Missing Supabase Configuration", { url: !!supabaseUrl, key: !!supabaseServiceKey });
-        return NextResponse.json(
-            { error: "System Configuration Error: API service offline." },
-            { status: 500 }
-        );
-    }
-
-    const supabase = createClient(supabaseUrl, supabaseServiceKey);
-    const headerUserId = req.headers.get("x-brofit-user-id");
-
-    if (!headerUserId || headerUserId === 'unknown') {
-        return NextResponse.json(
-            { error: "Authentication required. Please login to use the Diet Generator." },
-            { status: 401 }
-        );
-    }
-
+    const requestId = getRequestId(req);
+    const log = logger.child({ requestId });
     try {
-        // 1. Check Credits
-        const { data: userProfile, error: userError } = await supabase
-            .from('users')
-            .select('daily_credits, last_credit_reset')
-            .eq('firebase_uid', headerUserId)
-            .single();
+        // 0. Verify the caller's Supabase session token server-side.
+        const identity = await verifyUserToken(req);
+        if (identity instanceof NextResponse) return withRequestId(identity, requestId);
+        const { supabase, userId } = identity;
 
-        if (userError || !userProfile) {
-            console.error('Diet API: Profile Fetch Error:', userError);
-            return NextResponse.json({ error: "User profile not found. Please complete your profile." }, { status: 403 });
-        }
-
-        const today = new Date().toISOString().split('T')[0];
-        let credits = userProfile.daily_credits;
-
-        if (userProfile.last_credit_reset !== today) {
-            credits = MAX_DAILY_CREDITS;
-        }
-
-        if (credits <= 0) {
-            return NextResponse.json(
-                { error: `Daily credits depleted (0/${MAX_DAILY_CREDITS}). Resets tomorrow.` },
-                { status: 429 }
+        // 0b. Enforce the combined AI quota for this user.
+        const rateCheck = await checkRateLimit(`user:${userId}`, RATE_LIMITS.AI_COMBINED);
+        if (!rateCheck.allowed) {
+            return withRequestId(
+                NextResponse.json(
+                    { error: `Daily AI credits used up (0/${rateCheck.remaining}). They reset at 5:30 AM IST.` },
+                    { status: 429 }
+                ),
+                requestId
             );
         }
 
-        const body = await req.json();
+        // 1. Check credits (informational; the RPC below is the atomic spend).
+        const creditState = await getUserCreditState(supabase, userId);
+        if (creditState instanceof NextResponse) return withRequestId(creditState, requestId);
 
-        // Validate with Zod
+        // 2. Validate request body
+        const body = await req.json();
         const parsed = GenerateDietSchema.safeParse(body);
         if (!parsed.success) {
-            return NextResponse.json(
-                { error: parsed.error.issues[0]?.message || 'Invalid request' },
-                { status: 400 }
+            return withRequestId(
+                NextResponse.json(
+                    { error: parsed.error.issues[0]?.message || 'Invalid request' },
+                    { status: 400 }
+                ),
+                requestId
             );
         }
 
@@ -80,14 +83,17 @@ export async function POST(req: Request) {
             weightChangeRate
         } = parsed.data;
 
-        // Calculate calorie adjustment based on weight change rate
-        // 1 kg of body mass = ~7700 kcal, divided by 7 days = ~1100 kcal/day per kg/week
-        const rateNum = parseFloat(String(weightChangeRate)) || 0.5;
+        // 0 is a valid maintenance rate — only fall back to the default when the
+        // value is genuinely absent/unparseable.
+        const rateNum = weightChangeRate === undefined || weightChangeRate === null || weightChangeRate === ''
+            || Number.isNaN(parseFloat(String(weightChangeRate)))
+            ? 0.5
+            : parseFloat(String(weightChangeRate));
         const calorieAdjustment = Math.round(rateNum * 1100);
 
         const prompt = `
       You are an expert fitness nutritionist for 'BroFit', optimizing for an **Indian User**.
-      
+
       **User Biometrics**
       - Gender: ${gender}
       - Age: ${age} years
@@ -96,7 +102,7 @@ export async function POST(req: Request) {
       - Target Weight: ${targetWeight} kg
       - Activity Level: ${activityLevel}
       - Weight Change Rate: ${rateNum} kg/week
-      
+
       **Parameters**
       - Daily Calorie Target: ${calories ? calories + " kcal" : "Calculate TDEE"}
       - Calorie Adjustment: ${calorieAdjustment} kcal/day
@@ -105,7 +111,7 @@ export async function POST(req: Request) {
       - Primary Objective: ${goal_description}
 
       **Instructions**:
-      1.  **CALORIE CALCULATION**: 
+      1.  **CALORIE CALCULATION**:
           - If Daily Calorie Target is provided, USE IT EXACTLY.
           - Otherwise, calculate TDEE using Mifflin-St Jeor formula.
           - For BULK: Add ${calorieAdjustment} kcal to TDEE.
@@ -133,13 +139,13 @@ export async function POST(req: Request) {
       7.  **RECIPES**: For each meal, include full recipe instructions, complete ingredient list with quantities, and detailed macros.
       8.  **TIMELINE**: Calculate realistic "estimated_duration" based on ${rateNum} kg/week rate. Provide total_days and total_weeks.
       10. **Summary**: Write a detailed explanation of the plan.
-      
+
       **STRICT OUTPUT FORMAT**:
       Return ONLY valid JSON. No Markdown. No pre-text. Matches this schema EXACTLY:
       {
-        "tactical_brief": { 
-          "en": "Detailed strategic summary including: User's current stats (${currentWeight}kg, ${height}cm, ${age}yo, ${gender}), goal (${targetWeight}kg), activity level (${activityLevel}), diet type (${dietType}), budget (${budget}), weight change rate (${rateNum}kg/week), calculated calories, and full explanation of the approach...", 
-          "hi": "Same detailed summary in Hindi..." 
+        "tactical_brief": {
+          "en": "Detailed strategic summary including: User's current stats (${currentWeight}kg, ${height}cm, ${age}yo, ${gender}), goal (${targetWeight}kg), activity level (${activityLevel}), diet type (${dietType}), budget (${budget}), weight change rate (${rateNum}kg/week), calculated calories, and full explanation of the approach...",
+          "hi": "Same detailed summary in Hindi..."
         },
         "user_inputs_summary": {
           "gender": "${gender}",
@@ -167,10 +173,10 @@ export async function POST(req: Request) {
             "duration_days": 15,
             "average_daily_cost": 333,
             "items": [
-                { 
+                {
                     "name": { "en": "Item Name", "hi": "Hindi Name" },
                     "quantity": { "en": "e.g. 2kg", "hi": "e.g. 2kg" },
-                    "category": "Home_Essentials" | "Market_Purchase", 
+                    "category": "Home_Essentials" | "Market_Purchase",
                     "duration_days": 15,
                     "price_inr": 150
                 }
@@ -196,46 +202,44 @@ export async function POST(req: Request) {
       }
     `;
 
-        const aiResponse = await generateTextWithFallback({
-            prompt: prompt,
+        // 3. Generate + parse the JSON (with a single retry on malformed output).
+        const json = await requestDietJson({
+            prompt,
             systemPrompt: "You are a JSON-only API. You must return valid JSON matching the user's schema. Do not include markdown formatting.",
             jsonMode: true,
-            temperature: 0.2 // Lower temperature for consistent JSON
-        });
+            temperature: 0.2, // Lower temperature for consistent JSON
+        }, prompt, log);
 
-        // Parse JSON from text response
-        let parsedResponse;
-        try {
-            // Clean markdown code blocks if any (e.g. ```json ... ```)
-            const cleanJson = aiResponse.text.replace(/```json/g, "").replace(/```/g, "").trim();
-            parsedResponse = JSON.parse(cleanJson);
-        } catch {
-            console.error("Failed to parse AI response as JSON", aiResponse.text);
-            throw new Error(`AI returned invalid JSON: ${aiResponse.modelUsed}`);
-        }
-
-        // Validate AI response structure (lenient)
-        const validated = DietResponseSchema.safeParse(parsedResponse);
+        // 4. Validate the structure; do NOT pass structurally invalid AI output
+        // through to the client.
+        const validated = DietResponseSchema.safeParse(json);
         if (!validated.success) {
-            logger.warn('AI response structure mismatch', { issues: validated.error.issues.length });
+            log.warn('Diet AI response failed validation', { issues: validated.error.issues.length });
+            return withRequestId(
+                NextResponse.json(
+                    { error: 'The AI returned an incomplete meal plan. Please try again.' },
+                    { status: 502 }
+                ),
+                requestId
+            );
         }
 
-        // Deduct Credit on Success (Post-Generation)
-        await supabase
-            .from('users')
-            .update({
-                daily_credits: credits - 1,
-                last_credit_reset: today
-            })
-            .eq('firebase_uid', headerUserId);
+        // 5. Deduct the credit atomically AFTER a successful generation.
+        const spent = await spendUserCredit(supabase, userId);
+        if (spent instanceof NextResponse) return withRequestId(spent, requestId);
 
-        return NextResponse.json(parsedResponse);
-
+        return withRequestId(
+            NextResponse.json({
+                ...validated.data,
+                _meta: { remaining: spent.remaining }
+            }),
+            requestId
+        );
     } catch (error) {
         const errorMessage = error instanceof Error ? error.message : 'Unknown error';
         const errorStack = error instanceof Error ? error.stack : undefined;
 
-        logger.error("Fatal API Error in Generate Diet", { error: errorMessage, stack: errorStack });
+        log.error("Fatal API Error in Generate Diet", { error: errorMessage, stack: errorStack });
 
         // Provide more helpful error message to the user
         let userMessage = "Detailed Synthesis Failure: ";
@@ -243,7 +247,7 @@ export async function POST(req: Request) {
             userMessage = "Access Denied: API Key or Authentication validity expired.";
         } else if (errorMessage.includes('quota') || errorMessage.includes('rate') || errorMessage.includes('429')) {
             userMessage = "Resource Exhausted: AI Daily Quota reached.";
-        } else if (errorMessage.includes('timeout') || errorMessage.includes('ECONNREFUSED')) {
+        } else if (errorMessage.includes('timeout') || errorMessage.includes('aborted') || errorMessage.includes('ECONNREFUSED')) {
             userMessage = "Network Interruption: Uplink timed out.";
         } else if (errorMessage.includes('JSON')) {
             userMessage = "Data Corruption: AI Returned Invalid Protocol Structure.";
@@ -251,12 +255,15 @@ export async function POST(req: Request) {
             userMessage += errorMessage;
         }
 
-        return NextResponse.json(
-            {
-                error: userMessage,
-                details: errorMessage
-            },
-            { status: 500 }
+        return withRequestId(
+            NextResponse.json(
+                {
+                    error: userMessage,
+                    details: errorMessage
+                },
+                { status: 500 }
+            ),
+            requestId
         );
     }
 }

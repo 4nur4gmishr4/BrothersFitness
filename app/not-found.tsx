@@ -32,7 +32,7 @@ export default function NotFound() {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.2 }}
                 >
-                    <h1 className="font-display font-black text-6xl md:text-8xl text-transparent bg-clip-text bg-gradient-to-b from-white to-gray-600 mb-2">
+                    <h1 className="font-display font-black tracking-wide text-6xl md:text-8xl text-transparent bg-clip-text bg-gradient-to-b from-white to-gray-600 mb-2">
                         404
                     </h1>
                     <h2 className="font-display font-bold text-2xl md:text-3xl text-gym-red uppercase tracking-widest mb-6">

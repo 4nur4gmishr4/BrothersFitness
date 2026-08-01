@@ -1,9 +1,9 @@
 import { NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
+import { getServiceSupabase } from '@/lib/server-supabase';
 
 export async function GET() {
     try {
-        const { count, error } = await supabase
+        const { count, error } = await getServiceSupabase()
             .from('gym_members')
             .select('*', { count: 'exact', head: true });
 

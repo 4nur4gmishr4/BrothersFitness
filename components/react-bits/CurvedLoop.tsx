@@ -28,6 +28,7 @@ const CurvedLoop: FC<CurvedLoopProps> = ({
   const gradientId = `gym-grad-${uid}`;
   const pathD = `M0,100 Q960,${100 + curveAmount} 1920,100`;
   const dragRef = useRef(false);
+  const [isDragging, setIsDragging] = useState(false);
   const lastXRef = useRef(0);
   const dirRef = useRef<"left" | "right">(direction);
   const velRef = useRef(0);
@@ -82,6 +83,7 @@ const CurvedLoop: FC<CurvedLoopProps> = ({
   const onPointerDown = (e: PointerEvent<SVGSVGElement>) => {
     if (!interactive) return;
     dragRef.current = true;
+    setIsDragging(true);
     lastXRef.current = e.clientX;
     velRef.current = 0;
     (e.target as HTMLElement).setPointerCapture(e.pointerId);
@@ -106,10 +108,11 @@ const CurvedLoop: FC<CurvedLoopProps> = ({
   const endDrag = () => {
     if (!interactive) return;
     dragRef.current = false;
+    setIsDragging(false);
     dirRef.current = velRef.current > 0 ? "right" : "left";
   };
 
-  const cursorStyle = interactive ? (dragRef.current ? "grabbing" : "grab") : "auto";
+  const cursorStyle = interactive ? (isDragging ? "grabbing" : "grab") : "auto";
 
   return (
     <svg

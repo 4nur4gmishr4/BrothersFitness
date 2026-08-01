@@ -3,6 +3,7 @@
  * For all API request bodies.
  */
 import { z } from 'zod';
+import { MEMBERSHIP_PLANS } from '@/lib/config';
 
 // --- Admin Login ---
 export const LoginSchema = z.object({
@@ -66,6 +67,27 @@ export const DietResponseSchema = z.object({
     }).passthrough().optional(),
     meal_plan: z.array(z.any()).optional(),
 }).passthrough(); // Allow extra fields from AI
+
+// --- Admin Member (create/update) ---
+// membership_type is constrained to the known plans so it can be used safely
+// as a PLAN_PRICES lookup key (a typo previously produced ₹0 revenue).
+export const MemberSchema = z.object({
+    full_name: z.string().min(1, 'Name is required'),
+    mobile: z.string().min(7, 'Mobile number is required'),
+    email: z.string().nullable().optional(),
+    address: z.string().nullable().optional(),
+    date_of_birth: z.string().nullable().optional(),
+    gender: z.string().nullable().optional(),
+    height_cm: z.number().min(50).max(300).nullable().optional(),
+    weight_kg: z.number().min(10).max(500).nullable().optional(),
+    photo_url: z.string().nullable().optional(),
+    membership_type: z.enum(MEMBERSHIP_PLANS).nullable().optional(),
+    membership_start: z.string().nullable().optional(),
+    membership_end: z.string().nullable().optional(),
+    emergency_contact: z.string().nullable().optional(),
+    notes: z.string().nullable().optional(),
+});
+export type MemberPayload = z.infer<typeof MemberSchema>;
 
 // --- Profile Update ---
 export const ProfileUpdateSchema = z.object({

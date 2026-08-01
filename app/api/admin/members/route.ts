@@ -1,15 +1,11 @@
 import { NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
-import { verifyAdminToken, extractBearerToken } from '@/lib/auth';
+import { getServiceSupabase } from '@/lib/server-supabase';
+import { requireAdminToken } from '@/lib/admin-auth';
+import { MemberSchema } from '@/lib/validation';
 
-// Helper to check auth
-function checkAuth(req: Request): NextResponse | null {
-    const token = extractBearerToken(req.headers.get('Authorization'));
-    if (!token || !verifyAdminToken(token)) {
-        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-    return null;
-}
+// All admin routes use the service-role client (bypasses RLS) because the
+// admin tables have no anon/authenticated grants. The HMAC token in
+// `Authorization` is the only gate — enforced by requireAdminToken().
 
 // Helper to log admin activity (fails silently if table doesn't exist)
 async function logActivity(
@@ -19,7 +15,7 @@ async function logActivity(
     details?: Record<string, unknown>
 ) {
     try {
-        await supabase.from('admin_activity_logs').insert([{
+        await getServiceSupabase().from('admin_activity_logs').insert([{
             action_type: actionType,
             member_id: memberId,
             member_name: memberName,
@@ -31,20 +27,76 @@ async function logActivity(
     }
 }
 
-// GET all members
+// Pagination defaults — keep pages small so a growing member table never
+// ships the whole dataset to the admin grid in one payload.
+const DEFAULT_PAGE_SIZE = 50;
+const MAX_PAGE_SIZE = 200;
+
+function clampInt(value: string | null, fallback: number, min: number, max: number): number {
+    if (value === null || value.trim() === '') return fallback;
+    const parsed = Number(value);
+    if (!Number.isFinite(parsed)) return fallback;
+    return Math.min(max, Math.max(min, Math.floor(parsed)));
+}
+
+// GET members. Supports server-side search + pagination for the admin grid.
+// With no query params this returns every member (backward-compatible with the
+// stats/analytics that need the full list).
 export async function GET(req: Request) {
-    const authError = checkAuth(req);
-    if (authError) return authError;
+    const auth = await requireAdminToken(req);
+    if (auth instanceof NextResponse) return auth;
 
     try {
-        const { data, error } = await supabase
+        const { searchParams } = new URL(req.url);
+        const search = searchParams.get('search')?.trim() || '';
+        const page = clampInt(searchParams.get('page'), 1, 1, Number.MAX_SAFE_INTEGER);
+        const pageSize = clampInt(searchParams.get('pageSize'), DEFAULT_PAGE_SIZE, 1, MAX_PAGE_SIZE);
+        const sortBy = searchParams.get('sortBy') || 'newest';
+
+        const paginate = searchParams.has('page') || searchParams.has('pageSize');
+        const isSearch = search.length > 0;
+
+        // Only talk to the DB for the requested page; total reflects the filter
+        // so the client can render page controls without a second round-trip.
+        let query = getServiceSupabase()
             .from('gym_members')
-            .select('*')
-            .order('created_at', { ascending: false });
+            .select('*', { count: isSearch || paginate ? 'exact' : undefined });
+
+        if (isSearch) {
+            const term = `%${search}%`;
+            // Fuzzy-ish ILIKE across name + mobile; the leading % keeps the
+            // match working from anywhere in the field.
+            query = query.or(`full_name.ilike.${term},mobile.ilike.${term}`);
+        }
+
+        switch (sortBy) {
+            case 'oldest':
+                query = query.order('created_at', { ascending: true });
+                break;
+            case 'a-z':
+                query = query.order('full_name', { ascending: true });
+                break;
+            case 'z-a':
+                query = query.order('full_name', { ascending: false });
+                break;
+            case 'newest':
+            default:
+                query = query.order('created_at', { ascending: false });
+        }
+
+        if (paginate) {
+            const from = (page - 1) * pageSize;
+            query = query.range(from, from + pageSize - 1);
+        }
+
+        const { data, error, count } = await query;
 
         if (error) throw error;
 
-        return NextResponse.json({ members: data });
+        return NextResponse.json({
+            members: data,
+            ...(paginate || isSearch ? { total: count ?? data.length, page, pageSize } : {}),
+        });
     } catch (error) {
         console.error('Error fetching members:', error);
         return NextResponse.json(
@@ -56,15 +108,25 @@ export async function GET(req: Request) {
 
 // POST new member
 export async function POST(req: Request) {
-    const authError = checkAuth(req);
-    if (authError) return authError;
+    const auth = await requireAdminToken(req);
+    if (auth instanceof NextResponse) return auth;
 
     try {
         const body = await req.json();
 
-        const { data, error } = await supabase
+        // Validate every field, and constrain membership_type to known plans
+        // so it stays a safe PLAN_PRICES lookup key (a typo used to yield ₹0).
+        const parsed = MemberSchema.safeParse(body);
+        if (!parsed.success) {
+            return NextResponse.json(
+                { error: parsed.error.issues[0]?.message || 'Invalid member data' },
+                { status: 400 }
+            );
+        }
+
+        const { data, error } = await getServiceSupabase()
             .from('gym_members')
-            .insert([body])
+            .insert([parsed.data])
             .select()
             .single();
 
@@ -103,8 +165,8 @@ export async function POST(req: Request) {
 
 // DELETE member (also removes photo from storage)
 export async function DELETE(req: Request) {
-    const authError = checkAuth(req);
-    if (authError) return authError;
+    const auth = await requireAdminToken(req);
+    if (auth instanceof NextResponse) return auth;
 
     try {
         const { searchParams } = new URL(req.url);
@@ -118,7 +180,7 @@ export async function DELETE(req: Request) {
         }
 
         // First, get the member to retrieve photo_url and name for logging
-        const { data: member } = await supabase
+        const { data: member } = await getServiceSupabase()
             .from('gym_members')
             .select('photo_url, full_name, mobile')
             .eq('id', id)
@@ -131,7 +193,7 @@ export async function DELETE(req: Request) {
                 const urlParts = member.photo_url.split('/');
                 const filename = urlParts[urlParts.length - 1];
                 if (filename) {
-                    await supabase.storage.from('member-photos').remove([filename]);
+                    await getServiceSupabase().storage.from('member-photos').remove([filename]);
                 }
             } catch (storageError) {
                 console.warn('Failed to delete photo from storage:', storageError);
@@ -140,7 +202,7 @@ export async function DELETE(req: Request) {
         }
 
         // Now delete the member record
-        const { error } = await supabase
+        const { error } = await getServiceSupabase()
             .from('gym_members')
             .delete()
             .eq('id', id);
@@ -164,8 +226,8 @@ export async function DELETE(req: Request) {
 
 // PUT update member
 export async function PUT(req: Request) {
-    const authError = checkAuth(req);
-    if (authError) return authError;
+    const auth = await requireAdminToken(req);
+    if (auth instanceof NextResponse) return auth;
 
     try {
         const body = await req.json();
@@ -178,9 +240,17 @@ export async function PUT(req: Request) {
             );
         }
 
-        const { data, error } = await supabase
+        const parsed = MemberSchema.safeParse(updateData);
+        if (!parsed.success) {
+            return NextResponse.json(
+                { error: parsed.error.issues[0]?.message || 'Invalid member data' },
+                { status: 400 }
+            );
+        }
+
+        const { data, error } = await getServiceSupabase()
             .from('gym_members')
-            .update({ ...updateData, updated_at: new Date().toISOString() })
+            .update({ ...parsed.data, updated_at: new Date().toISOString() })
             .eq('id', id)
             .select()
             .single();
@@ -189,7 +259,7 @@ export async function PUT(req: Request) {
 
         // Log the update
         await logActivity('UPDATE', id, data.full_name, {
-            updated_fields: Object.keys(updateData)
+            updated_fields: Object.keys(parsed.data)
         });
 
         return NextResponse.json({ member: data });

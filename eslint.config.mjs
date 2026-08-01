@@ -14,7 +14,16 @@ const compat = new FlatCompat({
 const eslintConfig = [
   ...compat.extends('next/core-web-vitals', 'next/typescript'),
   {
-    ignores: [".next/**"]
+    // Generated/build output is not source: .next build cache, Next's typed
+    // env file, and the PWA plugin's service-worker artifacts in public/.
+    ignores: [
+      ".next/**",
+      "next-env.d.ts",
+      "public/sw.js",
+      "public/swe-worker-*.js",
+      "public/workbox-*.js",
+      "coverage/**"
+    ]
   }
 ];
 

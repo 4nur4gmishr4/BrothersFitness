@@ -4,6 +4,7 @@ import { Shield, Medal, Instagram, MessageCircle } from "lucide-react";
 import Image from "next/image";
 import { motion, useInView } from "framer-motion";
 import { useRef, useState } from "react";
+import { Scales } from "@/components/ui/scales";
 
 export default function Architects() {
   const ref = useRef(null);
@@ -43,7 +44,7 @@ export default function Architects() {
           transition={{ duration: 0.6 }}
         >
           <h2 className="heading-display text-4xl md:text-6xl mb-4">
-            OUR TRAINERS
+            OUR <span className="text-gym-red italic">TRAINERS</span>
           </h2>
           <p className="text-lg text-gray-300 font-mono tracking-wide">
             BUILT BY BROTHERS. FORGED IN IRON.
@@ -129,40 +130,88 @@ export default function Architects() {
                 </div>
 
                 <div
-                  className="relative w-full aspect-square mb-6 overflow-hidden bg-gray-900 cursor-pointer"
+                  className="relative w-full aspect-square mb-6 cursor-pointer"
+                  role="button"
+                  tabIndex={0}
+                  aria-label={`View ${t.name}'s profile`}
                   onClick={() => setTappedCard(tappedCard === t.id ? null : t.id)}
-                  onTouchStart={() => setTappedCard(tappedCard === t.id ? null : t.id)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      setTappedCard(tappedCard === t.id ? null : t.id);
+                    }
+                  }}
                 >
-                  <motion.div
-                    className="relative w-full h-full"
-                    initial={{ filter: "grayscale(100%)" }}
-                    animate={{ filter: tappedCard === t.id ? "grayscale(0%)" : "grayscale(100%)" }}
-                    whileHover={{ filter: "grayscale(0%)" }}
-                    transition={{ duration: 0.5 }}
-                  >
-                    <Image
-                      src={t.src}
-                      alt={`${t.name} - ${t.role} at Brother's Fitness specializing in ${t.spec}`}
-                      fill
-                      className="object-contain"
-                      sizes="(max-width: 768px) 100vw, 50vw"
-                      priority={i === 0}
-                    />
-                  </motion.div>
-
+                  {/* Scales frame: ruler edges hug the photo, faded at the short ends */}
                   <div
-                    className="absolute inset-0 pointer-events-none"
+                    className="absolute -inset-y-3 -left-3 w-4 pointer-events-none md:-inset-y-6 md:-left-6 md:w-7"
                     style={{
-                      backgroundImage: "repeating-linear-gradient(0deg, rgba(215, 25, 33, 0.1) 0px, transparent 2px, transparent 4px)",
+                      WebkitMaskImage: "linear-gradient(to bottom, transparent, black 12%, black 88%, transparent)",
+                      maskImage: "linear-gradient(to bottom, transparent, black 12%, black 88%, transparent)",
                     }}
-                  />
+                  >
+                    <Scales orientation="vertical" size={8} color="rgba(215, 25, 33, 0.75)" />
+                  </div>
+                  <div
+                    className="absolute -inset-y-3 -right-3 w-4 pointer-events-none md:-inset-y-6 md:-right-6 md:w-7"
+                    style={{
+                      WebkitMaskImage: "linear-gradient(to bottom, transparent, black 12%, black 88%, transparent)",
+                      maskImage: "linear-gradient(to bottom, transparent, black 12%, black 88%, transparent)",
+                    }}
+                  >
+                    <Scales orientation="vertical" size={8} color="rgba(215, 25, 33, 0.75)" />
+                  </div>
+                  <div
+                    className="absolute -inset-x-3 -top-3 h-4 pointer-events-none md:-inset-x-6 md:-top-6 md:h-7"
+                    style={{
+                      WebkitMaskImage: "linear-gradient(to right, transparent, black 12%, black 88%, transparent)",
+                      maskImage: "linear-gradient(to right, transparent, black 12%, black 88%, transparent)",
+                    }}
+                  >
+                    <Scales orientation="horizontal" size={8} color="rgba(215, 25, 33, 0.75)" />
+                  </div>
+                  <div
+                    className="absolute -inset-x-3 -bottom-3 h-4 pointer-events-none md:-inset-x-6 md:-bottom-6 md:h-7"
+                    style={{
+                      WebkitMaskImage: "linear-gradient(to right, transparent, black 12%, black 88%, transparent)",
+                      maskImage: "linear-gradient(to right, transparent, black 12%, black 88%, transparent)",
+                    }}
+                  >
+                    <Scales orientation="horizontal" size={8} color="rgba(215, 25, 33, 0.75)" />
+                  </div>
+
+                  <div className="relative w-full h-full overflow-hidden bg-gray-900">
+                    <motion.div
+                      className="relative w-full h-full"
+                      initial={{ filter: "grayscale(100%)" }}
+                      animate={{ filter: tappedCard === t.id ? "grayscale(0%)" : "grayscale(100%)" }}
+                      whileHover={{ filter: "grayscale(0%)" }}
+                      transition={{ duration: 0.5 }}
+                    >
+                      <Image
+                        src={t.src}
+                        alt={`${t.name} - ${t.role} at Brother's Fitness specializing in ${t.spec}`}
+                        fill
+                        className="object-contain"
+                        sizes="(max-width: 768px) 100vw, 50vw"
+                        priority={i === 0}
+                      />
+                    </motion.div>
+
+                    <div
+                      className="absolute inset-0 pointer-events-none"
+                      style={{
+                        backgroundImage: "repeating-linear-gradient(0deg, rgba(215, 25, 33, 0.1) 0px, transparent 2px, transparent 4px)",
+                      }}
+                    />
+                  </div>
 
                   {/* Tap hint for mobile - REMOVED */}
                 </div>
 
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
-                    <h3 className="text-3xl md:text-4xl font-display font-black tracking-tight">{t.name}</h3>
+                    <h3 className="text-3xl md:text-4xl font-display font-black tracking-wide">{t.name}</h3>
                     <motion.div
                       whileHover={{ rotate: 360, scale: 1.2 }}
                       transition={{ duration: 0.5 }}
@@ -174,7 +223,7 @@ export default function Architects() {
                     {t.role}
                   </p>
                   <motion.p
-                    className="text-lg font-display font-semibold text-gym-red tracking-tight"
+                    className="text-lg font-display font-semibold text-gym-red tracking-wide"
                     initial={{ opacity: 0, y: 10 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}

@@ -195,7 +195,14 @@ export default function QuotesPage() {
 
   useEffect(() => {
     const saved = localStorage.getItem("favoriteQuotes");
-    if (saved) setFavorites(JSON.parse(saved));
+    if (!saved) return;
+    // A corrupt value must not crash the app.
+    try {
+      const parsed = JSON.parse(saved);
+      if (Array.isArray(parsed)) setFavorites(parsed.filter(q => typeof q === 'string'));
+    } catch {
+      /* ignore corrupt favorites */
+    }
   }, []);
 
   const toggleFavorite = (quote: string) => {
@@ -308,7 +315,7 @@ export default function QuotesPage() {
                     />
                   </div>
 
-                  <p className="text-2xl md:text-4xl lg:text-5xl font-display font-bold text-center leading-relaxed">
+                  <p className="text-2xl md:text-4xl lg:text-5xl font-display font-bold tracking-wide text-center leading-relaxed">
                     &quot;{currentQuotes[currentQuoteIndex]}&quot;
                   </p>
 
