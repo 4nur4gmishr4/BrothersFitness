@@ -1,9 +1,8 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://auoljtzkmfnmwzfbwdwq.supabase.co';
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF1b2xqdHprbWZubXd6ZmJ3ZHdxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc2ODc2MTUsImV4cCI6MjA4MzI2MzYxNX0.riibLa8mhOm2-R-Clqoksegn95wEGWNs4TE2UL-4tnc';
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
 
-// Safe client instance for production resilience
 let supabaseClient: SupabaseClient | null = null;
 
 export const getSupabase = (): SupabaseClient => {
@@ -14,7 +13,7 @@ export const getSupabase = (): SupabaseClient => {
 };
 
 /**
- * Safe proxy for Supabase client
+ * Supabase client proxy reading directly from process.env
  */
 export const supabase: SupabaseClient = new Proxy({} as SupabaseClient, {
     get(_, prop) {
@@ -22,7 +21,7 @@ export const supabase: SupabaseClient = new Proxy({} as SupabaseClient, {
     },
 });
 
-// Types for our database tables
+// Types for database tables
 export type GymMember = {
     id: string;
     full_name: string;
