@@ -18,14 +18,14 @@ import { getSupabase } from '@/lib/supabase';
 
 export type UserProfile = {
     id: string;
-    firebase_uid: string;
+    firebase_uid?: string;
     email: string | null;
     full_name: string | null;
-    photo_url: string | null;
-    date_of_birth: string | null;
-    height_cm: number | null;
-    weight_kg: number | null;
-    gender: string | null;
+    photo_url?: string | null;
+    date_of_birth?: string | null;
+    height_cm?: number | null;
+    weight_kg?: number | null;
+    gender?: string | null;
     daily_credits: number;
     last_credit_reset: string | null;
 };
@@ -91,66 +91,50 @@ export function UserAuthProvider({ children }: { children: ReactNode }) {
     const [showWelcome, setShowWelcome] = useState(false);
     const [showLoginModal, setShowLoginModal] = useState(false);
 
-    // Listen to Firebase auth state
+    // Listen to Supabase auth state
     useEffect(() => {
-        const auth = getFirebaseAuth();
-        const isAuthPending = sessionStorage.getItem('brofit_auth_in_progress') === 'true';
+        let isMounted = true;
 
-        // Check specifically for redirect result
-        getRedirectResult(auth)
-            .then(async (result) => {
-                sessionStorage.removeItem('brofit_auth_in_progress'); // Clear flag directly
-
-                if (result?.user) {
-                    console.log('Auth: Redirect successful', result.user.uid);
-                    setShowWelcome(true);
-                    toast.success('Successfully signed in!');
-                } else if (isAuthPending) {
-                    // Double check if auth.currentUser is actually set (Race condition safety)
-                    if (auth.currentUser) {
-                        console.log('Auth: Recovered via persistence despite null redirect.');
-                        return;
-                    }
-
-                    // Check for Local IP usage which is the #1 cause of this on mobile dev
-                    const hostname = window.location.hostname;
-                    const isLocalIP = /^(\d{1,3}\.){3}\d{1,3}$/.test(hostname);
-
-                    console.warn('Auth: Redirect incomplete. Flag exists but no result.');
-
-                    if (isLocalIP) {
-                        toast.error(`Login Failed: Local IP (${hostname}) not authorized in Firebase? Add to console.`, { duration: 8000 });
-                    } else {
-                        toast.error("Login incomplete. Try disabling Pop-up Blockers or using a standard tab.", { duration: 6000 });
-                    }
+        const initAuth = async () => {
+            try {
+                const { data: { session } } = await supabase.auth.getSession();
+                if (session?.user && isMounted) {
+                    setUser({
+                        id: session.user.id,
+                        full_name: session.user.user_metadata?.full_name || session.user.email?.split('@')[0] || 'Member',
+                        email: session.user.email || null,
+                        daily_credits: MAX_DAILY_CREDITS,
+                        last_credit_reset: new Date().toISOString().split('T')[0]
+                    });
                 }
-            })
-            .catch((error) => {
-                sessionStorage.removeItem('brofit_auth_in_progress');
-                console.error('Auth: Redirect error', error);
-                const code = error?.code;
-                if (code === 'auth/unauthorized-domain') {
-                    const domain = window.location.hostname;
-                    toast.error(`Login Failed: Domain '${domain}' not authorized in Firebase.`);
-                } else {
-                    toast.error(`Login Failed: ${error.message}`);
-                }
-            });
-
-        const unsubscribe = onAuthStateChanged(auth, async (fbUser) => {
-            setFirebaseUser(fbUser);
-
-            if (fbUser) {
-                localStorage.setItem('brofit_user_id', fbUser.uid);
-                await loadUserProfile(fbUser);
-            } else {
-                localStorage.removeItem('brofit_user_id');
-                setUser(null);
-                setIsLoading(false);
+            } catch (err) {
+                console.error("Auth init error:", err);
+            } finally {
+                if (isMounted) setIsLoading(false);
             }
+        };
+
+        initAuth();
+
+        const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
+            if (session?.user && isMounted) {
+                setUser({
+                    id: session.user.id,
+                    full_name: session.user.user_metadata?.full_name || session.user.email?.split('@')[0] || 'Member',
+                    email: session.user.email || null,
+                    daily_credits: MAX_DAILY_CREDITS,
+                    last_credit_reset: new Date().toISOString().split('T')[0]
+                });
+            } else if (isMounted) {
+                setUser(null);
+            }
+            if (isMounted) setIsLoading(false);
         });
 
-        return () => unsubscribe();
+        return () => {
+            isMounted = false;
+            subscription.unsubscribe();
+        };
     }, []);
 
     const loadUserProfile = async (fbUser: FirebaseUser) => {
@@ -468,7 +452,7 @@ export function UserAuthProvider({ children }: { children: ReactNode }) {
 
             // Update Firestore
             try {
-                await updateDoc(doc(db, 'users', user.firebase_uid), {
+                await updateDoc(doc(db, 'users', user.firebase_uid || user.id), {
                     daily_credits: newCredits,
                     last_credit_reset: today,
                     updated_at: serverTimestamp()
@@ -524,7 +508,7 @@ export function UserAuthProvider({ children }: { children: ReactNode }) {
 
                     // Update Firestore
                     try {
-                        await updateDoc(doc(db, 'users', user.firebase_uid), {
+                        await updateDoc(doc(db, 'users', user.firebase_uid || user.id), {
                             daily_credits: credits,
                             last_credit_reset: today,
                             updated_at: serverTimestamp()
