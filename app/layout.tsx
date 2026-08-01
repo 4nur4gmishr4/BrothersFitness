@@ -88,6 +88,7 @@ export default function RootLayout({
     <html lang="en" className="dark">
       <body className={`${inter.variable} ${dotGothic.variable} ${anton.variable} ${jetBrainsMono.variable} font-sans bg-black text-white antialiased`}>
         <ReadingProgressBar />
+        <PwaUpdateToast />
         <Toaster
           theme="dark"
           position="top-center"
