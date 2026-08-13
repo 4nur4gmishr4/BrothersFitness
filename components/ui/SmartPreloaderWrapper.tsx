@@ -171,7 +171,7 @@ export default function SmartPreloaderWrapper() {
   // ── Scroll-lock (Attached scoped to hostRef div per Framer spec) ──
   useEffect(() => {
     if (typeof window === "undefined") return;
-    const shouldLock = overlayVisible && phase !== "done";
+    const shouldLock = overlayVisible;
     const el = hostRef.current;
     if (shouldLock && el) {
       const preventDefault = (e: Event) => e.preventDefault();
@@ -315,7 +315,7 @@ export default function SmartPreloaderWrapper() {
 
     const clamp = (v: number) => Math.max(0, Math.min(100, v));
     const unsub = revealPercentMV.on("change", (pct) => {
-      const doneNow = phase === "exiting" || phase === "done";
+      const doneNow = phase === "exiting";
       const rawPct = doneNow ? 100 : clamp(pct);
       const t = rawPct / 100;
 
