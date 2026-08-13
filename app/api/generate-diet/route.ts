@@ -3,8 +3,11 @@ import { GenerateDietSchema, DietResponseSchema } from "@/lib/validation";
 import { logger } from "@/lib/logger";
 import { generateTextWithFallback, type AIRequestConfig } from "@/lib/ai-provider";
 import { verifyUserToken, getUserCreditState, spendUserCredit } from "@/lib/credit-service";
-import { checkRateLimit, RATE_LIMITS } from "@/lib/rate-limit";
 import { getRequestId, withRequestId } from "@/lib/request-id";
+
+// L38: allow up to 60s for AI generation — the default Vercel budget (10s)
+// is easily exceeded by multi-provider fallback + JSON parsing.
+export const maxDuration = 60;
 
 /** Strip ```json / ``` code fences the model sometimes wraps JSON in. */
 function stripJsonFences(text: string): string {
@@ -38,18 +41,6 @@ export async function POST(req: Request) {
         const identity = await verifyUserToken(req);
         if (identity instanceof NextResponse) return withRequestId(identity, requestId);
         const { supabase, userId } = identity;
-
-        // 0b. Enforce the combined AI quota for this user.
-        const rateCheck = await checkRateLimit(`user:${userId}`, RATE_LIMITS.AI_COMBINED);
-        if (!rateCheck.allowed) {
-            return withRequestId(
-                NextResponse.json(
-                    { error: `Daily AI credits used up (0/${rateCheck.remaining}). They reset at 5:30 AM IST.` },
-                    { status: 429 }
-                ),
-                requestId
-            );
-        }
 
         // 1. Check credits (informational; the RPC below is the atomic spend).
         const creditState = await getUserCreditState(supabase, userId);
@@ -138,12 +129,12 @@ export async function POST(req: Request) {
       6.  **CATEGORIZATION**: Split shopping list into 'Home_Essentials' (Spices, Oil, common staples likely at home) and 'Market_Purchase' (Fresh produce, specific proteins, perishables).
       7.  **RECIPES**: For each meal, include full recipe instructions, complete ingredient list with quantities, and detailed macros.
       8.  **TIMELINE**: Calculate realistic "estimated_duration" based on ${rateNum} kg/week rate. Provide total_days and total_weeks.
-      10. **Summary**: Write a detailed explanation of the plan.
+      9.  **Summary**: Write a detailed explanation of the plan.
 
       **STRICT OUTPUT FORMAT**:
       Return ONLY valid JSON. No Markdown. No pre-text. Matches this schema EXACTLY:
       {
-        "tactical_brief": {
+        "summary": {
           "en": "Detailed strategic summary including: User's current stats (${currentWeight}kg, ${height}cm, ${age}yo, ${gender}), goal (${targetWeight}kg), activity level (${activityLevel}), diet type (${dietType}), budget (${budget}), weight change rate (${rateNum}kg/week), calculated calories, and full explanation of the approach...",
           "hi": "Same detailed summary in Hindi..."
         },
@@ -242,25 +233,22 @@ export async function POST(req: Request) {
         log.error("Fatal API Error in Generate Diet", { error: errorMessage, stack: errorStack });
 
         // Provide more helpful error message to the user
-        let userMessage = "Detailed Synthesis Failure: ";
+        let userMessage = "Generation failed: ";
         if (errorMessage.includes('API key') || errorMessage.includes('authentication') || errorMessage.includes('401')) {
-            userMessage = "Access Denied: API Key or Authentication validity expired.";
+            userMessage = "Access denied: API key or authentication expired.";
         } else if (errorMessage.includes('quota') || errorMessage.includes('rate') || errorMessage.includes('429')) {
-            userMessage = "Resource Exhausted: AI Daily Quota reached.";
+            userMessage = "Daily AI quota reached. Try again tomorrow.";
         } else if (errorMessage.includes('timeout') || errorMessage.includes('aborted') || errorMessage.includes('ECONNREFUSED')) {
-            userMessage = "Network Interruption: Uplink timed out.";
+            userMessage = "Network timeout — please try again.";
         } else if (errorMessage.includes('JSON')) {
-            userMessage = "Data Corruption: AI Returned Invalid Protocol Structure.";
+            userMessage = "The AI returned an invalid response. Please try again.";
         } else {
             userMessage += errorMessage;
         }
 
         return withRequestId(
             NextResponse.json(
-                {
-                    error: userMessage,
-                    details: errorMessage
-                },
+                { error: userMessage },
                 { status: 500 }
             ),
             requestId

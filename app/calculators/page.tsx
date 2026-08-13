@@ -4,7 +4,7 @@ import Footer from "@/components/Footer";
 
 export default function CalculatorsPage() {
     return (
-        <div className="min-h-screen bg-black text-white">
+        <div className="min-h-screen surface-canvas text-hi">
             <Navbar />
             <Diagnostics />
             <Footer />

@@ -14,7 +14,6 @@
 
 CREATE TABLE IF NOT EXISTS public.users (
     id UUID PRIMARY KEY,                     -- == auth.uid(), set by the client
-    firebase_uid VARCHAR(128) UNIQUE,
     email VARCHAR(255),
     mobile VARCHAR(15),
     otp VARCHAR(6),
@@ -32,7 +31,6 @@ CREATE TABLE IF NOT EXISTS public.users (
 );
 
 CREATE INDEX IF NOT EXISTS idx_users_mobile ON public.users(mobile);
-CREATE INDEX IF NOT EXISTS idx_users_firebase_uid ON public.users(firebase_uid);
 
 ALTER TABLE public.users ENABLE ROW LEVEL SECURITY;
 

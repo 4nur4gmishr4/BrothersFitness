@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import type { SupabaseClient } from '@supabase/supabase-js';
-import { MAX_DAILY_CREDITS } from '@/lib/config';
+import { MAX_DAILY_CREDITS, istToday } from '@/lib/config';
 import { getServiceSupabase } from '@/lib/server-supabase';
 import { retryableQuery, isTransientError } from '@/lib/retry';
 
@@ -8,15 +8,9 @@ import { retryableQuery, isTransientError } from '@/lib/retry';
 // Replaces the old trust-a-client-header model: identity now comes from a
 // verified Supabase session token, and credit deduction is atomic server-side.
 
-/** "Today" as YYYY-MM-DD in India Standard Time, so credits reset at 5:30 AM IST. */
-export function istToday(): string {
-    return new Intl.DateTimeFormat('en-CA', {
-        timeZone: 'Asia/Kolkata',
-        year: 'numeric',
-        month: '2-digit',
-        day: '2-digit',
-    }).format(new Date());
-}
+// Re-export so existing imports (incl. tests) keep working — single source
+// of truth lives in lib/config.ts.
+export { istToday };
 
 function bearerToken(authHeader: string | null): string | null {
     if (!authHeader?.startsWith('Bearer ')) return null;

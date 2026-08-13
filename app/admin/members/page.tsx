@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { motion } from 'framer-motion';
 import {
     Plus, Search, X, Shield, Users, LogOut, AlertTriangle, AlertCircle, CheckCircle,
     Download, IndianRupee, Send, BarChart3, Clock, Mail
@@ -13,25 +12,25 @@ import type { GymMember } from '@/lib/supabase';
 import Navbar from '@/components/Navbar';
 import Image from 'next/image';
 import dynamic from 'next/dynamic';
-import { PLAN_PRICES } from '@/lib/config';
+import { PLAN_PRICES, WHATSAPP_COUNTRY_CODE } from '@/lib/config';
 import { todayIST, getMemberStatus, getDaysUntil } from '@/lib/member-utils';
 import MemberCard from '@/components/admin/MemberCard';
 import MemberFormModal from '@/components/admin/MemberFormModal';
 import MemberReceiptModal from '@/components/admin/MemberReceiptModal';
 
 const BulkMessageModal = dynamic(() => import('@/components/admin/BulkMessageModal'), {
-    loading: () => <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[60]" />
+    loading: () => <div className="fixed inset-0 bg-black/50 z-[60]" />
 });
 
 const AnalyticsPanel = dynamic(() => import('@/components/admin/AnalyticsPanel'), {
-    loading: () => <div className="h-64 bg-white/5 animate-pulse rounded-xl mb-6" />
+    loading: () => <div className="h-64 skeleton mb-6" />
 });
 
 const ActivityLogPanel = dynamic(() => import('@/components/admin/ActivityLogPanel'));
 const LeadsInbox = dynamic(() => import('@/components/admin/LeadsInbox'));
 import DeploymentAlerts from '@/components/admin/DeploymentAlerts';
 const ExpiringMembersTable = dynamic(() => import('@/components/admin/ExpiringMembersTable'), {
-    loading: () => <div className="h-48 bg-white/5 animate-pulse rounded-xl mb-8" />
+    loading: () => <div className="h-48 skeleton mb-8" />
 });
 import IncompleteProfiles from '@/components/admin/IncompleteProfiles';
 
@@ -51,14 +50,12 @@ export default function MembersPage() {
     const [error, setError] = useState('');
     const [selectedImageUrl, setSelectedImageUrl] = useState<string | null>(null);
     const [showBulkMessage, setShowBulkMessage] = useState(false);
-    // const [bulkMessageText, setBulkMessageText] = useState(''); // Removed unused state
     const [showAnalytics, setShowAnalytics] = useState(false);
     const [receiptMember, setReceiptMember] = useState<GymMember | null>(null);
-    // const [searchTerm, setSearchTerm] = useState(''); // Removed unused state
     const [showActivityLog, setShowActivityLog] = useState(false);
     const [showLeadsInbox, setShowLeadsInbox] = useState(false);
     const [unreadLeadsCount, setUnreadLeadsCount] = useState(0);
-    const [showExpiringSoon, setShowExpiringSoon] = useState(false); // NEW: Toggle state
+    const [showExpiringSoon, setShowExpiringSoon] = useState(false);
 
     // Fetch unread leads count
     const fetchUnreadCount = useCallback(async () => {
@@ -73,7 +70,14 @@ export default function MembersPage() {
             const data = await res.json();
 
             if (res.ok && data.leads) {
-                const readLeads = JSON.parse(localStorage.getItem('brofit_admin_read_leads') || '[]');
+                // L43: corrupt localStorage value would throw and abort the
+                // whole fetch, leaving the unread count stale forever.
+                let readLeads: string[] = [];
+                try {
+                    readLeads = JSON.parse(localStorage.getItem('brofit_admin_read_leads') || '[]');
+                } catch {
+                    // Corrupt value — treat as no read leads (all unread).
+                }
                 const unread = data.leads.filter((l: { id: string }) => !readLeads.includes(l.id)).length;
                 setUnreadLeadsCount(unread);
             }
@@ -104,19 +108,20 @@ export default function MembersPage() {
         }
     }, [isAdmin, isLoading, router]);
 
-    // Fetch members
-    useEffect(() => {
-        if (isAdmin) {
-            fetchMembers();
-        }
-    }, [isAdmin]);
-
-    const fetchMembers = async () => {
+    const fetchMembers = useCallback(async () => {
         try {
             const token = sessionStorage.getItem('admin_token');
             const res = await fetch('/api/admin/members', {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
+            // M14: expired token silently showed an empty grid — redirect to
+            // login instead.
+            if (res.status === 401 || res.status === 403) {
+                sessionStorage.removeItem('admin_token');
+                router.push('/admin/login');
+                return;
+            }
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
             const data = await res.json();
             if (data.members) {
                 setMembers(data.members);
@@ -127,14 +132,21 @@ export default function MembersPage() {
         } finally {
             setLoading(false);
         }
-    };
+    }, [router]);
+
+    // Fetch members
+    useEffect(() => {
+        if (isAdmin) {
+            fetchMembers();
+        }
+    }, [isAdmin, fetchMembers]);
 
     // Calculate Stats with Birthday, Expiry Alerts, and Analytics
     const stats = useMemo(() => {
         const total = members.length;
         const expired = members.filter(m => getMemberStatus(m.membership_end) === 'expired').length;
         const expiring = members.filter(m => getMemberStatus(m.membership_end) === 'expiring').length;
-        const active = total - expired;
+        const active = total - expired - expiring;
 
         // Revenue & Plan Calculation
         let monthlyCount = 0, quarterlyCount = 0, halfYearlyCount = 0, fifteenDaysCount = 0;
@@ -192,7 +204,10 @@ export default function MembersPage() {
         const expiringToday = members.filter(m => {
             if (!m.membership_end) return false;
             const end = new Date(m.membership_end);
-            return end.getMonth() === todayMonth && end.getDate() === todayDate;
+            // L46: match the full date, not just month+day — otherwise a
+            // membership that expired a year ago on this date still flags.
+            return end.getFullYear() === today.getFullYear() &&
+                end.getMonth() === todayMonth && end.getDate() === todayDate;
         });
 
         return {
@@ -240,6 +255,14 @@ export default function MembersPage() {
     // Export members to CSV
     const exportToCSV = useCallback(() => {
         const headers = ['Name', 'Mobile', 'Plan', 'Start Date', 'End Date', 'Status'];
+
+        // Neutralize CSV injection: Excel treats leading = + - @ as formulas.
+        // A tab prefix neutralises the formula without affecting display.
+        const safeCell = (val: string) => {
+            const escaped = val.replace(/"/g, '""');
+            return /^[=+\-@\t\r\n]/.test(escaped) ? `\t${escaped}` : `"${escaped}"`;
+        };
+
         const rows = members.map(m => [
             m.full_name || '',
             m.mobile || '',
@@ -248,7 +271,7 @@ export default function MembersPage() {
             m.membership_end || '',
             getMemberStatus(m.membership_end).toUpperCase()
         ]);
-        const csvContent = [headers.join(','), ...rows.map(r => r.map(c => `"${c}"`).join(','))].join('\n');
+        const csvContent = [headers.join(','), ...rows.map(r => r.map(safeCell).join(','))].join('\n');
         const blob = new Blob([csvContent], { type: 'text/csv' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
@@ -262,7 +285,11 @@ export default function MembersPage() {
     // WhatsApp helper
     const openWhatsApp = (mobile: string, name: string) => {
         const message = encodeURIComponent(`Hi ${name}, this is a reminder from Brother's Fitness! 💪`);
-        window.open(`https://wa.me/91${mobile.replace(/\D/g, '')}?text=${message}`, '_blank');
+        // L44: use the config country code AND dedup it so a stored "91xxx"
+        // number doesn't become "9191xxx".
+        const digits = mobile.replace(/\D/g, '');
+        const number = digits.startsWith(WHATSAPP_COUNTRY_CODE) ? digits : WHATSAPP_COUNTRY_CODE + digits;
+        window.open(`https://wa.me/${number}?text=${message}`, '_blank');
     };
 
     const handleDelete = async (id: string) => {
@@ -342,8 +369,8 @@ export default function MembersPage() {
 
     if (isLoading) {
         return (
-            <div className="min-h-screen bg-black flex items-center justify-center">
-                <div className="text-white">Loading...</div>
+            <div className="min-h-[100svh] surface-canvas flex items-center justify-center">
+                <div className="text-hi">Loading...</div>
             </div>
         );
     }
@@ -353,37 +380,40 @@ export default function MembersPage() {
     return (
         <>
             <Navbar />
-            <div className="min-h-screen bg-black text-white p-4 md:p-8 pb-20 overflow-x-hidden">
+            <div className="min-h-[100svh] surface-canvas text-hi p-4 md:p-8 pb-20 overflow-x-hidden">
                 {/* Header */}
                 <div className="max-w-6xl mx-auto overflow-x-hidden">
-                    <div className="flex justify-between items-center mb-8 border-b border-white/10 pb-4 flex-wrap gap-4">
+                    <div className="flex justify-between items-center mb-8 hairline-b pb-4 flex-wrap gap-4">
                         <div className="flex items-center gap-4">
                             <div>
-                                <h1 className="text-2xl font-black uppercase flex items-center gap-2">
-                                    <Users className="w-6 h-6 text-gym-red" />
+                                <h1 className="heading-display text-2xl uppercase flex items-center gap-2">
+                                    <Users className="w-6 h-6 text-accent" />
                                     Manage Dashboard
                                 </h1>
-                                <p className="text-gray-400 text-sm">Welcome back, Aman</p>
+                                {/* L45: no admin identity exists in the password-only
+                                    auth system, so avoid a hardcoded name that would
+                                    mislabel any other admin who logs in. */}
+                                <p className="text-low text-sm">Welcome back</p>
                             </div>
                         </div>
                         <div className="flex items-center gap-2 ml-auto flex-wrap">
                             {/* Expiring Soon Toggle */}
                             <button
                                 onClick={() => setShowExpiringSoon(!showExpiringSoon)}
-                                className={`px-4 py-2 rounded-lg font-bold transition-all flex items-center gap-2 shadow-lg border ${showExpiringSoon
-                                    ? 'bg-yellow-500 text-black border-yellow-400 hover:bg-yellow-400'
-                                    : 'bg-white/5 text-white border-white/10 hover:bg-white/10'
+                                className={`px-4 py-2 font-bold transition-colors duration-fast flex items-center gap-2 border ${showExpiringSoon
+                                    ? 'bg-status-warning text-status-on border-status-warning'
+                                    : 'surface-card hairline text-hi hover:border-accent'
                                     }`}
                             >
-                                <AlertTriangle className={`w-4 h-4 ${showExpiringSoon ? 'fill-black stroke-black' : 'text-yellow-500'}`} />
+                                <AlertTriangle className={`w-4 h-4 ${showExpiringSoon ? 'fill-black stroke-black' : 'text-status-warning'}`} />
                                 Expiring Soon
                             </button>
 
-                            <div className="w-px h-8 bg-white/10 mx-2" />
+                            <div className="w-px h-8 surface-border mx-2" />
 
                             <button
                                 onClick={() => setShowBulkMessage(true)}
-                                className="bg-green-600/20 text-green-400 px-3 py-2 rounded hover:bg-green-600/30 transition-colors flex items-center gap-2"
+                                className="surface-card hairline text-status-success px-3 py-2 hover:border-accent transition-colors duration-fast flex items-center gap-2"
                                 title="Bulk WhatsApp"
                             >
                                 <Send className="w-4 h-4" />
@@ -391,7 +421,7 @@ export default function MembersPage() {
                             </button>
                             <button
                                 onClick={() => setShowAnalytics(!showAnalytics)}
-                                className="bg-purple-600/20 text-purple-400 px-3 py-2 rounded hover:bg-purple-600/30 transition-colors flex items-center gap-2"
+                                className="surface-card hairline text-status-info px-3 py-2 hover:border-accent transition-colors duration-fast flex items-center gap-2"
                                 title="Analytics"
                             >
                                 <BarChart3 className="w-4 h-4" />
@@ -399,7 +429,7 @@ export default function MembersPage() {
                             </button>
                             <button
                                 onClick={() => setShowActivityLog(true)}
-                                className="bg-orange-600/20 text-orange-400 px-3 py-2 rounded hover:bg-orange-600/30 transition-colors flex items-center gap-2"
+                                className="surface-card hairline text-status-warning px-3 py-2 hover:border-accent transition-colors duration-fast flex items-center gap-2"
                                 title="Activity Log"
                             >
                                 <Clock className="w-4 h-4" />
@@ -407,20 +437,20 @@ export default function MembersPage() {
                             </button>
                             <button
                                 onClick={() => setShowLeadsInbox(true)}
-                                className="bg-pink-600/20 text-pink-400 px-3 py-2 rounded hover:bg-pink-600/30 transition-colors flex items-center gap-2 relative"
+                                className="surface-card hairline text-accent px-3 py-2 hover:border-accent transition-colors duration-fast flex items-center gap-2 relative"
                                 title="Leads Inbox"
                             >
                                 <Mail className="w-4 h-4" />
                                 <span className="inline">Inbox</span>
                                 {unreadLeadsCount > 0 && (
-                                    <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center animate-pulse">
+                                    <span className="absolute -top-1 -right-1 w-4 h-4 bg-accent text-white text-[10px] font-bold rounded-full flex items-center justify-center">
                                         {unreadLeadsCount}
                                     </span>
                                 )}
                             </button>
                             <button
                                 onClick={exportToCSV}
-                                className="bg-white/10 text-white px-3 py-2 rounded hover:bg-white/20 transition-colors flex items-center gap-2"
+                                className="surface-card hairline text-hi px-3 py-2 hover:border-accent transition-colors duration-fast flex items-center gap-2"
                                 title="Export Members"
                             >
                                 <Download className="w-4 h-4" />
@@ -465,7 +495,7 @@ export default function MembersPage() {
                                         toast.error(`Backup failed: ${(err as Error).message}`, { id: 'backup' });
                                     }
                                 }}
-                                className="bg-blue-600/20 text-blue-400 px-3 py-2 rounded hover:bg-blue-600/30 transition-colors flex items-center gap-2"
+                                className="surface-card hairline text-status-info px-3 py-2 hover:border-accent transition-colors duration-fast flex items-center gap-2"
                                 title="Backup Database"
                             >
                                 <Shield className="w-4 h-4" />
@@ -473,7 +503,7 @@ export default function MembersPage() {
                             </button>
                             <button
                                 onClick={() => { logout(); router.push('/'); }}
-                                className="bg-white/10 text-white px-3 py-2 rounded hover:bg-white/20 transition-colors flex items-center gap-2"
+                                className="surface-card hairline text-hi px-3 py-2 hover:border-accent transition-colors duration-fast flex items-center gap-2"
                             >
                                 <LogOut className="w-4 h-4" />
                                 <span className="inline">Logout</span>
@@ -484,13 +514,9 @@ export default function MembersPage() {
 
                 {/* Expiring Members Table - Controlled by Toggle */}
                 {showExpiringSoon && (
-                    <motion.div
-                        initial={{ opacity: 0, height: 0 }}
-                        animate={{ opacity: 1, height: 'auto' }}
-                        className="overflow-hidden mb-8"
-                    >
+                    <div className="mb-8">
                         <ExpiringMembersTable members={members} />
-                    </motion.div>
+                    </div>
                 )}
 
                 {/* Deployment Alerts (Birthdays Only) */}
@@ -506,86 +532,84 @@ export default function MembersPage() {
 
                 {/* Dashboard Stats */}
                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8 max-w-full">
-                    <div className="glass-panel p-4 rounded-xl transition-all hover:bg-white/5">
+                    <div className="surface-card hairline p-4 hover:border-accent transition-colors duration-fast">
                         <div className="flex justify-between items-start mb-2">
-                            <span className="text-gray-400 text-xs uppercase font-bold tracking-wider">Total Members</span>
-                            <Users className="w-4 h-4 text-blue-400" />
+                            <span className="label-text text-faint uppercase tracking-widest">Total Members</span>
+                            <Users className="w-4 h-4 text-status-info" />
                         </div>
-                        <div className="text-2xl font-black">{stats.total}</div>
+                        <div className="heading-section text-2xl text-hi">{stats.total}</div>
                     </div>
-                    <div className="glass-panel p-4 rounded-xl transition-all hover:bg-white/5">
+                    <div className="surface-card hairline p-4 hover:border-accent transition-colors duration-fast">
                         <div className="flex justify-between items-start mb-2">
-                            <span className="text-gray-400 text-xs uppercase font-bold tracking-wider">Active</span>
-                            <CheckCircle className="w-4 h-4 text-green-400" />
+                            <span className="label-text text-faint uppercase tracking-widest">Active</span>
+                            <CheckCircle className="w-4 h-4 text-status-success" />
                         </div>
-                        <div className="text-2xl font-black text-green-400">{stats.active}</div>
+                        <div className="heading-section text-2xl text-status-success">{stats.active}</div>
                     </div>
-                    <div className="glass-panel p-4 rounded-xl transition-all hover:bg-white/5">
+                    <div className="surface-card hairline p-4 hover:border-accent transition-colors duration-fast">
                         <div className="flex justify-between items-start mb-2">
-                            <span className="text-gray-400 text-xs uppercase font-bold tracking-wider">Expiring Soon</span>
-                            <AlertTriangle className="w-4 h-4 text-yellow-400" />
+                            <span className="label-text text-faint uppercase tracking-widest">Expiring Soon</span>
+                            <AlertTriangle className="w-4 h-4 text-status-warning" />
                         </div>
-                        <div className="text-2xl font-black text-yellow-400">{stats.expiring}</div>
-                        <div className="text-[10px] text-gray-500 mt-1">Expire in &lt; 7 days</div>
+                        <div className="heading-section text-2xl text-status-warning">{stats.expiring}</div>
+                        <div className="label-text text-faint text-[10px] mt-1">Expire in &lt; 7 days</div>
                     </div>
-                    <div className="glass-panel p-4 rounded-xl transition-all hover:bg-white/5">
+                    <div className="surface-card hairline p-4 hover:border-accent transition-colors duration-fast">
                         <div className="flex justify-between items-start mb-2">
-                            <span className="text-gray-400 text-xs uppercase font-bold tracking-wider">Expired</span>
-                            <AlertCircle className="w-4 h-4 text-red-500" />
+                            <span className="label-text text-faint uppercase tracking-widest">Expired</span>
+                            <AlertCircle className="w-4 h-4 text-status-danger" />
                         </div>
-                        <div className="text-2xl font-black text-red-500">{stats.expired}</div>
+                        <div className="heading-section text-2xl text-status-danger">{stats.expired}</div>
                     </div>
                     {/* Revenue Card */}
-                    <div className="glass-panel-strong p-4 rounded-xl col-span-2 lg:col-span-4 relative overflow-hidden group transition-all hover:bg-white/5">
+                    <div className="surface-elevated hairline p-4 col-span-2 lg:col-span-4 relative overflow-hidden group hover:border-accent transition-colors duration-fast">
                         <div className="flex justify-between items-start mb-2 relative z-10">
-                            <span className="text-gray-400 text-xs uppercase font-bold tracking-wider">Estimated Revenue</span>
-                            <IndianRupee className="w-4 h-4 text-emerald-400" />
+                            <span className="label-text text-faint uppercase tracking-widest">Estimated Revenue</span>
+                            <IndianRupee className="w-4 h-4 text-status-success" />
                         </div>
-                        <div className="text-2xl font-black text-emerald-400 flex items-baseline gap-1 relative z-10">
-                            <span className="text-base text-gray-500">₹</span>
+                        <div className="heading-section text-2xl text-status-success flex items-baseline gap-1 relative z-10">
+                            <span className="text-base text-faint">₹</span>
                             {stats.revenue.total.toLocaleString('en-IN')}
                         </div>
-                        <div className="grid grid-cols-4 gap-2 mt-3 text-[10px] text-gray-500 border-t border-white/10 pt-2 relative z-10">
+                        <div className="grid grid-cols-4 gap-2 mt-3 text-[10px] text-faint hairline-t pt-2 relative z-10">
                             <div>
-                                <span className="block text-gray-400 font-bold mb-0.5">15d</span>
+                                <span className="block label-text text-low mb-0.5">15d</span>
                                 ₹{stats.revenue.fifteenDays.toLocaleString('en-IN')}
                             </div>
                             <div>
-                                <span className="block text-gray-400 font-bold mb-0.5">Mo</span>
+                                <span className="block label-text text-low mb-0.5">Mo</span>
                                 ₹{stats.revenue.monthly.toLocaleString('en-IN')}
                             </div>
                             <div>
-                                <span className="block text-gray-400 font-bold mb-0.5">Qr</span>
+                                <span className="block label-text text-low mb-0.5">Qr</span>
                                 ₹{stats.revenue.quarterly.toLocaleString('en-IN')}
                             </div>
                             <div>
-                                <span className="block text-gray-400 font-bold mb-0.5">Hy</span>
+                                <span className="block label-text text-low mb-0.5">Hy</span>
                                 ₹{stats.revenue.halfYearly.toLocaleString('en-IN')}
                             </div>
                         </div>
                     </div>
                 </div>
 
-
-
                 {/* Controls Area: Search + Add + Filter */}
                 <div className="flex flex-col gap-4 mb-6">
                     {/* Row 1: Search */}
                     <div className="relative w-full">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-faint" />
                         <input
                             type="text"
                             placeholder="Find member by name, mobile..."
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
-                            className="w-full bg-white/5 border border-white/10 rounded-lg py-2.5 pl-9 pr-4 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-gym-red focus:bg-white/10 transition-colors"
+                            className="input-field pl-9 pr-4"
                         />
                     </div>
 
                     {/* Row 2: Filter Tabs + Sort + New Member Button */}
                     <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center">
                         {/* Filter Tabs */}
-                        <div className="bg-white/5 p-1 rounded-lg flex border border-white/10 flex-shrink-0">
+                        <div className="surface-card hairline p-1 flex flex-shrink-0">
                             {[
                                 { id: 'all', label: 'All' },
                                 { id: 'active', label: 'Active' },
@@ -596,9 +620,9 @@ export default function MembersPage() {
                                 <button
                                     key={tab.id}
                                     onClick={() => setFilterStatus(tab.id as FilterStatus)}
-                                    className={`px-3 py-1.5 rounded text-xs font-bold transition-all ${filterStatus === tab.id
-                                        ? 'bg-gym-red text-white shadow-lg'
-                                        : 'text-gray-400 hover:text-white hover:bg-white/5'
+                                    className={`px-3 py-1.5 text-xs font-bold transition-colors duration-fast ${filterStatus === tab.id
+                                        ? 'bg-accent text-white'
+                                        : 'text-faint hover:text-hi hover:bg-surface-elevated'
                                         }`}
                                 >
                                     {tab.label}
@@ -606,28 +630,28 @@ export default function MembersPage() {
                             ))}
                         </div>
 
-                        {/* Sort Dropdown - White Arrow */}
+                        {/* Sort Dropdown */}
                         <select
                             value={sortBy}
                             onChange={(e) => setSortBy(e.target.value as 'newest' | 'oldest' | 'a-z' | 'z-a')}
-                            className="bg-black border border-white/20 rounded-lg px-3 py-2 pr-8 text-xs font-bold text-white focus:outline-none focus:border-gym-red cursor-pointer flex-shrink-0 appearance-none"
+                            className="input-field px-3 py-2 pr-8 text-xs font-bold flex-shrink-0 cursor-pointer appearance-none"
                             style={{
-                                backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E")`,
+                                backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23666' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E")`,
                                 backgroundPosition: 'right 8px center',
                                 backgroundRepeat: 'no-repeat'
                             }}
                         >
-                            <option value="newest" className="bg-black text-white">Newest First</option>
-                            <option value="oldest" className="bg-black text-white">Oldest First</option>
-                            <option value="a-z" className="bg-black text-white">A → Z</option>
-                            <option value="z-a" className="bg-black text-white">Z → A</option>
+                            <option value="newest" className="surface-canvas text-hi">Newest First</option>
+                            <option value="oldest" className="surface-canvas text-hi">Oldest First</option>
+                            <option value="a-z" className="surface-canvas text-hi">A → Z</option>
+                            <option value="z-a" className="surface-canvas text-hi">Z → A</option>
                         </select>
 
 
                         {/* New Member Button */}
                         <button
                             onClick={openNewMember}
-                            className="bg-gym-red text-white py-2.5 px-4 rounded-lg flex items-center justify-center gap-2 hover:bg-red-700 transition-colors shadow-lg shadow-red-900/20 flex-shrink-0 sm:ml-auto"
+                            className="btn-primary flex-shrink-0 sm:ml-auto"
                         >
                             <Plus className="w-4 h-4" />
                             <span className="text-sm font-bold">New Member</span>
@@ -636,7 +660,7 @@ export default function MembersPage() {
                 </div>
 
                 {error && (
-                    <div className="bg-red-500/20 border border-red-500/50 text-red-400 p-3 rounded mb-4 text-sm flex items-center gap-2">
+                    <div className="surface-card hairline border-status-danger text-status-danger label-text p-3 mb-4 flex items-center gap-2">
                         <AlertCircle className="w-4 h-4" />
                         {error}
                     </div>
@@ -651,30 +675,30 @@ export default function MembersPage() {
                 ) : loading ? (
                     <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
                         {[...Array(6)].map((_, i) => (
-                            <div key={i} className="bg-zinc-900/50 border border-white/10 rounded-xl p-4">
+                            <div key={i} className="surface-card hairline p-4">
                                 <div className="flex items-start gap-4 mb-4">
-                                    <div className="w-14 h-14 rounded-full skeleton" />
+                                    <div className="w-14 h-14 skeleton shrink-0" />
                                     <div className="flex-1 space-y-2">
                                         <div className="h-4 w-3/4 skeleton" />
                                         <div className="h-3 w-1/2 skeleton" />
                                         <div className="h-3 w-1/4 skeleton" />
                                     </div>
                                 </div>
-                                <div className="skeleton h-12 mb-4 rounded" />
+                                <div className="skeleton h-12 mb-4" />
                                 <div className="flex gap-2">
-                                    <div className="flex-1 h-9 skeleton rounded" />
-                                    <div className="w-10 h-9 skeleton rounded" />
+                                    <div className="flex-1 h-9 skeleton" />
+                                    <div className="w-10 h-9 skeleton" />
                                 </div>
                             </div>
                         ))}
                     </div>
                 ) : filteredMembers.length === 0 ? (
-                    <div className="text-center py-20 text-gray-400 border border-dashed border-white/10 rounded-xl">
-                        <div className="bg-white/5 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                            <Users className="w-8 h-8 text-white/20" />
+                    <div className="text-center py-20 text-low border border-dashed border-surface-border">
+                        <div className="surface-card hairline w-16 h-16 flex items-center justify-center mx-auto mb-4">
+                            <Users className="w-8 h-8 text-faint" />
                         </div>
-                        <p className="text-lg font-bold">No members found</p>
-                        <p className="text-sm">Try adjusting your search or filters.</p>
+                        <p className="heading-section text-lg text-hi">No members found</p>
+                        <p className="text-sm text-low">Try adjusting your search or filters.</p>
                     </div>
                 ) : (
                     <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -707,14 +731,11 @@ export default function MembersPage() {
             {
                 selectedImageUrl && (
                     <div
-                        className="fixed inset-0 z-[80] bg-black/95 flex items-center justify-center p-4 backdrop-blur-xl"
+                        className="fixed inset-0 z-[80] bg-black/95 flex items-center justify-center p-4 modal-overlay-in"
                         onClick={() => setSelectedImageUrl(null)}
                     >
-                        <motion.div
-                            initial={{ opacity: 0, scale: 0.8 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-                            className="relative max-w-md max-h-[80vh] w-full"
+                        <div
+                            className="relative max-w-md max-h-[80vh] w-full modal-panel-in"
                             onClick={(e) => e.stopPropagation()}
                         >
                             <Image
@@ -722,15 +743,15 @@ export default function MembersPage() {
                                 alt="Member Photo"
                                 width={400}
                                 height={600}
-                                className="w-full h-auto object-contain rounded-xl shadow-2xl"
+                                className="w-full h-auto object-contain"
                             />
                             <button
                                 onClick={() => setSelectedImageUrl(null)}
-                                className="absolute -top-3 -right-3 bg-gym-red p-2 rounded-full shadow-lg hover:bg-red-700 transition-colors"
+                                className="absolute -top-3 -right-3 bg-accent p-2 hover:bg-accent-hover transition-colors duration-fast"
                             >
                                 <X className="w-5 h-5 text-white" />
                             </button>
-                        </motion.div>
+                        </div>
                     </div>
                 )
             }

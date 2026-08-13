@@ -1,4 +1,4 @@
-import withPWA from '@ducanh2912/next-pwa';
+﻿import withPWA from '@ducanh2912/next-pwa';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
@@ -7,14 +7,10 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
+  experimental: { urlImports: ['https://framer.com/m/', 'https://framerusercontent.com/'] },
   outputFileTracingRoot: path.resolve(__dirname),
   images: {
     remotePatterns: [
-      {
-        protocol: 'https',
-        hostname: 'wger.de',
-        pathname: '/media/**',
-      },
       {
         protocol: 'https',
         hostname: 'auoljtzkmfnmwzfbwdwq.supabase.co',
@@ -66,9 +62,22 @@ const nextConfig = {
 export default withPWA({
   dest: 'public',
   register: true,
-  skipWaiting: true,
   disable: process.env.NODE_ENV === 'development',
   cacheOnFrontEndNav: true,
-  aggressiveFrontEndNavCaching: true,
+  // Default (false): navigations are NetworkFirst, so online users always get
+  // freshly-built HTML instead of a precached shell that points at deleted
+  // chunk hashes after a deploy. Offline still serves the cached app shell.
+  aggressiveFrontEndNavCaching: false,
   reloadOnOnline: true,
+  workboxOptions: {
+    // Keep the old service worker in charge until the user opts in via the
+    // PwaUpdateToast "Reload" action (which posts SKIP_WAITING; workbox's
+    // generated SW always wires that message listener). Auto-activation
+    // mid-session can swap chunk hashes under a live page and 404 on the new
+    // build's assets. NOTE: skipWaiting/clientsClaim must live here â€” they are
+    // only read from workboxOptions (top-level flags are silently ignored).
+    skipWaiting: false,
+  },
 })(nextConfig);
+
+

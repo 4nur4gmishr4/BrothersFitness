@@ -1,7 +1,6 @@
 "use client";
 
 import { useMemo } from 'react';
-import { motion } from 'framer-motion';
 import { AlertTriangle, MessageCircle, Calendar, Clock, User } from 'lucide-react';
 import type { GymMember } from '@/lib/supabase';
 import Image from 'next/image';
@@ -47,25 +46,21 @@ export default function ExpiringMembersTable({ members }: ExpiringMembersTablePr
     if (expiringMembers.length === 0) return null;
 
     return (
-        <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="mb-8"
-        >
-            <div className="glass-panel p-4 md:p-6 rounded-2xl border border-yellow-500/20 bg-gradient-to-b from-yellow-500/5 to-transparent relative overflow-hidden">
-                <div className="absolute top-0 right-0 p-8 opacity-5">
-                    <AlertTriangle className="w-32 h-32 text-yellow-500" />
+        <div className="mb-8">
+            <div className="surface-card hairline border-status-warning/30 p-4 md:p-6 relative overflow-hidden">
+                <div className="absolute top-0 right-0 p-8 opacity-5 pointer-events-none">
+                    <AlertTriangle className="w-32 h-32 text-status-warning" />
                 </div>
 
                 <div className="flex flex-col md:flex-row md:items-center gap-4 mb-6 relative z-10">
                     <div className="flex items-center gap-3">
-                        <div className="p-2 bg-yellow-500/20 rounded-lg ring-1 ring-yellow-500/40">
-                            <AlertTriangle className="w-5 h-5 text-yellow-400" />
+                        <div className="p-2 surface-modal hairline border-status-warning/30">
+                            <AlertTriangle className="w-5 h-5 text-status-warning" />
                         </div>
                         <div>
-                            <h3 className="font-bold text-yellow-100 text-lg">Expiring Soon</h3>
-                            <p className="text-xs text-yellow-400/80 uppercase tracking-wider font-medium flex items-center gap-2">
-                                <span className="w-1.5 h-1.5 rounded-full bg-yellow-500 animate-pulse" />
+                            <h3 className="heading-section text-base text-hi">Expiring Soon</h3>
+                            <p className="label-text text-xs text-status-warning uppercase tracking-wider font-medium flex items-center gap-2">
+                                <span className="w-1.5 h-1.5 rounded-full bg-status-warning" />
                                 {expiringMembers.length} Memberships ending within 7 days
                             </p>
                         </div>
@@ -73,59 +68,61 @@ export default function ExpiringMembersTable({ members }: ExpiringMembersTablePr
                 </div>
 
                 {/* DESKTOP TABLE VIEW */}
-                <div className="hidden md:block overflow-x-auto relative z-10 rounded-xl overflow-hidden bg-white/5 border border-white/5">
+                <div className="hidden md:block overflow-x-auto relative z-10 surface-canvas border border-surface-border">
                     <table className="w-full text-left border-collapse">
                         <thead>
-                            <tr className="bg-black/20 border-b border-white/10 text-xs text-gray-400 uppercase tracking-wider">
-                                <th className="py-4 px-6 font-semibold">Member Details</th>
-                                <th className="py-4 px-4 font-semibold">Plan Info</th>
-                                <th className="py-4 px-4 font-semibold">Time Remaining</th>
-                                <th className="py-4 px-6 text-right font-semibold">Quick Action</th>
+                            <tr className="surface-elevated hairline-b text-xs text-faint uppercase tracking-wider">
+                                <th className="py-4 px-6 label-text font-semibold">Member Details</th>
+                                <th className="py-4 px-4 label-text font-semibold">Plan Info</th>
+                                <th className="py-4 px-4 label-text font-semibold">Time Remaining</th>
+                                <th className="py-4 px-6 text-right label-text font-semibold">Quick Action</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-white/5">
+                        <tbody className="divide-y divide-surface-border">
                             {/* Group: Today */}
                             {groupedMembers.today.length > 0 && (
                                 <>
-                                    <tr className="bg-red-500/10">
-                                        <td colSpan={4} className="py-2 px-6 text-xs font-bold text-red-400 uppercase tracking-widest flex items-center gap-2">
-                                            <Clock className="w-3 h-3" /> Expiring Today
+                                    <tr className="bg-status-danger/5">
+                                        <td colSpan={4} className="py-2 px-6">
+                                            <div className="flex items-center gap-2 text-xs font-bold text-status-danger uppercase tracking-widest">
+                                                <Clock className="w-3 h-3" /> Expiring Today
+                                            </div>
                                         </td>
                                     </tr>
                                     {groupedMembers.today.map(m => (
-                                        <tr key={m.id} className="group hover:bg-white/5 transition-colors">
+                                        <tr key={m.id} className="group hover:bg-surface-elevated/50 transition-colors duration-fast">
                                             <td className="py-4 px-6">
                                                 <div className="flex items-center gap-3">
-                                                    <div className="relative w-10 h-10 rounded-full overflow-hidden bg-gray-700 border border-white/10 ring-2 ring-transparent group-hover:ring-gym-red/50 transition-all">
+                                                    <div className="relative w-10 h-10 overflow-hidden surface-modal border border-surface-border shrink-0 group-hover:border-accent transition-colors duration-fast">
                                                         {m.photo_url ? (
                                                             <Image src={m.photo_url} alt={m.full_name} fill className="object-cover" />
                                                         ) : (
-                                                            <div className="w-full h-full flex items-center justify-center text-gray-400"><User className="w-5 h-5" /></div>
+                                                            <div className="w-full h-full flex items-center justify-center text-faint"><User className="w-5 h-5" /></div>
                                                         )}
                                                     </div>
                                                     <div>
-                                                        <div className="font-bold text-white group-hover:text-gym-red transition-colors">{m.full_name}</div>
-                                                        <div className="text-xs text-gray-500">{m.mobile}</div>
+                                                        <div className="font-bold text-hi group-hover:text-accent transition-colors duration-fast">{m.full_name}</div>
+                                                        <div className="text-xs text-faint">{m.mobile}</div>
                                                     </div>
                                                 </div>
                                             </td>
                                             <td className="py-4 px-4">
-                                                <span className="text-sm text-gray-300 font-medium bg-white/5 px-2.5 py-1 rounded-md border border-white/5">
+                                                <span className="text-sm text-hi font-medium surface-modal hairline px-2.5 py-1">
                                                     {m.membership_type}
                                                 </span>
                                             </td>
                                             <td className="py-4 px-4">
                                                 <div className="flex items-center gap-2">
-                                                    <div className="w-24 h-1.5 bg-gray-700 rounded-full overflow-hidden">
-                                                        <div className="h-full bg-red-500 w-full animate-pulse" />
+                                                    <div className="w-24 h-1.5 surface-elevated overflow-hidden border border-surface-border">
+                                                        <div className="h-full bg-status-danger w-full" />
                                                     </div>
-                                                    <span className="text-xs font-bold text-red-400 uppercase">Critical</span>
+                                                    <span className="text-xs font-bold text-status-danger uppercase">Critical</span>
                                                 </div>
                                             </td>
                                             <td className="py-4 px-6 text-right">
                                                 <button
                                                     onClick={() => sendWhatsAppReminder(m)}
-                                                    className="inline-flex items-center gap-1.5 px-4 py-2 bg-green-600 hover:bg-green-500 text-white text-xs font-bold rounded-lg transition-all shadow-lg shadow-green-900/20 hover:shadow-green-900/40 transform hover:-translate-y-0.5"
+                                                    className="inline-flex items-center gap-1.5 px-4 py-2 surface-modal hairline text-status-success hover:border-status-success text-xs font-bold transition-colors duration-fast"
                                                 >
                                                     <MessageCircle className="w-3.5 h-3.5" /> Remind
                                                 </button>
@@ -138,42 +135,44 @@ export default function ExpiringMembersTable({ members }: ExpiringMembersTablePr
                             {/* Group: Upcoming */}
                             {groupedMembers.upcoming.length > 0 && (
                                 <>
-                                    <tr className="bg-yellow-500/5">
-                                        <td colSpan={4} className="py-2 px-6 text-xs font-bold text-yellow-400 uppercase tracking-widest flex items-center gap-2">
-                                            <Calendar className="w-3 h-3" /> Upcoming (1-6 Days)
+                                    <tr className="bg-status-warning/5">
+                                        <td colSpan={4} className="py-2 px-6">
+                                            <div className="flex items-center gap-2 text-xs font-bold text-status-warning uppercase tracking-widest">
+                                                <Calendar className="w-3 h-3" /> Upcoming (1-6 Days)
+                                            </div>
                                         </td>
                                     </tr>
                                     {groupedMembers.upcoming.map(m => (
-                                        <tr key={m.id} className="group hover:bg-white/5 transition-colors">
+                                        <tr key={m.id} className="group hover:bg-surface-elevated/50 transition-colors duration-fast">
                                             <td className="py-4 px-6">
                                                 <div className="flex items-center gap-3">
-                                                    <div className="relative w-10 h-10 rounded-full overflow-hidden bg-gray-700 border border-white/10 group-hover:border-white/30 transition-colors">
+                                                    <div className="relative w-10 h-10 overflow-hidden surface-modal border border-surface-border shrink-0 group-hover:border-surface-elevated transition-colors duration-fast">
                                                         {m.photo_url ? (
                                                             <Image src={m.photo_url} alt={m.full_name} fill className="object-cover" />
                                                         ) : (
-                                                            <div className="w-full h-full flex items-center justify-center text-gray-400"><User className="w-5 h-5" /></div>
+                                                            <div className="w-full h-full flex items-center justify-center text-faint"><User className="w-5 h-5" /></div>
                                                         )}
                                                     </div>
                                                     <div>
-                                                        <div className="font-bold text-gray-200 group-hover:text-white transition-colors">{m.full_name}</div>
-                                                        <div className="text-xs text-gray-500">{m.mobile}</div>
+                                                        <div className="font-bold text-mid group-hover:text-hi transition-colors duration-fast">{m.full_name}</div>
+                                                        <div className="text-xs text-faint">{m.mobile}</div>
                                                     </div>
                                                 </div>
                                             </td>
                                             <td className="py-4 px-4">
-                                                <span className="text-sm text-gray-400 bg-white/5 px-2.5 py-1 rounded-md border border-white/5">
+                                                <span className="text-sm text-low surface-modal hairline px-2.5 py-1">
                                                     {m.membership_type}
                                                 </span>
                                             </td>
                                             <td className="py-4 px-4">
                                                 <div className="flex items-center gap-2">
-                                                    <div className="w-24 h-1.5 bg-gray-700 rounded-full overflow-hidden">
+                                                    <div className="w-24 h-1.5 surface-elevated overflow-hidden border border-surface-border">
                                                         <div
-                                                            className="h-full bg-yellow-500 rounded-full"
+                                                            className="h-full bg-status-warning rounded-full"
                                                             style={{ width: `${(1 - m.daysRemaining / 7) * 100}%` }}
                                                         />
                                                     </div>
-                                                    <span className="text-xs font-bold text-yellow-500">
+                                                    <span className="text-xs font-bold text-status-warning">
                                                         {m.daysRemaining} Day{m.daysRemaining > 1 ? 's' : ''}
                                                     </span>
                                                 </div>
@@ -181,7 +180,7 @@ export default function ExpiringMembersTable({ members }: ExpiringMembersTablePr
                                             <td className="py-4 px-6 text-right">
                                                 <button
                                                     onClick={() => sendWhatsAppReminder(m)}
-                                                    className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white/5 hover:bg-white/10 text-gray-300 hover:text-white text-xs font-medium rounded-lg transition-colors border border-white/10"
+                                                    className="inline-flex items-center gap-1.5 px-3 py-1.5 surface-modal hairline text-mid hover:text-hi hover:border-accent text-xs font-medium transition-colors duration-fast"
                                                 >
                                                     <MessageCircle className="w-3.5 h-3.5" /> Remind
                                                 </button>
@@ -199,44 +198,44 @@ export default function ExpiringMembersTable({ members }: ExpiringMembersTablePr
                     {/* Today Group */}
                     {groupedMembers.today.length > 0 && (
                         <div>
-                            <div className="flex items-center gap-2 mb-3 text-xs font-bold text-red-400 uppercase tracking-widest pl-1">
+                            <div className="flex items-center gap-2 mb-3 text-xs font-bold text-status-danger uppercase tracking-widest pl-1">
                                 <Clock className="w-3 h-3" /> Expiring Today
                             </div>
                             <div className="space-y-3">
                                 {groupedMembers.today.map(m => (
-                                    <div key={m.id} className="bg-white/5 border border-red-500/30 rounded-xl p-4 flex flex-col gap-4 shadow-lg shadow-black/20">
+                                    <div key={m.id} className="surface-elevated hairline border-status-danger/30 p-4 flex flex-col gap-4">
                                         <div className="flex items-center justify-between">
                                             <div className="flex items-center gap-3">
-                                                <div className="relative w-12 h-12 rounded-full overflow-hidden bg-gray-700 border border-white/10">
+                                                <div className="relative w-12 h-12 overflow-hidden surface-modal border border-surface-border shrink-0">
                                                     {m.photo_url ? (
                                                         <Image src={m.photo_url} alt={m.full_name} fill className="object-cover" />
                                                     ) : (
-                                                        <div className="w-full h-full flex items-center justify-center text-gray-400"><User className="w-6 h-6" /></div>
+                                                        <div className="w-full h-full flex items-center justify-center text-faint"><User className="w-6 h-6" /></div>
                                                     )}
                                                 </div>
                                                 <div>
-                                                    <div className="font-bold text-white text-lg leading-tight">{m.full_name}</div>
-                                                    <div className="text-xs text-gray-400">{m.mobile}</div>
+                                                    <div className="font-bold text-hi text-lg leading-tight">{m.full_name}</div>
+                                                    <div className="text-xs text-faint">{m.mobile}</div>
                                                 </div>
                                             </div>
-                                            <span className="text-xs font-bold bg-white/10 text-gray-300 px-2 py-1 rounded border border-white/5">
+                                            <span className="text-xs font-bold surface-modal hairline text-mid px-2 py-1">
                                                 {m.membership_type}
                                             </span>
                                         </div>
 
                                         <div className="space-y-2">
-                                            <div className="flex justify-between text-xs text-gray-400">
+                                            <div className="flex justify-between text-xs text-faint">
                                                 <span>Status</span>
-                                                <span className="text-red-400 font-bold uppercase">Critical</span>
+                                                <span className="text-status-danger font-bold uppercase">Critical</span>
                                             </div>
-                                            <div className="w-full h-1.5 bg-gray-700 rounded-full overflow-hidden">
-                                                <div className="h-full bg-red-500 w-full animate-pulse" />
+                                            <div className="w-full h-1.5 surface-elevated overflow-hidden border border-surface-border">
+                                                <div className="h-full bg-status-danger w-full" />
                                             </div>
                                         </div>
 
                                         <button
                                             onClick={() => sendWhatsAppReminder(m)}
-                                            className="w-full flex items-center justify-center gap-2 py-3 bg-green-600 hover:bg-green-500 text-white text-sm font-bold rounded-xl transition-all shadow-lg shadow-green-900/20 active:scale-[0.98]"
+                                            className="w-full flex items-center justify-center gap-2 py-3 surface-modal hairline text-status-success hover:border-status-success text-sm font-bold transition-colors duration-fast"
                                         >
                                             <MessageCircle className="w-4 h-4" /> Send Reminder
                                         </button>
@@ -249,39 +248,39 @@ export default function ExpiringMembersTable({ members }: ExpiringMembersTablePr
                     {/* Upcoming Group */}
                     {groupedMembers.upcoming.length > 0 && (
                         <div className={groupedMembers.today.length > 0 ? "pt-4" : ""}>
-                            <div className="flex items-center gap-2 mb-3 text-xs font-bold text-yellow-400 uppercase tracking-widest pl-1">
+                            <div className="flex items-center gap-2 mb-3 text-xs font-bold text-status-warning uppercase tracking-widest pl-1">
                                 <Calendar className="w-3 h-3" /> Upcoming (1-6 Days)
                             </div>
                             <div className="space-y-3">
                                 {groupedMembers.upcoming.map(m => (
-                                    <div key={m.id} className="bg-white/5 border border-white/10 rounded-xl p-4 flex flex-col gap-4 shadow-md">
+                                    <div key={m.id} className="surface-elevated hairline p-4 flex flex-col gap-4">
                                         <div className="flex items-center justify-between">
                                             <div className="flex items-center gap-3">
-                                                <div className="relative w-12 h-12 rounded-full overflow-hidden bg-gray-700 border border-white/10">
+                                                <div className="relative w-12 h-12 overflow-hidden surface-modal border border-surface-border shrink-0">
                                                     {m.photo_url ? (
                                                         <Image src={m.photo_url} alt={m.full_name} fill className="object-cover" />
                                                     ) : (
-                                                        <div className="w-full h-full flex items-center justify-center text-gray-400"><User className="w-6 h-6" /></div>
+                                                        <div className="w-full h-full flex items-center justify-center text-faint"><User className="w-6 h-6" /></div>
                                                     )}
                                                 </div>
                                                 <div>
-                                                    <div className="font-bold text-gray-200 text-lg leading-tight">{m.full_name}</div>
-                                                    <div className="text-xs text-gray-500">{m.mobile}</div>
+                                                    <div className="font-bold text-mid text-lg leading-tight">{m.full_name}</div>
+                                                    <div className="text-xs text-faint">{m.mobile}</div>
                                                 </div>
                                             </div>
-                                            <span className="text-xs font-bold bg-white/5 text-gray-400 px-2 py-1 rounded border border-white/5">
+                                            <span className="text-xs font-bold surface-modal hairline text-low px-2 py-1">
                                                 {m.membership_type}
                                             </span>
                                         </div>
 
                                         <div className="space-y-2">
-                                            <div className="flex justify-between text-xs text-gray-400">
+                                            <div className="flex justify-between text-xs text-faint">
                                                 <span>Time Remaining</span>
-                                                <span className="text-yellow-500 font-bold">{m.daysRemaining} Days</span>
+                                                <span className="text-status-warning font-bold">{m.daysRemaining} Days</span>
                                             </div>
-                                            <div className="w-full h-1.5 bg-gray-700 rounded-full overflow-hidden">
+                                            <div className="w-full h-1.5 surface-elevated overflow-hidden border border-surface-border">
                                                 <div
-                                                    className="h-full bg-yellow-500 rounded-full"
+                                                    className="h-full bg-status-warning rounded-full"
                                                     style={{ width: `${(1 - m.daysRemaining / 7) * 100}%` }}
                                                 />
                                             </div>
@@ -289,7 +288,7 @@ export default function ExpiringMembersTable({ members }: ExpiringMembersTablePr
 
                                         <button
                                             onClick={() => sendWhatsAppReminder(m)}
-                                            className="w-full flex items-center justify-center gap-2 py-3 bg-white/5 hover:bg-white/10 text-gray-200 text-sm font-bold rounded-xl transition-all border border-white/10 active:scale-[0.98]"
+                                            className="w-full flex items-center justify-center gap-2 py-3 surface-modal hairline text-mid hover:text-hi hover:border-accent text-sm font-bold transition-colors duration-fast"
                                         >
                                             <MessageCircle className="w-4 h-4" /> Remind
                                         </button>
@@ -300,6 +299,6 @@ export default function ExpiringMembersTable({ members }: ExpiringMembersTablePr
                     )}
                 </div>
             </div>
-        </motion.div>
+        </div>
     );
 }

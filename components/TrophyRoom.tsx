@@ -1,41 +1,13 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect, useMemo } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Trophy, X, Flame, Award, Lock, Star, Sparkles } from 'lucide-react';
+import { Trophy, X, Award, Lock } from 'lucide-react';
 import { useGamification, MEDALS } from './GamificationContext';
+import TrophyShine from '@/components/animations/TrophyShine';
+import FlameFlicker from '@/components/animations/FlameFlicker';
+import ConfettiBurst from '@/components/animations/ConfettiBurst';
 
-// Floating particle component for celebration effect
-function FloatingParticles() {
-    return (
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-            {[...Array(12)].map((_, i) => (
-                <motion.div
-                    key={i}
-                    className="absolute w-1 h-1 rounded-full"
-                    style={{
-                        left: `${10 + (i * 7)}%`,
-                        background: i % 3 === 0 ? '#fbbf24' : i % 3 === 1 ? '#f59e0b' : '#d97706'
-                    }}
-                    initial={{ y: '100%', opacity: 0 }}
-                    animate={{
-                        y: '-100%',
-                        opacity: [0, 1, 1, 0],
-                        scale: [0.5, 1, 1, 0.5]
-                    }}
-                    transition={{
-                        duration: 3 + (i % 3),
-                        repeat: Infinity,
-                        delay: i * 0.3,
-                        ease: 'linear'
-                    }}
-                />
-            ))}
-        </div>
-    );
-}
-
-// Progress ring component
+// Progress ring component (pure SVG, no framer-motion)
 function ProgressRing({ progress, size = 80 }: { progress: number; size?: number }) {
     const strokeWidth = 4;
     const radius = (size - strokeWidth) / 2;
@@ -44,44 +16,32 @@ function ProgressRing({ progress, size = 80 }: { progress: number; size?: number
 
     return (
         <svg width={size} height={size} className="transform -rotate-90">
-            {/* Background circle */}
             <circle
                 cx={size / 2}
                 cy={size / 2}
                 r={radius}
                 fill="none"
-                stroke="rgba(255,255,255,0.1)"
+                stroke="rgba(42,42,42,0.8)"
                 strokeWidth={strokeWidth}
             />
-            {/* Progress circle */}
-            <motion.circle
+            <circle
                 cx={size / 2}
                 cy={size / 2}
                 r={radius}
                 fill="none"
-                stroke="url(#goldGradient)"
+                stroke="var(--accent-color, #D71921)"
                 strokeWidth={strokeWidth}
                 strokeLinecap="round"
-                initial={{ strokeDashoffset: circumference }}
-                animate={{ strokeDashoffset: offset }}
-                transition={{ duration: 1, ease: 'easeOut' }}
-                style={{
-                    strokeDasharray: circumference
-                }}
+                strokeDasharray={circumference}
+                strokeDashoffset={offset}
+                className="transition-all duration-500 ease-out"
             />
-            <defs>
-                <linearGradient id="goldGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                    <stop offset="0%" stopColor="#fbbf24" />
-                    <stop offset="100%" stopColor="#f59e0b" />
-                </linearGradient>
-            </defs>
         </svg>
     );
 }
 
-export default function TrophyRoom({ isModal = false, onClose }: { isModal?: boolean; onClose?: () => void } = {}) {
-    const [isOpen, setIsOpen] = useState(isModal); // Start open if modal mode
-    const [hasViewed, setHasViewed] = useState(true);
+/** Shared trophy content used in both modal and page modes. */
+function TrophyContent({ onClose }: { onClose?: () => void }) {
     const { medals, visitStreak } = useGamification();
 
     const allMedals = useMemo(() =>
@@ -92,25 +52,141 @@ export default function TrophyRoom({ isModal = false, onClose }: { isModal?: boo
         Math.round((medals.length / allMedals.length) * 100)
         , [medals.length, allMedals.length]);
 
+    return (
+        <div className="surface-modal hairline overflow-hidden">
+            {/* Header */}
+            <div className="surface-elevated hairline-b p-6">
+                <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-4">
+                        <div className="w-14 h-14 bg-accent flex items-center justify-center">
+                            <Trophy className="w-7 h-7 text-white" />
+                        </div>
+                        <div>
+                            <h2 className="heading-display text-2xl text-hi uppercase tracking-tight">
+                                Trophy Room
+                            </h2>
+                            <p className="text-low text-sm flex items-center gap-1">
+                                Your Achievements
+                            </p>
+                        </div>
+                    </div>
+                    {onClose && (
+                        <button
+                            onClick={onClose}
+                            aria-label="Close trophy room"
+                            className="p-2 text-low hover:text-hi hover:bg-surface-canvas transition-colors duration-fast"
+                        >
+                            <X className="w-5 h-5" />
+                        </button>
+                    )}
+                </div>
+            </div>
+
+            {/* Stats Row */}
+            <div className="px-6 py-4">
+                <div className="flex flex-col sm:flex-row gap-4">
+                    <div className="flex-1 surface-elevated hairline p-4 group">
+                        <div className="flex items-center gap-3">
+                            <div className="p-2.5 surface-canvas hairline border-status-danger/30">
+                                <FlameFlicker className="w-5 h-5 text-status-danger" />
+                            </div>
+                            <div>
+                                <p className="label-text text-[10px] text-faint uppercase tracking-wider font-bold">Streak</p>
+                                <p className="stat-callout__value text-xl font-black text-status-danger">
+                                    {visitStreak}
+                                    <span className="text-xs ml-1 text-status-danger/70 font-bold">DAYS</span>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="flex-1 surface-elevated hairline p-4 group">
+                        <div className="flex items-center gap-3">
+                            <div className="relative">
+                                <ConfettiBurst />
+                                <ProgressRing progress={progress} size={44} />
+                                <div className="absolute inset-0 flex items-center justify-center">
+                                    <Trophy className="w-4 h-4 text-accent" />
+                                </div>
+                            </div>
+                            <div>
+                                <p className="label-text text-[10px] text-faint uppercase tracking-wider font-bold">Rank</p>
+                                <p className="stat-callout__value text-xl font-black text-hi">
+                                    {medals.length}
+                                    <span className="text-xs text-faint font-bold">/{allMedals.length}</span>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {/* Medals Grid */}
+            <div className="px-6 pb-4">
+                <div className="grid grid-cols-1 gap-3">
+                    {allMedals.map(([key, medal]) => {
+                        const isUnlocked = medals.includes(key);
+                        return (
+                            <div
+                                key={key}
+                                className={`surface-elevated hairline p-4 transition-colors duration-fast hover:border-accent ${isUnlocked ? '' : 'opacity-60'}`}
+                            >
+                                <div className="flex items-center gap-4">
+                                    <div className={`relative w-12 h-12 flex items-center justify-center text-2xl shrink-0 overflow-hidden ${isUnlocked
+                                        ? 'surface-canvas border border-accent/30'
+                                        : 'surface-canvas hairline grayscale'
+                                        }`}>
+                                        {isUnlocked && <TrophyShine />}
+                                        {isUnlocked ? medal.icon : 'ðŸ”’'}
+                                    </div>
+                                    <div className="flex-1 min-w-0">
+                                        <h3 className={`font-bold text-sm ${isUnlocked ? 'text-accent' : 'text-faint'}`}>
+                                            {medal.name}
+                                        </h3>
+                                        <p className={`text-xs mt-0.5 ${isUnlocked ? 'text-mid' : 'text-faint'}`}>
+                                            {medal.description}
+                                        </p>
+                                    </div>
+                                    <div className={`shrink-0 p-2 ${isUnlocked ? 'surface-canvas text-accent' : 'surface-canvas text-faint'}`}>
+                                        {isUnlocked ? <Award className="w-4 h-4" /> : <Lock className="w-4 h-4" />}
+                                    </div>
+                                </div>
+                            </div>
+                        );
+                    })}
+                </div>
+            </div>
+
+            {/* Footer */}
+            <div className="p-4 hairline-t">
+                <p className="text-center text-xs text-faint flex items-center justify-center gap-2">
+                    <FlameFlicker className="w-3 h-3 text-status-danger" />
+                    Keep visiting daily to unlock more medals!
+                    <FlameFlicker className="w-3 h-3 text-status-danger" />
+                </p>
+            </div>
+        </div>
+    );
+}
+
+export default function TrophyRoom({ isModal = false, isPage = false, onClose }: { isModal?: boolean; isPage?: boolean; onClose?: () => void } = {}) {
+    const [isOpen, setIsOpen] = useState(isModal);
+    const [hasViewed, setHasViewed] = useState(true);
+
     useEffect(() => {
         const viewed = localStorage.getItem('brofit_trophy_seen');
         if (!viewed) setHasViewed(false);
     }, []);
 
-    // Sync with isModal prop
     useEffect(() => {
         if (isModal) setIsOpen(true);
     }, [isModal]);
 
     useEffect(() => {
+        if (!isOpen) return;
         const chatbotBtn = document.getElementById('tactical-chatbot-button');
-        if (isOpen) {
-            document.body.style.overflow = 'hidden';
-            if (chatbotBtn) chatbotBtn.style.display = 'none';
-        } else {
-            document.body.style.overflow = '';
-            if (chatbotBtn) chatbotBtn.style.display = '';
-        }
+        document.body.style.overflow = 'hidden';
+        if (chatbotBtn) chatbotBtn.style.display = 'none';
         return () => {
             document.body.style.overflow = '';
             if (chatbotBtn) chatbotBtn.style.display = '';
@@ -130,221 +206,45 @@ export default function TrophyRoom({ isModal = false, onClose }: { isModal?: boo
         if (onClose) onClose();
     };
 
+    // Page mode: render content inline without modal overlay
+    if (isPage) {
+        return (
+            <div className="w-full max-w-md mx-auto">
+                <TrophyContent />
+            </div>
+        );
+    }
+
     return (
         <>
-            {/* Trophy Button - Only show when not in modal mode */}
             {!isModal && (
                 <button
                     onClick={handleOpen}
-                    className="relative p-2.5 text-gray-400 hover:text-yellow-400 transition-all group"
+                    className="relative p-2.5 text-faint hover:text-accent transition-colors duration-fast group"
                     title="Trophy Room"
                 >
-                    <Trophy className="w-4 h-4 sm:w-5 sm:h-5 group-hover:scale-110 transition-transform" />
+                    <Trophy className="w-4 h-4 sm:w-5 sm:h-5" />
                     {!hasViewed && (
-                        <motion.span
-                            initial={{ scale: 0 }}
-                            animate={{ scale: 1 }}
-                            className="absolute -top-1 -right-1 w-4 h-4 bg-gradient-to-r from-yellow-400 to-amber-500 text-black text-[10px] font-bold rounded-full flex items-center justify-center shadow-lg shadow-yellow-500/50"
-                        >
+                        <span className="absolute -top-1 -right-1 w-4 h-4 bg-accent text-white text-[10px] font-bold flex items-center justify-center">
                             !
-                        </motion.span>
+                        </span>
                     )}
                 </button>
             )}
 
-            {/* Trophy Room Modal - Premium Design */}
-            <AnimatePresence>
-                {isOpen && (
-                    <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        className="fixed inset-0 bg-black/95 backdrop-blur-xl z-[100] overflow-y-auto"
-                    >
-                        <div className="min-h-full flex items-center justify-center p-4">
-                            {/* Floating particles background */}
-                            <FloatingParticles />
-
-                            <motion.div
-                                initial={{ opacity: 0, scale: 0.9, y: 30 }}
-                                animate={{ opacity: 1, scale: 1, y: 0 }}
-                                exit={{ opacity: 0, scale: 0.9, y: 30 }}
-                                transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-                                className="relative w-full max-w-md rounded-3xl z-10 my-auto" // Added z-10 and my-auto
-                                onClick={(e) => e.stopPropagation()}
-                            >
-                                {/* Glassmorphism container */}
-                                <div className="bg-gradient-to-b from-zinc-900/95 to-black/95 border border-yellow-500/20 rounded-3xl overflow-hidden shadow-2xl shadow-yellow-900/20">
-
-                                    {/* Header with animated gradient */}
-                                    <div className="relative p-6 pb-4 overflow-hidden">
-                                        {/* Animated gradient background */}
-                                        <div className="absolute inset-0 bg-gradient-to-r from-yellow-600/20 via-amber-500/10 to-orange-600/20 animate-pulse" />
-
-                                        <div className="relative flex items-center justify-between">
-                                            <div className="flex items-center gap-4">
-                                                <motion.div
-                                                    animate={{ rotateY: [0, 360] }}
-                                                    transition={{ duration: 3, repeat: Infinity, ease: 'linear' }}
-                                                    className="w-14 h-14 bg-gradient-to-br from-yellow-400 to-amber-600 rounded-2xl flex items-center justify-center shadow-lg shadow-yellow-500/30"
-                                                >
-                                                    <Trophy className="w-7 h-7 text-black" />
-                                                </motion.div>
-                                                <div>
-                                                    <h2 className="text-2xl font-black bg-gradient-to-r from-yellow-400 to-amber-500 bg-clip-text text-transparent uppercase tracking-tight">
-                                                        Trophy Room
-                                                    </h2>
-                                                    <p className="text-sm text-gray-400 flex items-center gap-1">
-                                                        <Sparkles className="w-3 h-3" /> Your Achievements
-                                                    </p>
-                                                </div>
-                                            </div>
-                                            <button
-                                                onClick={handleClose}
-                                                aria-label="Close trophy room"
-                                                className="p-2 hover:bg-white/10 rounded-xl transition-colors text-gray-400 hover:text-white"
-                                            >
-                                                <X className="w-5 h-5" />
-                                            </button>
-                                        </div>
-                                    </div>
-
-                                    {/* Stats Row */}
-                                    <div className="px-6 pb-4">
-                                        <div className="flex flex-col sm:flex-row gap-4">
-                                            {/* Streak Card */}
-                                            <motion.div
-                                                initial={{ x: -20, opacity: 0 }}
-                                                animate={{ x: 0, opacity: 1 }}
-                                                transition={{ delay: 0.1 }}
-                                                className="flex-1 bg-gradient-to-br from-orange-500/20 to-red-600/10 border border-orange-500/30 rounded-2xl p-4 relative overflow-hidden group"
-                                            >
-                                                <div className="absolute inset-0 bg-orange-500/5 group-hover:bg-orange-500/10 transition-colors" />
-                                                <div className="flex items-center gap-3 relative z-10">
-                                                    <div className="p-2.5 bg-orange-500/20 rounded-xl shadow-inner shadow-orange-500/20">
-                                                        <Flame className="w-5 h-5 text-orange-400" />
-                                                    </div>
-                                                    <div>
-                                                        <p className="text-[10px] text-gray-400 uppercase tracking-wider font-bold">Streak</p>
-                                                        <p className="text-xl font-black text-orange-400">
-                                                            {visitStreak}
-                                                            <span className="text-xs ml-1 text-orange-500/70 font-bold">DAYS</span>
-                                                        </p>
-                                                    </div>
-                                                </div>
-                                            </motion.div>
-
-                                            {/* Progress Card */}
-                                            <motion.div
-                                                initial={{ x: 20, opacity: 0 }}
-                                                animate={{ x: 0, opacity: 1 }}
-                                                transition={{ delay: 0.2 }}
-                                                className="flex-1 bg-gradient-to-br from-yellow-500/20 to-amber-600/10 border border-yellow-500/30 rounded-2xl p-4 relative overflow-hidden group"
-                                            >
-                                                <div className="absolute inset-0 bg-yellow-500/5 group-hover:bg-yellow-500/10 transition-colors" />
-                                                <div className="flex items-center gap-3 relative z-10">
-                                                    <div className="relative">
-                                                        <ProgressRing progress={progress} size={44} />
-                                                        <div className="absolute inset-0 flex items-center justify-center">
-                                                            <Star className="w-4 h-4 text-yellow-400 fill-yellow-400/20" />
-                                                        </div>
-                                                    </div>
-                                                    <div>
-                                                        <p className="text-[10px] text-gray-400 uppercase tracking-wider font-bold">Rank</p>
-                                                        <p className="text-xl font-black text-yellow-400">
-                                                            {medals.length}
-                                                            <span className="text-xs text-gray-500 font-bold">/{allMedals.length}</span>
-                                                        </p>
-                                                    </div>
-                                                </div>
-                                            </motion.div>
-                                        </div>
-                                    </div>
-
-                                    {/* Medals Grid */}
-                                    <div className="px-6 pb-6 max-h-[45vh] overflow-y-auto custom-scrollbar">
-                                        <div className="grid grid-cols-1 gap-3">
-                                            {allMedals.map(([key, medal], index) => {
-                                                const isUnlocked = medals.includes(key);
-                                                return (
-                                                    <motion.div
-                                                        key={key}
-                                                        initial={{ opacity: 0, y: 20 }}
-                                                        animate={{ opacity: 1, y: 0 }}
-                                                        transition={{ delay: 0.1 + index * 0.05 }}
-                                                        whileHover={{ scale: 1.02 }}
-                                                        whileTap={{ scale: 0.98 }}
-                                                        className={`relative p-4 rounded-2xl border transition-all overflow-hidden ${isUnlocked
-                                                            ? 'bg-gradient-to-r from-yellow-500/15 to-amber-600/10 border-yellow-500/40'
-                                                            : 'bg-zinc-900/50 border-zinc-700/50'
-                                                            }`}
-                                                    >
-                                                        {/* Unlock shimmer effect */}
-                                                        {isUnlocked && (
-                                                            <motion.div
-                                                                className="absolute inset-0 bg-gradient-to-r from-transparent via-yellow-400/10 to-transparent"
-                                                                animate={{ x: ['-100%', '100%'] }}
-                                                                transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
-                                                            />
-                                                        )}
-
-                                                        <div className="relative flex items-center gap-4">
-                                                            {/* Medal Icon */}
-                                                            <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-2xl ${isUnlocked
-                                                                ? 'bg-gradient-to-br from-yellow-500/30 to-amber-600/20 shadow-lg shadow-yellow-500/20'
-                                                                : 'bg-zinc-800/50 grayscale'
-                                                                }`}>
-                                                                {isUnlocked ? medal.icon : '🔒'}
-                                                            </div>
-
-                                                            {/* Medal Info */}
-                                                            <div className="flex-1 min-w-0">
-                                                                <h3 className={`font-bold text-sm ${isUnlocked ? 'text-yellow-400' : 'text-gray-500'
-                                                                    }`}>
-                                                                    {medal.name}
-                                                                </h3>
-                                                                <p className={`text-xs mt-0.5 ${isUnlocked ? 'text-gray-300' : 'text-gray-600'
-                                                                    }`}>
-                                                                    {medal.description}
-                                                                </p>
-                                                            </div>
-
-                                                            {/* Status Icon */}
-                                                            <div className={`flex-shrink-0 p-2 rounded-lg ${isUnlocked ? 'bg-yellow-500/20' : 'bg-zinc-800/50'
-                                                                }`}>
-                                                                {isUnlocked ? (
-                                                                    <Award className="w-4 h-4 text-yellow-400" />
-                                                                ) : (
-                                                                    <Lock className="w-4 h-4 text-gray-600" />
-                                                                )}
-                                                            </div>
-                                                        </div>
-                                                    </motion.div>
-                                                );
-                                            })}
-                                        </div>
-                                    </div>
-
-                                    {/* Footer */}
-                                    <div className="p-4 border-t border-yellow-500/10 bg-black/50 space-y-3">
-                                        <p className="text-center text-xs text-gray-500 flex items-center justify-center gap-2">
-                                            <Flame className="w-3 h-3 text-orange-400" />
-                                            Keep visiting daily to unlock more medals!
-                                            <Flame className="w-3 h-3 text-orange-400" />
-                                        </p>
-                                        <button
-                                            onClick={handleClose}
-                                            className="w-full py-3 bg-zinc-800 hover:bg-zinc-700 text-gray-300 hover:text-white rounded-xl font-bold text-sm transition-colors"
-                                        >
-                                            Close Trophy Room
-                                        </button>
-                                    </div>
-                                </div>
-                            </motion.div>
+            {isOpen && (
+                <div className="fixed inset-0 bg-black/95 z-[200] overflow-y-auto modal-overlay-in">
+                    <div className="min-h-full flex items-center justify-center p-4">
+                        <div
+                            className="relative w-full max-w-md z-10 my-auto modal-panel-in"
+                            onClick={(e) => e.stopPropagation()}
+                        >
+                            <TrophyContent onClose={handleClose} />
                         </div>
-                    </motion.div>
-                )}
-            </AnimatePresence>
+                    </div>
+                </div>
+            )}
         </>
     );
 }
+

@@ -1,6 +1,6 @@
 ﻿"use client";
 
-import { useRef, useEffect, useState, useMemo, useId, FC, PointerEvent } from "react";
+import { useRef, useEffect, useState, useId, FC, PointerEvent } from "react";
 
 interface CurvedLoopProps {
   marqueeText?: string;
@@ -19,7 +19,7 @@ const CurvedLoop: FC<CurvedLoopProps> = ({
   direction = "left",
   interactive = true
 }) => {
-  const text = useMemo(() => marqueeText, [marqueeText]);
+  // L29: useMemo on a primitive (string) is pointless — use the prop directly.
   const measureRef = useRef<SVGTextElement | null>(null);
   const textPathRef = useRef<SVGTextPathElement | null>(null);
   const [spacing, setSpacing] = useState(0);
@@ -32,9 +32,12 @@ const CurvedLoop: FC<CurvedLoopProps> = ({
   const lastXRef = useRef(0);
   const dirRef = useRef<"left" | "right">(direction);
   const velRef = useRef(0);
+  const svgRef = useRef<SVGSVGElement | null>(null);
+  const [isVisible, setIsVisible] = useState(true);
+  const [reduceMotion, setReduceMotion] = useState(false);
 
   const dumbbellIcon = " 🏋️ ";
-  const textWithIcon = text + dumbbellIcon;
+  const textWithIcon = marqueeText + dumbbellIcon;
 
   const textLength = spacing;
   const totalText = textLength
@@ -47,7 +50,7 @@ const CurvedLoop: FC<CurvedLoopProps> = ({
 
   useEffect(() => {
     if (measureRef.current) setSpacing(measureRef.current.getComputedTextLength());
-  }, [text, className]);
+  }, [marqueeText, className]);
 
   useEffect(() => {
     if (!spacing) return;
@@ -57,8 +60,28 @@ const CurvedLoop: FC<CurvedLoopProps> = ({
     }
   }, [spacing]);
 
+  // Pause the marquee when off-screen (IntersectionObserver) and when the
+  // user prefers reduced motion — a decorative loop must not burn CPU or
+  // fight an accessibility preference.
   useEffect(() => {
-    if (!spacing || !ready) return;
+    const media = window.matchMedia("(prefers-reduced-motion: reduce)");
+    setReduceMotion(media.matches);
+    const onChange = () => setReduceMotion(media.matches);
+    media.addEventListener("change", onChange);
+    return () => media.removeEventListener("change", onChange);
+  }, []);
+
+  useEffect(() => {
+    if (!svgRef.current) return;
+    const observer = new IntersectionObserver(([entry]) => setIsVisible(entry.isIntersecting), {
+      threshold: 0,
+    });
+    observer.observe(svgRef.current);
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    if (!spacing || !ready || !isVisible || reduceMotion) return;
     let frame = 0;
 
     const step = () => {
@@ -78,7 +101,7 @@ const CurvedLoop: FC<CurvedLoopProps> = ({
 
     frame = requestAnimationFrame(step);
     return () => cancelAnimationFrame(frame);
-  }, [spacing, speed, ready]);
+  }, [spacing, speed, ready, isVisible, reduceMotion]);
 
   const onPointerDown = (e: PointerEvent<SVGSVGElement>) => {
     if (!interactive) return;
@@ -116,6 +139,7 @@ const CurvedLoop: FC<CurvedLoopProps> = ({
 
   return (
     <svg
+      ref={svgRef}
       viewBox="0 0 1920 320"
       className={className}
       onPointerDown={onPointerDown}
@@ -128,9 +152,9 @@ const CurvedLoop: FC<CurvedLoopProps> = ({
       <defs>
         <path id={pathId} d={pathD} />
         <linearGradient id={gradientId} x1="0%" y1="0%" x2="100%" y2="0%">
-          <stop offset="0%" stopColor="#D71921" />
-          <stop offset="50%" stopColor="#ffffff" />
-          <stop offset="100%" stopColor="#D71921" />
+          <stop offset="0%" stopColor="var(--accent-color)" />
+          <stop offset="50%" stopColor="var(--text-hi-color)" />
+          <stop offset="100%" stopColor="var(--accent-color)" />
         </linearGradient>
       </defs>
 

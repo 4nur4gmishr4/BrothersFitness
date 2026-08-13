@@ -1,7 +1,7 @@
 ﻿"use client";
 
 import { useState, useEffect } from "react";
-import { Flame, Brain, Target, Laugh, Sparkles, ArrowLeft, Shuffle, Heart } from "lucide-react";
+import { Flame, Brain, Target, Laugh, ArrowLeft, LayoutGrid, List, Heart, Sparkles } from "lucide-react";
 import Link from "next/link";
 import Footer from "@/components/Footer";
 
@@ -179,10 +179,10 @@ const quotes = {
 };
 
 const categories = [
-  { id: "intensity", name: "Pure Intensity", icon: <Flame className="w-5 h-5" />, color: "bg-red-500" },
-  { id: "mindset", name: "Mindset", icon: <Brain className="w-5 h-5" />, color: "bg-purple-500" },
-  { id: "discipline", name: "Discipline", icon: <Target className="w-5 h-5" />, color: "bg-gym-red" },
-  { id: "funny", name: "Humor", icon: <Laugh className="w-5 h-5" />, color: "bg-yellow-500" }
+  { id: "intensity", name: "Pure Intensity", icon: <Flame className="w-5 h-5" /> },
+  { id: "mindset", name: "Mindset", icon: <Brain className="w-5 h-5" /> },
+  { id: "discipline", name: "Discipline", icon: <Target className="w-5 h-5" /> },
+  { id: "funny", name: "Humor", icon: <Laugh className="w-5 h-5" /> }
 ];
 
 export default function QuotesPage() {
@@ -226,40 +226,39 @@ export default function QuotesPage() {
   }, [activeCategory]);
 
   return (
-    <div className="min-h-screen bg-black text-white relative overflow-hidden">
-      {/* Static Background Pattern */}
-      <div className="absolute inset-0 opacity-10">
-        <div
-          className="absolute inset-0"
-          style={{
-            backgroundImage: `linear-gradient(rgba(215, 25, 33, 0.3) 1px, transparent 1px),
-                             linear-gradient(90deg, rgba(215, 25, 33, 0.3) 1px, transparent 1px)`,
-            backgroundSize: "50px 50px",
-          }}
-        />
-      </div>
+    <div className="min-h-screen surface-canvas text-hi relative overflow-hidden">
+      {/* Static grid pattern */}
+      <div
+        className="absolute inset-0 opacity-[0.03] pointer-events-none"
+        style={{
+          
+          backgroundSize: "80px 80px",
+        }}
+      />
 
       <div className="relative z-10 min-h-screen flex flex-col">
         {/* Header */}
         <header className="p-6 md:p-8">
           <div className="max-w-7xl mx-auto flex items-center justify-between">
-            <Link href="/" className="flex items-center gap-2 text-white hover:text-gym-red transition-colors group">
+            <Link href="/" className="flex items-center gap-2 text-hi hover:text-accent transition-colors duration-fast group">
               <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
-              <span className="font-mono text-sm uppercase tracking-wider">Back to Gym</span>
+              <span className="label-text">Back to Gym</span>
             </Link>
 
             <div className="flex gap-3">
               <button
                 onClick={() => setDisplayMode(displayMode === "single" ? "grid" : "single")}
-                className="p-3 border border-white/20 hover:border-gym-red hover:text-gym-red transition-all"
+                className="p-3 surface-card hairline text-mid hover:border-accent hover:text-accent transition-colors duration-fast"
+                aria-label="Toggle display mode"
               >
-                <Sparkles className="w-5 h-5" />
+                {displayMode === "single" ? <LayoutGrid className="w-5 h-5" /> : <List className="w-5 h-5" />}
               </button>
               <button
                 onClick={randomQuote}
-                className="p-3 border border-white/20 hover:border-gym-red hover:text-gym-red transition-all"
+                className="p-3 surface-card hairline text-mid hover:border-accent hover:text-accent transition-colors duration-fast"
+                aria-label="Random quote"
               >
-                <Shuffle className="w-5 h-5" />
+                <Sparkles className="w-5 h-5" />
               </button>
             </div>
           </div>
@@ -267,12 +266,10 @@ export default function QuotesPage() {
 
         {/* Title */}
         <div className="text-center py-8">
-          <h1 className="heading-display text-5xl md:text-7xl mb-4">
-            DAILY FUEL
+          <h1 className="heading-display text-5xl md:text-7xl mb-4 text-hi">
+            DAILY <span className="text-accent">FUEL</span>
           </h1>
-          <p className="font-mono text-sm tracking-ultra text-gray-400">
-            QUOTES THAT FORGE CHAMPIONS
-          </p>
+          <p className="label-text text-mid">QUOTES TO START YOUR DAY</p>
         </div>
 
         {/* Category Tabs */}
@@ -282,10 +279,11 @@ export default function QuotesPage() {
               <button
                 key={cat.id}
                 onClick={() => setActiveCategory(cat.id as keyof typeof quotes)}
-                className={`flex items-center gap-2 px-6 py-3 font-mono text-xs uppercase tracking-widest border transition-all ${activeCategory === cat.id
-                  ? `${cat.color} text-white border-transparent`
-                  : "bg-transparent text-gray-400 border-white/20 hover:border-white/40"
-                  }`}
+                className={`flex items-center gap-2 px-6 py-3 label-text border transition-colors duration-fast ${
+                  activeCategory === cat.id
+                    ? "bg-accent text-white border-accent"
+                    : "surface-card hairline text-mid hover:border-accent hover:text-accent"
+                }`}
               >
                 {cat.icon}
                 {cat.name}
@@ -298,40 +296,34 @@ export default function QuotesPage() {
         <div className="flex-1 px-4 pb-8">
           {displayMode === "single" ? (
             <div className="max-w-5xl mx-auto">
-              <div
-                className="relative animate-in fade-in duration-500"
-                key={`${activeCategory}-${currentQuoteIndex}`}
-              >
-                <div className="border-2 border-white/20 p-12 md:p-16 bg-white/5 backdrop-blur-sm">
-                  <div
-                    className="absolute top-4 right-4"
-                    onClick={() => toggleFavorite(currentQuotes[currentQuoteIndex])}
-                  >
-                    <Heart
-                      className={`w-6 h-6 cursor-pointer transition-colors ${favorites.includes(currentQuotes[currentQuoteIndex])
-                        ? "fill-gym-red text-gym-red"
-                        : "text-white/40 hover:text-white"
-                        }`}
-                    />
-                  </div>
+              <div key={`${activeCategory}-${currentQuoteIndex}`} className="surface-card hairline p-12 md:p-16 relative">
+                <button
+                  onClick={() => toggleFavorite(currentQuotes[currentQuoteIndex])}
+                  className="absolute top-4 right-4"
+                  aria-label="Toggle favorite"
+                >
+                  <Heart
+                    className={`w-6 h-6 transition-colors duration-fast ${
+                      favorites.includes(currentQuotes[currentQuoteIndex])
+                        ? "fill-accent text-accent"
+                        : "text-faint hover:text-mid"
+                    }`}
+                  />
+                </button>
 
-                  <p className="text-2xl md:text-4xl lg:text-5xl font-display font-bold tracking-wide text-center leading-relaxed">
-                    &quot;{currentQuotes[currentQuoteIndex]}&quot;
-                  </p>
+                <p className="heading-display text-2xl md:text-4xl lg:text-5xl font-bold text-hi text-center leading-relaxed">
+                  &quot;{currentQuotes[currentQuoteIndex]}&quot;
+                </p>
 
-                  <div className="flex justify-center gap-4 mt-12">
-                    <button
-                      onClick={nextQuote}
-                      className="px-8 py-3 bg-gym-red text-white font-mono text-sm uppercase tracking-widest hover:bg-white hover:text-black transition-colors"
-                    >
-                      Next Quote
-                    </button>
-                  </div>
-
-                  <p className="text-center text-sm font-mono text-gray-500 mt-8">
-                    {currentQuoteIndex + 1} / {currentQuotes.length}
-                  </p>
+                <div className="flex justify-center gap-4 mt-12">
+                  <button onClick={nextQuote} className="btn-primary">
+                    Next Quote
+                  </button>
                 </div>
+
+                <p className="text-center label-text text-faint mt-8">
+                  {currentQuoteIndex + 1} / {currentQuotes.length}
+                </p>
               </div>
             </div>
           ) : (
@@ -339,25 +331,27 @@ export default function QuotesPage() {
               {currentQuotes.map((quote, index) => (
                 <div
                   key={index}
-                  className="border border-white/20 p-6 bg-white/5 backdrop-blur-sm relative group cursor-pointer hover:border-gym-red transition-colors"
+                  className="surface-card hairline p-6 relative group cursor-pointer hover:border-accent transition-colors duration-fast"
                   onClick={() => {
                     setCurrentQuoteIndex(index);
                     setDisplayMode("single");
                   }}
                 >
-                  <div
-                    className="absolute top-3 right-3"
+                  <button
                     onClick={(e) => {
                       e.stopPropagation();
                       toggleFavorite(quote);
                     }}
+                    className="absolute top-3 right-3"
+                    aria-label="Toggle favorite"
                   >
                     <Heart
-                      className={`w-4 h-4 transition-colors ${favorites.includes(quote) ? "fill-gym-red text-gym-red" : "text-white/20 hover:text-white"
-                        }`}
+                      className={`w-4 h-4 transition-colors duration-fast ${
+                        favorites.includes(quote) ? "fill-accent text-accent" : "text-faint group-hover:text-mid"
+                      }`}
                     />
-                  </div>
-                  <p className="text-sm md:text-base font-sans leading-relaxed pr-6">
+                  </button>
+                  <p className="body-text text-sm md:text-base text-low leading-relaxed pr-6">
                     &quot;{quote}&quot;
                   </p>
                 </div>
@@ -370,3 +364,4 @@ export default function QuotesPage() {
     </div>
   );
 }
+

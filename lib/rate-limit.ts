@@ -9,7 +9,6 @@
  * tests, local-first deployments), we transparently fall back to the in-memory
  * implementation so the app keeps working — with the documented caveat.
  */
-import { MAX_DAILY_CREDITS } from "@/lib/config";
 import { Redis } from "@upstash/redis";
 import { Ratelimit } from "@upstash/ratelimit";
 
@@ -80,6 +79,29 @@ export interface RateLimitResult {
     resetIn: number;          // Seconds until reset
 }
 
+/** Sentinal IP returned when no trustworthy client identity can be extracted. */
+export const UNKNOWN_IP = 'unknown';
+
+// Rate limiting is keyed by identity. With no trustworthy IP there is nothing
+// to key on — every client would collapse into ONE shared `unknown` bucket,
+// so a single heavy user would lock out the whole site. When identity is
+// unknowable, the correct degradation is to let the request through (rate
+// limiting is anti-abuse, not an auth boundary) and surface a warning so the
+// operator fixes proxy trust. (M13)
+let warnedUnknownIp = false;
+function warnUnknownIp(): void {
+    if (warnedUnknownIp) return;
+    warnedUnknownIp = true;
+    console.warn(
+        '[rate-limit] No trustworthy client IP — rate limiting disabled. ' +
+        'Set TRUST_PROXY_HEADERS=true (or VERCEL=1) behind a proxy that sets X-Forwarded-For/X-Real-IP.'
+    );
+}
+
+function isUnknownIdentity(identifier: string): boolean {
+    return identifier === UNKNOWN_IP || identifier.endsWith(`:${UNKNOWN_IP}`);
+}
+
 /**
  * Check if a request should be rate limited
  * @param identifier - Unique identifier (usually IP address)
@@ -90,6 +112,17 @@ export async function checkRateLimit(
     identifier: string,
     config: RateLimitConfig
 ): Promise<RateLimitResult> {
+    // Degrade open when there's no trustworthy identity to key on — see
+    // warnUnknownIp. This prevents the shared-`unknown`-bucket lockout (M13).
+    if (isUnknownIdentity(identifier)) {
+        warnUnknownIp();
+        return {
+            allowed: true,
+            remaining: config.maxRequests,
+            resetIn: Math.ceil(config.windowMs / 1000),
+        };
+    }
+
     const redis = getRedisClient(config);
     if (redis) {
         const { success, remaining, reset } = await redis.limit(identifier);
@@ -180,7 +213,7 @@ export function getClientIp(req: Request): string {
         }
     }
 
-    return 'unknown';
+    return UNKNOWN_IP;
 }
 
 /**
@@ -188,29 +221,25 @@ export function getClientIp(req: Request): string {
  * Used by read-only endpoints (e.g. /api/rate-limit-status) so that
  * a status check does not itself consume a quota slot.
  *
- * With Redis this is a best-effort peek via a 1-request budget window keyed
- * separately — it does not touch the real counter. In the in-memory fallback it
- * reads the map directly.
+ * NOTE: non-consuming peeks are only supported on the in-memory path.
+ * Upstash's Ratelimit sliding-window API exposes no non-consuming read of its
+ * internal counters, and the old Redis branch here read a `:peek:` key that was
+ * never written — so it silently reported full quota to exhausted users. No
+ * production route calls this anymore; the status endpoint reads the
+ * authoritative Supabase credit row instead. The Redis branch below therefore
+ * returns the optimistic "full budget" result rather than lying about a counter
+ * it cannot see.
  */
 export async function peekRateLimit(
     identifier: string,
     config: RateLimitConfig
 ): Promise<RateLimitResult> {
     if (USING_REDIS) {
-        // 1-request window just to test whether the identifier is exhausted;
-        // never consumes the real budget because the key is distinct.
-        const redis = new Redis({ url: UPSTASH_URL!, token: UPSTASH_TOKEN! });
-        const remaining = await redis.get<number>(`${REDIS_KEY_PREFIX}:peek:${identifier}`);
-        if (remaining === null) {
-            return {
-                allowed: true,
-                remaining: config.maxRequests,
-                resetIn: Math.ceil(config.windowMs / 1000)
-            };
-        }
+        // Cannot observe the real sliding-window counter without consuming it.
+        // Report the cap so callers never see a fabricated "exhausted" state.
         return {
-            allowed: remaining > 0,
-            remaining: Math.max(0, remaining),
+            allowed: true,
+            remaining: config.maxRequests,
             resetIn: Math.ceil(config.windowMs / 1000)
         };
     }
@@ -235,12 +264,13 @@ export async function peekRateLimit(
 }
 
 // Preset configurations
+//
+// M36 fix: AI_COMBINED was removed. AI credit enforcement is handled
+// server-side by the Supabase `spend_user_credit` RPC (IST 5:30 AM reset),
+// which is the single source of truth. The old Redis sliding-window duplicate
+// had a different reset cadence and blocked users between 5:30 AM and the
+// window expiry even when their Supabase credits had already refilled.
 export const RATE_LIMITS = {
-    // Combined AI limit: daily credits per day per IP (diet + chatbot)
-    AI_COMBINED: {
-        maxRequests: MAX_DAILY_CREDITS,
-        windowMs: 24 * 60 * 60 * 1000 // 24 hours
-    },
     // Login attempts: 5 per 15 minutes
     LOGIN: {
         maxRequests: 5,

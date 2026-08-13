@@ -1,4 +1,4 @@
-﻿import { NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { supabase } from "@/lib/supabase";
 import { checkRateLimit, RATE_LIMITS, getClientIp } from "@/lib/rate-limit";
 import { ContactSchema } from "@/lib/validation";
@@ -45,7 +45,8 @@ export async function POST(req: Request) {
 
     const { name, email, phone, message } = parsed.data;
 
-    // Store in Supabase (fails silently if table doesn't exist)
+    // Store in Supabase. If this fails we must NOT tell the visitor their
+    // message went through — silent drops (M4) lose real lead data.
     const { error: dbError } = await supabase.from('contact_submissions').insert([{
       name,
       email,
@@ -54,33 +55,14 @@ export async function POST(req: Request) {
     }]);
 
     if (dbError) {
-      log.warn('Failed to store contact submission', { error: dbError.message });
-    }
-
-    // Send Discord webhook notification (if configured)
-    const webhookUrl = process.env.DISCORD_WEBHOOK_URL;
-    if (webhookUrl) {
-      try {
-        await fetch(webhookUrl, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            embeds: [{
-              title: "🆕 New Contact Form Submission",
-              color: 0xE53935,
-              fields: [
-                { name: "👤 Name", value: name, inline: true },
-                { name: "📧 Email", value: email, inline: true },
-                { name: "📱 Phone", value: phone || "Not provided", inline: true },
-                { name: "💬 Message", value: message.substring(0, 1000) }
-              ],
-              timestamp: new Date().toISOString()
-            }]
-          })
-        });
-      } catch (webhookError) {
-        log.warn('Discord webhook failed', { error: webhookError instanceof Error ? webhookError.message : 'Unknown' });
-      }
+      log.error('Failed to store contact submission', { error: dbError.message });
+      return withRequestId(
+        NextResponse.json(
+          { error: "Could not save your message. Please try again." },
+          { status: 502 }
+        ),
+        requestId
+      );
     }
 
     return withRequestId(NextResponse.json({ success: true }, { status: 200 }), requestId);

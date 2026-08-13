@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getServiceSupabase } from '@/lib/server-supabase';
 import { requireAdminToken } from '@/lib/admin-auth';
+import { logger } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -60,7 +61,7 @@ export async function DELETE(req: Request) {
                 details: { email: lead?.email || null }
             }]);
         } catch (logError) {
-            console.warn('Failed to log lead deletion:', logError);
+            logger.warn('Failed to log lead deletion', { error: logError instanceof Error ? logError.message : 'Unknown' });
         }
 
         return NextResponse.json({ success: true });

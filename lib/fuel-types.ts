@@ -3,7 +3,7 @@
 export type LocalizedText = { en: string; hi: string };
 
 export type DietPlan = {
-    tactical_brief: LocalizedText;
+    summary: LocalizedText;
     user_inputs_summary?: {
         gender: string;
         age: string;

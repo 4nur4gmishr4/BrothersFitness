@@ -1,6 +1,10 @@
 import { NextResponse } from 'next/server';
 import { getServiceSupabase } from '@/lib/server-supabase';
 
+// H2 fix: force dynamic so the member count reflects live data
+// instead of being frozen at build time.
+export const dynamic = 'force-dynamic';
+
 export async function GET() {
     try {
         const { count, error } = await getServiceSupabase()
@@ -15,6 +19,7 @@ export async function GET() {
         return NextResponse.json({ count: displayCount });
     } catch (error) {
         console.error('Error fetching member count:', error);
-        return NextResponse.json({ count: 0 });
+        // L37: return 503 instead of masking the outage as count:0.
+        return NextResponse.json({ error: 'Could not load member count' }, { status: 503 });
     }
 }

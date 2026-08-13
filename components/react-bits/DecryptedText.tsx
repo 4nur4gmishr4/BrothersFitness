@@ -1,6 +1,8 @@
 ﻿"use client";
 import React, { useState, useEffect, useRef, useCallback } from "react";
 
+const SCRAMBLE_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890!@#$%^&*()_+";
+
 interface DecryptedTextProps {
   text: string;
   speed?: number;
@@ -27,8 +29,6 @@ export default function DecryptedText({
   // re-running the effect) on every reveal.
   const revealedRef = useRef<Set<number>>(new Set());
 
-  const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890!@#$%^&*()_+";
-
   const scramble = useCallback(() => {
     if (intervalRef.current) clearInterval(intervalRef.current);
 
@@ -48,7 +48,7 @@ export default function DecryptedText({
             next.add(index);
             return char;
           }
-          return characters[Math.floor(Math.random() * characters.length)];
+          return SCRAMBLE_CHARS[Math.floor(Math.random() * SCRAMBLE_CHARS.length)];
         })
         .join("");
 

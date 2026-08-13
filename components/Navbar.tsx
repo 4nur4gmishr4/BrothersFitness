@@ -2,398 +2,234 @@
 
 import { useState, useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { motion, AnimatePresence, useScroll, useMotionValueEvent } from "framer-motion";
-import { Menu, X, ArrowRight, Volume2, VolumeX, Instagram, MessageCircle, User, Trophy } from "lucide-react";
-import { useTacticalSound } from "@/components/TacticalSoundContext";
-import { useAdmin } from "@/lib/auth-context";
+import { useTheme } from "@/components/ThemeProvider";
 import { useUserAuth } from "@/lib/user-auth-context";
-import TrophyRoom from "@/components/TrophyRoom";
 import dynamic from "next/dynamic";
-import WelcomeModal from './WelcomeModal';
 import Image from "next/image";
+import { Phone, Menu, X, Star, ChevronRight, Github, Instagram } from "lucide-react";
 
-// Lazy load modals
+const WhatsAppIcon = ({ className }: { className?: string }) => ( <svg xmlns="http://www.w3.org/2000/svg" className={className} viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z" /></svg> );
+
 const ProfileModal = dynamic(() => import("@/components/ProfileModal"), { ssr: false });
 const LoginModal = dynamic(() => import("@/components/LoginModal"), { ssr: false });
+const WelcomeModal = dynamic(() => import("@/components/WelcomeModal"), { ssr: false });
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
   const { showLoginModal, setShowLoginModal, showWelcome, setShowWelcome } = useUserAuth();
-  const [showTrophyRoom, setShowTrophyRoom] = useState(false);
-  const { scrollY } = useScroll();
-  const { soundEnabled, toggleSound } = useTacticalSound();
+  const { resolvedTheme, setTheme } = useTheme();
   const { user, isLoggedIn, isLoading } = useUserAuth();
-  useAdmin(); // Keep the hook call for context
   const pathname = usePathname();
   const router = useRouter();
 
-  useMotionValueEvent(scrollY, "change", (latest) => {
-    setIsScrolled(latest > 20);
-  });
-
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      setIsMobile(window.innerWidth < 768);
-      const handleResize = () => setIsMobile(window.innerWidth < 768);
-      window.addEventListener('resize', handleResize);
-
-      return () => window.removeEventListener('resize', handleResize);
-    }
-  }, []);
-
-  useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = 'unset';
-    }
-    // Cleanup: Always restore scroll on unmount or state change
-    return () => {
-      document.body.style.overflow = 'unset';
-    };
-  }, [isOpen]);
-
-  // Additional cleanup on component unmount
-  useEffect(() => {
-    return () => {
-      document.body.style.overflow = 'unset';
-    };
+    const handleScroll = () => setIsScrolled(window.scrollY > 20);
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   const menuItems = [
-    { name: "Home", id: "/", isExternal: false, isRoute: true },
-    { name: "Workouts", id: "/workouts", isExternal: false, isRoute: true },
-    { name: "Diet Planner", id: "/fuel", isExternal: false, isRoute: true },
-    { name: "Calculators", id: "/calculators", isExternal: false, isRoute: true },
-    { name: "Pricing", id: "/pricing", isExternal: false, isRoute: true },
-    { name: "Quotes", id: "/quotes", isExternal: false, isRoute: true }
+    { name: "Home", id: "/", isRoute: true },
+    { name: "Workouts", id: "/workouts", isRoute: true },
+    { name: "Diet Planner", id: "/fuel", isRoute: true },
+    { name: "Calculators", id: "/calculators", isRoute: true },
+    { name: "Pricing", id: "/pricing", isRoute: true },
+    { name: "Quotes", id: "/quotes", isRoute: true },
+    { name: "Trophy Room", id: "/trophy-room", isRoute: true },
   ];
 
-  const scrollToSection = (id: string) => {
-    const element = document.getElementById(id);
-    if (element) {
-      const navbarHeight = 80;
-      const elementPosition = element.getBoundingClientRect().top + window.scrollY;
-      window.scrollTo({
-        top: elementPosition - navbarHeight,
-        behavior: "smooth"
-      });
-      setIsOpen(false);
-    } else {
-      // If element not found (e.g. we are on /workouts), redirect to home with hash
-      window.location.href = `/#${id}`;
-      setIsOpen(false);
-    }
-  };
-
-  const handleMenuClick = (item: typeof menuItems[0]) => {
-    if (item.isRoute) {
-      // Internal route navigation — router.push avoids a full page reload.
-      router.push(item.id);
-      setIsOpen(false);
-    } else {
-      scrollToSection(item.id);
-    }
+  const handleMenuClick = (item: (typeof menuItems)[0]) => {
+    router.push(item.id);
+    setIsOpen(false);
   };
 
   return (
     <>
-      {/* Fixed Navbar - always on top */}
+      {/* Boxy Futuristic Navbar */}
       <nav
-        className={`fixed top-0 left-0 right-0 z-[60] transition-all duration-300 ${isScrolled
-          ? 'bg-black/50 backdrop-blur-xl border-b border-white/5 shadow-sm'
-          : 'bg-transparent backdrop-blur-none'
-          }`}
+        className={`fixed top-0 left-0 right-0 z-[50] transition-all duration-300 ${
+          isScrolled ? "bg-surface-canvas/90 backdrop-blur-md border-b border-surface-border" : "bg-transparent"
+        }`}
       >
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16 sm:h-20">
             {/* Logo */}
-            <motion.button
-              onClick={() => {
-                if (pathname === '/') {
-                  window.scrollTo({ top: 0, behavior: 'smooth' });
+            <button
+              onClick={(e) => {
+                e.preventDefault();
+                if (pathname === "/") {
+                  window.scrollTo({ top: 0, behavior: "smooth" });
                 } else {
-                  router.push('/');
+                  router.push("/");
                 }
               }}
-              className="relative z-50 group"
-              whileHover={!isMobile ? { scale: 1.05 } : undefined}
-              whileTap={{ scale: 0.95 }}
+              className="relative z-50 group flex items-center gap-3 transition-colors duration-200"
             >
-              <span className="text-base sm:text-lg md:text-xl lg:text-3xl font-sans uppercase tracking-tight">
-                <span className="font-extrabold text-white group-hover:text-gym-red transition-colors duration-300">
-                  BROTHER&apos;S
-                </span>
-                <span className="font-light text-gym-red">_</span>
-                <span className="font-light text-white group-hover:text-gym-red transition-colors duration-300">
-                  FITNESS
-                </span>
-              </span>
-            </motion.button>
+              <div className="font-display text-sm sm:text-lg md:text-xl tracking-widest text-hi font-bold cursor-default select-none group-hover:text-accent transition-colors duration-200">
+                BROTHER'S<span className="text-accent group-hover:animate-pulse">_</span>FITNESS
+              </div>
+            </button>
+
+            {/* Desktop Navigation Links */}
+            <div className="hidden lg:flex items-center gap-8 absolute left-1/2 -translate-x-1/2">
+              {menuItems.slice(0, 5).map((item) => (
+                <button
+                  key={item.name}
+                  onClick={(e) => { e.preventDefault(); handleMenuClick(item); }}
+                  className="text-sm font-display tracking-widest uppercase text-hi hover:text-accent transition-colors duration-200"
+                >
+                  {item.name}
+                </button>
+              ))}
+            </div>
 
             {/* Action Buttons */}
-            <div className="flex items-center gap-1 sm:gap-2 md:gap-3">
-              {/* Instagram */}
-              <motion.a
-                href="https://www.instagram.com/brothers_fitness_17?igsh=MW0xYmV2dHIzOHlneQ=="
-                target="_blank"
-                rel="noopener noreferrer"
-                className="p-2.5 sm:p-2.5 text-gray-400 hover:text-gym-red transition-colors"
-                aria-label="Instagram"
-                whileHover={!isMobile ? { scale: 1.1, rotate: 5 } : undefined}
-                whileTap={{ scale: 0.9 }}
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
+                className="w-10 h-10 flex items-center justify-center border border-surface-border bg-surface-card hover:border-accent transition-colors duration-200"
+                aria-label="Toggle theme"
               >
-                <Instagram className="w-4 h-4 sm:w-6 sm:h-6" />
-              </motion.a>
+                <div className="w-5 h-5">
+                  <Star className="w-full h-full text-hi group-hover:scale-110 group-hover:text-accent transition-all duration-300" />
+                </div>
+              </button>
 
-              {/* WhatsApp */}
-              {/* WhatsApp */}
-              <motion.a
-                href="https://wa.me/919131179343?text=Hi%20Aman,%20I'm%20interested%20in%20joining%20Brother's%20Fitness!"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="p-2.5 sm:p-2.5 text-gray-400 hover:text-[#25D366] transition-colors"
-                whileHover={!isMobile ? { scale: 1.1 } : undefined}
-                whileTap={{ scale: 0.9 }}
-              >
-                <MessageCircle className="w-4 h-4 sm:w-6 sm:h-6" />
-              </motion.a>
-
-              {/* Profile Button (replaces Trophy) */}
-              <motion.button
-                onClick={() => {
+              <button
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
                   if (isLoggedIn) {
                     setShowProfileModal(true);
                   } else {
                     setShowLoginModal(true);
                   }
                 }}
-                className="p-2.5 sm:p-2.5 text-gray-400 hover:text-gym-red transition-colors"
+                className="w-10 h-10 flex items-center justify-center border border-surface-border bg-surface-card hover:border-accent transition-colors duration-200"
                 aria-label="Profile"
-                whileHover={!isMobile ? { scale: 1.1 } : undefined}
-                whileTap={{ scale: 0.9 }}
               >
                 {isLoading ? (
-                  <div className="w-4 h-4 sm:w-6 sm:h-6 rounded-full bg-gray-600 animate-pulse" />
+                  <div className="w-4 h-4 rounded-full skeleton" />
                 ) : isLoggedIn && user?.photo_url ? (
                   <Image
                     src={user.photo_url}
                     alt="Profile"
                     width={24}
                     height={24}
-                    className="w-6 h-6 rounded-full object-cover border border-gym-red"
+                    className="w-6 h-6 object-cover border border-accent"
                   />
                 ) : (
-                  <User className="w-4 h-4 sm:w-6 sm:h-6" />
+                  <div className="w-5 h-5">
+                    <Star className="w-full h-full text-hi group-hover:scale-110 group-hover:text-accent transition-all duration-300" />
+                  </div>
                 )}
-              </motion.button>
+              </button>
 
-              {/* Hamburger Menu */}
-              <motion.button
+              <button
                 onClick={() => setIsOpen(!isOpen)}
-                className="p-2.5 sm:p-2.5 text-gray-400 hover:text-gym-red transition-colors"
+                className="w-10 h-10 flex items-center justify-center border border-surface-border bg-accent text-white hover:bg-hi hover:text-canvas transition-colors duration-200 lg:hidden"
                 aria-label="Toggle Menu"
-                whileHover={!isMobile ? { scale: 1.1 } : undefined}
-                whileTap={{ scale: 0.9 }}
               >
-                {isOpen ? (
-                  <X className="w-5 h-5 sm:w-7 sm:h-7" />
-                ) : (
-                  <Menu className="w-5 h-5 sm:w-7 sm:h-7" />
-                )}
-              </motion.button>
+                <div className="relative w-6 h-6 flex items-center justify-center">
+                  <Menu className={`absolute inset-0 w-full h-full transition-all duration-300 ${isOpen ? 'opacity-0 rotate-90 scale-50' : 'opacity-100 rotate-0 scale-100'}`} />
+                  <X className={`absolute inset-0 w-full h-full transition-all duration-300 ${isOpen ? 'opacity-100 rotate-0 scale-100' : 'opacity-0 -rotate-90 scale-50'}`} />
+                </div>
+              </button>
             </div>
           </div>
         </div>
       </nav>
 
-      {/* Spacer to prevent content overlap */}
+      {/* Spacer */}
       <div className="h-16 sm:h-20" />
 
-      {/* Full Screen Menu - Redesigned */}
-      <AnimatePresence>
-        {isOpen && (
-          <>
-            {/* Backdrop */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.3 }}
-              onClick={() => setIsOpen(false)}
-              className="fixed inset-0 bg-black/98 backdrop-blur-xl z-40"
-            >
-              {/* Subtle gradient accents - desktop only */}
-              {!isMobile && (
-                <>
-                  <div className="absolute top-0 left-0 w-96 h-96 bg-gym-red/10 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2" />
-                  <div className="absolute bottom-0 right-0 w-96 h-96 bg-gym-red/10 rounded-full blur-3xl translate-x-1/2 translate-y-1/2" />
-                </>
-              )}
-            </motion.div>
+      {/* Full Screen Menu */}
+      {isOpen && (
+        <>
+          <div
+            onClick={() => setIsOpen(false)}
+            className="fixed inset-0 bg-[#0a0a0a]/95 backdrop-blur-sm z-40 modal-overlay-in"
+          />
 
-            {/* Menu Panel */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.3 }}
-              className="fixed inset-0 z-50 flex flex-col items-center px-6 sm:px-8 pt-20 pb-6"
-            >
-              {/* Navigation Items - Scrollable Container */}
-              <div className="w-full max-w-lg overflow-y-auto overflow-x-hidden flex-1 py-4 scrollbar-hide">
-                <motion.nav
-                  initial="hidden"
-                  animate="visible"
-                  exit="hidden"
-                  variants={{
-                    hidden: { transition: { staggerChildren: 0.03, staggerDirection: -1 } },
-                    visible: { transition: { staggerChildren: 0.05, delayChildren: 0.1 } }
-                  }}
-                  className="flex flex-col items-stretch gap-2 sm:gap-3"
-                >
-                  {menuItems.map((item, index) => {
-                    const isActive = pathname === item.id || (pathname === "/" && item.id === "/");
-                    return (
-                      <motion.button
-                        key={item.name}
-                        onClick={() => handleMenuClick(item)}
-                        variants={{
-                          hidden: { opacity: 0, y: 20 },
-                          visible: { opacity: 1, y: 0 }
-                        }}
-                        whileHover={!isMobile ? { scale: 1.02, x: 10 } : undefined}
-                        whileTap={{ scale: 0.98 }}
-                        className="w-full group"
-                        custom={index}
+          <div className="fixed inset-0 z-50 flex flex-col items-center px-4 pt-24 pb-6 pointer-events-none">
+            <div className="w-full max-w-2xl overflow-y-auto scrollbar-hide pointer-events-auto">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {menuItems.map((item, i) => {
+                  const isActive = pathname === item.id;
+                  return (
+                    <button
+                      key={item.name}
+                      onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleMenuClick(item); }}
+                      className="group menu-item-in relative"
+                      style={{ animationDelay: `${i * 40}ms` }}
+                    >
+                      <div
+                        className={`flex items-center justify-between p-6 border transition-all duration-300 ${
+                          isActive
+                            ? "border-accent bg-accent/5"
+                            : "border-surface-border bg-[#111] hover:border-accent hover:bg-accent/10"
+                        }`}
                       >
-                        <div className={`flex items-center justify-between px-5 py-3 sm:py-4 border rounded-lg transition-all duration-200 ${isActive
-                          ? "border-gym-red bg-gym-red/20 shadow-[0_0_15px_rgba(215,25,33,0.3)]"
-                          : "border-white/10 hover:border-gym-red/50 bg-white/5 hover:bg-gym-red/10"
-                          }`}>
-                          <span className={`text-base sm:text-lg md:text-xl font-display font-bold uppercase tracking-wide transition-colors ${isActive ? "text-gym-red" : "text-white group-hover:text-gym-red"
-                            }`}>
-                            {item.name}
-                          </span>
-                          <ArrowRight className={`w-4 h-4 sm:w-5 sm:h-5 transition-all ${isActive ? "text-gym-red" : "text-gray-500 group-hover:text-gym-red group-hover:translate-x-1"
-                            }`} />
+                        <span
+                          className={`text-lg font-display tracking-widest uppercase transition-colors duration-fast ${
+                            isActive ? "text-accent" : "text-hi group-hover:text-accent"
+                          }`}
+                        >
+                          {item.name}
+                        </span>
+                        <div className="w-6 h-6 opacity-50 group-hover:opacity-100 transition-opacity">
+                           <ChevronRight className="w-full h-full text-accent group-hover:translate-x-1 transition-transform duration-300" />
                         </div>
-                      </motion.button>
-                    );
-                  })}
-                </motion.nav>
-
-                {/* Footer / Connect Section */}
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  transition={{ delay: 0.5 }}
-                  className="mt-8 pt-6 border-t border-white/10 space-y-6"
-                >
-                  {/* Trophy Room Button */}
-                  <div className="flex justify-center">
-                    <button
-                      onClick={() => {
-                        setShowTrophyRoom(true);
-                        setIsOpen(false);
-                      }}
-                      className="flex items-center gap-2 px-6 py-3 bg-gym-red/10 border border-gym-red/30 rounded-full hover:bg-gym-red/20 transition-colors"
-                    >
-                      <Trophy className="w-5 h-5 text-gym-red" />
-                      <span className="text-sm font-mono text-gym-red uppercase tracking-widest">
-                        Trophy Room
-                      </span>
-                    </button>
-                  </div>
-
-                  {/* Sound Toggle in Menu */}
-                  <div className="flex justify-center">
-                    <button
-                      onClick={toggleSound}
-                      className="flex items-center gap-2 px-6 py-3 bg-white/5 border border-white/10 rounded-full hover:bg-white/10 transition-colors"
-                    >
-                      <span className="text-sm font-mono text-gray-400 uppercase tracking-widest">
-                        {soundEnabled ? 'Sound On' : 'Sound Off'}
-                      </span>
-                      {soundEnabled ? (
-                        <Volume2 className="w-5 h-5 text-gym-red" />
-                      ) : (
-                        <VolumeX className="w-5 h-5 text-gray-500" />
-                      )}
-                    </button>
-                  </div>
-
-                  {/* Social Links */}
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-3">
-                      <p className="text-[10px] font-mono uppercase tracking-widest text-gray-500 text-center">
-                        Connect with Aman
-                      </p>
-                      <div className="flex justify-center gap-3">
-                        <motion.a
-                          href="https://www.instagram.com/brothers_fitness_17"
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="p-3 bg-white/5 rounded-lg text-gray-400 hover:text-gym-red transition-colors"
-                          whileHover={{ scale: 1.1 }}
-                          whileTap={{ scale: 0.9 }}
-                        >
-                          <Instagram className="w-5 h-5" />
-                        </motion.a>
-                        <motion.a
-                          href="https://wa.me/919131179343"
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="p-3 bg-white/5 rounded-lg text-gray-400 hover:text-[#25D366] transition-colors"
-                          whileHover={{ scale: 1.1 }}
-                          whileTap={{ scale: 0.9 }}
-                        >
-                          <MessageCircle className="w-5 h-5" />
-                        </motion.a>
                       </div>
-                    </div>
-                    <div className="space-y-3">
-                      <p className="text-[10px] font-mono uppercase tracking-widest text-gray-500 text-center">
-                        Call Pradeep
-                      </p>
-                      <div className="flex justify-center gap-3">
-                        <motion.a
-                          href="tel:+919131272754"
-                          className="p-3 bg-white/5 rounded-lg text-gray-400 hover:text-gym-red transition-colors"
-                          whileHover={{ scale: 1.1 }}
-                          whileTap={{ scale: 0.9 }}
-                        >
-                          <MessageCircle className="w-5 h-5" />
-                        </motion.a>
-                        <motion.a
-                          href="https://wa.me/919131272754"
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="p-3 bg-white/5 rounded-lg text-gray-400 hover:text-[#25D366] transition-colors"
-                          whileHover={{ scale: 1.1 }}
-                          whileTap={{ scale: 0.9 }}
-                        >
-                          <MessageCircle className="w-5 h-5" />
-                        </motion.a>
-                      </div>
-                    </div>
-                  </div>
-                </motion.div>
+                      {/* Technical corner accents */}
+                      <div className="absolute top-0 left-0 w-2 h-2 border-t border-l border-accent opacity-0 group-hover:opacity-100 transition-opacity" />
+                      <div className="absolute bottom-0 right-0 w-2 h-2 border-b border-r border-accent opacity-0 group-hover:opacity-100 transition-opacity" />
+                    </button>
+                  );
+                })}
               </div>
-            </motion.div>
-          </>
-        )}
-      </AnimatePresence>
+
+              {/* Boxy Footer / Connect Section */}
+              <div className="mt-12 pt-8 border-t border-surface-border">
+                {/* Gym Owners */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+                  <div className="p-4 border border-surface-border bg-surface-card flex flex-col justify-between">
+                    <p className="text-[10px] uppercase tracking-widest text-low mb-2">AMAN (FOUNDER)</p>
+                    <div className="flex gap-4">
+                      <a href="tel:+919131179343" className="w-6 h-6 opacity-70 hover:opacity-100 transition-opacity"><Phone className="w-full h-full text-accent" /></a>
+                      <a href="https://wa.me/919131179343" target="_blank" className="w-6 h-6 opacity-70 hover:opacity-100 transition-opacity"><WhatsAppIcon className="w-full h-full text-[#25D366]" /></a>
+                    </div>
+                  </div>
+                  <div className="p-4 border border-surface-border bg-surface-card flex flex-col justify-between">
+                    <p className="text-[10px] uppercase tracking-widest text-low mb-2">PRADEEP (CO-FOUNDER)</p>
+                    <div className="flex gap-4">
+                      <a href="tel:+919131272754" className="w-6 h-6 opacity-70 hover:opacity-100 transition-opacity"><Phone className="w-full h-full text-accent" /></a>
+                      <a href="https://wa.me/919131272754" target="_blank" className="w-6 h-6 opacity-70 hover:opacity-100 transition-opacity"><WhatsAppIcon className="w-full h-full text-[#25D366]" /></a>
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Developer */}
+                <div className="p-4 border border-surface-border bg-surface-soft flex flex-col justify-between items-center text-center">
+                  <p className="text-[10px] uppercase tracking-widest text-low mb-2">DEVELOPER : ANURAG MISHRA</p>
+                  <div className="flex gap-6 mt-2">
+                    <a href="https://github.com/4nur4gmishr4" target="_blank" className="w-8 h-8 opacity-70 hover:opacity-100 hover:scale-110 hover:-translate-y-1 transition-all duration-300 drop-shadow-[0_0_10px_rgba(255,255,255,0.1)] hover:drop-shadow-[0_0_15px_rgba(255,255,255,0.3)]"><Github className="w-full h-full text-hi" /></a>
+                    <a href="https://www.instagram.com/4nur4gmishr4?igsh=MTZkb3N6NDNhc2kwaQ==" target="_blank" className="w-8 h-8 opacity-70 hover:opacity-100 hover:scale-110 hover:-translate-y-1 transition-all duration-300 drop-shadow-[0_0_10px_rgba(255,255,255,0.1)] hover:drop-shadow-[0_0_15px_rgba(255,255,255,0.3)]"><Instagram className="w-full h-full text-hi" /></a>
+                    <a href="https://wa.me/919302786886" target="_blank" className="w-8 h-8 p-1 opacity-70 hover:opacity-100 hover:scale-110 hover:-translate-y-1 transition-all duration-300 drop-shadow-[0_0_10px_rgba(255,255,255,0.1)] hover:drop-shadow-[0_0_15px_rgba(255,255,255,0.3)]"><WhatsAppIcon className="w-full h-full text-[#25D366]" /></a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </>
+      )}
 
       {/* Modals */}
       <ProfileModal isOpen={showProfileModal} onClose={() => setShowProfileModal(false)} />
       <LoginModal isOpen={showLoginModal} onClose={() => setShowLoginModal(false)} />
       <WelcomeModal isOpen={showWelcome} onClose={() => setShowWelcome(false)} />
-      {showTrophyRoom && <TrophyRoom isModal onClose={() => setShowTrophyRoom(false)} />}
     </>
   );
 }

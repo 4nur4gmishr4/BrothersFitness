@@ -1,13 +1,13 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState } from "react";
 
 const MESSAGES = [
-    "CALCULATING OPTIMAL MACRO DISTRIBUTION...",
+    "CALCULATING DAILY MACROS...",
     "ANALYZING MARKET PRICES (INR)...",
     "TRANSLATING TO HINDI...",
     "CATEGORIZING HOME ESSENTIALS...",
-    "FINALIZING TACTICAL BRIEF..."
+    "GENERATING YOUR PLAN..."
 ];
 
 /** Rotates through synthesis progress messages every 3 seconds. */
@@ -22,8 +22,9 @@ export default function LoadingStatus() {
     }, []);
 
     return (
-        <p className="font-dot text-xs text-green-500 uppercase tracking-widest min-h-[1.5em]">
+        <p className="font-mono text-xs text-status-success uppercase tracking-widest min-h-[1.5em]">
             {MESSAGES[index]}
         </p>
     );
 }
+
