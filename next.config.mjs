@@ -13,7 +13,6 @@ const nextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
-  experimental: { urlImports: ['https://framer.com/m/', 'https://framerusercontent.com/'] },
   outputFileTracingRoot: path.resolve(__dirname),
   images: {
     remotePatterns: [
