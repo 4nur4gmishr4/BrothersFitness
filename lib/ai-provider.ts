@@ -38,7 +38,7 @@ function createAbort(timeoutMs: number): { signal: AbortSignal; clear: () => voi
 }
 
 // Active Verified Working Provider Types
-type Provider = "groq" | "mistral" | "openrouter" | "cohere";
+type Provider = "groq" | "mistral" | "openrouter" | "cohere" | "vercel";
 
 interface ModelConfig {
     id: string;
@@ -47,9 +47,10 @@ interface ModelConfig {
     description?: string;
 }
 
-// Unified Model Stack - 100% Verified Working Models (Ranked Strictly by Speed: 331ms -> 2401ms)
+// Unified Model Stack - Ranked by Speed & Availability
 export const MODEL_STACK: ModelConfig[] = [
     { id: "llama-3.1-8b-instant", provider: "groq", name: "Llama 3.1 8B (Groq)" },
+    { id: "inclusionai/ling-3.0-tiny-free", provider: "vercel", name: "Ling 3.0 Tiny (Vercel AI Gateway)" },
     { id: "codestral-latest", provider: "mistral", name: "Codestral (Mistral AI)" },
     { id: "pixtral-12b-2409", provider: "mistral", name: "Pixtral 12B (Mistral AI)" },
     { id: "llama-3.3-70b-versatile", provider: "groq", name: "Llama 3.3 70B (Groq)" },
@@ -70,6 +71,7 @@ export const MODEL_STACK: ModelConfig[] = [
 let groqClient: OpenAI | null = null;
 let mistralClient: OpenAI | null = null;
 let openRouterClient: OpenAI | null = null;
+let vercelClient: OpenAI | null = null;
 
 function getGroqClient() {
     if (!groqClient && process.env.GROQ_API_KEY) {
@@ -97,8 +99,6 @@ function getOpenRouterClient() {
             baseURL: 'https://openrouter.ai/api/v1',
             apiKey: process.env.OPENROUTER_API_KEY,
             defaultHeaders: {
-                // L52: was 'https://brofit.app' — a domain we don't own. OpenRouter
-                // shows this referer to app creators, so point it at the real site.
                 'HTTP-Referer': process.env.NEXT_PUBLIC_SITE_URL || 'https://brothersfitness.in',
                 'X-Title': 'BroFit'
             }
@@ -107,12 +107,24 @@ function getOpenRouterClient() {
     return openRouterClient;
 }
 
+function getVercelClient() {
+    const key = process.env.VERCEL_AI_GATEWAY_API_KEY || process.env.OPENROUTER_API_KEY;
+    if (!vercelClient && key) {
+        vercelClient = new OpenAI({
+            baseURL: 'https://ai-gateway.vercel.com/v1',
+            apiKey: key,
+        });
+    }
+    return vercelClient;
+}
+
 function isProviderConfigured(provider: Provider): boolean {
     switch (provider) {
         case "groq": return !!process.env.GROQ_API_KEY;
         case "mistral": return !!process.env.MISTRAL_API_KEY;
         case "openrouter": return !!process.env.OPENROUTER_API_KEY;
         case "cohere": return !!process.env.COHERE_API_KEY;
+        case "vercel": return !!(process.env.VERCEL_AI_GATEWAY_API_KEY || process.env.OPENROUTER_API_KEY);
         default: return false;
     }
 }
@@ -122,6 +134,7 @@ const PROVIDER_ENV_KEY: Record<Provider, string> = {
     mistral: "MISTRAL_API_KEY",
     openrouter: "OPENROUTER_API_KEY",
     cohere: "COHERE_API_KEY",
+    vercel: "VERCEL_AI_GATEWAY_API_KEY",
 };
 
 /**
@@ -208,6 +221,7 @@ export async function generateTextWithFallback(config: AIRequestConfig): Promise
                     if (model.provider === "groq") client = getGroqClient();
                     else if (model.provider === "mistral") client = getMistralClient();
                     else if (model.provider === "openrouter") client = getOpenRouterClient();
+                    else if (model.provider === "vercel") client = getVercelClient();
 
                     if (!client) throw new Error(`${model.provider} API Key missing`);
 
