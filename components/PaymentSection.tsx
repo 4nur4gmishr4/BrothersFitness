@@ -1,7 +1,6 @@
-"use client";
+﻿"use client";
 
-import { useState, useEffect, useCallback } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { CreditCard, User, Users, Phone, QrCode, Smartphone, MessageCircle, ExternalLink, CheckCircle } from "lucide-react";
 import Image from "next/image";
 
@@ -12,19 +11,29 @@ export default function PaymentSection() {
   const [selectedPlan, setSelectedPlan] = useState<"monthly" | "quarterly" | null>(null);
   const [formData, setFormData] = useState({ name: "", gender: "", mobile: "" });
 
+  // History depth the section mounted at. Every forward step calls pushState, so
+  // once the flow finishes we can collapse those entries with history.go(-N) â€”
+  // otherwise the browser back button later re-enters the wizard from a stale
+  // paymentStep on an unrelated page (H7 fix).
+  const baseIndexRef = useRef<number>(0);
+  const isResettingRef = useRef(false);
+
   const AMAN_WHATSAPP = "919131179343";
   const UPI_ID = "annushrivastava112@okicici";
   const PAYEE_NAME = "Aman Brothers Fitness";
 
   const plans = [
     { id: "monthly", price: 700, duration: "1 Month", label: "MONTHLY" },
-    { id: "quarterly", price: 1800, duration: "3 Months", label: "QUARTERLY", save: "Save ₹300" }
+    { id: "quarterly", price: 1800, duration: "3 Months", label: "QUARTERLY", save: "Save â‚¹300" },
   ];
 
   const selectedPlanData = plans.find(p => p.id === selectedPlan);
 
-  // Handle browser back button - navigate to previous step
+  // Handle browser back button - navigate to previous step. Ignored while a
+  // reset is collapsing the stack so the user doesn't see every intermediate
+  // step flash past.
   const handlePopState = useCallback(() => {
+    if (isResettingRef.current) return;
     const state = window.history.state;
     if (state && state.paymentStep) {
       setStep(state.paymentStep);
@@ -34,13 +43,13 @@ export default function PaymentSection() {
   }, []);
 
   useEffect(() => {
+    baseIndexRef.current = window.history.length;
     window.addEventListener("popstate", handlePopState);
     return () => window.removeEventListener("popstate", handlePopState);
   }, [handlePopState]);
 
   // Navigate to a step with history management
   const navigateToStep = (newStep: PaymentStep) => {
-    // Push new state to history
     window.history.pushState({ paymentStep: newStep }, "", window.location.href);
     setStep(newStep);
   };
@@ -70,18 +79,18 @@ export default function PaymentSection() {
     const plan = selectedPlanData;
     if (!plan) return "";
 
-    const baseMessage = `🏋️ Brothers Fitness - New Membership
+    const baseMessage = `ðŸ‹ï¸ Brothers Fitness - New Membership
 
 Name: ${formData.name}
 Gender: ${formData.gender}
 Mobile: ${formData.mobile}
 Plan: ${plan.label} (${plan.duration})
-Amount: ₹${plan.price}`;
+Amount: â‚¹${plan.price}`;
 
     if (includePaymentConfirm) {
       return `${baseMessage}
 
-Status: ✅ Payment Completed
+Status: âœ… Payment Completed
 Screenshot: Attached
 
 Please activate my membership. Thank you!`;
@@ -93,380 +102,342 @@ Please activate my membership. Thank you!`;
   const openWhatsApp = (includePaymentConfirm: boolean = false) => {
     const message = generateWhatsAppMessage(includePaymentConfirm);
     const url = `https://wa.me/${AMAN_WHATSAPP}?text=${encodeURIComponent(message)}`;
-    window.open(url, '_blank');
+    window.open(url, "_blank");
   };
 
   const resetFlow = () => {
-    // Replace current state instead of pushing
-    window.history.replaceState({ paymentStep: "plan" }, "", window.location.href);
+    // Collapse every payment entry we pushed since mount, so the browser back
+    // button can't re-enter the wizard from a later page. history.go(-N) fires
+    // popstate for each popped entry â€” suppress those with the reset flag and
+    // clear it on the next tick once the stack has settled.
+    const backCount = window.history.length - baseIndexRef.current;
+    if (backCount > 0) {
+      isResettingRef.current = true;
+      window.history.go(-backCount);
+      setTimeout(() => { isResettingRef.current = false; }, 0);
+    } else {
+      window.history.replaceState({ paymentStep: "plan" }, "", window.location.href);
+    }
     setStep("plan");
     setSelectedPlan(null);
     setFormData({ name: "", gender: "", mobile: "" });
   };
 
   return (
-    <section id="payment" className="relative min-h-screen bg-black text-white py-20 overflow-hidden">
-      {/* Background Grid */}
-      <div className="absolute inset-0 bg-[linear-gradient(rgba(215,25,33,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(215,25,33,0.03)_1px,transparent_1px)] bg-[size:50px_50px]" />
+    <section id="payment" className="surface-canvas text-hi py-16 md:py-24 relative overflow-hidden">
+      {/* Subtle grid pattern - static */}
+      <div
+        className="absolute inset-0 opacity-[0.03] pointer-events-none"
+        style={{
+          
+          backgroundSize: "80px 80px",
+        }}
+      />
 
       <div className="relative z-10 container mx-auto px-4 sm:px-6 lg:px-8 max-w-6xl">
         {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
-          className="text-center mb-16"
-        >
-          <div className="inline-flex items-center gap-2 px-4 py-2 bg-gym-red/10 border border-gym-red/20 rounded-full mb-6">
-            <CreditCard className="w-4 h-4 text-gym-red" />
-            <span className="text-xs font-mono uppercase tracking-wider text-gym-red">Secure Payment</span>
+        <div className="text-center mb-12 md:mb-16">
+          <div className="inline-flex items-center gap-2 badge badge--accent mb-6">
+            <CreditCard className="w-4 h-4" />
+            Secure Payment
           </div>
-          <h2 className="text-4xl sm:text-5xl lg:text-6xl font-display font-black uppercase tracking-wide mb-4">
-            JOIN THE <span className="text-gym-red italic">BROTHERHOOD</span>
+          <h2 className="heading-display text-4xl sm:text-5xl lg:text-6xl text-hi mb-4">
+            JOIN THE <span className="text-accent">BROTHERHOOD</span>
           </h2>
-          <p className="text-gray-300 font-mono text-sm uppercase tracking-wide">
+          <p className="label-text text-mid">
             {step === "plan" && "Select Your Plan"}
             {step === "details" && "Your Membership Details"}
             {step === "paymentChoice" && "Choose Payment Method"}
             {step === "qrCode" && "Scan QR Code"}
           </p>
-        </motion.div>
+        </div>
 
-        <AnimatePresence mode="wait">
-          {/* STEP 1: Plan Selection */}
-          {step === "plan" && (
-            <motion.div
-              key="plan"
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -20 }}
-              className="grid md:grid-cols-2 gap-6"
-            >
-              {plans.map((plan, idx) => (
-                <motion.div
-                  key={plan.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: idx * 0.1 }}
-                  onClick={() => {
-                    setSelectedPlan(plan.id as "monthly" | "quarterly");
-                    navigateToStep("details");
-                  }}
-                  className="relative border-2 border-white/10 bg-white/5 hover:border-gym-red/50 rounded-lg p-8 cursor-pointer transition-all hover:shadow-[0_0_30px_rgba(215,25,33,0.2)] group"
-                >
-                  {plan.save && (
-                    <div className="absolute -top-3 right-6 bg-gym-red px-3 py-1 rounded-full">
-                      <span className="text-xs font-bold uppercase">{plan.save}</span>
-                    </div>
-                  )}
-                  <div className="text-center">
-                    <h3 className="text-sm font-mono uppercase tracking-widest text-gray-300 mb-2">
-                      {plan.label}
-                    </h3>
-                    <div className="flex items-baseline justify-center gap-1 mb-1">
-                      <span className="text-5xl font-black text-white group-hover:text-gym-red transition-colors">₹{plan.price}</span>
-                    </div>
-                    <p className="text-gray-500 font-mono text-xs uppercase mb-4">
-                      {plan.duration}
-                    </p>
-                    <div className="text-gym-red font-mono text-xs uppercase opacity-0 group-hover:opacity-100 transition-opacity">
-                      Click to Select →
-                    </div>
-                  </div>
-                </motion.div>
-              ))}
-            </motion.div>
-          )}
-
-          {/* STEP 2: Membership Details Form */}
-          {step === "details" && (
-            <motion.div
-              key="details"
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -20 }}
-              className="max-w-2xl mx-auto"
-            >
-              <div className="border border-gym-red/20 rounded-lg p-8 bg-white/5 backdrop-blur-sm">
-                {/* Selected Plan Summary */}
-                <div className="bg-gym-red/10 border border-gym-red/20 rounded-lg p-4 mb-6 text-center">
-                  <p className="text-xs font-mono uppercase text-gray-400 mb-1">Selected Plan</p>
-                  <p className="text-2xl font-display font-black tracking-wide text-gym-red">
-                    {selectedPlanData?.label} - ₹{selectedPlanData?.price}
-                  </p>
-                  <p className="text-xs text-gray-400 mt-1">{selectedPlanData?.duration}</p>
-                </div>
-
-                <h3 className="text-2xl font-display font-bold uppercase tracking-wide mb-6 text-center">
-                  Membership Details
-                </h3>
-
-                <form onSubmit={handleDetailsSubmit} className="space-y-6">
-                  {/* Name */}
-                  <div>
-                    <label className="flex items-center gap-2 text-sm font-mono uppercase tracking-wide text-gray-400 mb-2">
-                      <User className="w-4 h-4" />
-                      Full Name
-                    </label>
-                    <input
-                      type="text"
-                      required
-                      value={formData.name}
-                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                      className="w-full bg-black/50 border border-white/10 rounded px-4 py-3 text-white focus:border-gym-red focus:outline-none transition-colors"
-                      placeholder="Enter your name"
-                    />
-                  </div>
-
-                  {/* Gender */}
-                  <div>
-                    <label className="flex items-center gap-2 text-sm font-mono uppercase tracking-wide text-gray-400 mb-2">
-                      <Users className="w-4 h-4" />
-                      Gender
-                    </label>
-                    <div className="grid grid-cols-3 gap-3">
-                      {["Male", "Female", "Other"].map((gender) => (
-                        <button
-                          key={gender}
-                          type="button"
-                          onClick={() => setFormData({ ...formData, gender })}
-                          className={`py-3 rounded border-2 font-mono text-sm uppercase tracking-wide transition-all ${formData.gender === gender
-                            ? "border-gym-red bg-gym-red/10 text-gym-red"
-                            : "border-white/10 text-gray-400 hover:border-white/30"
-                            }`}
-                        >
-                          {gender}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Mobile */}
-                  <div>
-                    <label className="flex items-center gap-2 text-sm font-mono uppercase tracking-wide text-gray-300 mb-2">
-                      <Phone className="w-4 h-4" />
-                      Mobile Number
-                    </label>
-                    <input
-                      type="tel"
-                      required
-                      pattern="[0-9]{10}"
-                      maxLength={10}
-                      value={formData.mobile}
-                      onChange={(e) => setFormData({ ...formData, mobile: e.target.value.replace(/\D/g, "") })}
-                      className="w-full bg-black/50 border border-white/10 rounded px-4 py-3 text-white focus:border-gym-red focus:outline-none transition-colors"
-                      placeholder="10-digit mobile number"
-                    />
-                  </div>
-
-                  {/* Buttons */}
-                  <div className="flex gap-3">
-                    <button
-                      type="button"
-                      onClick={goBack}
-                      className="flex-1 border border-white/20 hover:border-gym-red text-white font-mono uppercase tracking-wide py-3 rounded transition-all"
-                      aria-label="Go back to plan selection"
-                    >
-                      ← Back
-                    </button>
-                    <button
-                      type="submit"
-                      disabled={!formData.name || !formData.gender || formData.mobile.length !== 10}
-                      className="flex-1 bg-gym-red hover:bg-gym-red/90 disabled:bg-gray-700 disabled:cursor-not-allowed text-white font-display font-bold uppercase tracking-wider py-3 rounded transition-all transform hover:scale-[1.02] active:scale-[0.98]"
-                      aria-label="Proceed to payment options"
-                    >
-                      Go to Payments →
-                    </button>
-                  </div>
-                </form>
-              </div>
-            </motion.div>
-          )}
-
-          {/* STEP 3: Payment Method Choice */}
-          {step === "paymentChoice" && (
-            <motion.div
-              key="choice"
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -20 }}
-              className="max-w-4xl mx-auto"
-            >
-              <div className="grid md:grid-cols-2 gap-6">
-                {/* UPI App - Opens UPI app directly with pre-filled payment */}
-                <motion.div
-                  whileHover={{ scale: 1.02 }}
-                  onClick={openUPIApp}
-                  className="border-2 border-white/10 bg-white/5 hover:border-gym-red/50 rounded-lg p-8 cursor-pointer transition-all group"
-                >
-                  <div className="text-center">
-                    <div className="w-20 h-20 mx-auto mb-6 bg-gym-red/10 rounded-full flex items-center justify-center group-hover:bg-gym-red/20 transition-colors">
-                      <Smartphone className="w-10 h-10 text-gym-red" />
-                    </div>
-                    <h3 className="text-2xl font-display font-bold uppercase tracking-wide mb-3">
-                      Pay via UPI App
-                    </h3>
-                    <p className="text-gray-400 text-sm mb-4">
-                      Opens your UPI app (GPay, PhonePe, Paytm, etc.) with payment details pre-filled
-                    </p>
-                    <div className="text-gym-red font-mono text-xs uppercase opacity-0 group-hover:opacity-100 transition-opacity">
-                      Opens UPI App →
-                    </div>
-                  </div>
-                </motion.div>
-
-                {/* QR Code */}
-                <motion.div
-                  whileHover={{ scale: 1.02 }}
-                  onClick={() => navigateToStep("qrCode")}
-                  className="border-2 border-white/10 bg-white/5 hover:border-gym-red/50 rounded-lg p-8 cursor-pointer transition-all group"
-                >
-                  <div className="text-center">
-                    <div className="w-20 h-20 mx-auto mb-6 bg-gym-red/10 rounded-full flex items-center justify-center group-hover:bg-gym-red/20 transition-colors">
-                      <QrCode className="w-10 h-10 text-gym-red" />
-                    </div>
-                    <h3 className="text-2xl font-display font-bold uppercase tracking-wide mb-3">
-                      Pay via QR Code
-                    </h3>
-                    <p className="text-gray-400 text-sm mb-4">
-                      Scan QR code to make payment instantly
-                    </p>
-                    <div className="text-gym-red font-mono text-xs uppercase opacity-0 group-hover:opacity-100 transition-opacity">
-                      Click to Continue →
-                    </div>
-                  </div>
-                </motion.div>
-              </div>
-
-              {/* WhatsApp Section - After Payment */}
-              <div className="mt-8 border border-[#25D366]/30 rounded-lg p-6 bg-[#25D366]/5">
+        {/* STEP 1: Plan Selection */}
+        {step === "plan" && (
+          <div className="grid md:grid-cols-2 gap-6 max-w-3xl mx-auto">
+            {plans.map((plan) => (
+              <div
+                key={plan.id}
+                onClick={() => {
+                  setSelectedPlan(plan.id as "monthly" | "quarterly");
+                  navigateToStep("details");
+                }}
+                className={`relative p-8 cursor-pointer transition-colors duration-fast group ${
+                  plan.save ? "featured-tier" : "surface-card hairline hover:border-accent"
+                }`}
+              >
+                {plan.save && (
+                  <div className="featured-tier__badge">{plan.save}</div>
+                )}
                 <div className="text-center">
-                  <p className="text-gray-400 font-mono text-xs uppercase mb-4">
-                    After completing payment, send your screenshot via WhatsApp:
+                  <h3 className="label-text text-mid mb-4">{plan.label}</h3>
+                  <p className="stat-callout__value text-hi group-hover:text-accent transition-colors duration-fast">
+                    â‚¹{plan.price}
                   </p>
-                  <button
-                    onClick={() => openWhatsApp(true)}
-                    className="bg-[#25D366] hover:bg-[#20BA5A] text-white font-display font-bold uppercase tracking-wider py-3 px-8 rounded transition-all transform hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-3 mx-auto"
-                    aria-label="Send payment screenshot via WhatsApp"
-                  >
-                    <MessageCircle className="w-5 h-5" />
-                    Send Payment Screenshot
-                    <ExternalLink className="w-4 h-4" />
-                  </button>
+                  <p className="label-text text-faint mt-3">{plan.duration}</p>
+                  <p className="label-text text-accent mt-6 opacity-0 group-hover:opacity-100 transition-opacity duration-fast">
+                    Click to Select â†’
+                  </p>
                 </div>
               </div>
+            ))}
+          </div>
+        )}
 
-              <div className="text-center mt-6">
-                <button
-                  onClick={goBack}
-                  className="text-gray-300 hover:text-white font-mono text-sm uppercase tracking-wide transition-colors"
-                  aria-label="Go back to membership details"
-                >
-                  ← Back to Details
-                </button>
+        {/* STEP 2: Membership Details Form */}
+        {step === "details" && (
+          <div className="max-w-2xl mx-auto">
+            <div className="surface-card hairline p-8">
+              {/* Selected Plan Summary */}
+              <div className="surface-elevated hairline border-accent p-4 mb-6 text-center">
+                <p className="label-text text-low mb-1">Selected Plan</p>
+                <p className="heading-section text-2xl font-bold text-accent">
+                  {selectedPlanData?.label} - â‚¹{selectedPlanData?.price}
+                </p>
+                <p className="label-text text-faint mt-1">{selectedPlanData?.duration}</p>
               </div>
-            </motion.div>
-          )}
 
-          {/* STEP 4: QR Code Payment */}
-          {step === "qrCode" && (
-            <motion.div
-              key="qrCode"
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -20 }}
-              className="max-w-2xl mx-auto"
-            >
-              <div className="border border-gym-red/20 rounded-lg p-8 bg-white/5 backdrop-blur-sm">
-                <div className="text-center mb-6">
-                  <div className="w-20 h-20 mx-auto mb-4 bg-gym-red/10 rounded-full flex items-center justify-center">
-                    <QrCode className="w-10 h-10 text-gym-red" />
-                  </div>
-                  <h3 className="text-3xl font-display font-black uppercase tracking-wide mb-2">
-                    Scan & Pay ₹{selectedPlanData?.price}
-                  </h3>
-                  <p className="text-gray-400 font-mono text-sm">
-                    {selectedPlanData?.duration}
-                  </p>
+              <h3 className="heading-section text-2xl text-hi mb-6 text-center">
+                Membership Details
+              </h3>
+
+              <form onSubmit={handleDetailsSubmit} className="space-y-6">
+                <div>
+                  <label className="label-text text-mid flex items-center gap-2 mb-2">
+                    <User className="w-4 h-4" /> Full Name
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={formData.name}
+                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    className="input-field"
+                    placeholder="Enter your name"
+                  />
                 </div>
 
-                {/* QR Code */}
-                <div className="flex justify-center mb-6">
-                  <div className="relative w-72 h-72 border-4 border-gym-red/20 rounded-lg overflow-hidden bg-white p-4">
-                    <Image
-                      src="/assets/QRCode.jpeg"
-                      alt="Payment QR Code"
-                      fill
-                      className="object-contain"
-                    />
-                  </div>
-                </div>
-
-                {/* UPI ID Fallback */}
-                <div className="bg-black/50 border border-white/10 rounded-lg p-4 mb-6 text-center">
-                  <p className="text-gray-400 font-mono text-xs uppercase mb-2">Or use UPI ID</p>
-                  <p className="text-white font-mono text-lg break-all">
-                    {UPI_ID}
-                  </p>
-                </div>
-
-                {/* Instructions */}
-                <div className="bg-gym-red/5 border border-gym-red/20 rounded-lg p-6 mb-6">
-                  <p className="text-xs font-mono uppercase text-gray-400 mb-4 flex items-center gap-2">
-                    <CheckCircle className="w-4 h-4" /> Payment Steps
-                  </p>
-                  <ol className="text-sm text-gray-300 space-y-3 list-decimal list-inside">
-                    <li>Open any UPI app on your phone</li>
-                    <li>Scan the QR code above</li>
-                    <li>Pay <span className="text-gym-red font-semibold">₹{selectedPlanData?.price}</span></li>
-                    <li>Take a <span className="text-gym-red font-semibold">screenshot</span> of the transaction</li>
-                    <li>Click below to send confirmation via WhatsApp</li>
-                  </ol>
-                </div>
-
-                {/* User Details */}
-                <div className="bg-white/5 border border-white/10 rounded-lg p-4 mb-6">
-                  <p className="text-xs font-mono uppercase text-gray-400 mb-3">Your Details:</p>
-                  <div className="space-y-2 text-sm">
-                    <p><span className="text-gray-400">Name:</span> <span className="text-white font-semibold">{formData.name}</span></p>
-                    <p><span className="text-gray-400">Gender:</span> <span className="text-white font-semibold">{formData.gender}</span></p>
-                    <p><span className="text-gray-400">Mobile:</span> <span className="text-white font-semibold">{formData.mobile}</span></p>
+                <div>
+                  <label className="label-text text-mid flex items-center gap-2 mb-2">
+                    <Users className="w-4 h-4" /> Gender
+                  </label>
+                  <div className="grid grid-cols-3 gap-3">
+                    {["Male", "Female", "Other"].map((gender) => (
+                      <button
+                        key={gender}
+                        type="button"
+                        onClick={() => setFormData({ ...formData, gender })}
+                        className={`py-3 label-text transition-colors duration-fast ${
+                          formData.gender === gender
+                            ? "bg-accent text-white border border-accent"
+                            : "surface-card hairline text-mid hover:border-accent"
+                        }`}
+                      >
+                        {gender}
+                      </button>
+                    ))}
                   </div>
                 </div>
 
-                {/* WhatsApp Button */}
-                <button
-                  onClick={() => openWhatsApp(true)}
-                  className="w-full bg-[#25D366] hover:bg-[#20BA5A] text-white font-display font-bold uppercase tracking-wider py-4 rounded transition-all transform hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-3 mb-4"
-                  aria-label="Send payment confirmation via WhatsApp"
-                >
-                  <MessageCircle className="w-5 h-5" />
-                  Send Payment Screenshot via WhatsApp
-                  <ExternalLink className="w-4 h-4" />
-                </button>
+                <div>
+                  <label className="label-text text-mid flex items-center gap-2 mb-2">
+                    <Phone className="w-4 h-4" /> Mobile Number
+                  </label>
+                  <input
+                    type="tel"
+                    required
+                    pattern="[0-9]{10}"
+                    maxLength={10}
+                    value={formData.mobile}
+                    onChange={(e) => setFormData({ ...formData, mobile: e.target.value.replace(/\D/g, "") })}
+                    className="input-field"
+                    placeholder="10-digit mobile number"
+                  />
+                </div>
 
                 <div className="flex gap-3">
                   <button
+                    type="button"
                     onClick={goBack}
-                    className="flex-1 border border-white/20 hover:border-gym-red text-white font-mono uppercase text-sm py-3 rounded transition-all"
-                    aria-label="Change payment method"
+                    className="btn-secondary flex-1"
+                    aria-label="Go back to plan selection"
                   >
-                    ← Change Method
+                    â† Back
                   </button>
                   <button
-                    onClick={resetFlow}
-                    className="flex-1 border border-white/20 hover:border-gym-red text-white font-mono uppercase text-sm py-3 rounded transition-all"
-                    aria-label="Start payment process over"
+                    type="submit"
+                    disabled={!formData.name || !formData.gender || formData.mobile.length !== 10}
+                    className="btn-primary flex-1"
+                    aria-label="Proceed to payment options"
                   >
-                    Start Over
+                    Go to Payments â†’
                   </button>
                 </div>
+              </form>
+            </div>
+          </div>
+        )}
+
+        {/* STEP 3: Payment Method Choice */}
+        {step === "paymentChoice" && (
+          <div className="max-w-4xl mx-auto">
+            <div className="grid md:grid-cols-2 gap-6">
+              {/* UPI App */}
+              <div
+                onClick={openUPIApp}
+                className="surface-card hairline hover:border-accent p-8 cursor-pointer transition-colors duration-fast group"
+              >
+                <div className="text-center">
+                  <div className="w-20 h-20 mx-auto mb-6 surface-elevated hairline flex items-center justify-center group-hover:border-accent transition-colors duration-fast">
+                    <Smartphone className="w-10 h-10 text-accent" />
+                  </div>
+                  <h3 className="heading-section text-2xl text-hi mb-3">Pay via UPI App</h3>
+                  <p className="body-text text-sm text-mid mb-4">
+                    Opens your UPI app (GPay, PhonePe, Paytm, etc.) with payment details pre-filled
+                  </p>
+                  <p className="label-text text-accent opacity-0 group-hover:opacity-100 transition-opacity duration-fast">
+                    Opens UPI App â†’
+                  </p>
+                </div>
               </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+
+              {/* QR Code */}
+              <div
+                onClick={() => navigateToStep("qrCode")}
+                className="surface-card hairline hover:border-accent p-8 cursor-pointer transition-colors duration-fast group"
+              >
+                <div className="text-center">
+                  <div className="w-20 h-20 mx-auto mb-6 surface-elevated hairline flex items-center justify-center group-hover:border-accent transition-colors duration-fast">
+                    <QrCode className="w-10 h-10 text-accent" />
+                  </div>
+                  <h3 className="heading-section text-2xl text-hi mb-3">Pay via QR Code</h3>
+                  <p className="body-text text-sm text-mid mb-4">
+                    Scan QR code to make payment instantly
+                  </p>
+                  <p className="label-text text-accent opacity-0 group-hover:opacity-100 transition-opacity duration-fast">
+                    Click to Continue â†’
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* WhatsApp Section - After Payment */}
+            <div className="mt-8 surface-card hairline p-6">
+              <div className="text-center">
+                <p className="label-text text-mid mb-4">
+                  After completing payment, send your screenshot via WhatsApp:
+                </p>
+                <button
+                  onClick={() => openWhatsApp(true)}
+                  className="btn-primary"
+                  aria-label="Send payment screenshot via WhatsApp"
+                >
+                  <MessageCircle className="w-5 h-5" />
+                  Send Payment Screenshot
+                  <ExternalLink className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+
+            <div className="text-center mt-6">
+              <button
+                onClick={goBack}
+                className="label-text text-mid hover:text-hi transition-colors duration-fast"
+                aria-label="Go back to membership details"
+              >
+                â† Back to Details
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* STEP 4: QR Code Payment */}
+        {step === "qrCode" && (
+          <div className="max-w-2xl mx-auto">
+            <div className="surface-card hairline p-8">
+              <div className="text-center mb-6">
+                <div className="w-20 h-20 mx-auto mb-4 surface-elevated hairline flex items-center justify-center">
+                  <QrCode className="w-10 h-10 text-accent" />
+                </div>
+                <h3 className="heading-display text-3xl text-hi mb-2">
+                  Scan &amp; Pay â‚¹{selectedPlanData?.price}
+                </h3>
+                <p className="label-text text-mid">{selectedPlanData?.duration}</p>
+              </div>
+
+              {/* QR Code */}
+              <div className="flex justify-center mb-6">
+                <div className="relative w-72 h-72 border-4 border-accent overflow-hidden bg-white p-4">
+                  <Image
+                    src="/assets/QRCode.jpeg"
+                    alt="Payment QR Code"
+                    fill
+                    className="object-contain"
+                  />
+                </div>
+              </div>
+
+              {/* UPI ID Fallback */}
+              <div className="surface-elevated hairline p-4 mb-6 text-center">
+                <p className="label-text text-mid mb-2">Or use UPI ID</p>
+                <p className="font-mono text-lg text-hi break-all">{UPI_ID}</p>
+              </div>
+
+              {/* Instructions */}
+              <div className="surface-elevated hairline border-accent p-6 mb-6">
+                <p className="label-text text-accent mb-4 flex items-center gap-2">
+                  <CheckCircle className="w-4 h-4" /> Payment Steps
+                </p>
+                <ol className="body-text text-sm text-mid space-y-3 list-decimal list-inside">
+                  <li>Open any UPI app on your phone</li>
+                  <li>Scan the QR code above</li>
+                  <li>Pay <span className="text-accent font-semibold">â‚¹{selectedPlanData?.price}</span></li>
+                  <li>Take a <span className="text-accent font-semibold">screenshot</span> of the transaction</li>
+                  <li>Click below to send confirmation via WhatsApp</li>
+                </ol>
+              </div>
+
+              {/* User Details */}
+              <div className="surface-elevated hairline p-4 mb-6">
+                <p className="label-text text-mid mb-3">Your Details:</p>
+                <div className="space-y-2 body-text text-sm text-mid">
+                  <p><span className="text-low">Name:</span> <span className="text-hi font-semibold">{formData.name}</span></p>
+                  <p><span className="text-low">Gender:</span> <span className="text-hi font-semibold">{formData.gender}</span></p>
+                  <p><span className="text-low">Mobile:</span> <span className="text-hi font-semibold">{formData.mobile}</span></p>
+                </div>
+              </div>
+
+              {/* WhatsApp Button */}
+              <button
+                onClick={() => openWhatsApp(true)}
+                className="btn-primary w-full mb-4"
+                aria-label="Send payment confirmation via WhatsApp"
+              >
+                <MessageCircle className="w-5 h-5" />
+                Send Payment Screenshot via WhatsApp
+                <ExternalLink className="w-4 h-4" />
+              </button>
+
+              <div className="flex gap-3">
+                <button
+                  onClick={goBack}
+                  className="btn-secondary flex-1"
+                  aria-label="Change payment method"
+                >
+                  â† Change Method
+                </button>
+                <button
+                  onClick={resetFlow}
+                  className="btn-secondary flex-1"
+                  aria-label="Start payment process over"
+                >
+                  Start Over
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </section>
   );
 }
+

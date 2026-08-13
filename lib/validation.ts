@@ -13,10 +13,10 @@ export type LoginPayload = z.infer<typeof LoginSchema>;
 
 // --- Contact Form ---
 export const ContactSchema = z.object({
-    name: z.string().min(1, 'Name is required'),
-    email: z.string().email('Invalid email format'),
-    phone: z.string().optional(),
-    message: z.string().min(1, 'Message is required'),
+    name: z.string().min(1, 'Name is required').max(100, 'Name is too long'),
+    email: z.string().email('Invalid email format').max(254, 'Email is too long'),
+    phone: z.string().max(20, 'Phone is too long').optional(),
+    message: z.string().min(1, 'Message is required').max(2000, 'Message must be under 2000 characters'),
     // Honeypot field - should be empty if submitted by a human
     _honeypot: z.string().max(0, 'Bot detected').optional(),
 });
@@ -24,7 +24,7 @@ export type ContactPayload = z.infer<typeof ContactSchema>;
 
 // --- Chat ---
 export const ChatSchema = z.object({
-    message: z.string().min(1, 'Message is required'),
+    message: z.string().min(1, 'Message is required').max(4000, 'Message must be under 4000 characters'),
     context: z.object({
         language: z.enum(['en', 'hi']).optional().default('en'),
     }).passthrough(), // Allow extra fields
@@ -32,26 +32,36 @@ export const ChatSchema = z.object({
 export type ChatPayload = z.infer<typeof ChatSchema>;
 
 // --- Generate Diet ---
+// Shared numeric bound so the server never pays for or renders absurd biometrics.
+const numericInRange = (min: number, max: number) =>
+    z.union([z.string(), z.number()]).refine(
+        (v) => {
+            const n = typeof v === 'number' ? v : parseFloat(v);
+            return !Number.isNaN(n) && n >= min && n <= max;
+        },
+        { message: `Value must be between ${min}-${max}` }
+    );
+
 export const GenerateDietSchema = z.object({
-    calories: z.number().optional(),
-    mode: z.string().optional(),
-    dietType: z.string().optional(),
-    budget: z.string().optional(),
-    goal_description: z.string().optional(),
-    currentWeight: z.union([z.string(), z.number()]).optional(),
-    targetWeight: z.union([z.string(), z.number()]).optional(),
-    age: z.union([z.string(), z.number()]).optional(),
-    height: z.union([z.string(), z.number()]).optional(),
-    gender: z.string().optional(),
-    activityLevel: z.string().optional(),
-    weightChangeRate: z.union([z.string(), z.number()]).optional(),
+    calories: z.number().min(800).max(10000).optional(),
+    mode: z.string().max(20).optional(),
+    dietType: z.string().max(40).optional(),
+    budget: z.string().max(100).optional(),
+    goal_description: z.string().max(500, 'Goal description must be under 500 characters').optional(),
+    currentWeight: numericInRange(1, 500).optional(),
+    targetWeight: numericInRange(1, 500).optional(),
+    age: numericInRange(10, 120).optional(),
+    height: numericInRange(50, 300).optional(),
+    gender: z.string().max(20).optional(),
+    activityLevel: z.string().max(40).optional(),
+    weightChangeRate: numericInRange(0, 5).optional(),
 });
 export type GenerateDietPayload = z.infer<typeof GenerateDietSchema>;
 
 // --- AI Response Schema (lenient, for safeParse) ---
 // This validates the *structure* of the AI response to prevent crashes.
 export const DietResponseSchema = z.object({
-    tactical_brief: z.record(z.string(), z.string()).optional(),
+    summary: z.record(z.string(), z.string()).optional(),
     user_inputs_summary: z.record(z.string(), z.any()).optional(),
     transformation_timeline: z.object({
         estimated_duration: z.string().optional(),
@@ -73,7 +83,7 @@ export const DietResponseSchema = z.object({
 // as a PLAN_PRICES lookup key (a typo previously produced ₹0 revenue).
 export const MemberSchema = z.object({
     full_name: z.string().min(1, 'Name is required'),
-    mobile: z.string().min(7, 'Mobile number is required'),
+    mobile: z.string().min(7, 'Mobile number is required').max(15, 'Mobile number is too long'),
     email: z.string().nullable().optional(),
     address: z.string().nullable().optional(),
     date_of_birth: z.string().nullable().optional(),
@@ -91,11 +101,11 @@ export type MemberPayload = z.infer<typeof MemberSchema>;
 
 // --- Profile Update ---
 export const ProfileUpdateSchema = z.object({
-    full_name: z.string().min(1, 'Name is required').optional(),
+    full_name: z.string().min(1, 'Name is required').max(100).optional(),
     date_of_birth: z.string().optional(),
-    height_cm: z.number().optional(),
-    weight_kg: z.number().optional(),
-    gender: z.string().optional(),
+    height_cm: z.number().min(50).max(300).optional(),
+    weight_kg: z.number().min(10).max(500).optional(),
+    gender: z.string().max(20).optional(),
     photo_url: z.string().url().optional(),
 });
 export type ProfileUpdatePayload = z.infer<typeof ProfileUpdateSchema>;

@@ -5,7 +5,6 @@ import { supabase } from '@/lib/supabase';
 
 export type UserProfile = {
     id: string;
-    firebase_uid?: string;
     email: string | null;
     full_name: string | null;
     photo_url?: string | null;
@@ -50,17 +49,7 @@ export type ProfileUpdateData = {
 const UserAuthContext = createContext<UserAuthContextType | undefined>(undefined);
 
 import { toast } from "sonner";
-import { MAX_DAILY_CREDITS } from '@/lib/config';
-
-/** YYYY-MM-DD in India Standard Time (credit day boundary is IST midnight). */
-function istToday(): string {
-    return new Intl.DateTimeFormat('en-CA', {
-        timeZone: 'Asia/Kolkata',
-        year: 'numeric',
-        month: '2-digit',
-        day: '2-digit',
-    }).format(new Date());
-}
+import { MAX_DAILY_CREDITS, istToday } from '@/lib/config';
 
 export function UserAuthProvider({ children }: { children: ReactNode }) {
     const [user, setUser] = useState<UserProfile | null>(null);
@@ -93,7 +82,6 @@ export function UserAuthProvider({ children }: { children: ReactNode }) {
                 .from('users')
                 .insert({
                     id: authId,
-                    firebase_uid: authId, // legacy column, kept in sync
                     email: session.user.email || null,
                     full_name: fallbackName,
                     daily_credits: MAX_DAILY_CREDITS,
@@ -109,7 +97,6 @@ export function UserAuthProvider({ children }: { children: ReactNode }) {
         const today = istToday();
         setUser({
             id: row.id,
-            firebase_uid: row.firebase_uid || row.id,
             email: row.email || session.user.email || null,
             full_name: row.full_name || (session.user.user_metadata?.full_name as string) || 'Member',
             photo_url: row.photo_url ?? null,

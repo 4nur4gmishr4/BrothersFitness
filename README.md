@@ -219,7 +219,7 @@ export const MAX_DAILY_CREDITS = parseInt(process.env.MAX_DAILY_CREDITS || '5', 
 │  │  if (UPSTASH_REDIS_REST_URL && UPSTASH_REDIS_REST_TOKEN)│   │
 │  │     → Distributed Redis (Upstash)                       │   │
 │  │  else                                                    │   │
-│  │     → In-memory Map (per-instance, dev only)            │   │
+│  │     → In-memory Map (per-instance, dev/tests/fallback)  │   │
 │  └─────────────────────────────────────────────────────────┘   │
 │         │                                                       │
 │         ▼                                                       │
@@ -279,7 +279,6 @@ npm run dev
 | `OPENROUTER_API_KEY` | Fallback AI provider |
 | `COHERE_API_KEY` | Fallback AI provider |
 | `API_NINJAS_KEY` | Exercise data |
-| `DISCORD_WEBHOOK_URL` | Admin notifications |
 | `UPSTASH_REDIS_REST_URL` | Distributed rate limiting |
 | `UPSTASH_REDIS_REST_TOKEN` | Distributed rate limiting |
 | `TRUST_PROXY_HEADERS` | Set `true` behind proxy (Vercel auto) |
@@ -312,7 +311,7 @@ brofit/
 │   │   ├── auth/            # Supabase OAuth callbacks
 │   │   ├── generate-diet/route.ts      # AI diet generation
 │   │   ├── exercises/ninjas/route.ts   # Exercise search
-│   │   ├── contact/route.ts            # Contact form → Discord
+│   │   ├── contact/route.ts            # Contact form submission
 │   │   └── cron/monthly-revenue/route.ts # Scheduled job
 │   ├── admin/               # Admin dashboard pages
 │   ├── (user)/              # User dashboard (protected)
@@ -414,11 +413,26 @@ export const MEMBERSHIP_PLANS = Object.keys(PLAN_PRICES) as const;
 
 ### `next.config.mjs` — PWA Config
 ```javascript
-const withPWA = require('next-pwa')({
+// @ducanh2912/next-pwa wraps the Next config; PWA is disabled in dev.
+// `skipWaiting` lives in `workboxOptions` (top-level flags are ignored).
+import withPWA from '@ducanh2912/next-pwa';
+
+const nextConfig = { /* ... */ };
+
+export default withPWA({
   dest: 'public',
-  disable: process.env.NODE_ENV === 'development', // PWA only in prod
   register: true,
-  skipWaiting: true,
+  disable: process.env.NODE_ENV === 'development',
+  cacheOnFrontEndNav: true,
+  // Navigations are NetworkFirst so deployed HTML is always fresh; the app
+  // shell stays available offline.
+  aggressiveFrontEndNavCaching: false,
+  reloadOnOnline: true,
+  workboxOptions: {
+    // New SW waits for user opt-in: PwaUpdateToast posts SKIP_WAITING on
+    // "Reload" instead of auto-activating mid-session (avoids chunk-hash 404s).
+    skipWaiting: false,
+  },
 });
 ```
 
@@ -428,10 +442,10 @@ const withPWA = require('next-pwa')({
 
 | Area | Status | Notes |
 |------|--------|-------|
-| Rate limiting | In-memory only | Move to Upstash Redis for production (set env vars) |
-| PWA | Dev disabled | Service worker only registers on production builds |
-| Admin revocation | In-memory nonce set | Use Upstash Redis for distributed deployments |
-| AI timeout | 30s/provider, 90s total | Adjust in `lib/ai-provider.ts` if needed |
+| Rate limiting | Redis (Upstash) + in-memory fallback | Distributed when `UPSTASH_REDIS_REST_URL`/`TOKEN` set; falls back to per-instance memory in dev |
+| PWA | Manual SW updates | `skipWaiting: false` (workboxOptions): new SW waits for user opt-in via `PwaUpdateToast` Reload → SKIP_WAITING; navigations are NetworkFirst so deployed HTML is always fresh |
+| Admin revocation | Redis-backed | Nonce blacklist in Upstash Redis when configured, in-memory otherwise |
+| AI timeout | 8s/provider, 60s total | Tightened for serverless budgets in `lib/ai-provider.ts` |
 | Test env | `NODE_ENV=production` inherited | Use `VITEST===true` for test guards (see memory) |
 
 ---

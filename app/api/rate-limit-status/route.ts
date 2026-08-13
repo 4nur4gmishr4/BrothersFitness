@@ -1,35 +1,34 @@
 import { NextResponse } from "next/server";
-import { peekRateLimit, RATE_LIMITS, getClientIp } from "@/lib/rate-limit";
-import { verifyUserToken } from "@/lib/credit-service";
+import { MAX_DAILY_CREDITS } from "@/lib/config";
+import { verifyUserToken, getUserCreditState } from "@/lib/credit-service";
 
 export async function GET(req: Request) {
     try {
-        // Key by the authenticated user when possible, so the counter matches
-        // the one the AI routes enforce; otherwise fall back to the client IP.
-        let key: string;
         const authHeader = req.headers.get("Authorization");
 
         if (authHeader?.startsWith("Bearer ")) {
-            try {
-                const identity = await verifyUserToken(req);
-                key = identity instanceof NextResponse
-                    ? `ip:${getClientIp(req)}`
-                    : `user:${identity.userId}`;
-            } catch {
-                key = `ip:${getClientIp(req)}`;
+            const identity = await verifyUserToken(req);
+            if (!(identity instanceof NextResponse)) {
+                // C2 fix: read credits from the Supabase user row (authoritative)
+                // instead of peekRateLimit, whose Redis path was always returning
+                // full quota due to a never-written key.
+                const creditState = await getUserCreditState(identity.supabase, identity.userId);
+                if (!(creditState instanceof NextResponse)) {
+                    return NextResponse.json({
+                        ai: {
+                            remaining: creditState.credits,
+                            total: MAX_DAILY_CREDITS,
+                        }
+                    });
+                }
             }
-        } else {
-            key = `ip:${getClientIp(req)}`;
         }
 
-        // peekRateLimit is non-destructive: reading status must not consume a slot.
-        const aiCheck = await peekRateLimit(key, RATE_LIMITS.AI_COMBINED);
-
+        // Unauthenticated fallback: return the credit cap (no per-user data).
         return NextResponse.json({
             ai: {
-                remaining: aiCheck.remaining,
-                total: RATE_LIMITS.AI_COMBINED.maxRequests,
-                resetIn: aiCheck.resetIn
+                remaining: MAX_DAILY_CREDITS,
+                total: MAX_DAILY_CREDITS,
             }
         });
     } catch (error) {

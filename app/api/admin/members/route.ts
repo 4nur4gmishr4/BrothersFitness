@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { getServiceSupabase } from '@/lib/server-supabase';
 import { requireAdminToken } from '@/lib/admin-auth';
 import { MemberSchema } from '@/lib/validation';
+import { logger } from '@/lib/logger';
 
 // All admin routes use the service-role client (bypasses RLS) because the
 // admin tables have no anon/authenticated grants. The HMAC token in
@@ -23,7 +24,7 @@ async function logActivity(
         }]);
     } catch (err) {
         // Silently fail - logging shouldn't block operations
-        console.warn('Activity log failed:', err);
+        logger.warn('Activity log failed', { error: err instanceof Error ? err.message : 'Unknown' });
     }
 }
 
@@ -31,6 +32,13 @@ async function logActivity(
 // ships the whole dataset to the admin grid in one payload.
 const DEFAULT_PAGE_SIZE = 50;
 const MAX_PAGE_SIZE = 200;
+
+// Escape PostgREST `or()` filter metacharacters so a search string
+// containing commas, %, or _ doesn't splice extra predicates or act as
+// a wildcard. Admin-gated route, but defensive.
+function escapeOrFilter(term: string): string {
+    return term.replace(/[,_%]/g, '\\$&');
+}
 
 function clampInt(value: string | null, fallback: number, min: number, max: number): number {
     if (value === null || value.trim() === '') return fallback;
@@ -63,7 +71,7 @@ export async function GET(req: Request) {
             .select('*', { count: isSearch || paginate ? 'exact' : undefined });
 
         if (isSearch) {
-            const term = `%${search}%`;
+            const term = `%${escapeOrFilter(search)}%`;
             // Fuzzy-ish ILIKE across name + mobile; the leading % keeps the
             // match working from anywhere in the field.
             query = query.or(`full_name.ilike.${term},mobile.ilike.${term}`);
@@ -98,7 +106,7 @@ export async function GET(req: Request) {
             ...(paginate || isSearch ? { total: count ?? data.length, page, pageSize } : {}),
         });
     } catch (error) {
-        console.error('Error fetching members:', error);
+        logger.error('Error fetching members', { error: error instanceof Error ? error.message : 'Unknown' });
         return NextResponse.json(
             { error: 'Failed to fetch members' },
             { status: 500 }
@@ -147,15 +155,20 @@ export async function POST(req: Request) {
             `Let's crush those goals together! 🔥\n\n` +
             `- Team BroFit`
         );
-        const whatsappUrl = data.mobile ?
-            `https://wa.me/91${data.mobile.replace(/\D/g, '')}?text=${welcomeMessage}` : null;
+        // L47: avoid `91` + `91xxx` = `9191xxx` — use the same country-code
+        // dedup pattern applied in LeadsInbox (M29).
+        const whatsappUrl = data.mobile ? (() => {
+            const digits = data.mobile.replace(/\D/g, '');
+            const number = digits.startsWith('91') ? digits : `91${digits}`;
+            return `https://wa.me/${number}?text=${welcomeMessage}`;
+        })() : null;
 
         return NextResponse.json({
             member: data,
             welcomeWhatsApp: whatsappUrl
         });
     } catch (error) {
-        console.error('Error creating member:', error);
+        logger.error('Error creating member', { error: error instanceof Error ? error.message : 'Unknown' });
         return NextResponse.json(
             { error: 'Failed to create member' },
             { status: 500 }
@@ -186,6 +199,14 @@ export async function DELETE(req: Request) {
             .eq('id', id)
             .single();
 
+        // L48: return 404 instead of reporting success for a non-existent member.
+        if (!member) {
+            return NextResponse.json(
+                { error: 'Member not found' },
+                { status: 404 }
+            );
+        }
+
         // If member has a photo, delete it from storage
         if (member?.photo_url) {
             try {
@@ -196,7 +217,7 @@ export async function DELETE(req: Request) {
                     await getServiceSupabase().storage.from('member-photos').remove([filename]);
                 }
             } catch (storageError) {
-                console.warn('Failed to delete photo from storage:', storageError);
+                logger.warn('Failed to delete photo from storage', { error: storageError instanceof Error ? storageError.message : 'Unknown' });
                 // Continue with member deletion even if photo deletion fails
             }
         }
@@ -216,7 +237,7 @@ export async function DELETE(req: Request) {
 
         return NextResponse.json({ success: true });
     } catch (error) {
-        console.error('Error deleting member:', error);
+        logger.error('Error deleting member', { error: error instanceof Error ? error.message : 'Unknown' });
         return NextResponse.json(
             { error: 'Failed to delete member' },
             { status: 500 }
@@ -264,7 +285,7 @@ export async function PUT(req: Request) {
 
         return NextResponse.json({ member: data });
     } catch (error) {
-        console.error('Error updating member:', error);
+        logger.error('Error updating member', { error: error instanceof Error ? error.message : 'Unknown' });
         return NextResponse.json(
             { error: 'Failed to update member' },
             { status: 500 }

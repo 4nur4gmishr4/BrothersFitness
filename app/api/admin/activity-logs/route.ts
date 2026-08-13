@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getServiceSupabase } from '@/lib/server-supabase';
 import { requireAdminToken } from '@/lib/admin-auth';
+import { logger } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -26,7 +27,7 @@ export async function GET(req: Request) {
 
         return NextResponse.json({ logs: data });
     } catch (error) {
-        console.error('Error fetching activity logs:', error);
+        logger.error('Error fetching activity logs', { error: error instanceof Error ? error.message : 'Unknown' });
         return NextResponse.json(
             { error: 'Failed to fetch logs' },
             { status: 500 }

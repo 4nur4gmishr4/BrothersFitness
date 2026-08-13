@@ -14,7 +14,6 @@ CREATE TABLE IF NOT EXISTS public.users (
 );
 
 -- 2. Add columns safely (using IF NOT EXISTS)
-ALTER TABLE public.users ADD COLUMN IF NOT EXISTS firebase_uid VARCHAR(128) UNIQUE;
 ALTER TABLE public.users ADD COLUMN IF NOT EXISTS email VARCHAR(255);
 ALTER TABLE public.users ADD COLUMN IF NOT EXISTS photo_url TEXT;
 ALTER TABLE public.users ADD COLUMN IF NOT EXISTS full_name VARCHAR(100);
@@ -27,7 +26,6 @@ ALTER TABLE public.users ADD COLUMN IF NOT EXISTS gender VARCHAR(10);
 
 -- 3. Create Indexes (idempotent)
 CREATE INDEX IF NOT EXISTS idx_users_email ON public.users(email);
-CREATE INDEX IF NOT EXISTS idx_users_firebase_uid ON public.users(firebase_uid);
 
 -- 4. Enable RLS
 ALTER TABLE public.users ENABLE ROW LEVEL SECURITY;

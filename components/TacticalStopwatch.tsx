@@ -1,8 +1,8 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { motion, AnimatePresence } from "framer-motion";
 import { Timer, Play, Pause, RotateCcw, X, TrendingUp, TrendingDown, Bell } from "lucide-react";
+import TimerTick from "@/components/animations/TimerTick";
 
 export default function TacticalStopwatch() {
     const [isOpen, setIsOpen] = useState(false);
@@ -87,123 +87,114 @@ export default function TacticalStopwatch() {
     return (
         <>
             {/* Floating Toggle Button */}
-            <motion.button
+            <button
                 onClick={() => setIsOpen(true)}
-                className="fixed bottom-24 left-6 z-50 w-14 h-14 bg-gym-red rounded-full flex items-center justify-center shadow-lg border-2 border-white/20"
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.9 }}
-                initial={{ opacity: 0, scale: 0 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: 0.5 }}
-                aria-label="Open Tactical Timer"
+                className="fixed bottom-24 left-6 z-[105] w-14 h-14 bg-accent text-white flex items-center justify-center border border-accent-hover hover:bg-accent-hover transition-colors duration-fast"
+                aria-label="Open rest timer"
             >
-                <Timer className="w-6 h-6 text-white" />
-            </motion.button>
+                <Timer className="w-6 h-6" />
+            </button>
 
             {/* Timer Overlay */}
-            <AnimatePresence>
-                {isOpen && (
-                    <motion.div
-                        initial={{ opacity: 0, y: 50 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: 50 }}
-                        className="fixed bottom-24 left-6 z-50 bg-black border border-white/20 rounded-2xl p-6 shadow-2xl w-80"
-                    >
-                        {/* Header */}
-                        <div className="flex justify-between items-center mb-4">
-                            <h3 className="font-black uppercase text-sm tracking-widest">Tactical Timer</h3>
-                            <button onClick={() => setIsOpen(false)} className="text-gray-500 hover:text-white">
-                                <X className="w-5 h-5" />
-                            </button>
-                        </div>
+            {isOpen && (
+                <div className="fixed bottom-24 left-6 z-[200] surface-modal hairline p-6 w-80">
+                    {/* Header */}
+                    <div className="flex justify-between items-center mb-4">
+                        <h3 className="heading-section text-sm text-hi uppercase tracking-widest">Rest Timer</h3>
+                        <button
+                            onClick={() => setIsOpen(false)}
+                            className="text-low hover:text-hi transition-colors duration-fast"
+                            aria-label="Close timer"
+                        >
+                            <X className="w-5 h-5" />
+                        </button>
+                    </div>
 
-                        {/* Mode Switcher */}
-                        <div className="flex gap-2 mb-6">
-                            <button
-                                onClick={handleModeSwitch}
-                                className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-lg border transition-all text-xs font-bold uppercase tracking-wider ${mode === "stopwatch"
-                                        ? "bg-gym-red border-gym-red text-white"
-                                        : "bg-white/5 border-white/10 text-gray-400 hover:border-gym-red/50"
-                                    }`}
-                            >
-                                <TrendingUp className="w-3 h-3" />
-                                Count Up
-                            </button>
-                            <button
-                                onClick={handleModeSwitch}
-                                className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-lg border transition-all text-xs font-bold uppercase tracking-wider ${mode === "countdown"
-                                        ? "bg-gym-red border-gym-red text-white"
-                                        : "bg-white/5 border-white/10 text-gray-400 hover:border-gym-red/50"
-                                    }`}
-                            >
-                                <TrendingDown className="w-3 h-3" />
-                                Countdown
-                            </button>
-                        </div>
+                    {/* Mode Switcher */}
+                    <div className="flex gap-2 mb-6">
+                        <button
+                            onClick={handleModeSwitch}
+                            className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 border text-xs font-bold uppercase tracking-wider transition-colors duration-fast ${mode === "stopwatch"
+                                ? "bg-accent text-white border-accent"
+                                : "surface-card hairline text-low hover:border-accent hover:text-hi"
+                                }`}
+                        >
+                            <TrendingUp className="w-3 h-3" />
+                            Count Up
+                        </button>
+                        <button
+                            onClick={handleModeSwitch}
+                            className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 border text-xs font-bold uppercase tracking-wider transition-colors duration-fast ${mode === "countdown"
+                                ? "bg-accent text-white border-accent"
+                                : "surface-card hairline text-low hover:border-accent hover:text-hi"
+                                }`}
+                        >
+                            <TrendingDown className="w-3 h-3" />
+                            Countdown
+                        </button>
+                    </div>
 
-                        {/* Timer Display */}
-                        <div className="text-center mb-6">
-                            <motion.p
-                                className={`text-6xl font-black font-mono tabular-nums ${time === 0 && mode === "countdown" ? "text-gray-600" : "text-gym-red"}`}
-                                animate={time === 0 && mode === "countdown" && isRunning === false ? { scale: [1, 1.05, 1] } : {}}
-                                transition={{ duration: 2, repeat: Infinity }}
-                            >
-                                {formatTime(time)}
-                            </motion.p>
-                            <div className="flex items-center justify-center gap-2 mt-2">
-                                {time === 0 && mode === "countdown" && !isRunning && (
-                                    <Bell className="w-3 h-3 text-gray-500 animate-pulse" />
-                                )}
-                                <p className="text-xs text-gray-500 uppercase tracking-widest">
-                                    {getStatusText()}
-                                </p>
+                    {/* Timer Display */}
+                    <div className="text-center mb-6">
+                        <p className={`text-6xl font-black font-mono tabular-nums ${time === 0 && mode === "countdown" ? "text-faint" : "text-accent"}`}>
+                            <TimerTick seconds={time} active={isRunning} format={formatTime} />
+                        </p>
+                        <div className="flex items-center justify-center gap-2 mt-2">
+                            {time === 0 && mode === "countdown" && !isRunning && (
+                                <Bell className="w-3 h-3 text-low" />
+                            )}
+                            <p className="text-xs text-faint uppercase tracking-widest">
+                                {getStatusText()}
+                            </p>
+                        </div>
+                    </div>
+
+                    {/* Controls */}
+                    <div className="flex justify-center gap-4 mb-6">
+                        <button
+                            onClick={handleStartStop}
+                            disabled={mode === "countdown" && time === 0 && !isRunning}
+                            className={`flex items-center justify-center w-14 h-14 border ${isRunning
+                                ? 'bg-status-warning text-status-on border-status-warning hover:bg-status-warning/90'
+                                : 'bg-status-success text-status-on border-status-success hover:bg-status-success/90'
+                                } disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-fast`}
+                            aria-label={isRunning ? "Pause Timer" : "Start Timer"}
+                        >
+                            {isRunning ? <Pause className="w-6 h-6" /> : <Play className="w-6 h-6" />}
+                        </button>
+
+                        <button
+                            onClick={handleReset}
+                            className="flex items-center justify-center w-14 h-14 surface-elevated hairline text-hi hover:border-accent hover:text-accent transition-colors duration-fast"
+                            aria-label="Reset Timer"
+                        >
+                            <RotateCcw className="w-5 h-5" />
+                        </button>
+                    </div>
+
+                    {/* Quick Presets - Only for Countdown */}
+                    {mode === "countdown" && (
+                        <div className="pt-4 hairline-t">
+                            <p className="label-text text-[10px] uppercase tracking-widest text-faint mb-3">Rest Presets</p>
+                            <div className="grid grid-cols-3 gap-2">
+                                {[30, 60, 90, 120, 180, 300].map(sec => (
+                                    <button
+                                        key={sec}
+                                        onClick={() => handlePresetClick(sec)}
+                                        className={`px-3 py-2 border text-xs font-mono transition-colors duration-fast ${time === sec && mode === "countdown"
+                                            ? "bg-accent text-white border-accent"
+                                            : "surface-card hairline text-low hover:border-accent hover:text-hi"
+                                            }`}
+                                    >
+                                        {sec >= 60 ? `${Math.floor(sec / 60)}m${sec % 60 > 0 ? `${sec % 60}s` : ''}` : `${sec}s`}
+                                    </button>
+                                ))}
                             </div>
                         </div>
-
-                        {/* Controls */}
-                        <div className="flex justify-center gap-4 mb-6">
-                            <motion.button
-                                onClick={handleStartStop}
-                                disabled={mode === "countdown" && time === 0 && !isRunning}
-                                className={`flex items-center justify-center w-14 h-14 rounded-full ${isRunning ? 'bg-yellow-500' : 'bg-green-500'
-                                    } disabled:opacity-50 disabled:cursor-not-allowed`}
-                                whileTap={{ scale: 0.9 }}
-                                aria-label={isRunning ? "Pause Timer" : "Start Timer"}
-                            >
-                                {isRunning ? <Pause className="w-6 h-6 text-black" /> : <Play className="w-6 h-6 text-black" />}
-                            </motion.button>
-
-                            <motion.button
-                                onClick={handleReset}
-                                className="flex items-center justify-center w-14 h-14 rounded-full bg-white/10 border border-white/20 hover:bg-white/20 transition-colors"
-                                whileTap={{ scale: 0.9 }}
-                                aria-label="Reset Timer"
-                            >
-                                <RotateCcw className="w-5 h-5 text-white" />
-                            </motion.button>
-                        </div>
-
-                        {/* Quick Presets - Only for Countdown */}
-                        {mode === "countdown" && (
-                            <div className="pt-4 border-t border-white/10">
-                                <p className="text-[10px] uppercase tracking-widest text-gray-500 mb-3">Rest Presets</p>
-                                <div className="grid grid-cols-3 gap-2">
-                                    {[30, 60, 90, 120, 180, 300].map(sec => (
-                                        <button
-                                            key={sec}
-                                            onClick={() => handlePresetClick(sec)}
-                                            className={`px-3 py-2 bg-white/5 border border-white/10 rounded text-xs font-mono hover:border-gym-red hover:text-gym-red hover:bg-gym-red/10 transition-all ${time === sec && mode === "countdown" ? "border-gym-red text-gym-red bg-gym-red/10" : ""
-                                                }`}
-                                        >
-                                            {sec >= 60 ? `${sec / 60}m` : `${sec}s`}
-                                        </button>
-                                    ))}
-                                </div>
-                            </div>
-                        )}
-                    </motion.div>
-                )}
-            </AnimatePresence>
+                    )}
+                </div>
+            )}
         </>
     );
 }
+

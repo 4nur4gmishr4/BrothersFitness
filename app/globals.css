@@ -1,108 +1,837 @@
-@tailwind base;
+﻿@tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+/* ============================================================
+   BroFit Ã— ClickHouse design system
+   ------------------------------------------------------------
+   Principles carried across from ClickHouse's own marketing &
+   docs surfaces (see design analysis):
+   â€¢ Surface ladder â€” elevation is conveyed by lightness of the
+     surface (canvas < card < elevated < modal), NEVER shadows.
+   â€¢ Hairline borders (1px) delineate every surface.
+   â€¢ 4px base spacing grid, tight technical type scale.
+   â€¢ Monochrome status text â€” success/warning/danger are allowed
+     to carry their hue only for data-state, labels stay neutral.
+   â€¢ One signature accent (gym red) used sparingly.
+   â€¢ Reduced motion is respected everywhere.
+   ------------------------------------------------------------
+   Theming:
+   All colors are RGB triplets (e.g. "17 17 17") consumed via
+   rgb(var(--x)). Tailwind references them too, so alpha modifiers
+   (bg-surface-card/50) work in every theme.
+
+   Default = dark. Two light sources:
+     1. @media (prefers-color-scheme: light) â€” "system" users
+        whose OS is light, unless they explicitly chose dark.
+     2. :root[data-theme="light"] â€” explicit light choice.
+   Scrims (bg-black/80 etc.) deliberately stay black in both themes.
+   ============================================================ */
+
+/* ---- Dark (default) ---- */
 :root {
-  --gym-red: #D71921;
-  /* Force dark theme always - no light mode */
-  --foreground-rgb: 255, 255, 255;
-  --background-start-rgb: 0, 0, 0;
-  --background-end-rgb: 0, 0, 0;
+  color-scheme: dark;
+
+  /* Surface ladder â€” ClickHouse exact tokens:
+     canvas #0a0a0a â†’ surface-soft #121212 â†’ card #1a1a1a â†’
+     elevated #242424 â†’ modal (one step higher, #2e2e2e).
+     Hairline #2a2a2a borders every surface. */
+  --surface-canvas: 10 10 10;
+  --surface-soft: 18 18 18;
+  --surface-card: 26 26 26;
+  --surface-elevated: 36 36 36;
+  --surface-modal: 46 46 46;
+  --surface-border: 42 42 42;
+
+  /* Signature accent â€” BroFit gym red #D71921 substitutes for
+     ClickHouse electric yellow #faff69 (accent substitution rule). */
+  --accent: 215 25 33;
+  --accent-hover: 232 30 38;
+  --accent-muted: 58 10 13;
+
+  /* Status hues â€” ClickHouse exact: success #22c55e, warning
+     #f59e0b, error #ef4444, info #3b82f6. Used sparingly,
+     only for data state. */
+  --status-success: 34 197 94;
+  --status-warning: 245 158 11;
+  --status-danger: 239 68 68;
+  --status-info: 59 130 246;
+
+  /* Text ladder â€” ClickHouse exact: ink #ffffff â†’ body #cccccc
+     â†’ muted #888888 â†’ muted-soft #5a5a5a. */
+  --text-hi: 255 255 255;
+  --text-mid: 204 204 204;
+  --text-low: 136 136 136;
+  --text-faint: 90 90 90;
+
+  /* Foreground color for text on filled status backgrounds.
+     Dark theme status hues are bright (black reads better),
+     light theme hues are dark (white reads better). */
+  --status-on: 0 0 0;
+
+  /* Full-color aliases for SVG fills/strokes â€” the triplet vars
+     above are consumed via rgb() in CSS and cannot feed SVG. */
+  --accent-color: #D71921;
+  --text-hi-color: #ffffff;
+
+  /* Motion tokens â€” semantic duration ladder. All component
+     transitions resolve through these so a single value change
+     re-tunes the whole interface. fast = micro-interaction,
+     normal = state feedback, slow = navigation/entrance. */
+  --motion-fast: 100ms;
+  --motion-normal: 150ms;
+  --motion-slow: 300ms;
+  --ease-clickhouse: cubic-bezier(0.2, 0, 0, 1);
+  --ease-emphasis: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* ---- Global scroll & scale behavior ---- */
+html {
+  /* Ultra-compact scaling: reduces all rem-based units (padding, margin, text) by ~12.5% */
+  font-size: 14px;
+  scroll-behavior: smooth;
+  scroll-padding-top: 6rem; /* clears fixed navbar on anchor jumps */
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+/* ---- Light (system: OS prefers light, no explicit dark choice) ---- */
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) {
+    color-scheme: light;
+
+    --surface-canvas: 255 255 255;
+    --surface-soft: 250 250 250;
+    --surface-card: 245 245 245;
+    --surface-elevated: 237 237 237;
+    --surface-modal: 229 229 229;
+    --surface-border: 217 217 217;
+
+    --accent: 215 25 33;
+    --accent-hover: 193 16 24;
+    --accent-muted: 252 231 234;
+
+    --status-success: 21 128 61;
+    --status-warning: 146 64 14;
+    --status-danger: 185 28 28;
+    --status-info: 30 64 175;
+
+    --text-hi: 10 10 10;
+    --text-mid: 75 75 75;
+    --text-low: 107 107 107;
+    --text-faint: 140 140 140;
+    --status-on: 255 255 255;
+    --text-hi-color: #0a0a0a;
+  }
+
+  /* Softer shadows on white â€” elevation comes from tone, not shadow */
+  :root:not([data-theme="dark"]) .surface-elevated {
+    box-shadow: 0 4px 16px -4px rgb(0 0 0 / 0.06);
+  }
+
+  :root:not([data-theme="dark"]) .surface-modal {
+    box-shadow: 0 8px 32px -8px rgb(0 0 0 / 0.08);
+  }
+
+  /* Subtle dark shimmer on light backgrounds */
+  :root:not([data-theme="dark"]) .skeleton {
+    background: linear-gradient(90deg,
+        rgb(0 0 0 / 0.04) 25%,
+        rgb(0 0 0 / 0.08) 50%,
+        rgb(0 0 0 / 0.04) 75%);
+  }
+
+  /* Darker chevron so it reads on white */
+  :root:not([data-theme="dark"]) select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%234b4b4b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  }
+}
+
+/* ---- Light (explicit data-theme="light") ---- */
+:root[data-theme="light"] {
+  color-scheme: light;
+
+  --surface-canvas: 255 255 255;
+  --surface-soft: 250 250 250;
+  --surface-card: 245 245 245;
+  --surface-elevated: 237 237 237;
+  --surface-modal: 229 229 229;
+  --surface-border: 217 217 217;
+
+  --accent: 215 25 33;
+  --accent-hover: 193 16 24;
+  --accent-muted: 252 231 234;
+
+  --status-success: 21 128 61;
+  --status-warning: 146 64 14;
+  --status-danger: 185 28 28;
+  --status-info: 30 64 175;
+
+  --text-hi: 10 10 10;
+  --text-mid: 75 75 75;
+  --text-low: 107 107 107;
+  --text-faint: 140 140 140;
+  --status-on: 255 255 255;
+  --text-hi-color: #0a0a0a;
+}
+
+:root[data-theme="light"] .surface-elevated {
+  box-shadow: 0 4px 16px -4px rgb(0 0 0 / 0.06);
+}
+
+:root[data-theme="light"] .surface-modal {
+  box-shadow: 0 8px 32px -8px rgb(0 0 0 / 0.08);
+}
+
+:root[data-theme="light"] .skeleton {
+  background: linear-gradient(90deg,
+      rgb(0 0 0 / 0.04) 25%,
+      rgb(0 0 0 / 0.08) 50%,
+      rgb(0 0 0 / 0.04) 75%);
+}
+
+:root[data-theme="light"] select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%234b4b4b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
 }
 
 body {
-  color: rgb(var(--foreground-rgb));
-  background: linear-gradient(to bottom,
-      transparent,
-      rgb(var(--background-end-rgb))) rgb(var(--background-start-rgb));
-  font-family: var(--font-inter), -apple-system, BlinkMacSystemFont, sans-serif;
-  font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+  color: rgb(var(--text-hi));
+  background-color: rgb(var(--surface-canvas));
+  font-family: var(--font-inter), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-feature-settings: "cv02", "cv03", "cv04", "cv11";
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
   overflow-x: hidden;
 }
 
-/* Custom Text Selection */
+/* ---------- Universal Theme Transition Sync ---------- */
+/* Ensures every component flips colors in exactly 300ms synchronously */
+*, *::before, *::after {
+  transition-property: background-color, border-color, color, fill, stroke !important;
+  transition-duration: 300ms !important;
+  transition-timing-function: cubic-bezier(0.2, 0, 0, 1) !important;
+}
+
+/* Note: we exclude layout properties like opacity or transform from 
+   the universal transition to allow independent hover states to continue 
+   working, but all color changes (including hover) will now strictly be 300ms. */
+
+/* ---------- Selection ---------- */
 ::selection {
-  background-color: var(--gym-red);
+  background-color: rgb(var(--accent));
   color: #ffffff;
 }
 
-.bg-gym-red {
-  background-color: var(--gym-red);
+/* ============================================================
+   Surface ladder components
+   ============================================================ */
+
+.surface-canvas {
+  background-color: rgb(var(--surface-canvas));
 }
 
-.text-gym-red {
-  color: var(--gym-red);
+.surface-card {
+  background-color: rgb(var(--surface-card));
+  border: 1px solid rgb(var(--surface-border));
 }
 
-.border-gym-red {
-  border-color: var(--gym-red);
+.surface-elevated {
+  background-color: rgb(var(--surface-elevated));
+  border: 1px solid rgb(var(--surface-border));
+  box-shadow: 0 4px 16px -4px rgb(0 0 0 / 0.4);
 }
 
-/* Typography Utilities */
-/* Anton is a single-weight face, so no font-black/font-bold here —
-   the condensed cut is already the heaviest the family offers. */
+.surface-modal {
+  background-color: rgb(var(--surface-modal));
+  border: 1px solid rgb(var(--surface-border));
+  box-shadow: 0 8px 32px -8px rgb(0 0 0 / 0.5);
+}
+
+.hairline {
+  border: 1px solid rgb(var(--surface-border));
+}
+
+.hairline-t {
+  border-top: 1px solid rgb(var(--surface-border));
+}
+
+.hairline-b {
+  border-bottom: 1px solid rgb(var(--surface-border));
+}
+
+/* ============================================================
+   Hero grain â€” pitch-black background with analog film noise.
+   Only applies in dark mode. In light mode, it falls back to surface-canvas.
+   ============================================================ */
+
+:root:not([data-theme="light"]) .hero-grain {
+  position: relative;
+  background-color: #0a0a0a !important;
+  color: #ffffff !important;
+}
+
+:root:not([data-theme="light"]) .hero-grain::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  opacity: 0.07;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='grain'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23grain)'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 256px 256px;
+}
+
+/* ============================================================
+   Typography
+   ============================================================ */
+
 .heading-display {
-  /* Anton is ultra-condensed: negative tracking makes glyphs crowd.
-     Widen it so the heavy cut gets room to breathe. */
-  @apply font-display uppercase tracking-wide;
+  font-family: var(--font-display), Anton, Impact, sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  line-height: 0.95;
 }
 
 .heading-section {
-  @apply font-display uppercase tracking-wide;
+  font-family: var(--font-display), Anton, Impact, sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
 }
 
 .label-text {
-  @apply font-mono text-xs font-semibold uppercase tracking-ultra;
+  font-family: var(--font-mono), "JetBrains Mono", Consolas, monospace;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  color: rgb(var(--text-mid));
 }
 
 .body-text {
-  @apply font-sans text-base leading-relaxed;
+  font-family: var(--font-sans);
+  font-size: 0.9375rem;
+  line-height: 1.6;
+  color: rgb(var(--text-mid));
 }
 
-/* Hide Scrollbars */
+/* ============================================================
+   Stat callout component (ClickHouse signature)
+   ============================================================ */
+
+.stat-callout {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 1.5rem;
+  background-color: rgb(var(--surface-card));
+  border: 1px solid rgb(var(--surface-border));
+}
+
+.stat-callout__value {
+  font-family: var(--font-display), Anton, Impact, sans-serif;
+  font-size: 3rem;
+  line-height: 1;
+  letter-spacing: -0.03em;
+  color: rgb(var(--text-hi));
+}
+
+.stat-callout__label {
+  font-family: var(--font-mono), "JetBrains Mono", Consolas, monospace;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: rgb(var(--text-mid));
+}
+
+.stat-callout--large .stat-callout__value {
+  font-size: 4.5rem;
+}
+
+/* ============================================================
+   Feature card (ClickHouse feature-card-dark)
+   ============================================================ */
+
+.feature-card {
+  background-color: rgb(var(--surface-card));
+  border: 1px solid rgb(var(--surface-border));
+  border-radius: 0.75rem;
+  padding: 1.25rem;
+  transition: border-color var(--motion-normal) var(--ease-clickhouse),
+    transform var(--motion-normal) var(--ease-clickhouse),
+    background-color var(--motion-normal) var(--ease-clickhouse);
+}
+
+.feature-card:hover {
+  border-color: rgb(var(--accent));
+  background-color: rgb(var(--surface-elevated));
+  transform: translateY(-2px);
+}
+
+/* ============================================================
+   Category tabs (ClickHouse category-tab / -active)
+   ============================================================ */
+
+.category-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.875rem;
+  background-color: transparent;
+  color: rgb(var(--text-mid));
+  font-family: var(--font-mono), "JetBrains Mono", Consolas, monospace;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  border: 1px solid transparent;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: background-color var(--motion-normal) var(--ease-clickhouse), color var(--motion-normal) var(--ease-clickhouse), border-color var(--motion-normal) var(--ease-clickhouse);
+}
+
+.category-tab:hover {
+  color: rgb(var(--text-hi));
+}
+
+.category-tab--active {
+  background-color: rgb(var(--surface-card));
+  color: rgb(var(--text-hi));
+  border-color: rgb(var(--surface-border));
+}
+
+.category-tab--accent-active {
+  background-color: rgb(var(--accent));
+  color: #ffffff;
+  border-color: rgb(var(--accent));
+}
+
+/* ============================================================
+   Code window card (ClickHouse code-window-card)
+   ============================================================ */
+
+.code-window-card {
+  background-color: rgb(var(--surface-card));
+  border: 1px solid rgb(var(--surface-border));
+  border-radius: 0.75rem;
+  overflow: hidden;
+}
+
+.code-window-card__bar {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.75rem 1rem;
+  background-color: rgb(var(--surface-elevated));
+  border-bottom: 1px solid rgb(var(--surface-border));
+}
+
+.code-window-card__dot {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 9999px;
+  background-color: rgb(var(--surface-border));
+}
+
+.code-window-card__body {
+  padding: 1.5rem;
+  font-family: var(--font-mono), "JetBrains Mono", Consolas, monospace;
+  font-size: 0.8125rem;
+  line-height: 1.55;
+  color: rgb(var(--text-mid));
+  overflow-x: auto;
+}
+
+/* ============================================================
+   CTA band (ClickHouse cta-band â€” accent substitution for yellow)
+   ============================================================ */
+
+.cta-band {
+  background-color: rgb(var(--accent));
+  color: #ffffff;
+  border-radius: 0.75rem;
+  padding: 3rem;
+}
+
+.cta-band h2,
+.cta-band h3 {
+  color: #ffffff;
+}
+
+.cta-band .cta-band__action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.625rem 1.25rem;
+  background-color: #ffffff;
+  color: #0a0a0a;
+  font-family: var(--font-mono), "JetBrains Mono", Consolas, monospace;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  border: 1px solid #ffffff;
+  cursor: pointer;
+  transition: opacity var(--motion-normal) var(--ease-clickhouse);
+}
+
+.cta-band .cta-band__action:hover {
+  opacity: 0.9;
+}
+
+/* ============================================================
+   Pricing tier cards
+   ============================================================ */
+
+.pricing-tier {
+  background-color: rgb(var(--surface-card));
+  border: 1px solid rgb(var(--surface-border));
+  border-radius: 0.75rem;
+  padding: 2rem;
+}
+
+.pricing-tier--featured {
+  background-color: rgb(var(--surface-elevated));
+  border: 1px solid rgb(var(--accent));
+  position: relative;
+}
+
+/* ============================================================
+   Geometric SVG placeholder (for assets provided later)
+   ============================================================ */
+
+.placeholder-glyph {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background:
+    linear-gradient(rgb(var(--surface-border)) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(var(--surface-border)) 1px, transparent 1px);
+  background-size: 16px 16px;
+  color: rgb(var(--text-low));
+  border: 1px dashed rgb(var(--surface-border));
+}
+
+/* ============================================================
+   Featured tier (pricing highlight)
+   ============================================================ */
+
+.featured-tier {
+  background-color: rgb(var(--surface-elevated));
+  border: 1px solid rgb(var(--accent));
+  position: relative;
+}
+
+.featured-tier .featured-tier__badge {
+  position: absolute;
+  top: -0.75rem;
+  left: 1.5rem;
+  padding: 0.25rem 0.75rem;
+  background-color: rgb(var(--accent));
+  color: #ffffff;
+  font-family: var(--font-mono), "JetBrains Mono", Consolas, monospace;
+  font-size: 0.625rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+}
+
+/* ============================================================
+   Monochrome status text
+   ============================================================ */
+
+.text-status-success {
+  color: rgb(var(--status-success));
+}
+
+.text-status-warning {
+  color: rgb(var(--status-warning));
+}
+
+.text-status-danger {
+  color: rgb(var(--status-danger));
+}
+
+.text-status-info {
+  color: rgb(var(--status-info));
+}
+
+/* ============================================================
+   Text ladder (neutral tones)
+   ============================================================ */
+
+.text-hi {
+  color: rgb(var(--text-hi));
+}
+
+.text-mid {
+  color: rgb(var(--text-mid));
+}
+
+.text-low {
+  color: rgb(var(--text-low));
+}
+
+.text-faint {
+  color: rgb(var(--text-faint));
+}
+
+/* ============================================================
+   Buttons â€” flat, hairline, one accent
+   ============================================================ */
+
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.625rem 1.25rem;
+  background-color: rgb(var(--accent));
+  color: #ffffff;
+  font-family: var(--font-mono), "JetBrains Mono", Consolas, monospace;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  border: 1px solid rgb(var(--accent));
+  transition: background-color var(--motion-normal) var(--ease-clickhouse),
+    transform var(--motion-fast) var(--ease-clickhouse);
+  cursor: pointer;
+}
+
+.btn-primary:hover {
+  background-color: rgb(var(--accent-hover));
+}
+
+.btn-primary:active {
+  transform: translateY(1px) scale(0.98);
+}
+
+.btn-primary:focus-visible {
+  outline: 2px solid rgb(var(--accent));
+  outline-offset: 2px;
+}
+
+.btn-primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.625rem 1.25rem;
+  background-color: transparent;
+  color: rgb(var(--text-hi));
+  font-family: var(--font-mono), "JetBrains Mono", Consolas, monospace;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  border: 1px solid rgb(var(--surface-border));
+  transition: border-color var(--motion-normal) var(--ease-clickhouse), background-color var(--motion-normal) var(--ease-clickhouse), transform var(--motion-fast) var(--ease-clickhouse);
+  cursor: pointer;
+}
+
+.btn-secondary:hover {
+  border-color: rgb(var(--surface-elevated));
+  background-color: rgb(var(--surface-card));
+}
+
+.btn-secondary:active {
+  transform: translateY(1px) scale(0.98);
+}
+
+.btn-secondary:focus-visible {
+  outline: 2px solid rgb(var(--accent));
+  outline-offset: 2px;
+}
+
+.btn-secondary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* ============================================================
+   Inputs â€” flat, hairline, crisp focus
+   ============================================================ */
+
+.input-field {
+  width: 100%;
+  padding: 0.625rem 0.875rem;
+  background-color: rgb(var(--surface-canvas));
+  color: rgb(var(--text-hi));
+  border: 1px solid rgb(var(--surface-border));
+  border-radius: 0.25rem;
+  font-size: 0.875rem;
+  line-height: 1.55;
+  transition: border-color var(--motion-normal) var(--ease-clickhouse);
+  outline: none;
+}
+
+.input-field::placeholder {
+  color: rgb(var(--text-faint));
+}
+
+.input-field:focus {
+  border-color: rgb(var(--accent));
+  box-shadow: 0 0 0 3px rgb(var(--accent-muted));
+}
+
+.input-field:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ============================================================
+   Badges
+   ============================================================ */
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.125rem 0.5rem;
+  background-color: rgb(var(--surface-elevated));
+  border: 1px solid rgb(var(--surface-border));
+  color: rgb(var(--text-mid));
+  font-family: var(--font-mono), "JetBrains Mono", Consolas, monospace;
+  font-size: 0.625rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+}
+
+.badge--accent {
+  background-color: rgb(var(--accent-muted));
+  border-color: rgb(var(--accent));
+  color: rgb(var(--accent-hover));
+}
+
+.badge--success {
+  background-color: rgb(var(--status-success) / 0.1);
+  border-color: rgb(var(--status-success) / 0.3);
+  color: rgb(var(--status-success));
+}
+
+.badge--warning {
+  background-color: rgb(var(--status-warning) / 0.1);
+  border-color: rgb(var(--status-warning) / 0.3);
+  color: rgb(var(--status-warning));
+}
+
+/* ============================================================
+   Table â€” dense admin data grid
+   ============================================================ */
+
+.table-clickhouse {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8125rem;
+  line-height: 1.55;
+}
+
+.table-clickhouse th {
+  text-align: left;
+  padding: 0.75rem 0.5rem;
+  color: rgb(var(--text-mid));
+  font-family: var(--font-mono), "JetBrains Mono", Consolas, monospace;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  border-bottom: 1px solid rgb(var(--surface-border));
+}
+
+.table-clickhouse td {
+  padding: 0.75rem 0.5rem;
+  border-bottom: 1px solid rgb(var(--surface-border));
+  color: rgb(var(--text-mid));
+}
+
+.table-clickhouse tr:last-child td {
+  border-bottom: none;
+}
+
+.table-clickhouse tr:hover td {
+  background-color: rgb(var(--surface-card));
+}
+
+/* ============================================================
+   Accent utilities (legacy gym-red replacement)
+   ============================================================ */
+
+.bg-accent {
+  background-color: rgb(var(--accent));
+}
+
+.text-accent {
+  color: rgb(var(--accent));
+}
+
+.border-accent {
+  border-color: rgb(var(--accent));
+}
+
+/* Foreground on filled status backgrounds â€” flips with theme */
+.text-status-on {
+  color: rgb(var(--status-on));
+}
+
+/* ============================================================
+   Scrollbars â€” subtle, hairline, monochrome
+   ============================================================ */
+
 .scrollbar-hide {
   -ms-overflow-style: none;
-  /* IE and Edge */
   scrollbar-width: none;
-  /* Firefox */
 }
 
 .scrollbar-hide::-webkit-scrollbar {
   display: none;
-  /* Chrome, Safari and Opera */
 }
 
-/* Custom Tactical Scrollbar */
+/* Custom thin scrollbar */
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #111111;
-  border-radius: 4px;
+  background: rgb(var(--surface-canvas));
 }
 
 ::-webkit-scrollbar-thumb {
-  background: linear-gradient(180deg, #D71921 0%, #9b1218 100%);
+  background: rgb(var(--surface-border));
   border-radius: 4px;
-  border: 1px solid #222;
+  border: 1px solid rgb(var(--surface-card));
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(180deg, #ff2a33 0%, #D71921 100%);
+  background: rgb(var(--text-low));
 }
 
-/* Firefox scrollbar */
 * {
   scrollbar-width: thin;
-  scrollbar-color: #D71921 #111111;
+  scrollbar-color: rgb(var(--surface-border)) rgb(var(--surface-canvas));
 }
 
-/* Skeleton Loading Animation */
+/* ============================================================
+   Skeleton loading
+   ============================================================ */
+
 @keyframes shimmer {
   0% {
     background-position: -200% 0;
@@ -115,358 +844,631 @@ body {
 
 .skeleton {
   background: linear-gradient(90deg,
-      rgba(255, 255, 255, 0.03) 25%,
-      rgba(255, 255, 255, 0.08) 50%,
-      rgba(255, 255, 255, 0.03) 75%);
+      rgb(255 255 255 / 0.03) 25%,
+      rgb(255 255 255 / 0.08) 50%,
+      rgb(255 255 255 / 0.03) 75%);
   background-size: 200% 100%;
   animation: shimmer 1.5s infinite;
   border-radius: 4px;
 }
 
+/* ============================================================
+   Page transitions â€” keyed route/loader entrance & exit
+   ============================================================ */
 
-/* Noise Animation */
-@keyframes noise {
-
-  0%,
-  100% {
-    transform: translate(0, 0);
+@keyframes page-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
   }
 
-  10% {
-    transform: translate(-5%, -5%);
-  }
-
-  20% {
-    transform: translate(-10%, 5%);
-  }
-
-  30% {
-    transform: translate(5%, -10%);
-  }
-
-  40% {
-    transform: translate(-5%, 15%);
-  }
-
-  50% {
-    transform: translate(-10%, 5%);
-  }
-
-  60% {
-    transform: translate(15%, 0);
-  }
-
-  70% {
-    transform: translate(0, 10%);
-  }
-
-  80% {
-    transform: translate(-15%, 0);
-  }
-
-  90% {
-    transform: translate(10%, 5%);
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 
-.animate-noise {
-  animation: noise 8s steps(10) infinite;
+.animate-page-in {
+  animation: page-in 400ms cubic-bezier(0.2, 0, 0, 1) both;
 }
 
-.bg-noise {
-  background-image: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMDAiIGhlaWdodD0iMzAwIj48ZmlsdGVyIGlkPSJhIiB4PSIwIiB5PSIwIj48ZmVUdXJidWxlbmNlIGJhc2VGcmVxdWVuY3k9Ii43NSIgc3RpdGNoVGlsZXM9InN0aXRjaCIgdHlwZT0iZnJhY3RhbE5vaXNlIi8+PGZlQ29sb3JNYXRyaXggdHlwZT0ic2F0dXJhdGUiIHZhbHVlcz0iMCIvPjwvZmlsdGVyPjxwYXRoIGQ9Ik0wIDBoMzAwdjMwMEgweiIgZmlsdGVyPSJ1cmwoI2EpIiBvcGFjaXR5PSIuMDUiLz48L3N2Zz4=');
-}
-
-@keyframes ripple {
-  0% {
-    transform: scale(0);
+@keyframes fade-out {
+  from {
     opacity: 1;
   }
 
-  100% {
-    transform: scale(4);
+  to {
     opacity: 0;
   }
 }
 
-.ripple {
-  animation: ripple 0.6s linear;
+.animate-fade-out {
+  animation: fade-out 600ms ease-in-out forwards;
 }
 
-@keyframes shake {
+/* ============================================================
+   Scroll reveal â€” [data-reveal] elements are hidden until the
+   observer (components/ScrollReveal.tsx) flips them to .reveal-in.
+   Only runs when motion is allowed; gated by a 0.4s delay so
+   above-fold content never flashes then re-hides.
+   ============================================================ */
 
-  0%,
-  100% {
-    transform: translateX(0);
+@media (prefers-reduced-motion: no-preference) {
+  [data-reveal] {
+    opacity: 0;
+    transform: translateY(16px);
+    transition: opacity var(--motion-slow) var(--ease-emphasis),
+      transform var(--motion-slow) var(--ease-emphasis);
   }
 
-  10%,
-  30%,
-  50%,
-  70%,
-  90% {
-    transform: translateX(-10px);
+  [data-reveal].reveal-in {
+    opacity: 1;
+    transform: none;
   }
 
-  20%,
-  40%,
-  60%,
-  80% {
-    transform: translateX(10px);
-  }
-}
-
-.shake {
-  animation: shake 0.5s ease-in-out;
-}
-
-@keyframes float {
-
-  0%,
-  100% {
-    transform: translateY(0px);
-  }
-
-  50% {
-    transform: translateY(-20px);
+  /* Stagger within a reveal group via inline --reveal-delay */
+  [data-reveal] {
+    transition-delay: var(--reveal-delay, 0ms);
   }
 }
 
-.animate-float {
-  animation: float 3s ease-in-out infinite;
-}
+/* ============================================================
+   Modal entrance â€” mounted conditionally, so a CSS animation
+   plays on mount (fade the overlay, lift the panel). No exit
+   keyframes: conditional modals unmount instantly.
+   ============================================================ */
 
-@keyframes pulse-glow {
-
-  0%,
-  100% {
-    box-shadow: 0 0 5px rgba(215, 25, 33, 0.5);
-  }
-
-  50% {
-    box-shadow: 0 0 20px rgba(215, 25, 33, 0.8), 0 0 30px rgba(215, 25, 33, 0.6);
+@keyframes modal-overlay-in {
+  from {
+    opacity: 0;
   }
 }
 
-.pulse-glow {
-  animation: pulse-glow 2s ease-in-out infinite;
-}
-
-@keyframes gradient-shift {
-
-  0%,
-  100% {
-    background-position: 0% 50%;
-  }
-
-  50% {
-    background-position: 100% 50%;
+@keyframes modal-panel-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.98);
   }
 }
 
-.animate-gradient {
-  background-size: 200% 200%;
-  animation: gradient-shift 3s ease infinite;
+.modal-overlay-in {
+  animation: modal-overlay-in var(--motion-slow) var(--ease-clickhouse) both;
 }
 
-/* Gooey Animation Effects */
-@keyframes gooey-float-1 {
+.modal-panel-in {
+  animation: modal-panel-in var(--motion-slow) var(--ease-emphasis) both;
+}
 
-  0%,
-  100% {
-    transform: translate(0, 0) scale(1);
-  }
-
-  33% {
-    transform: translate(30vw, 20vh) scale(1.2);
-  }
-
-  66% {
-    transform: translate(-20vw, 40vh) scale(0.9);
+/* Full-screen menu â€” items cascade in from below, 40ms apart.
+   The `both` fill keeps later items hidden until their delay elapses. */
+@keyframes menu-item-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
   }
 }
 
-@keyframes gooey-float-2 {
-
-  0%,
-  100% {
-    transform: translate(0, 0) scale(1);
-  }
-
-  33% {
-    transform: translate(-30vw, 30vh) scale(0.8);
-  }
-
-  66% {
-    transform: translate(20vw, -20vh) scale(1.3);
-  }
+.menu-item-in {
+  animation: menu-item-in var(--motion-normal) var(--ease-emphasis) both;
 }
 
-@keyframes gooey-float-3 {
+/* ============================================================
+   Dropdowns â€” default chevron matches monochrome palette
+   ============================================================ */
 
-  0%,
-  100% {
-    transform: translate(0, 0) scale(1);
-  }
-
-  50% {
-    transform: translate(15vw, -25vh) scale(1.1);
-  }
-}
-
-.gooey-blob-1 {
-  animation: gooey-float-1 20s ease-in-out infinite;
-}
-
-.gooey-blob-2 {
-  animation: gooey-float-2 15s ease-in-out infinite;
-}
-
-.gooey-blob-3 {
-  animation: gooey-float-3 18s ease-in-out infinite;
-}
-
-/* Instagram Gradient Glow Animations */
-@keyframes gradient-rotate {
-  0% {
-    background-position: 0% 50%;
-    filter: hue-rotate(0deg) brightness(1.2);
-  }
-
-  50% {
-    background-position: 100% 50%;
-    filter: hue-rotate(45deg) brightness(1.4);
-  }
-
-  100% {
-    background-position: 0% 50%;
-    filter: hue-rotate(0deg) brightness(1.2);
-  }
-}
-
-@keyframes pulse-slow {
-
-  0%,
-  100% {
-    opacity: 0.3;
-    transform: scale(1);
-  }
-
-  50% {
-    opacity: 0.6;
-    transform: scale(1.02);
-  }
-}
-
-@keyframes gradient-shift-instagram {
-  0% {
-    background-position: 0% 50%;
-  }
-
-  50% {
-    background-position: 100% 50%;
-  }
-
-  100% {
-    background-position: 0% 50%;
-  }
-}
-
-.animate-gradient-rotate {
-  background-size: 200% 200%;
-  animation: gradient-rotate 6s ease infinite;
-}
-
-.animate-pulse-slow {
-  animation: pulse-slow 4s ease-in-out infinite;
-}
-
-.animate-gradient-instagram {
-  background-size: 200% 200%;
-  animation: gradient-shift-instagram 3s ease infinite;
-}
-
-/* Glassmorphism 2.0 Utilities */
-.glass-panel {
-  background: rgba(255, 255, 255, 0.03);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-}
-
-.glass-panel-strong {
-  background: rgba(0, 0, 0, 0.6);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-/* Glow Border Effect */
-.glow-border {
-  position: relative;
-}
-
-.glow-border::before {
-  content: '';
-  position: absolute;
-  inset: -1px;
-  background: linear-gradient(45deg, var(--gym-red), transparent, var(--gym-red));
-  border-radius: inherit;
-  z-index: -1;
-  opacity: 0;
-  transition: opacity 0.3s ease;
-}
-
-.glow-border:hover::before {
-  opacity: 1;
-}
-
-@keyframes border-glow {
-
-  0%,
-  100% {
-    box-shadow: 0 0 5px rgba(215, 25, 33, 0.3), inset 0 0 5px rgba(215, 25, 33, 0.1);
-  }
-
-  50% {
-    box-shadow: 0 0 20px rgba(215, 25, 33, 0.5), inset 0 0 10px rgba(215, 25, 33, 0.2);
-  }
-}
-
-.animate-border-glow {
-  animation: border-glow 3s ease-in-out infinite;
-}
-
-/* Reduced motion for accessibility and low-end devices */
-@media (prefers-reduced-motion: reduce) {
-
-  .glass-panel,
-  .glass-panel-strong {
-    backdrop-filter: none;
-    -webkit-backdrop-filter: none;
-  }
-
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-  }
-}
-
-/* Global Dropdown Styling - White Arrow */
 select {
   appearance: none;
   -webkit-appearance: none;
   -moz-appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23cccccc' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
   background-position: right 8px center;
   background-repeat: no-repeat;
   padding-right: 28px;
 }
 
 select option {
-  background-color: #000000;
-  color: #ffffff;
+  background-color: rgb(var(--surface-modal));
+  color: rgb(var(--text-hi));
 }
+
+/* ============================================================
+   Icon animation utilities â€” subtle, ClickHouse-restrained.
+   The global reduced-motion block below zeroes these, so no
+   per-icon JS guard is needed.
+   ============================================================ */
+
+@keyframes icon-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.45;
+  }
+}
+
+.icon-pulse {
+  animation: icon-pulse 2s ease-in-out infinite;
+}
+
+@keyframes icon-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.icon-spin {
+  animation: icon-spin 1.2s linear infinite;
+}
+
+@keyframes icon-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-3px);
+  }
+}
+
+.icon-float {
+  animation: icon-float 3s ease-in-out infinite;
+}
+
+@keyframes icon-draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+.icon-draw {
+  stroke-dasharray: var(--dash, 100);
+  stroke-dashoffset: var(--dash, 100);
+  animation: icon-draw 600ms cubic-bezier(0.2, 0, 0, 1) forwards;
+}
+
+@keyframes icon-ring {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.icon-ring {
+  animation: icon-ring 4s linear infinite;
+}
+
+/* ============================================================
+   Native animation system â€” the 19 spec'd requirements rebuilt
+   as CSS keyframes driving inline SVG + DOM primitives. Every
+   loop is subtle and ClickHouse-restrained; the reduced-motion
+   block below collapses them all. `transform-box: fill-box`
+   keeps SVG-shape animations anchored to their own bbox.
+   ============================================================ */
+
+/* req #2 â€” pulse_dot: soft expanding halo, not a blinking dot */
+@keyframes pulse-ring {
+  0% {
+    transform: scale(1);
+    opacity: 0.5;
+  }
+
+  100% {
+    transform: scale(2.8);
+    opacity: 0;
+  }
+}
+
+.pulse-ring {
+  animation: pulse-ring 2.4s cubic-bezier(0.2, 0, 0, 1) infinite;
+}
+
+/* req #3 â€” bar_grow: stat bar scales to its data value, once */
+@keyframes bar-grow-x {
+  from {
+    transform: scaleX(0);
+  }
+
+  to {
+    transform: scaleX(1);
+  }
+}
+
+.bar-grow {
+  transform-origin: left center;
+  animation: bar-grow-x 800ms cubic-bezier(0.2, 0, 0, 1) both;
+}
+
+/* req #1 â€” gym_equipment: slow dumbbell bob + sway in the hero */
+@keyframes equipment-bob {
+  0%,
+  100% {
+    transform: translateY(0) rotate(-4deg);
+  }
+
+  50% {
+    transform: translateY(-6px) rotate(4deg);
+  }
+}
+
+.equipment-bob {
+  animation: equipment-bob 4s ease-in-out infinite;
+}
+
+/* req #5 â€” bell_ring: single alert wiggle */
+@keyframes bell-ring {
+  0% {
+    transform: rotate(0deg);
+  }
+
+  15% {
+    transform: rotate(-18deg);
+  }
+
+  30% {
+    transform: rotate(16deg);
+  }
+
+  45% {
+    transform: rotate(-12deg);
+  }
+
+  60% {
+    transform: rotate(8deg);
+  }
+
+  100% {
+    transform: rotate(0deg);
+  }
+}
+
+.bell-ring {
+  transform-origin: 50% 0%;
+  display: inline-flex;
+  animation: bell-ring 900ms cubic-bezier(0.2, 0, 0, 1);
+}
+
+/* req #6 â€” meal_plate: food items assemble onto a plate, then a
+   soft pulse signals work continues */
+@keyframes plate-item {
+  0% {
+    transform: scale(0.4);
+    opacity: 0;
+  }
+
+  60% {
+    transform: scale(1.05);
+    opacity: 1;
+  }
+
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.plate-item {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: plate-item 600ms cubic-bezier(0.2, 0, 0, 1) both;
+}
+
+@keyframes plate-progress {
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.55;
+  }
+}
+
+.plate-progress {
+  animation: plate-progress 1.8s ease-in-out infinite;
+}
+
+/* req #7 â€” check_draw: stroke draws itself once */
+@keyframes stroke-draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+.stroke-draw {
+  stroke-dasharray: var(--dash, 60);
+  stroke-dashoffset: var(--dash, 60);
+  animation: stroke-draw 700ms cubic-bezier(0.2, 0, 0, 1) forwards;
+}
+
+/* req #9 â€” typing_dots: staggered bounce, tiny */
+@keyframes typing-bounce {
+  0%,
+  60%,
+  100% {
+    transform: translateY(0);
+    opacity: 0.4;
+  }
+
+  30% {
+    transform: translateY(-4px);
+    opacity: 1;
+  }
+}
+
+.typing-dot {
+  animation: typing-bounce 1.2s ease-in-out infinite;
+}
+
+/* req #10 â€” send_arrow: arrow flies out, then reloads */
+@keyframes send-fly {
+  0% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+
+  70% {
+    transform: translateX(14px);
+    opacity: 0;
+  }
+
+  71% {
+    transform: translateX(-14px);
+    opacity: 0;
+  }
+
+  100% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.send-fly {
+  animation: send-fly 700ms cubic-bezier(0.2, 0, 0, 1);
+}
+
+/* req #8 â€” gears: dual counter-rotation */
+@keyframes gear-rotate {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes gear-rotate-rev {
+  to {
+    transform: rotate(-360deg);
+  }
+}
+
+.gear-spin,
+.gear-spin-rev {
+  transform-origin: center;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
+
+.gear-spin {
+  animation-name: gear-rotate;
+  animation-duration: 2.4s;
+}
+
+.gear-spin-rev {
+  animation-name: gear-rotate-rev;
+  animation-duration: 3.2s;
+}
+
+/* req #13 â€” slider_bounce: thumb nudges on commit */
+@keyframes thumb-bounce {
+  0% {
+    transform: translateY(0);
+  }
+
+  40% {
+    transform: translateY(3px);
+  }
+
+  100% {
+    transform: translateY(0);
+  }
+}
+
+.thumb-bounce {
+  animation: thumb-bounce 500ms cubic-bezier(0.2, 0, 0, 1);
+}
+
+/* req #14 â€” result_reveal: line expands, number fades up */
+@keyframes result-line-expand {
+  from {
+    transform: scaleX(0);
+  }
+
+  to {
+    transform: scaleX(1);
+  }
+}
+
+@keyframes result-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.result-line {
+  transform-origin: left center;
+  animation: result-line-expand 600ms cubic-bezier(0.2, 0, 0, 1) both;
+}
+
+.result-reveal {
+  animation: result-reveal 600ms cubic-bezier(0.2, 0, 0, 1) both;
+}
+
+/* req #15 â€” trophy_shine: diagonal light sweep */
+@keyframes trophy-shine {
+  0% {
+    transform: translateX(-120%) skewX(-20deg);
+  }
+
+  60%,
+  100% {
+    transform: translateX(260%) skewX(-20deg);
+  }
+}
+
+.trophy-shine {
+  animation: trophy-shine 2.8s cubic-bezier(0.2, 0, 0, 1) infinite;
+}
+
+/* req #16 â€” flame_flicker: irregular intensity */
+@keyframes flame-flicker {
+  0%,
+  100% {
+    transform: scale(1) rotate(0deg);
+    opacity: 1;
+  }
+
+  25% {
+    transform: scale(1.07) rotate(-2deg);
+    opacity: 0.9;
+  }
+
+  55% {
+    transform: scale(0.96) rotate(2deg);
+    opacity: 0.84;
+  }
+
+  80% {
+    transform: scale(1.04) rotate(-1deg);
+    opacity: 1;
+  }
+}
+
+.flame-flicker {
+  transform-origin: 50% 85%;
+  animation: flame-flicker 1.8s ease-in-out infinite;
+}
+
+/* req #17 â€” confetti_burst: pieces scatter outward + fall */
+@keyframes confetti-fall-a {
+  from {
+    transform: translate(0, 0) rotate(0deg);
+    opacity: 1;
+  }
+
+  to {
+    transform: translate(-48px, 120px) rotate(320deg);
+    opacity: 0;
+  }
+}
+
+@keyframes confetti-fall-b {
+  from {
+    transform: translate(0, 0) rotate(0deg);
+    opacity: 1;
+  }
+
+  to {
+    transform: translate(48px, 110px) rotate(-300deg);
+    opacity: 0;
+  }
+}
+
+@keyframes confetti-fall-c {
+  from {
+    transform: translate(0, 0) rotate(0deg);
+    opacity: 1;
+  }
+
+  to {
+    transform: translate(8px, 132px) rotate(360deg);
+    opacity: 0;
+  }
+}
+
+.confetti-a {
+  animation: confetti-fall-a 1.2s cubic-bezier(0.2, 0, 0, 1) forwards;
+}
+
+.confetti-b {
+  animation: confetti-fall-b 1.4s cubic-bezier(0.2, 0, 0, 1) forwards;
+}
+
+.confetti-c {
+  animation: confetti-fall-c 1.1s cubic-bezier(0.2, 0, 0, 1) forwards;
+}
+
+/* req #12 â€” timer_tick: seconds pop on each tick */
+@keyframes timer-tick-pop {
+  0% {
+    transform: scale(1);
+  }
+
+  30% {
+    transform: scale(1.08);
+  }
+
+  100% {
+    transform: scale(1);
+  }
+}
+
+.timer-tick {
+  animation: timer-tick-pop 400ms cubic-bezier(0.2, 0, 0, 1);
+}
+
+/* req #4/#18 â€” logo_build: badge strokes draw, then fills fade in */
+@keyframes logo-fade-in {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+.logo-fade-in {
+  opacity: 0;
+  animation: logo-fade-in 600ms ease-out forwards;
+}
+
+/* req #19 â€” page_spinner: dumbbell rotation for suspense fallbacks */
+@keyframes dumbbell-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.dumbbell-spin {
+  transform-origin: center;
+  animation: dumbbell-spin 1.1s linear infinite;
+}
+
+/* ============================================================
+   Reduced motion â€” collapse decorative motion, keep essential
+   state feedback. One-shot entrances complete instantly; infinite
+   loops (pulse-ring, gear spin, shimmer) run a single frame and
+   freeze; transitions collapse to --motion-fast so hover/focus
+   states still read as responsive but without movement.
+   ============================================================ */
+
+@media (prefers-reduced-motion: reduce) {
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: var(--motion-fast) !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+body.mobile-menu-open #tactical-chatbot { display: none !important; }
+

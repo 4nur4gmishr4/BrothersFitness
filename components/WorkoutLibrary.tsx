@@ -1,248 +1,232 @@
-"use client";
+﻿"use client";
 
 import { useState, useMemo } from "react";
-import useSWR from "swr";
-import { motion, AnimatePresence } from "framer-motion";
-import { Search, Filter, ChevronLeft, ChevronRight, Dumbbell } from "lucide-react";
 import Image from "next/image";
-import { fetchFreeExerciseDb, FreeExercise } from "@/lib/fitness-data-service";
+import { Search, ChevronLeft, ChevronRight, Dumbbell } from "lucide-react";
+import useSWR from "swr";
+import fuzzysort from "fuzzysort";
 
-const fetcher = () => fetchFreeExerciseDb();
+interface FreeExercise {
+  id: string;
+  name: string;
+  category: string;
+  primaryMuscles: string[];
+  secondaryMuscles: string[];
+  equipment: string;
+  instructions: string[];
+  images: string[];
+}
+
+const fetcher = () =>
+  fetch("https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/dist/exercises.json")
+    .then((res) => res.json())
+    .catch(() => {
+      throw new Error("Failed to load exercises");
+    });
 
 export default function WorkoutLibrary() {
-    const [page, setPage] = useState(1);
-    const [search, setSearch] = useState("");
-    const [category, setCategory] = useState<string>("");
-    const [selectedMuscle, setSelectedMuscle] = useState<string>("");
+  const [page, setPage] = useState(1);
+  const [search, setSearch] = useState("");
+  const [activeFilter, setActiveFilter] = useState("ALL");
 
-    const { data: allExercises, error, isLoading } = useSWR('free-exercise-db', fetcher);
+  const { data: allExercises, error, isLoading } = useSWR("free-exercise-db", fetcher);
 
-    // Stable array reference so the filter memo below doesn't churn every render.
-    const exercises = useMemo(() => allExercises || [], [allExercises]);
+  const exercises = useMemo(() => allExercises || [], [allExercises]);
 
-    // Filter by search, category & individual muscle (memoized so typing in
-    // the search box doesn't re-run the filter for unrelated state changes).
-    const filteredExercises = useMemo(() => {
-        return exercises.filter((ex: FreeExercise) => {
-            const matchesSearch = !search || ex.name.toLowerCase().includes(search.toLowerCase()) || ex.primaryMuscles.some(m => m.toLowerCase().includes(search.toLowerCase()));
-            const matchesCategory = !category || ex.category.toLowerCase() === category.toLowerCase();
-            const matchesMuscle = !selectedMuscle ||
-                (ex.primaryMuscles && ex.primaryMuscles.some(m => m.toLowerCase().includes(selectedMuscle.toLowerCase()))) ||
-                (ex.secondaryMuscles && ex.secondaryMuscles.some(m => m.toLowerCase().includes(selectedMuscle.toLowerCase())));
+  const unifiedFilters = [
+    "ALL",
+    "CHEST",
+    "BACK",
+    "LEGS",
+    "ARMS",
+    "SHOULDERS",
+    "CORE",
+    "CARDIO",
+    "STRENGTH",
+    "STRETCHING"
+  ];
 
-            return matchesSearch && matchesCategory && matchesMuscle;
-        });
-    }, [exercises, search, category, selectedMuscle]);
+  const filteredExercises = useMemo(() => {
+    let pool = exercises;
 
-    const pageSize = 18;
-    const totalCount = filteredExercises.length;
-    const maxPage = Math.max(1, Math.ceil(totalCount / pageSize));
-    const paginatedExercises = useMemo(
-        () => filteredExercises.slice((page - 1) * pageSize, page * pageSize),
-        [filteredExercises, page]
-    );
+    if (search.trim()) {
+      const fuzzyResults = fuzzysort.go(search.trim(), exercises, {
+        keys: ['name', 'category', 'equipment', (obj: FreeExercise) => obj.primaryMuscles.join(' ')],
+        threshold: -500,
+      });
+      pool = fuzzyResults.map((r) => r.obj);
+    }
 
-    if (isLoading && !allExercises) return (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[...Array(6)].map((_, i) => (
-                <div key={i} className="bg-white/5 border border-white/10 rounded-xl overflow-hidden">
-                    <div className="h-40 skeleton" />
-                    <div className="p-4 space-y-3">
-                        <div className="h-5 skeleton rounded w-3/4" />
-                        <div className="h-3 skeleton rounded w-1/2" />
-                        <div className="flex gap-2">
-                            <div className="h-6 skeleton rounded w-16" />
-                            <div className="h-6 skeleton rounded w-20" />
-                        </div>
-                    </div>
-                </div>
-            ))}
-        </div>
-    );
+    return pool.filter((ex: FreeExercise) => {
+      if (activeFilter === "ALL") return true;
 
-    if (error) return (
-        <div className="text-center p-10 border border-red-500/50 bg-red-500/10 text-red-500 font-mono">
-            UPLINK FAILURE: UNABLE TO RETRIEVE TACTICAL EXERCISE DATA.
-        </div>
-    );
+      const f = activeFilter.toLowerCase();
+      
+      // Map grouped muscle names to actual DB terminology
+      const mappedTargets: Record<string, string[]> = {
+        arms: ['biceps', 'triceps', 'forearms'],
+        legs: ['quadriceps', 'hamstrings', 'glutes', 'calves'],
+        core: ['abdominis'],
+        back: ['lats', 'lower back', 'middle back', 'traps'],
+      };
 
-    // Muscle Group Options
-    const muscleGroups = [
-        { label: "ALL MUSCLES", value: "" },
-        { label: "CHEST", value: "chest" },
-        { label: "TRICEPS", value: "triceps" },
-        { label: "BICEPS", value: "biceps" },
-        { label: "BACK / LATS", value: "lats" },
-        { label: "SHOULDERS", value: "shoulders" },
-        { label: "LEGS / QUADS", value: "quadriceps" },
-        { label: "ABS / CORE", value: "abdominis" },
-        { label: "GLUTES", value: "glutes" },
-        { label: "HAMSTRINGS", value: "hamstrings" },
-        { label: "FOREARMS", value: "forearms" },
-    ];
+      const matchCategory = ex.category?.toLowerCase() === f;
+      const targetMuscles = mappedTargets[f] || [f];
+      
+      const matchMuscle = targetMuscles.some(tm => 
+        (ex.primaryMuscles && ex.primaryMuscles.some(m => m.toLowerCase().includes(tm))) ||
+        (ex.secondaryMuscles && ex.secondaryMuscles.some(m => m.toLowerCase().includes(tm)))
+      );
 
-    // Discipline / Exercise Type Options
-    const disciplines = [
-        { label: "ALL TYPES", value: "" },
-        { label: "STRENGTH", value: "strength" },
-        { label: "CARDIO", value: "cardio" },
-        { label: "STRETCHING", value: "stretching" },
-        { label: "POWERLIFTING", value: "powerlifting" },
-        { label: "PLYOMETRICS", value: "plyometrics" },
-        { label: "STRONGMAN", value: "strongman" },
-        { label: "WEIGHTLIFTING", value: "olympic weightlifting" },
-    ];
+      return matchCategory || matchMuscle;
+    });
+  }, [exercises, search, activeFilter]);
 
+  const pageSize = 18;
+  const totalCount = filteredExercises.length;
+  const maxPage = Math.max(1, Math.ceil(totalCount / pageSize));
+  const paginatedExercises = useMemo(
+    () => filteredExercises.slice((page - 1) * pageSize, page * pageSize),
+    [filteredExercises, page],
+  );
+
+  if (isLoading && !allExercises) {
     return (
-        <div className="space-y-8">
-            {/* Controls Header with Adaptive Search & Auto-Sized Dropdowns */}
-            <div className="flex flex-col md:flex-row gap-4 bg-white/5 p-5 border border-white/10 rounded-xl items-stretch md:items-center">
-                {/* Search Input (Flex Grow) */}
-                <div className="relative flex-1 min-w-[240px]">
-                    <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                    <input
-                        type="text"
-                        placeholder="Search exercises or muscles..."
-                        value={search}
-                        onChange={(e) => {
-                            setSearch(e.target.value);
-                            setPage(1);
-                        }}
-                        className="w-full bg-black border border-white/20 pl-11 pr-4 py-3 text-white focus:border-gym-red focus:outline-none rounded-lg text-sm placeholder:text-gray-500 shadow-inner"
-                    />
-                </div>
-
-                {/* Dropdown 1: Target Muscle Group (Adaptable Width) */}
-                <div className="relative w-full md:w-auto min-w-[210px]">
-                    <Filter className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gym-red" />
-                    <select
-                        value={selectedMuscle}
-                        onChange={(e) => {
-                            setSelectedMuscle(e.target.value);
-                            setPage(1);
-                        }}
-                        className="w-full bg-black border border-white/20 pl-10 pr-9 py-3 text-white focus:border-gym-red focus:outline-none rounded-lg font-mono text-xs tracking-wider appearance-none cursor-pointer uppercase font-semibold text-ellipsis"
-                    >
-                        {muscleGroups.map((m) => (
-                            <option key={m.label} value={m.value} className="bg-zinc-900 text-white font-sans text-sm py-2">
-                                {m.label}
-                            </option>
-                        ))}
-                    </select>
-                    <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400 text-xs">▼</div>
-                </div>
-
-                {/* Dropdown 2: Exercise Type / Discipline (Adaptable Width) */}
-                <div className="relative w-full md:w-auto min-w-[210px]">
-                    <Dumbbell className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gym-red" />
-                    <select
-                        value={category}
-                        onChange={(e) => {
-                            setCategory(e.target.value);
-                            setPage(1);
-                        }}
-                        className="w-full bg-black border border-white/20 pl-10 pr-9 py-3 text-white focus:border-gym-red focus:outline-none rounded-lg font-mono text-xs tracking-wider appearance-none cursor-pointer uppercase font-semibold text-ellipsis"
-                    >
-                        {disciplines.map((d) => (
-                            <option key={d.label} value={d.value} className="bg-zinc-900 text-white font-sans text-sm py-2">
-                                {d.label}
-                            </option>
-                        ))}
-                    </select>
-                    <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400 text-xs">▼</div>
-                </div>
-            </div>
-
-            {/* Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <AnimatePresence mode="popLayout">
-                    {paginatedExercises.map((exercise: FreeExercise) => (
-                        <motion.div
-                            key={exercise.id}
-                            initial={{ opacity: 0, scale: 0.95 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            exit={{ opacity: 0, scale: 0.95 }}
-                            layout
-                            className="bg-black border border-white/10 rounded-xl overflow-hidden hover:border-gym-red/50 transition-all group flex flex-col h-full"
-                        >
-                            {/* Image Section */}
-                            <div className="aspect-video bg-white/5 relative overflow-hidden">
-                                {exercise.images && exercise.images.length > 0 ? (
-                                    <Image
-                                        src={exercise.images[0]}
-                                        alt={exercise.name}
-                                        fill
-                                        className="object-cover opacity-80 group-hover:opacity-100 group-hover:scale-105 transition-all duration-500"
-                                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                                    />
-                                ) : (
-                                    <div className="w-full h-full flex items-center justify-center">
-                                        <Dumbbell className="w-12 h-12 text-white/10" />
-                                    </div>
-                                )}
-
-                                <div className="absolute top-2 right-2 bg-black/80 px-2 py-1 rounded border border-white/10 z-10">
-                                    <span className="text-[10px] font-mono text-gym-red uppercase">
-                                        {exercise.category || "STRENGTH"}
-                                    </span>
-                                </div>
-                            </div>
-
-                            <div className="p-6 flex flex-col flex-grow">
-                                <h3 className="text-xl font-black uppercase mb-3 line-clamp-1" title={exercise.name}>
-                                    {exercise.name}
-                                </h3>
-
-                                <p className="text-gray-400 text-xs font-sans line-clamp-3 mb-4">
-                                    {exercise.instructions?.[0] || 'NO STRATEGIC DATA AVAILABLE.'}
-                                </p>
-
-                                <div className="mt-auto pt-4 border-t border-white/10 flex flex-wrap gap-2">
-                                    {exercise.primaryMuscles.map((m: string) => (
-                                        <span key={m} className="text-[10px] bg-gym-red/20 border border-gym-red/30 px-2 py-1 rounded text-gym-red uppercase font-mono">
-                                            {m}
-                                        </span>
-                                    ))}
-                                    {exercise.equipment && (
-                                        <span className="text-[10px] bg-white/10 px-2 py-1 rounded text-gray-300 uppercase font-mono">
-                                            {exercise.equipment}
-                                        </span>
-                                    )}
-                                </div>
-                            </div>
-                        </motion.div>
-                    ))}
-                </AnimatePresence>
-            </div>
-
-            {filteredExercises.length === 0 && (
-                <div className="text-center py-20 text-gray-500 font-mono">
-                    NO MATCHING INTEL FOUND.
-                </div>
-            )}
-
-            {/* Pagination controls */}
-            <div className="flex justify-between items-center bg-white/5 p-4 rounded-xl border border-white/10">
-                <button
-                    onClick={() => setPage(p => Math.max(1, p - 1))}
-                    disabled={page === 1}
-                    className="flex items-center gap-2 px-4 py-2 hover:text-gym-red disabled:opacity-50 disabled:hover:text-gray-500 transition-colors uppercase font-bold text-sm"
-                >
-                    <ChevronLeft className="w-4 h-4" /> Prev
-                </button>
-
-                <span className="font-mono text-gym-red">
-                    PAGE {page} <span className="text-gray-500">of {maxPage}</span>
-                </span>
-
-                <button
-                    onClick={() => setPage(p => Math.min(maxPage, p + 1))}
-                    disabled={page >= maxPage}
-                    className="flex items-center gap-2 px-4 py-2 hover:text-gym-red disabled:opacity-50 disabled:hover:text-gray-500 transition-colors uppercase font-bold text-sm"
-                >
-                    Next <ChevronRight className="w-4 h-4" />
-                </button>
-            </div>
-        </div>
+      <div className="flex items-center justify-center py-20 text-accent font-mono text-[10px] tracking-widest animate-pulse">
+        LOADING WORKOUT DATABASE...
+      </div>
     );
+  }
+
+  if (error) {
+    return (
+      <div className="text-center p-10 surface-card hairline border-status-danger text-status-danger font-mono text-[10px]">
+        FAILED TO LOAD EXERCISES. RETRY REQUIRED.
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-8">
+      {/* Controls Header */}
+      <div className="flex flex-col gap-6 surface-card hairline p-6">
+        
+        {/* Unified Pill Filters */}
+        <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide pb-2" style={{ WebkitOverflowScrolling: 'touch' }}>
+          {unifiedFilters.map((f) => (
+            <button
+              key={f}
+              onClick={() => { setActiveFilter(f); setPage(1); }}
+              className={`whitespace-nowrap px-5 py-2.5 rounded-full border transition-all duration-300 font-mono text-[10px] tracking-[0.2em] uppercase ${
+                activeFilter === f 
+                  ? "bg-accent border-accent text-white shadow-[0_0_15px_rgba(215,25,33,0.4)]"
+                  : "bg-[#0a0a0a] border-surface-border text-mid hover:text-hi hover:border-hi"
+              }`}
+            >
+              {f}
+            </button>
+          ))}
+        </div>
+
+        {/* Search Input */}
+        <div className="relative w-full">
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-low" />
+          <input
+            type="text"
+            placeholder="Search exercises by name or equipment..."
+            value={search}
+            onChange={(e) => {
+              setSearch(e.target.value);
+              setPage(1);
+            }}
+            className="w-full bg-[#050505] border border-surface-border text-hi pl-11 pr-4 py-3 rounded-md focus:outline-none focus:border-accent transition-colors text-sm font-mono placeholder:text-low/50"
+          />
+        </div>
+      </div>
+
+      {/* Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {paginatedExercises.map((exercise: FreeExercise) => (
+          <div
+            key={exercise.id}
+            className="surface-card hairline overflow-hidden hover:border-accent transition-colors duration-fast group flex flex-col h-full bg-[#111]"
+          >
+            {/* Image Section */}
+            <div className="aspect-video bg-[#050505] relative overflow-hidden">
+              {exercise.images && exercise.images.length > 0 ? (
+                <Image
+                  src={exercise.images[0]}
+                  alt={exercise.name}
+                  fill
+                  className="object-cover opacity-80 group-hover:opacity-100 transition-opacity duration-slow"
+                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center">
+                  <Dumbbell className="w-12 h-12 text-surface-border" />
+                </div>
+              )}
+
+              <div className="absolute top-2 right-2 surface-modal hairline px-2 py-1 z-10 bg-black/50 backdrop-blur-md">
+                <span className="text-[9px] font-mono tracking-widest text-accent uppercase">
+                  {exercise.category || "STRENGTH"}
+                </span>
+              </div>
+            </div>
+
+            <div className="p-6 flex flex-col flex-grow">
+              <h3 className="heading-section text-lg text-hi mb-3 line-clamp-1" title={exercise.name}>
+                {exercise.name}
+              </h3>
+
+              <p className="body-text text-sm text-low line-clamp-3 mb-4">
+                {exercise.instructions?.[0] || "No additional instructions available."}
+              </p>
+
+              <div className="mt-auto pt-4 hairline-t flex flex-wrap gap-2">
+                {exercise.primaryMuscles.map((m: string) => (
+                  <span key={m} className="px-2 py-1 bg-accent/10 border border-accent/20 text-[9px] font-mono tracking-widest text-accent uppercase rounded-sm">
+                    {m}
+                  </span>
+                ))}
+                {exercise.equipment && (
+                  <span className="px-2 py-1 bg-surface-border/30 border border-surface-border text-[9px] font-mono tracking-widest text-mid uppercase rounded-sm">
+                    {exercise.equipment}
+                  </span>
+                )}
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {filteredExercises.length === 0 && (
+        <div className="text-center py-20 text-[10px] font-mono tracking-widest text-faint uppercase">NO MATCHING EXERCISES FOUND.</div>
+      )}
+
+      {/* Pagination controls */}
+      <div className="flex justify-between items-center surface-card hairline p-4 bg-[#111]">
+        <button
+          onClick={() => setPage((p) => Math.max(1, p - 1))}
+          disabled={page === 1}
+          className="btn-secondary disabled:opacity-50 text-[10px]"
+        >
+          <ChevronLeft className="w-4 h-4 mr-1" /> PREV
+        </button>
+
+        <span className="text-[10px] font-mono tracking-[0.2em] text-accent uppercase">
+          PAGE {page} <span className="text-faint">/ {maxPage}</span>
+        </span>
+
+        <button
+          onClick={() => setPage((p) => Math.min(maxPage, p + 1))}
+          disabled={page >= maxPage}
+          className="btn-secondary disabled:opacity-50 text-[10px]"
+        >
+          NEXT <ChevronRight className="w-4 h-4 ml-1" />
+        </button>
+      </div>
+    </div>
+  );
 }
+

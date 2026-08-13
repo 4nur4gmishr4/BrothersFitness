@@ -1,13 +1,13 @@
 "use client";
 
-import { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import { createContext, useContext, useState, useEffect, useCallback, useMemo, ReactNode } from "react";
 
 // Medal Definitions
 export const MEDALS = {
     ROOKIE_RECRUIT: {
         id: "rookie_recruit",
-        name: "Rookie Recruit",
-        description: "Welcome to the battlefield, soldier.",
+        name: "Newcomer",
+        description: "Welcome to the team.",
         icon: "🎖️"
     },
     IRON_ADDICT: {
@@ -18,13 +18,13 @@ export const MEDALS = {
     },
     DIET_TACTICIAN: {
         id: "diet_tactician",
-        name: "Diet Tactician",
-        description: "Generated a tactical diet plan.",
+        name: "Diet Master",
+        description: "Generated a diet plan.",
         icon: "🍽️"
     },
     CALCULATOR_ELITE: {
         id: "calculator_elite",
-        name: "Calculator Elite",
+        name: "Calculator Master",
         description: "Used the fitness calculators.",
         icon: "📊"
     }
@@ -101,23 +101,28 @@ export function GamificationProvider({ children }: { children: ReactNode }) {
         setVisitStreak(currentStreak);
     }, []);
 
-    const awardMedal = (medalId: MedalId) => {
-        if (!medals.includes(medalId)) {
-            const newMedals = [...medals, medalId];
-            setMedals(newMedals);
+    // M18: stable function identities so consumers don't re-render on every
+    // provider render. awardMedal/hasMedal read state via functional updates
+    // instead of closing over `medals` (which would go stale).
+    const awardMedal = useCallback((medalId: MedalId) => {
+        setMedals(prev => {
+            if (prev.includes(medalId)) return prev;
+            const newMedals = [...prev, medalId];
             localStorage.setItem("brofit_medals", JSON.stringify(newMedals));
-        }
-    };
+            return newMedals;
+        });
+    }, []);
 
-    const hasMedal = (medalId: MedalId) => medals.includes(medalId);
+    const hasMedal = useCallback((medalId: MedalId) => medals.includes(medalId), [medals]);
 
-    // Render Provider even if not loaded (with initial values), or handle loading state differently if needed.
-    // Ideally, we should render children always.
-    // If we simply return children when !isLoaded, context users will crash.
-    // So we MUST return Provider.
+    // Memoize the value so unrelated provider re-renders don't bust consumers.
+    const value = useMemo(
+        () => ({ medals, visitStreak, awardMedal, hasMedal }),
+        [medals, visitStreak, awardMedal, hasMedal]
+    );
 
     return (
-        <GamificationContext.Provider value={{ medals, visitStreak, awardMedal, hasMedal }}>
+        <GamificationContext.Provider value={value}>
             {children}
         </GamificationContext.Provider>
     );

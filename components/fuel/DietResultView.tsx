@@ -1,12 +1,12 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { motion } from "framer-motion";
 import {
     Globe, Utensils, ShoppingCart, IndianRupee, Home, Store, RefreshCw,
 } from "lucide-react";
 import { toast } from "sonner";
-import MissionDirective from "@/components/MissionDirective";
+import DietPlanPrint from "@/components/DietPlanPrint";
+import CheckDraw from "@/components/animations/CheckDraw";
 import type { DietPlan } from "@/lib/fuel-types";
 
 type Lang = "en" | "hi";
@@ -18,7 +18,7 @@ interface DietResultViewProps {
     onLangChange: (lang: Lang) => void;
     timelineUnit: TimelineUnit;
     onTimelineUnitChange: (unit: TimelineUnit) => void;
-    mode: "bulk" | "cut";
+    mode: "bulk" | "cut" | "maintain";
     biometrics: { currentWeight: string; targetWeight: string };
 }
 
@@ -66,10 +66,16 @@ export default function DietResultView({
                 heightLeft -= pdfHeight;
             }
 
-            pdf.save(`BroFit_Mission_Directive_${new Date().toISOString().split('T')[0]}.pdf`);
+            pdf.save(`BroFit_Diet_Plan_${new Date().toISOString().split('T')[0]}.pdf`);
+            toast.success(
+                <span className="flex items-center gap-2">
+                    <CheckDraw />
+                    <span>Diet plan saved!</span>
+                </span>
+            );
         } catch (err) {
-            console.error("PDF Fail:", err);
-            toast.error("Tactical Printer Jammed. Please retry.");
+            console.error("PDF export failed:", err);
+            toast.error("PDF export failed. Please try again.");
         } finally {
             setPdfLoading(false);
         }
@@ -77,27 +83,23 @@ export default function DietResultView({
 
     return (
         <>
-            <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="space-y-8"
-            >
+            <div className="space-y-8">
                 {/* Control Bar */}
-                <div className="flex justify-between items-center bg-white/5 p-4 border border-white/10">
+                <div className="surface-card hairline p-4 flex justify-between items-center">
                     <div className="flex items-center gap-2">
-                        <Globe className="w-4 h-4 text-gym-red" />
-                        <span className="font-dot text-xs uppercase tracking-widest text-gray-400">Language Protocol</span>
+                        <Globe className="w-4 h-4 text-accent" />
+                        <span className="label-text text-[10px]">Language</span>
                     </div>
                     <div className="flex gap-2">
                         <button
                             onClick={() => onLangChange("en")}
-                            className={`px-3 py-1 text-xs font-bold uppercase transition-colors ${lang === "en" ? "bg-gym-red text-white" : "border border-white/20 text-gray-400"}`}
+                            className={`px-3 py-1 text-xs font-bold uppercase transition-colors duration-fast ${lang === "en" ? "bg-accent text-white border border-accent" : "surface-elevated hairline text-low hover:border-accent"}`}
                         >
                             English
                         </button>
                         <button
                             onClick={() => onLangChange("hi")}
-                            className={`px-3 py-1 text-xs font-bold uppercase transition-colors ${lang === "hi" ? "bg-gym-red text-white" : "border border-white/20 text-gray-400"}`}
+                            className={`px-3 py-1 text-xs font-bold uppercase transition-colors duration-fast ${lang === "hi" ? "bg-accent text-white border border-accent" : "surface-elevated hairline text-low hover:border-accent"}`}
                         >
                             Hindi
                         </button>
@@ -105,57 +107,56 @@ export default function DietResultView({
                 </div>
 
                 {/* Brief */}
-                {/* Enhanced Your Plan Section */}
-                <div className="bg-gym-red/10 border-l-4 border-gym-red p-6">
-                    <h3 className="text-gym-red font-dot text-xs uppercase tracking-widest mb-3">Your Plan // Mission Summary</h3>
-                    <p className="font-medium text-lg italic mb-4">&quot;{data.tactical_brief[lang]}&quot;</p>
+                <div className="surface-elevated hairline-l-[3px] border-l-accent p-6">
+                    <h3 className="label-text text-[10px] text-accent mb-3">Your Plan</h3>
+                    <p className="font-medium text-lg text-hi mb-4">&quot;{data.summary[lang]}&quot;</p>
 
                     {/* User Inputs Summary */}
                     {data.user_inputs_summary && (
-                        <div className="mt-4 pt-4 border-t border-gym-red/30">
-                            <h4 className="text-xs font-dot text-gray-400 uppercase tracking-widest mb-3">Your Complete Profile</h4>
+                        <div className="mt-4 pt-4 hairline-t border-accent/20">
+                            <h4 className="label-text text-[10px] text-low mb-3">Your Profile</h4>
                             <div className="grid grid-cols-3 md:grid-cols-5 gap-3 text-xs">
-                                <div className="bg-black/30 p-2 text-center rounded">
-                                    <span className="block text-gray-500">Gender</span>
-                                    <span className="font-bold text-white">{data.user_inputs_summary.gender}</span>
+                                <div className="surface-canvas hairline p-2 text-center">
+                                    <span className="block text-faint">Gender</span>
+                                    <span className="font-bold text-hi">{data.user_inputs_summary.gender}</span>
                                 </div>
-                                <div className="bg-black/30 p-2 text-center rounded">
-                                    <span className="block text-gray-500">Age</span>
-                                    <span className="font-bold text-white">{data.user_inputs_summary.age} yrs</span>
+                                <div className="surface-canvas hairline p-2 text-center">
+                                    <span className="block text-faint">Age</span>
+                                    <span className="font-bold text-hi">{data.user_inputs_summary.age} yrs</span>
                                 </div>
-                                <div className="bg-black/30 p-2 text-center rounded">
-                                    <span className="block text-gray-500">Height</span>
-                                    <span className="font-bold text-white">{data.user_inputs_summary.height} cm</span>
+                                <div className="surface-canvas hairline p-2 text-center">
+                                    <span className="block text-faint">Height</span>
+                                    <span className="font-bold text-hi">{data.user_inputs_summary.height} cm</span>
                                 </div>
-                                <div className="bg-black/30 p-2 text-center rounded">
-                                    <span className="block text-gray-500">Current</span>
-                                    <span className="font-bold text-white">{data.user_inputs_summary.current_weight} kg</span>
+                                <div className="surface-canvas hairline p-2 text-center">
+                                    <span className="block text-faint">Current</span>
+                                    <span className="font-bold text-hi">{data.user_inputs_summary.current_weight} kg</span>
                                 </div>
-                                <div className="bg-black/30 p-2 text-center rounded">
-                                    <span className="block text-gray-500">Target</span>
-                                    <span className="font-bold text-gym-red">{data.user_inputs_summary.target_weight} kg</span>
+                                <div className="surface-canvas hairline p-2 text-center">
+                                    <span className="block text-faint">Target</span>
+                                    <span className="font-bold text-accent">{data.user_inputs_summary.target_weight} kg</span>
                                 </div>
                             </div>
                             <div className="grid grid-cols-2 md:grid-cols-5 gap-3 text-xs mt-3">
-                                <div className="bg-black/30 p-2 text-center rounded">
-                                    <span className="block text-gray-500">Activity</span>
-                                    <span className="font-bold text-white text-[10px]">{data.user_inputs_summary.activity_level?.split(" ")[0] || "N/A"}</span>
+                                <div className="surface-canvas hairline p-2 text-center">
+                                    <span className="block text-faint">Activity</span>
+                                    <span className="font-bold text-hi text-[10px]">{data.user_inputs_summary.activity_level?.split(" ")[0] || "N/A"}</span>
                                 </div>
-                                <div className="bg-black/30 p-2 text-center rounded">
-                                    <span className="block text-gray-500">Diet Type</span>
-                                    <span className="font-bold text-white text-[10px]">{data.user_inputs_summary.diet_type}</span>
+                                <div className="surface-canvas hairline p-2 text-center">
+                                    <span className="block text-faint">Diet Type</span>
+                                    <span className="font-bold text-hi text-[10px]">{data.user_inputs_summary.diet_type}</span>
                                 </div>
-                                <div className="bg-black/30 p-2 text-center rounded">
-                                    <span className="block text-gray-500">Budget</span>
-                                    <span className="font-bold text-white text-[10px]">{data.user_inputs_summary.budget}</span>
+                                <div className="surface-canvas hairline p-2 text-center">
+                                    <span className="block text-faint">Budget</span>
+                                    <span className="font-bold text-hi text-[10px]">{data.user_inputs_summary.budget}</span>
                                 </div>
-                                <div className="bg-black/30 p-2 text-center rounded">
-                                    <span className="block text-gray-500">Mode</span>
-                                    <span className="font-bold text-green-400">{data.user_inputs_summary.mode?.toUpperCase()}</span>
+                                <div className="surface-canvas hairline p-2 text-center">
+                                    <span className="block text-faint">Mode</span>
+                                    <span className="font-bold text-status-success">{data.user_inputs_summary.mode?.toUpperCase()}</span>
                                 </div>
-                                <div className="bg-black/30 p-2 text-center rounded">
-                                    <span className="block text-gray-500">Rate</span>
-                                    <span className="font-bold text-yellow-400">{data.user_inputs_summary.weight_change_rate || "0.5"} kg/wk</span>
+                                <div className="surface-canvas hairline p-2 text-center">
+                                    <span className="block text-faint">Rate</span>
+                                    <span className="font-bold text-status-warning">{data.user_inputs_summary.weight_change_rate || "0.5"} kg/wk</span>
                                 </div>
                             </div>
                         </div>
@@ -164,15 +165,15 @@ export default function DietResultView({
 
                 {/* Timeline with Unit Switcher */}
                 {data.transformation_timeline && (
-                    <div className="bg-white/5 border border-white/20 p-6">
+                    <div className="surface-card hairline p-6">
                         <div className="flex justify-between items-center mb-4">
-                            <h3 className="text-gray-400 font-dot text-xs uppercase tracking-widest">Estimated Timeline</h3>
+                            <h3 className="label-text text-[10px] text-low">Estimated Timeline</h3>
                             <div className="flex gap-1">
                                 {(["days", "weeks", "months", "years"] as const).map((unit) => (
                                     <button
                                         key={unit}
                                         onClick={() => onTimelineUnitChange(unit)}
-                                        className={`px-2 py-1 text-[10px] font-bold uppercase transition-colors ${timelineUnit === unit ? "bg-gym-red text-white" : "border border-white/20 text-gray-500 hover:text-white"}`}
+                                        className={`px-2 py-1 text-[10px] font-bold uppercase transition-colors duration-fast ${timelineUnit === unit ? "bg-accent text-white border border-accent" : "surface-elevated hairline text-faint hover:text-hi hover:border-accent"}`}
                                     >
                                         {unit}
                                     </button>
@@ -181,55 +182,54 @@ export default function DietResultView({
                         </div>
                         <div className="flex justify-between items-end">
                             <div>
-                                <p className="text-4xl font-black text-white">
+                                <p className="text-4xl font-black text-hi">
                                     {timelineUnit === "days" && (data.transformation_timeline.total_days || Math.round((data.transformation_timeline.total_weeks || 0) * 7))}
                                     {timelineUnit === "weeks" && (data.transformation_timeline.total_weeks || data.transformation_timeline.estimated_duration)}
                                     {timelineUnit === "months" && Math.round((data.transformation_timeline.total_weeks || 0) / 4.33)}
                                     {timelineUnit === "years" && ((data.transformation_timeline.total_weeks || 0) / 52).toFixed(1)}
-                                    <span className="text-lg text-gray-400 ml-2">{timelineUnit}</span>
+                                    <span className="text-lg text-faint ml-2">{timelineUnit}</span>
                                 </p>
-                                <p className="text-xs text-green-500 font-mono uppercase mt-1">
+                                <p className="text-xs text-status-success font-mono uppercase mt-1">
                                     {data.transformation_timeline.weekly_change} / week
                                 </p>
                             </div>
                             <div className="text-right">
-                                <p className="text-xs text-gray-400 uppercase">Target Intake</p>
-                                <p className="text-2xl font-black text-gym-red">{data.transformation_timeline.daily_calories} kcal</p>
+                                <p className="text-xs text-faint uppercase">Target Intake</p>
+                                <p className="text-2xl font-black text-accent">{data.transformation_timeline.daily_calories} kcal</p>
                             </div>
                         </div>
                     </div>
                 )}
 
-                {/* MEAL PLAN SECTION - NOW ABOVE SHOPPING CART */}
-                <div className="border border-white/20 p-6 bg-black relative">
-                    <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-gym-red to-transparent opacity-50" />
-                    <div className="flex items-center gap-3 mb-6 border-b border-white/10 pb-4">
-                        <Utensils className="w-5 h-5 text-gym-red" />
-                        <h3 className="text-xl font-black uppercase">Fuel Injector // Daily Protocol</h3>
+                {/* MEAL PLAN SECTION */}
+                <div className="surface-card hairline p-6">
+                    <div className="flex items-center gap-3 mb-6 hairline-b pb-4">
+                        <Utensils className="w-5 h-5 text-accent" />
+                        <h3 className="heading-section text-xl text-hi">Daily Meal Plan</h3>
                     </div>
                     <div className="space-y-4">
                         {data.meal_plan.map((meal, idx) => (
-                            <div key={idx} className="bg-white/5 p-4 border border-white/10 hover:border-gym-red/50 transition-colors">
+                            <div key={idx} className="surface-elevated hairline p-4 hover:border-accent transition-colors duration-fast">
                                 <div className="flex justify-between items-start mb-2">
                                     <div className="flex items-center gap-3">
                                         {meal.timing && (
-                                            <span className="text-yellow-400 font-mono font-bold text-sm bg-yellow-400/10 px-2 py-1 rounded">
+                                            <span className="font-mono font-bold text-sm text-status-warning bg-status-warning/10 border border-status-warning/30 px-2 py-1">
                                                 {meal.timing}
                                             </span>
                                         )}
-                                        <h4 className="font-bold text-white uppercase text-sm">{meal.name?.[lang] || "Unnamed Ration"}</h4>
+                                        <h4 className="font-bold text-hi uppercase text-sm">{meal.name?.[lang] || "Standard Meal"}</h4>
                                     </div>
-                                    <span className="text-gym-red font-black text-xs">{meal.calories} kcal</span>
+                                    <span className="text-accent font-black text-xs">{meal.calories} kcal</span>
                                 </div>
-                                <p className="text-xs text-gray-400 mb-3 leading-relaxed">{meal.description?.[lang] || "No strategic details provided."}</p>
+                                <p className="text-xs text-low mb-3 leading-relaxed">{meal.description?.[lang] || "No details provided."}</p>
 
                                 {/* Ingredients List */}
                                 {meal.ingredients && meal.ingredients.length > 0 && (
-                                    <div className="mb-3 p-2 bg-black/50 border border-white/5 rounded">
-                                        <p className="text-[10px] font-dot text-gray-500 uppercase mb-1">Ingredients</p>
+                                    <div className="mb-3 p-2 surface-canvas hairline">
+                                        <p className="label-text text-[10px] text-faint mb-1">Ingredients</p>
                                         <div className="flex flex-wrap gap-2">
                                             {meal.ingredients.map((ing, i) => (
-                                                <span key={i} className="text-[10px] text-gray-300 bg-white/5 px-2 py-0.5 rounded">
+                                                <span key={i} className="badge">
                                                     {ing.name?.[lang] || ing.name?.en} ({ing.quantity})
                                                 </span>
                                             ))}
@@ -239,49 +239,49 @@ export default function DietResultView({
 
                                 {/* Recipe */}
                                 {meal.recipe && (
-                                    <div className="mb-3 p-2 bg-black/50 border border-white/5 rounded">
-                                        <p className="text-[10px] font-dot text-gray-500 uppercase mb-1">Recipe</p>
-                                        <p className="text-xs text-gray-300 leading-relaxed">{meal.recipe[lang]}</p>
+                                    <div className="mb-3 p-2 surface-canvas hairline">
+                                        <p className="label-text text-[10px] text-faint mb-1">Recipe</p>
+                                        <p className="text-xs text-mid leading-relaxed">{meal.recipe[lang]}</p>
                                     </div>
                                 )}
 
                                 {/* Macros */}
-                                <div className="flex flex-wrap gap-2 text-[10px] font-dot uppercase tracking-widest text-gray-500">
-                                    <span className="bg-black px-2 py-1 border border-white/10 rounded">P: {meal.protein}g</span>
-                                    <span className="bg-black px-2 py-1 border border-white/10 rounded">C: {meal.carbs}g</span>
-                                    <span className="bg-black px-2 py-1 border border-white/10 rounded">F: {meal.fats}g</span>
-                                    {meal.fiber !== undefined && <span className="bg-black px-2 py-1 border border-white/10 rounded">Fiber: {meal.fiber}g</span>}
-                                    {meal.sugar !== undefined && <span className="bg-black px-2 py-1 border border-white/10 rounded">Sugar: {meal.sugar}g</span>}
+                                <div className="flex flex-wrap gap-2 text-[10px] font-mono uppercase tracking-widest text-faint">
+                                    <span className="surface-canvas hairline px-2 py-1">P: {meal.protein}g</span>
+                                    <span className="surface-canvas hairline px-2 py-1">C: {meal.carbs}g</span>
+                                    <span className="surface-canvas hairline px-2 py-1">F: {meal.fats}g</span>
+                                    {meal.fiber !== undefined && <span className="surface-canvas hairline px-2 py-1">Fiber: {meal.fiber}g</span>}
+                                    {meal.sugar !== undefined && <span className="surface-canvas hairline px-2 py-1">Sugar: {meal.sugar}g</span>}
                                 </div>
                             </div>
                         ))}
                     </div>
                 </div>
 
-                {/* SHOPPING CART SECTION - NOW BELOW MEAL PLAN */}
-                <div className="border border-white/20 p-6 bg-black">
-                    <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 border-b border-white/10 pb-4 gap-4">
+                {/* SHOPPING CART SECTION */}
+                <div className="surface-card hairline p-6">
+                    <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 hairline-b pb-4 gap-4">
                         <div className="flex items-center gap-3">
-                            <ShoppingCart className="w-5 h-5 text-gym-red" />
-                            <h3 className="text-xl font-black uppercase">Mission Manifest</h3>
+                            <ShoppingCart className="w-5 h-5 text-accent" />
+                            <h3 className="heading-section text-xl text-hi">Shopping List</h3>
                             {data.shopping_list.duration_days && (
-                                <span className="text-[10px] bg-gym-red/20 text-gym-red px-2 py-1 rounded font-bold">
+                                <span className="badge badge--accent">
                                     {data.shopping_list.duration_days} DAY SUPPLY
                                 </span>
                             )}
                         </div>
                         <div className="flex items-center gap-4">
                             <div className="text-center">
-                                <p className="text-[10px] text-gray-500 uppercase">Total (15 Days)</p>
-                                <div className="flex items-center gap-1 text-green-400 font-bold text-lg">
+                                <p className="label-text text-[10px] text-faint">Total</p>
+                                <div className="flex items-center gap-1 text-status-success font-bold text-lg">
                                     <IndianRupee className="w-4 h-4" />
                                     {data.shopping_list.total_estimated_cost}
                                 </div>
                             </div>
-                            <div className="h-8 w-[1px] bg-white/10" />
+                            <div className="h-8 w-[1px] surface-border" />
                             <div className="text-center">
-                                <p className="text-[10px] text-gray-500 uppercase">Avg/Day</p>
-                                <div className="flex items-center gap-1 text-yellow-400 font-bold">
+                                <p className="label-text text-[10px] text-faint">Avg/Day</p>
+                                <div className="flex items-center gap-1 text-status-warning font-bold">
                                     <IndianRupee className="w-3 h-3" />
                                     {data.shopping_list.average_daily_cost || Math.round(data.shopping_list.total_estimated_cost / (data.shopping_list.duration_days || 15))}
                                 </div>
@@ -296,21 +296,21 @@ export default function DietResultView({
 
                             return (
                                 <div key={category}>
-                                    <div className="flex items-center gap-2 mb-3 text-gray-400">
+                                    <div className="flex items-center gap-2 mb-3 text-low">
                                         {category === "Home_Essentials" ? <Home className="w-4 h-4" /> : <Store className="w-4 h-4" />}
-                                        <h4 className="font-dot text-xs uppercase tracking-widest">
+                                        <h4 className="label-text text-[10px]">
                                             {category === "Home_Essentials" ? (lang === "en" ? "Home Essentials" : "Ghar ka Samaan") : (lang === "en" ? "Market Purchase" : "Bazaar se Kharidein")}
                                         </h4>
                                     </div>
                                     <div className="space-y-2">
                                         {items.map((item, idx) => (
-                                            <div key={idx} className="flex justify-between items-center text-sm p-2 bg-white/5 border border-white/5">
+                                            <div key={idx} className="flex justify-between items-center text-sm p-2 surface-elevated hairline hover:border-accent transition-colors duration-fast">
                                                 <div>
-                                                    <p className="font-bold">{item.name[lang]}</p>
-                                                    <p className="text-xs text-gray-500">{item.quantity[lang]} • {item.duration_days} Days</p>
+                                                    <p className="font-bold text-hi">{item.name[lang]}</p>
+                                                    <p className="text-xs text-faint">{item.quantity[lang]} &middot; {item.duration_days} Days</p>
                                                 </div>
-                                                <div className="text-right text-gray-300">
-                                                    ₹{item.price_inr}
+                                                <div className="text-right text-mid">
+                                                    &#8377;{item.price_inr}
                                                 </div>
                                             </div>
                                         ))}
@@ -319,8 +319,8 @@ export default function DietResultView({
                             );
                         })}
                     </div>
-                    <div className="mt-6 pt-4 border-t border-white/10 text-center">
-                        <p className="text-[10px] text-gray-500 font-dot uppercase">* Prices are Average Market Estimates (INR) for {data.shopping_list.duration_days || 15} Days</p>
+                    <div className="mt-6 pt-4 hairline-t text-center">
+                        <p className="label-text text-[10px] text-faint">* Prices are Average Market Estimates (INR) for {data.shopping_list.duration_days || 15} Days</p>
                     </div>
                 </div>
 
@@ -328,20 +328,18 @@ export default function DietResultView({
                     id="export-btn"
                     onClick={downloadPDF}
                     disabled={pdfLoading}
-                    className="w-full border border-white/20 py-4 font-dot font-bold text-xs uppercase tracking-widest hover:bg-white hover:text-black transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                    className="btn-secondary w-full py-4 text-xs hover:bg-accent hover:text-white hover:border-accent disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 >
                     {pdfLoading && (
-                        <motion.div animate={{ rotate: 360 }} transition={{ duration: 1, repeat: Infinity, ease: "linear" }}>
-                            <RefreshCw className="w-4 h-4" />
-                        </motion.div>
+                        <RefreshCw className="w-4 h-4 animate-spin" />
                     )}
-                    {pdfLoading ? "CAPTURING DIRECTIVE..." : "DOWNLOAD MISSION DIRECTIVE (PDF)"}
+                    {pdfLoading ? "Exporting..." : "Download PDF"}
                 </button>
-            </motion.div>
+            </div>
 
             {/* Hidden PDF Component */}
             <div className="absolute top-0 left-[-9999px]">
-                <MissionDirective
+                <DietPlanPrint
                     ref={missionRef}
                     data={data}
                     lang={lang}

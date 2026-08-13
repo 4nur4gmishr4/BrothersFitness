@@ -20,11 +20,13 @@ function istDateKey(d: Date): string {
     }).format(d);
 }
 
-/** Parse a 'YYYY-MM-DD' (or full ISO) value as a UTC date-only millisecond value. */
+/** Parse a 'YYYY-MM-DD' (or full ISO) value as an IST date-only millisecond value. */
 function dateOnlyMs(value: string): number {
     const key = value.slice(0, 10);
     if (!/^\d{4}-\d{2}-\d{2}$/.test(key)) return NaN;
-    return Date.parse(`${key}T00:00:00Z`);
+    // Parse as midnight IST, then convert to UTC ms
+    const [y, m, d] = key.split('-').map(Number);
+    return Date.UTC(y, m - 1, d) + 5.5 * 60 * 60 * 1000; // IST offset in ms
 }
 
 export async function GET(req: Request) {
@@ -59,8 +61,9 @@ export async function GET(req: Request) {
 
         // Fetch all members via the service client (bypasses RLS like the admin routes).
         // Idempotent read → safe to retry on transient network failures.
+        // Select only needed columns to reduce payload.
         const { data: rawMembers, error } = await retryableQuery(() =>
-            getServiceSupabase().from('gym_members').select('*')
+            getServiceSupabase().from('gym_members').select('membership_start,membership_end,membership_type')
         );
 
         if (error) throw error;
@@ -90,7 +93,7 @@ export async function GET(req: Request) {
         // Active members: still within their membership through today (date-only)
         const todayMs = dateOnlyMs(todayKey);
         const activeMembers = (members || []).filter((m: GymMember) => {
-            if (!m.membership_end) return true;
+            if (!m.membership_end) return false; // null/undefined → unknown/expired
             const end = dateOnlyMs(m.membership_end);
             if (Number.isNaN(end)) return false;
             return end >= todayMs;
@@ -114,23 +117,6 @@ export async function GET(req: Request) {
 
         // Log report
         log.info(`Monthly Report for ${lastMonthStr}`, { report });
-
-        // Send to Discord/Telegram if webhook configured
-        if (process.env.DISCORD_WEBHOOK_URL) {
-            await fetch(process.env.DISCORD_WEBHOOK_URL, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    content: `📊 **Monthly Revenue Report - ${lastMonthStr}**\n\n` +
-                        `💰 Revenue: ₹${revenue.toLocaleString()}\n` +
-                        `👥 New Members: ${lastMonthMembers.length}\n` +
-                        `✅ Active Members: ${activeMembers}\n` +
-                        `📋 Total Members: ${members?.length || 0}\n\n` +
-                        `**Plan Breakdown:**\n` +
-                        Object.entries(planBreakdown).map(([plan, count]) => `• ${plan}: ${count}`).join('\n')
-                })
-            });
-        }
 
         return withRequestId(
             NextResponse.json({

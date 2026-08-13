@@ -9,15 +9,20 @@ interface ShareButtonProps {
     filename?: string;
 }
 
-export default function ShareMissionReport({ targetRef, filename = "mission-report" }: ShareButtonProps) {
+export default function ShareMissionReport({ targetRef, filename = "fitness-report" }: ShareButtonProps) {
     const handleShare = async () => {
         if (!targetRef.current) return;
+
+        // Match the export background to the active theme so the
+        // captured image reflects what the user is actually seeing.
+        const root = getComputedStyle(document.documentElement);
+        const canvas = root.getPropertyValue("--surface-canvas").trim() || "0 0 0";
 
         try {
             // Create a wrapper with padding for cleaner export
             const wrapper = document.createElement('div');
             wrapper.style.padding = '32px';
-            wrapper.style.backgroundColor = '#000000';
+            wrapper.style.backgroundColor = `rgb(${canvas})`;
             wrapper.style.display = 'inline-block';
 
             // Clone the target content into the wrapper
@@ -29,9 +34,9 @@ export default function ShareMissionReport({ targetRef, filename = "mission-repo
             wrapper.style.left = '-9999px';
             document.body.appendChild(wrapper);
 
-            const canvas = await html2canvas(wrapper, {
+            const shot = await html2canvas(wrapper, {
                 scale: 2,
-                backgroundColor: "#000000",
+                backgroundColor: `rgb(${canvas})`,
                 useCORS: true,
             });
 
@@ -40,19 +45,22 @@ export default function ShareMissionReport({ targetRef, filename = "mission-repo
 
             const link = document.createElement('a');
             link.download = `${filename}_${new Date().toISOString().split('T')[0]}.png`;
-            link.href = canvas.toDataURL('image/png');
+            link.href = shot.toDataURL('image/png');
+            link.style.display = 'none';
+            document.body.appendChild(link);
             link.click();
+            document.body.removeChild(link);
         } catch (err) {
-            console.error("Mission Report generation failed:", err);
-            toast.error("Failed to generate Mission Report. Please try again.");
+            console.error("Fitness report generation failed:", err);
+            toast.error("Failed to generate fitness report. Please try again.");
         }
     };
 
     return (
         <button
             onClick={handleShare}
-            className="flex items-center gap-2 px-4 py-2 bg-white/10 border border-white/20 rounded-lg text-xs uppercase tracking-widest font-bold hover:bg-gym-red hover:border-gym-red transition-all mt-4"
-            aria-label="Download Mission Report"
+            className="btn-secondary mt-4"
+            aria-label="Download fitness report"
         >
             <Share2 className="w-4 h-4" />
             Share Result

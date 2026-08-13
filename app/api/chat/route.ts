@@ -3,7 +3,6 @@ import { ChatSchema } from "@/lib/validation";
 import { logger } from "@/lib/logger";
 import { generateTextWithFallback } from "@/lib/ai-provider";
 import { verifyUserToken, getUserCreditState, spendUserCredit } from "@/lib/credit-service";
-import { checkRateLimit, RATE_LIMITS } from "@/lib/rate-limit";
 import { getRequestId, withRequestId } from "@/lib/request-id";
 
 export async function POST(req: Request) {
@@ -15,18 +14,6 @@ export async function POST(req: Request) {
         const identity = await verifyUserToken(req);
         if (identity instanceof NextResponse) return withRequestId(identity, requestId);
         const { supabase, userId } = identity;
-
-        // 0b. Enforce the combined AI quota for this user.
-        const rateCheck = await checkRateLimit(`user:${userId}`, RATE_LIMITS.AI_COMBINED);
-        if (!rateCheck.allowed) {
-            return withRequestId(
-                NextResponse.json(
-                    { error: `Daily AI credits used up (0/${rateCheck.remaining}). They reset at 5:30 AM IST.` },
-                    { status: 429 }
-                ),
-                requestId
-            );
-        }
 
         // 1. Check credits (informational pre-check; the RPC below is the
         // authoritative, atomic deduction).

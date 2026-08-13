@@ -2,8 +2,8 @@
 
 import { useState, useEffect, Suspense, useCallback, useMemo } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import { motion } from "framer-motion";
-import { ArrowLeft, RefreshCw, Cpu, Calculator } from "lucide-react";
+import { ArrowLeft, Cpu, Calculator } from "lucide-react";
+import { toast } from "sonner";
 import Navbar from "@/components/Navbar";
 import { useUserAuth } from "@/lib/user-auth-context";
 import { MAX_DAILY_CREDITS } from "@/lib/config";
@@ -11,6 +11,9 @@ import type { DietPlan } from "@/lib/fuel-types";
 import DietResultView from "@/components/fuel/DietResultView";
 import CountdownTimer from "@/components/fuel/CountdownTimer";
 import LoadingStatus from "@/components/fuel/LoadingStatus";
+import MealPlate from "@/components/animations/MealPlate";
+import BellRing from "@/components/animations/BellRing";
+import PageSpinner from "@/components/animations/PageSpinner";
 
 function FuelSynthesizerContent() {
     const router = useRouter();
@@ -35,8 +38,11 @@ function FuelSynthesizerContent() {
     const mode = useMemo(() => {
         const current = parseFloat(currentWeight);
         const target = parseFloat(targetWeight);
+        // L40: equal weights mean "hold my weight" — defaulting to bulk (the
+        // old behaviour) silently told the AI to gain muscle. Maintain is the
+        // least-biased default and matches what the numbers say.
         if (isNaN(current) || isNaN(target) || current === target) {
-            return "bulk"; // Default to bulk if weights are equal or invalid
+            return "maintain";
         }
         return target < current ? "cut" : "bulk";
     }, [currentWeight, targetWeight]);
@@ -132,16 +138,16 @@ function FuelSynthesizerContent() {
     const validateInputs = (): { valid: boolean; error: string } => {
         // Check if fields are empty
         if (!currentWeight || currentWeight.trim() === "") {
-            return { valid: false, error: "INVALID INPUT: Current Weight is required" };
+            return { valid: false, error: "Current weight is required" };
         }
         if (!targetWeight || targetWeight.trim() === "") {
-            return { valid: false, error: "INVALID INPUT: Target Weight is required" };
+            return { valid: false, error: "Target weight is required" };
         }
         if (!age || age.trim() === "") {
-            return { valid: false, error: "INVALID INPUT: Age is required" };
+            return { valid: false, error: "Age is required" };
         }
         if (!height || height.trim() === "") {
-            return { valid: false, error: "INVALID INPUT: Height is required" };
+            return { valid: false, error: "Height is required" };
         }
 
         // Validate numeric ranges
@@ -152,26 +158,26 @@ function FuelSynthesizerContent() {
         const caloriesNum = parseFloat(calories);
 
         if (isNaN(weightNum) || weightNum <= 0 || weightNum > 500) {
-            return { valid: false, error: "INVALID INPUT: Current Weight must be between 1-500 kg" };
+            return { valid: false, error: "Current weight must be between 1-500 kg" };
         }
         if (isNaN(targetWeightNum) || targetWeightNum <= 0 || targetWeightNum > 500) {
-            return { valid: false, error: "INVALID INPUT: Target Weight must be between 1-500 kg" };
+            return { valid: false, error: "Target weight must be between 1-500 kg" };
         }
         if (isNaN(ageNum) || ageNum < 10 || ageNum > 150) {
-            return { valid: false, error: "INVALID INPUT: Age must be between 10-150 years" };
+            return { valid: false, error: "Age must be between 10-150 years" };
         }
         if (isNaN(heightNum) || heightNum < 50 || heightNum > 300) {
-            return { valid: false, error: "INVALID INPUT: Height must be between 50-300 cm" };
+            return { valid: false, error: "Height must be between 50-300 cm" };
         }
         // Calories is optional but if provided, must be valid
         if (calories && calories.trim() !== "" && (isNaN(caloriesNum) || caloriesNum < 1000 || caloriesNum > 10000)) {
-            return { valid: false, error: "INVALID INPUT: Calories must be between 1000-10000" };
+            return { valid: false, error: "Calories must be between 1000-10000" };
         }
 
         return { valid: true, error: "" };
     };
 
-    const generateProtocol = async () => {
+    const generatePlan = async () => {
         setError("");
 
         // 1. Check Login
@@ -183,37 +189,14 @@ function FuelSynthesizerContent() {
         // 2. Check Credits (Local Check)
         const canProceed = await checkCredit();
         if (!canProceed) {
-            setError("INSUFFICIENT CREDITS: DAILY LIMIT REACHED. REFRESH TOMORROW.");
+            setError("Daily credit limit reached. New credits reset at 5:30 AM IST.");
             return;
         }
 
-        // Comprehensive validation check
+        // Comprehensive validation check (single source of truth — M2)
         const validation = validateInputs();
         if (!validation.valid) {
             setError(validation.error);
-            return;
-        }
-
-        // Input Validation (redundant numeric validation kept for safety)
-        const weightNum = parseFloat(currentWeight);
-        const targetWeightNum = parseFloat(targetWeight);
-        const ageNum = parseFloat(age);
-        const heightNum = parseFloat(height);
-
-        if (isNaN(weightNum) || weightNum <= 0 || weightNum > 500) {
-            setError("INVALID INPUT: Current Weight must be between 1-500 kg");
-            return;
-        }
-        if (isNaN(targetWeightNum) || targetWeightNum <= 0 || targetWeightNum > 500) {
-            setError("INVALID INPUT: Target Weight must be between 1-500 kg");
-            return;
-        }
-        if (isNaN(ageNum) || ageNum < 10 || ageNum > 150) {
-            setError("INVALID INPUT: Age must be between 10-150 years");
-            return;
-        }
-        if (isNaN(heightNum) || heightNum < 50 || heightNum > 300) {
-            setError("INVALID INPUT: Height must be between 50-300 cm");
             return;
         }
 
@@ -243,7 +226,7 @@ function FuelSynthesizerContent() {
                     gender,
                     activityLevel,
                     weightChangeRate,
-                    goal_description: `I want to ${mode === "bulk" ? "gain muscle mass" : "shred fat"} effectively at ${weightChangeRate} kg/week.`
+                    goal_description: `I want to ${mode === "bulk" ? "gain muscle mass" : mode === "cut" ? "shred fat" : "maintain my weight"} effectively at ${weightChangeRate} kg/week.`
                 }),
                 signal: controller.signal
             });
@@ -252,18 +235,24 @@ function FuelSynthesizerContent() {
 
             if (!res.ok) {
                 const errorData = await res.json().catch(() => ({}));
-                throw new Error(errorData.error || "Synthesis Failed");
+                throw new Error(errorData.error || "Generation failed");
             }
 
             const result = await res.json();
 
             // Validate critical fields exist
-            if (!result.tactical_brief || !result.shopping_list || !result.meal_plan) {
+            if (!result.summary || !result.shopping_list || !result.meal_plan) {
                 throw new Error("Malformed AI Response");
             }
 
             // SUCCESS: Setup Data & Deduct Credit
             setData(result);
+            toast.success(
+                <span className="flex items-center gap-2">
+                    <BellRing />
+                    <span>{lang === "hi" ? "Aapka diet plan taiyar hai!" : "Your diet plan is ready!"}</span>
+                </span>
+            );
             await deductCredit();
             // Refresh credit state
             await checkCredit();
@@ -271,10 +260,10 @@ function FuelSynthesizerContent() {
         } catch (err: unknown) {
             const message = err instanceof Error ? err.message : 'Unknown error';
             if (message.includes('abort') || (err instanceof Error && err.name === 'AbortError')) {
-                setError("TIMEOUT: AI UPLINK TOOK TOO LONG (>90s). RETRY ADVISED.");
+                setError("The request took too long (>90s). Please try again.");
             } else {
                 // Show the actual error message from backend (e.g. Rate limit, API key)
-                setError(message.toUpperCase());
+                setError(message);
             }
         } finally {
             clearTimeout(timeoutId);
@@ -282,87 +271,74 @@ function FuelSynthesizerContent() {
         }
     };
 
-    // Auto-clear input on focus
-    const handleInputFocus = (dispatcher: React.Dispatch<React.SetStateAction<string>>) => {
-        dispatcher("");
-    };
-
     return (
-        <div className="min-h-screen bg-black text-white font-sans relative">
+        <div className="min-h-screen bg-surface-canvas text-hi font-sans relative">
             <Navbar />
             <div className="p-4 md:p-8 pt-4">
                 {/* Header */}
-                <motion.div
-                    className="max-w-4xl mx-auto flex justify-between items-center mb-12 border-b border-white/20 pb-6"
-                    initial={{ opacity: 0, y: -20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                >
+                <div className="max-w-4xl mx-auto flex justify-between items-center mb-12 hairline-b pb-6">
                     <div className="flex items-center gap-4">
                         <button
                             onClick={() => router.back()}
-                            className="flex items-center gap-2 text-gray-400 hover:text-gym-red transition-colors"
+                            className="flex items-center gap-2 text-low hover:text-accent transition-colors duration-fast"
                         >
                             <ArrowLeft className="w-5 h-5" />
-                            <span className="font-dot text-[10px] uppercase tracking-widest hidden sm:inline">Back</span>
+                            <span className="font-mono text-[10px] uppercase tracking-widest hidden sm:inline">Back</span>
                         </button>
                         {isLoggedIn && user && (
-                            <div className="flex items-center gap-1.5 bg-white/5 border border-white/10 px-3 py-1.5 rounded-full">
-                                <Cpu className="w-3 h-3 text-gym-red" />
-                                <span className={`text-xs font-bold ${user.daily_credits > 0 ? "text-white" : "text-red-500"}`}>
+                            <div className="flex items-center gap-1.5 surface-card hairline px-3 py-1.5">
+                                <Cpu className="w-3 h-3 text-accent" />
+                                <span className={`text-xs font-bold ${user.daily_credits > 0 ? "text-hi" : "text-status-danger"}`}>
                                     {user.daily_credits}/{MAX_DAILY_CREDITS} CREDITS
                                 </span>
                             </div>
                         )}
                     </div>
                     <div className="text-right">
-                        <h1 className="text-2xl font-black uppercase tracking-tighter">Fuel / Diet Generator</h1>
-                        <p className="text-xs font-dot text-gray-500 uppercase tracking-widest">Your Details</p>
+                        <h1 className="heading-display text-2xl text-hi uppercase tracking-tight">Fuel / Diet Generator</h1>
+                        <p className="label-text text-xs text-faint uppercase tracking-widest">Your Details</p>
                     </div>
-                </motion.div>
+                </div>
 
                 <div className="max-w-4xl mx-auto pb-20">
                     {/* Input Confirm Section */}
                     {!data && !loading && (
-                        <motion.div
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            className="border border-white/20 p-8 space-y-8 bg-white/5 backdrop-blur-sm"
-                        >
-                            <h3 className="text-gym-red font-dot text-sm uppercase tracking-widest mb-4 border-b border-white/10 pb-2">Your Body Info</h3>
+                        <div className="surface-card hairline p-8 space-y-8">
+                            <h3 className="label-text text-accent text-sm uppercase tracking-widest mb-4 hairline-b pb-2">Your Details</h3>
 
                             <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
                                 <div>
-                                    <label className="block text-[10px] font-dot text-gray-500 uppercase tracking-widest mb-2">Gender</label>
-                                    <select value={gender} onChange={(e) => setGender(e.target.value)} className="w-full bg-black border border-white/20 p-2 font-bold text-white focus:border-gym-red focus:outline-none">
+                                    <label className="block label-text text-[10px] text-faint uppercase tracking-widest mb-2">Gender</label>
+                                    <select value={gender} onChange={(e) => setGender(e.target.value)} className="input-field w-full">
                                         <option>Male</option>
                                         <option>Female</option>
                                     </select>
                                 </div>
                                 <div>
-                                    <label className="block text-[10px] font-dot text-gray-500 uppercase tracking-widest mb-2">Age <span className="text-gym-red">*</span></label>
-                                    <input type="number" value={age} onFocus={() => handleInputFocus(setAge)} onChange={(e) => setAge(e.target.value)} placeholder="25" className="w-full bg-black border border-white/20 p-2 font-bold focus:border-gym-red focus:outline-none placeholder:text-gray-700" />
+                                    <label className="block label-text text-[10px] text-faint uppercase tracking-widest mb-2">Age <span className="text-accent">*</span></label>
+                                    <input type="number" value={age} onFocus={(e) => e.target.select()} onChange={(e) => setAge(e.target.value)} placeholder="25" className="input-field w-full" />
                                 </div>
                                 <div>
-                                    <label className="block text-[10px] font-dot text-gray-500 uppercase tracking-widest mb-2">Height (cm) <span className="text-gym-red">*</span></label>
-                                    <input type="number" value={height} onFocus={() => handleInputFocus(setHeight)} onChange={(e) => setHeight(e.target.value)} placeholder="175" className="w-full bg-black border border-white/20 p-2 font-bold focus:border-gym-red focus:outline-none placeholder:text-gray-700" />
+                                    <label className="block label-text text-[10px] text-faint uppercase tracking-widest mb-2">Height (cm) <span className="text-accent">*</span></label>
+                                    <input type="number" value={height} onFocus={(e) => e.target.select()} onChange={(e) => setHeight(e.target.value)} placeholder="175" className="input-field w-full" />
                                 </div>
                                 <div>
-                                    <label className="block text-[10px] font-dot text-gray-500 uppercase tracking-widest mb-2">Current Weight (kg) <span className="text-gym-red">*</span></label>
-                                    <input type="number" value={currentWeight} onFocus={() => handleInputFocus(setCurrentWeight)} onChange={(e) => setCurrentWeight(e.target.value)} placeholder="70" className="w-full bg-black border border-white/20 p-2 font-bold focus:border-gym-red focus:outline-none placeholder:text-gray-700" />
+                                    <label className="block label-text text-[10px] text-faint uppercase tracking-widest mb-2">Current Weight (kg) <span className="text-accent">*</span></label>
+                                    <input type="number" value={currentWeight} onFocus={(e) => e.target.select()} onChange={(e) => setCurrentWeight(e.target.value)} placeholder="70" className="input-field w-full" />
                                 </div>
                                 <div>
-                                    <label className="block text-[10px] font-dot text-gray-500 uppercase tracking-widest mb-2">Target Weight (kg) <span className="text-gym-red">*</span></label>
-                                    <input type="number" value={targetWeight} onFocus={() => handleInputFocus(setTargetWeight)} onChange={(e) => setTargetWeight(e.target.value)} placeholder="75" className="w-full bg-black border border-white/20 p-2 font-bold text-gym-red focus:border-gym-red focus:outline-none placeholder:text-red-900/50" />
+                                    <label className="block label-text text-[10px] text-faint uppercase tracking-widest mb-2">Target Weight (kg) <span className="text-accent">*</span></label>
+                                    <input type="number" value={targetWeight} onFocus={(e) => e.target.select()} onChange={(e) => setTargetWeight(e.target.value)} placeholder="75" className="input-field w-full text-accent" />
                                 </div>
                             </div>
 
                             {/* Weight Goal & Calorie Calculation Section */}
-                            <div className="border-t border-white/10 pt-6 mt-6">
-                                <h3 className="text-gym-red font-dot text-sm uppercase tracking-widest mb-4">Weight Goal & Calorie Target</h3>
+                            <div className="hairline-t pt-6 mt-6">
+                                <h3 className="label-text text-accent text-sm uppercase tracking-widest mb-4">Goal & Calorie Target</h3>
 
                                 <div className="max-w-md">
                                     {/* Rate Selection */}
-                                    <label className="block text-xs font-dot text-gray-500 uppercase tracking-widest mb-3">Rate of Change (per week) <span className="text-gym-red">*</span></label>
+                                    <label className="block text-xs label-text text-faint uppercase tracking-widest mb-3">Rate of Change (per week) <span className="text-accent">*</span></label>
                                     <div className="space-y-2">
                                         {[
                                             { value: "0.25", label: "0.25 kg/week (Slow & Steady)" },
@@ -376,9 +352,9 @@ function FuelSynthesizerContent() {
                                                     value={option.value}
                                                     checked={weightChangeRate === option.value}
                                                     onChange={(e) => setWeightChangeRate(e.target.value)}
-                                                    className="w-4 h-4 accent-gym-red cursor-pointer"
+                                                    className="w-4 h-4 accent-[#D71921] cursor-pointer"
                                                 />
-                                                <span className="text-sm font-medium group-hover:text-gym-red transition-colors">
+                                                <span className="text-sm font-medium text-mid group-hover:text-accent transition-colors duration-fast">
                                                     {option.label}
                                                 </span>
                                             </label>
@@ -390,8 +366,8 @@ function FuelSynthesizerContent() {
                             <div className="grid md:grid-cols-2 gap-8">
                                 <div className="space-y-6">
                                     <div>
-                                        <label className="block text-xs font-dot text-gray-500 uppercase tracking-widest mb-2">Activity Level <span className="text-gym-red">*</span></label>
-                                        <select value={activityLevel} onChange={(e) => setActivityLevel(e.target.value)} className="w-full bg-black border border-white/20 p-4 font-bold text-white focus:border-gym-red focus:outline-none">
+                                        <label className="block label-text text-xs text-faint uppercase tracking-widest mb-2">Activity Level <span className="text-accent">*</span></label>
+                                        <select value={activityLevel} onChange={(e) => setActivityLevel(e.target.value)} className="input-field w-full p-4">
                                             <option>Sedentary (Office Job)</option>
                                             <option>Light (Exercise 1-3 days)</option>
                                             <option>Moderate (Exercise 3-5 days)</option>
@@ -400,11 +376,11 @@ function FuelSynthesizerContent() {
                                         </select>
                                     </div>
                                     <div>
-                                        <label className="block text-xs font-dot text-gray-500 uppercase tracking-widest mb-2">Diet Preference</label>
+                                        <label className="block label-text text-xs text-faint uppercase tracking-widest mb-2">Diet Preference</label>
                                         <select
                                             value={dietType}
                                             onChange={(e) => setDietType(e.target.value)}
-                                            className="w-full bg-black border border-white/20 p-4 font-sans font-bold text-white focus:border-gym-red focus:outline-none appearance-none cursor-pointer"
+                                            className="input-field w-full p-4 appearance-none cursor-pointer"
                                         >
                                             <option value="Everything">Standard (Omnivore)</option>
                                             <option value="Vegetarian">Vegetarian (No Meat)</option>
@@ -414,11 +390,11 @@ function FuelSynthesizerContent() {
                                         </select>
                                     </div>
                                     <div>
-                                        <label className="block text-xs font-dot text-gray-500 uppercase tracking-widest mb-2">Budget Level</label>
+                                        <label className="block label-text text-xs text-faint uppercase tracking-widest mb-2">Budget Level</label>
                                         <select
                                             value={budget}
                                             onChange={(e) => setBudget(e.target.value)}
-                                            className="w-full bg-black border border-white/20 p-4 font-sans font-bold text-white focus:border-gym-red focus:outline-none appearance-none cursor-pointer"
+                                            className="input-field w-full p-4 appearance-none cursor-pointer"
                                         >
                                             <option value="Standard">Standard</option>
                                             <option value="Budget">Budget Friendly (Low Cost)</option>
@@ -426,28 +402,28 @@ function FuelSynthesizerContent() {
                                         </select>
                                     </div>
 
-                                    {/* Calculated Calories Button moved here */}
+                                    {/* Calculated Calories */}
                                     <div className="pt-2">
-                                        <div className="bg-gym-red/10 border-2 border-gym-red p-4 text-center">
+                                        <div className="surface-elevated hairline-l-[3px] border-l-accent p-4">
                                             {calculatedCalories !== null ? (
                                                 <>
-                                                    <p className="text-4xl font-black text-gym-red">{calculatedCalories}</p>
-                                                    <p className="text-xs text-gray-400 uppercase mt-1">KCAL/DAY</p>
+                                                    <p className="text-4xl font-black text-accent">{calculatedCalories}</p>
+                                                    <p className="label-text text-xs text-faint uppercase mt-1">KCAL/DAY</p>
                                                     <button
                                                         onClick={handleCalculateCalories}
-                                                        className="text-[10px] font-dot font-bold uppercase text-gray-500 hover:text-gym-red border border-gray-700 hover:border-gym-red px-3 py-1 mt-3 transition-colors"
+                                                        className="label-text text-[10px] font-bold uppercase text-faint hover:text-accent hairline hover:border-accent px-3 py-1 mt-3 transition-colors duration-fast"
                                                     >
                                                         Recalculate
                                                     </button>
                                                 </>
                                             ) : (
                                                 <div className="py-2">
-                                                    <p className="text-sm text-gray-500 mb-3 text-center uppercase font-dot tracking-widest">Target Estimation</p>
+                                                    <p className="label-text text-sm text-faint mb-3 text-center uppercase tracking-widest">Calorie Target</p>
                                                     <button
                                                         onClick={handleCalculateCalories}
-                                                        className="bg-white text-black text-xs font-bold px-4 py-3 w-full uppercase hover:bg-gym-red hover:text-white transition-colors"
+                                                        className="btn-secondary w-full text-xs font-bold uppercase hover:bg-accent hover:text-white hover:border-accent transition-colors duration-fast"
                                                     >
-                                                        Calculate Calorie
+                                                        Calculate Calories
                                                     </button>
                                                 </div>
                                             )}
@@ -456,26 +432,26 @@ function FuelSynthesizerContent() {
                                 </div>
 
                                 <div className="mt-8 md:mt-0">
-                                    <div className="bg-white/5 border border-white/10 p-6 h-full flex flex-col justify-center">
+                                    <div className="surface-canvas hairline p-6 h-full flex flex-col justify-center">
                                         <div className="flex items-center gap-2 mb-4">
-                                            <Calculator className="w-5 h-5 text-gym-red" />
-                                            <h4 className="font-dot text-xs uppercase tracking-widest text-white">System Estimation</h4>
+                                            <Calculator className="w-5 h-5 text-accent" />
+                                            <h4 className="label-text text-xs uppercase tracking-widest text-hi">Calorie Estimation</h4>
                                         </div>
-                                        <p className="text-sm text-gray-400 leading-relaxed mb-4">
-                                            Our Tactical AI uses the Mifflin-St Jeor equation to precisely estimate your Total Daily Energy Expenditure (TDEE).
+                                        <p className="text-sm text-mid leading-relaxed mb-4">
+                                            Your daily calories are estimated using the Mifflin-St Jeor equation, adjusted for your activity level and weekly weight-change goal.
                                         </p>
-                                        <ul className="space-y-2 text-xs text-gray-500">
+                                        <ul className="space-y-2 text-xs text-faint">
                                             <li className="flex gap-2">
-                                                <span className="text-gym-red">/</span>
-                                                Automatic Deficit/Surplus Scaling
+                                                <span className="text-accent">/</span>
+                                                Automatic deficit/surplus scaling
                                             </li>
                                             <li className="flex gap-2">
-                                                <span className="text-gym-red">/</span>
-                                                Activity Multiplier Calibration
+                                                <span className="text-accent">/</span>
+                                                Activity multiplier calibration
                                             </li>
                                             <li className="flex gap-2">
-                                                <span className="text-gym-red">/</span>
-                                                Real-time Goal Adjustment
+                                                <span className="text-accent">/</span>
+                                                Real-time goal adjustment
                                             </li>
                                         </ul>
                                     </div>
@@ -484,89 +460,84 @@ function FuelSynthesizerContent() {
 
                             {/* Calculation Summary - Shown after Calculate Target */}
                             {calculatedCalories !== null && (
-                                <div className="mb-6 p-4 bg-gym-red/10 border border-gym-red/30 rounded">
+                                <div className="mb-6 p-4 surface-elevated hairline border-accent/30">
                                     <div className="flex items-center gap-2 mb-3">
-                                        <Calculator className="w-4 h-4 text-gym-red" />
-                                        <h4 className="font-dot text-xs uppercase tracking-widest text-gym-red">Your Calculated Profile</h4>
+                                        <Calculator className="w-4 h-4 text-accent" />
+                                        <h4 className="label-text text-xs uppercase tracking-widest text-accent">Your Calculated Profile</h4>
                                     </div>
                                     <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
-                                        <div className="bg-black/30 p-2 rounded text-center">
-                                            <span className="block text-[10px] text-gray-500 uppercase">Daily Calories</span>
-                                            <span className="font-black text-gym-red text-lg">{calculatedCalories} kcal</span>
+                                        <div className="surface-canvas hairline p-2 text-center">
+                                            <span className="block text-[10px] text-faint uppercase">Daily Calories</span>
+                                            <span className="font-black text-accent text-lg">{calculatedCalories} kcal</span>
                                         </div>
-                                        <div className="bg-black/30 p-2 rounded text-center">
-                                            <span className="block text-[10px] text-gray-500 uppercase">Weight Change</span>
-                                            <span className="font-bold text-white">{weightChangeRate} kg/week</span>
+                                        <div className="surface-canvas hairline p-2 text-center">
+                                            <span className="block text-[10px] text-faint uppercase">Weight Change</span>
+                                            <span className="font-bold text-hi">{weightChangeRate} kg/week</span>
                                         </div>
-                                        <div className="bg-black/30 p-2 rounded text-center">
-                                            <span className="block text-[10px] text-gray-500 uppercase">Activity</span>
-                                            <span className="font-bold text-white text-xs">{activityLevel.split(" ")[0]}</span>
+                                        <div className="surface-canvas hairline p-2 text-center">
+                                            <span className="block text-[10px] text-faint uppercase">Activity</span>
+                                            <span className="font-bold text-hi text-xs">{activityLevel.split(" ")[0]}</span>
                                         </div>
-                                        <div className="bg-black/30 p-2 rounded text-center">
-                                            <span className="block text-[10px] text-gray-500 uppercase">Mode</span>
-                                            <span className="font-bold text-white">{mode.toUpperCase()}</span>
+                                        <div className="surface-canvas hairline p-2 text-center">
+                                            <span className="block text-[10px] text-faint uppercase">Mode</span>
+                                            <span className="font-bold text-hi">{mode.toUpperCase()}</span>
                                         </div>
                                     </div>
                                     <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm mt-3">
-                                        <div className="bg-black/30 p-2 rounded text-center">
-                                            <span className="block text-[10px] text-gray-500 uppercase">Diet Type</span>
-                                            <span className="font-bold text-white text-xs">{dietType}</span>
+                                        <div className="surface-canvas hairline p-2 text-center">
+                                            <span className="block text-[10px] text-faint uppercase">Diet Type</span>
+                                            <span className="font-bold text-hi text-xs">{dietType}</span>
                                         </div>
-                                        <div className="bg-black/30 p-2 rounded text-center">
-                                            <span className="block text-[10px] text-gray-500 uppercase">Budget</span>
-                                            <span className="font-bold text-white text-xs">{budget}</span>
+                                        <div className="surface-canvas hairline p-2 text-center">
+                                            <span className="block text-[10px] text-faint uppercase">Budget</span>
+                                            <span className="font-bold text-hi text-xs">{budget}</span>
                                         </div>
-                                        <div className="bg-black/30 p-2 rounded text-center">
-                                            <span className="block text-[10px] text-gray-500 uppercase">Current → Target</span>
-                                            <span className="font-bold text-white text-xs">{currentWeight}kg → {targetWeight}kg</span>
+                                        <div className="surface-canvas hairline p-2 text-center">
+                                            <span className="block text-[10px] text-faint uppercase">Current → Target</span>
+                                            <span className="font-bold text-hi text-xs">{currentWeight}kg → {targetWeight}kg</span>
                                         </div>
-                                        <div className="bg-black/30 p-2 rounded text-center">
-                                            <span className="block text-[10px] text-gray-500 uppercase">Body Stats</span>
-                                            <span className="font-bold text-white text-xs">{gender}, {age}y, {height}cm</span>
+                                        <div className="surface-canvas hairline p-2 text-center">
+                                            <span className="block text-[10px] text-faint uppercase">Body Stats</span>
+                                            <span className="font-bold text-hi text-xs">{gender}, {age}y, {height}cm</span>
                                         </div>
                                     </div>
                                 </div>
                             )}
 
-                            <div className="pt-8 border-t border-white/10">
+                            <div className="pt-8 hairline-t">
                                 <button
-                                    onClick={generateProtocol}
+                                    onClick={generatePlan}
                                     disabled={!validateInputs().valid || loading || calculatedCalories === null}
-                                    className="w-full bg-white text-black font-black uppercase text-lg py-4 hover:bg-gym-red hover:text-white transition-all flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-white disabled:hover:text-black"
+                                    className="w-full bg-accent text-white font-black uppercase text-lg py-4 hover:bg-accent-hover transition-colors duration-fast flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
                                     <Cpu className="w-6 h-6" />
-                                    Initialize Synthesis
+                                    Generate Diet Plan
                                 </button>
                                 {!validateInputs().valid && !error && (
-                                    <p className="text-xs text-gym-red/70 mt-2 font-dot uppercase tracking-wider text-center">
-                                        ⚠ All fields must be filled with valid values
+                                    <p className="label-text text-xs text-status-danger mt-2 uppercase tracking-wider text-center">
+                                        All fields must be filled with valid values
                                     </p>
                                 )}
                                 {validateInputs().valid && calculatedCalories === null && !loading && (
-                                    <p className="text-xs text-gym-red/70 mt-2 font-dot uppercase tracking-wider text-center">
-                                        ⚠ Calculate calories first to enable synthesis
+                                    <p className="label-text text-xs text-status-danger mt-2 uppercase tracking-wider text-center">
+                                        Calculate calories first to continue
                                     </p>
                                 )}
                             </div>
-                        </motion.div>
+                        </div>
                     )}
 
                     {/* Loading State */}
                     {loading && (
                         <div className="flex flex-col items-center justify-center py-20 space-y-6">
-                            <motion.div
-                                animate={{ rotate: 360 }}
-                                transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-                            >
-                                <RefreshCw className="w-16 h-16 text-gym-red" />
-                            </motion.div>
+                            <MealPlate active />
                             <div className="text-center space-y-2 max-w-md mx-auto">
-                                <p className="font-black text-xl uppercase animate-pulse">Establishing Uplink...</p>
+                                <p className="font-black text-xl uppercase animate-pulse">Generating your plan...</p>
                                 <CountdownTimer duration={60} />
                                 <LoadingStatus />
-                                <p className="text-[10px] text-gray-500 font-mono mt-4 border border-white/10 p-2 inline-block">
-                                    NOTE: Complex synthesis (Dual-Language + Pricing) active.<br />
-                                    Optimizing tactical response...
+                                <p className="text-[10px] text-faint font-mono mt-4 hairline p-2 inline-block">
+                                    NOTE: Building your bilingual meal plan and pricing.<br />
+                                    Estimated time: under a minute.
                                 </p>
                             </div>
                         </div>
@@ -574,13 +545,13 @@ function FuelSynthesizerContent() {
 
                     {/* Error State */}
                     {error && (
-                        <div className="border border-red-500/50 bg-red-500/10 p-8 text-center space-y-4">
-                            <p className="text-red-500 font-black text-2xl uppercase">{error}</p>
+                        <div className="surface-elevated hairline border-status-danger/50 p-8 text-center space-y-4">
+                            <p className="text-status-danger font-black text-2xl uppercase">{error}</p>
                             <button
-                                onClick={generateProtocol}
-                                className="text-xs font-dot uppercase tracking-widest border border-red-500 px-6 py-2 hover:bg-red-500 hover:text-black transition-colors"
+                                onClick={generatePlan}
+                                className="label-text text-xs uppercase tracking-widest hairline border-status-danger px-6 py-2 hover:bg-status-danger hover:text-status-on transition-colors duration-fast"
                             >
-                                Retry Protocol
+                                Try Again
                             </button>
                         </div>
                     )}
@@ -605,7 +576,7 @@ function FuelSynthesizerContent() {
 
 export default function FuelPage() {
     return (
-        <Suspense fallback={<div className="min-h-screen bg-black flex items-center justify-center text-white">LOADING SYSTEM...</div>}>
+        <Suspense fallback={<PageSpinner />}>
             <FuelSynthesizerContent />
         </Suspense>
     );

@@ -1,10 +1,13 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { Cpu, X, Send, Dumbbell, Utensils, Zap, Languages } from "lucide-react";
+import { Cpu, X, Dumbbell, Utensils, Zap, Languages } from "lucide-react";
 import { useUserAuth } from "@/lib/user-auth-context";
+import { useModalDismiss } from "@/components/hooks/useModalDismiss";
 import { MAX_DAILY_CREDITS } from "@/lib/config";
+import TypingDots from "@/components/animations/TypingDots";
+import SendArrow from "@/components/animations/SendArrow";
+import DecryptedText from "@/components/react-bits/DecryptedText";
 import dynamic from "next/dynamic";
 
 const LoginModal = dynamic(() => import("@/components/LoginModal"), { ssr: false });
@@ -38,8 +41,18 @@ export default function TacticalChatbot() {
     const [loading, setLoading] = useState(false);
     const [language, setLanguage] = useState<"en" | "hi" | null>(null);
     const [showLoginModal, setShowLoginModal] = useState(false);
+    const [sentFlash, setSentFlash] = useState(false);
 
     const scrollRef = useRef<HTMLDivElement>(null);
+    // L24: track the flash timer so it can't fire after unmount.
+    const flashTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+    useEffect(() => () => {
+        if (flashTimerRef.current) clearTimeout(flashTimerRef.current);
+    }, []);
+
+    // M33: Escape dismisses the chat overlay (matches backdrop click).
+    const modalProps = useModalDismiss(() => setIsOpen(false));
 
     // Load language from localStorage on mount
     useEffect(() => {
@@ -117,12 +130,21 @@ export default function TacticalChatbot() {
                 // Add error message with retry capability
                 setMessages((prev) => [...prev, {
                     role: "model",
-                    text: data.error || (language === "hi" ? "Connection failed." : "Connection failed."),
+                    // L22: the hi branch was identical English â€” give both
+                    // languages a real fallback.
+                    text: data.error || (language === "hi"
+                        ? "Connection fail ho gaya."
+                        : "Connection failed."),
                     isError: true,
                     retryText: text
                 }]);
             } else {
-                setMessages((prev) => [...prev, { role: "model", text: data.response || (language === "hi" ? "Connection failed." : "Connection failed.") }]);
+                setMessages((prev) => [...prev, {
+                    role: "model",
+                    text: data.response || (language === "hi"
+                        ? "Koi jawab nahi mila."
+                        : "No response received.")
+                }]);
                 await refreshCredits();
             }
         } catch (error: unknown) {
@@ -136,222 +158,187 @@ export default function TacticalChatbot() {
             }]);
         } finally {
             setLoading(false);
+            // Flash the send arrow for 700ms after a response
+            setSentFlash(true);
+            if (flashTimerRef.current) clearTimeout(flashTimerRef.current);
+            flashTimerRef.current = setTimeout(() => setSentFlash(false), 700);
         }
     };
 
-    // Force visibility everywhere for debugging/reliability
-    // if (pathname !== "/") return null;
-
     return (
         <>
-            <AnimatePresence>
-                {!isOpen && (
-                    <motion.button
-                        id="tactical-chatbot-button"
-                        className="fixed bottom-6 right-6 z-[9999] w-14 h-14 bg-gym-red rounded-full flex items-center justify-center shadow-[0_0_20px_rgba(215,25,33,0.5)] border-2 border-transparent cursor-pointer hover:scale-110 active:scale-95 transition-transform"
-                        initial={{ scale: 0, opacity: 0 }}
-                        animate={{ scale: 1, opacity: 1 }}
-                        exit={{ scale: 0, opacity: 0 }}
-                        onClick={() => setIsOpen(true)}
-                        aria-label="Open BroFit AI chat"
+            {!isOpen && (
+                <button
+                    id="tactical-chatbot-button"
+                    className="fixed bottom-6 right-6 z-[105] w-14 h-14 bg-accent text-white border border-accent-hover flex items-center justify-center cursor-pointer hover:bg-accent-hover transition-colors duration-fast"
+                    onClick={() => setIsOpen(true)}
+                    aria-label="Open BroFit AI chat"
+                >
+                    <Cpu className="w-6 h-6" />
+                </button>
+            )}
+
+            {isOpen && (
+                <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
+                    {/* Backdrop */}
+                    <div
+                        className="absolute inset-0 bg-black/80 modal-overlay-in"
+                        onClick={() => setIsOpen(false)}
+                    />
+
+                    <div
+                        {...modalProps}
+                        aria-label="BroFit AI chat"
+                        className="relative w-full max-w-[420px] h-full max-h-[85vh] sm:max-h-[650px] surface-modal hairline overflow-hidden flex flex-col modal-panel-in"
                     >
-                        <Cpu className="w-6 h-6 text-white animate-pulse relative z-10" />
+                        {/* Header */}
+                        <div className="surface-elevated hairline-b p-4 flex justify-between items-center">
+                            <div className="flex items-center gap-3">
+                                <div className="p-2 surface-canvas hairline">
+                                    <Cpu className="w-5 h-5 text-accent" />
+                                </div>
+                                <span className="heading-section text-sm text-hi uppercase tracking-widest">
+                                    <DecryptedText text="BROFIT AI" speed={40} />
+                                </span>
+                                {isLoggedIn ? (
+                                    <span className="label-text text-xs surface-canvas hairline px-2 py-0.5 text-hi font-bold">
+                                        {remainingCredits}/{MAX_DAILY_CREDITS}
+                                    </span>
+                                ) : (
+                                    <span className="label-text text-xs surface-canvas hairline px-2 py-0.5 text-accent font-bold">
+                                        Login
+                                    </span>
+                                )}
+                            </div>
+                            <button
+                                onClick={() => setIsOpen(false)}
+                                className="text-low hover:text-hi p-1 hover:bg-surface-canvas transition-colors duration-fast"
+                                aria-label="Close chat"
+                            >
+                                <X className="w-5 h-5" />
+                            </button>
+                        </div>
 
-                        {/* Rotating White Circle Ring */}
-                        <motion.div
-                            className="absolute inset-0 border-2 border-white/20 rounded-full"
-                            style={{ margin: "-4px" }}
-                        />
-                        <motion.div
-                            className="absolute inset-0 border-t-2 border-white rounded-full"
-                            style={{ margin: "-4px" }}
-                            animate={{ rotate: 360 }}
-                            transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
-                        />
-                    </motion.button>
-                )}
-            </AnimatePresence>
+                        {/* Language Selection Mode */}
+                        {!language ? (
+                            <div className="flex-1 surface-canvas flex flex-col items-center justify-center p-6 space-y-6 text-center">
+                                <Languages className="w-12 h-12 text-accent" />
+                                <div>
+                                    <h3 className="heading-section text-lg text-hi">Select Language</h3>
+                                    <p className="text-low text-xs">Bhasha chunein</p>
+                                </div>
+                                <div className="grid grid-cols-2 gap-4 w-full">
+                                    <button
+                                        onClick={() => handleLanguageChange("en")}
+                                        className="surface-card hairline p-4 hover:border-accent transition-colors duration-fast group"
+                                    >
+                                        <span className="block text-xl font-black text-hi group-hover:text-accent">EN</span>
+                                        <span className="label-text text-[10px] uppercase tracking-widest text-low group-hover:text-mid">English</span>
+                                    </button>
+                                    <button
+                                        onClick={() => handleLanguageChange("hi")}
+                                        className="surface-card hairline p-4 hover:border-accent transition-colors duration-fast group"
+                                    >
+                                        <span className="block text-xl font-black text-hi group-hover:text-accent">HI</span>
+                                        <span className="label-text text-[10px] uppercase tracking-widest text-low group-hover:text-mid">Hindi</span>
+                                    </button>
+                                </div>
+                            </div>
+                        ) : (
+                            /* Chat Interface */
+                            <>
+                                <div
+                                    className="flex-1 overflow-y-auto p-4 space-y-4 surface-canvas relative cursor-auto"
+                                    ref={scrollRef}
+                                >
+                                    {messages.length === 0 && (
+                                        <div className="absolute inset-0 flex flex-col justify-center items-center p-6 space-y-4 opacity-70 pointer-events-none">
+                                            <Cpu className="w-12 h-12 text-faint/20" />
+                                            <div className="grid gap-2 w-full pointer-events-auto">
+                                                {SUGGESTIONS[language].map((s, i) => (
+                                                    <button
+                                                        key={i}
+                                                        onClick={() => handleSend(s.text)}
+                                                        className="flex items-center gap-3 p-3 surface-card hairline hover:border-accent text-left transition-colors duration-fast"
+                                                    >
+                                                        <s.icon className="w-4 h-4 text-accent shrink-0" />
+                                                        <span className="text-xs font-bold text-mid">{s.text}</span>
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
 
-            <AnimatePresence>
-                {isOpen && (
-                    <div className="fixed inset-0 z-[99999] flex items-center justify-center p-4">
-                        {/* Backdrop for centering and low-end support (simple opacity) */}
-                        <motion.div
-                            className="absolute inset-0 bg-black/60 backdrop-blur-[2px]"
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            exit={{ opacity: 0 }}
-                            onClick={() => setIsOpen(false)}
-                        />
-
-                        <motion.div
-                            className="relative w-full max-w-[420px] h-full max-h-[85vh] sm:max-h-[650px] bg-black border border-white/20 rounded-2xl overflow-hidden flex flex-col shadow-2xl"
-                            initial={{ opacity: 0, scale: 0.95, y: 20 }}
-                            animate={{ opacity: 1, scale: 1, y: 0 }}
-                            exit={{ opacity: 0, scale: 0.95, y: 20 }}
-                            transition={{ duration: 0.3, ease: "easeOut" }}
-                        >
-                            {/* Header */}
-                            <div className="bg-gym-red p-4 flex justify-between items-center shadow-lg">
-                                <div className="flex items-center gap-3">
-                                    <Cpu className="w-5 h-5 text-white" />
-                                    <span className="font-black uppercase tracking-widest text-sm text-white">BroFit AI</span>
-                                    {isLoggedIn ? (
-                                        <span className="text-xs bg-white/20 px-2 py-0.5 rounded-full font-bold">
-                                            {remainingCredits}/{MAX_DAILY_CREDITS}
-                                        </span>
-                                    ) : (
-                                        <span className="text-xs bg-gym-red/20 text-gym-red px-2 py-0.5 rounded-full font-bold">
-                                            Login
-                                        </span>
+                                    {messages.map((msg, i) => (
+                                        <div
+                                            key={i}
+                                            className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
+                                        >
+                                            <div className={`max-w-[85%] ${msg.role === "user" ? "" : "space-y-2"}`}>
+                                                <div className={`p-3 text-sm ${msg.role === "user"
+                                                    ? "bg-accent text-white font-medium"
+                                                    : `${msg.isError ? "border-status-danger/30 bg-status-danger/10 text-status-danger" : "surface-elevated hairline"} text-hi`
+                                                    }`}>
+                                                    {msg.text}
+                                                </div>
+                                                {msg.isError && msg.retryText && (
+                                                    <button
+                                                        onClick={() => handleSend(msg.retryText!)}
+                                                        className="text-xs text-status-danger hover:text-hi border border-status-danger/30 hover:border-status-danger px-3 py-1 transition-colors duration-fast"
+                                                        aria-label="Retry failed message"
+                                                    >
+                                                        Retry
+                                                    </button>
+                                                )}
+                                            </div>
+                                        </div>
+                                    ))}
+                                    {loading && (
+                                        <div className="flex justify-start">
+                                            <div className="surface-elevated hairline p-3">
+                                                <TypingDots active={loading} />
+                                            </div>
+                                        </div>
                                     )}
                                 </div>
-                                <button
-                                    onClick={() => setIsOpen(false)}
-                                    className="text-white hover:text-black transition-colors p-1 rounded-full hover:bg-white/20"
-                                    aria-label="Close chat"
+
+                                {/* Input */}
+                                <form
+                                    onSubmit={(e) => { e.preventDefault(); handleSend(input); }}
+                                    className="p-3 hairline-t surface-modal flex gap-2 cursor-auto"
                                 >
-                                    <X className="w-5 h-5" />
-                                </button>
-                            </div>
-
-                            {/* Language Selection Mode */}
-                            {!language ? (
-                                <div className="flex-1 bg-black/95 flex flex-col items-center justify-center p-6 space-y-6 text-center">
-                                    <Languages className="w-12 h-12 text-gym-red" />
-                                    <div>
-                                        <h3 className="text-white font-bold text-lg">Select Language</h3>
-                                        <p className="text-gray-400 text-xs">Bhasha chunein</p>
-                                    </div>
-                                    <div className="grid grid-cols-2 gap-4 w-full">
-                                        <button
-                                            onClick={() => handleLanguageChange("en")}
-                                            className="bg-white/10 border border-white/20 p-4 rounded-xl hover:bg-gym-red hover:border-gym-red transition-all group"
-                                        >
-                                            <span className="block text-xl font-black text-white group-hover:text-white">EN</span>
-                                            <span className="text-[10px] uppercase tracking-widest text-gray-400 group-hover:text-white/80">English</span>
-                                        </button>
-                                        <button
-                                            onClick={() => handleLanguageChange("hi")}
-                                            className="bg-white/10 border border-white/20 p-4 rounded-xl hover:bg-gym-red hover:border-gym-red transition-all group"
-                                        >
-                                            <span className="block text-xl font-black text-white group-hover:text-white">HI</span>
-                                            <span className="text-[10px] uppercase tracking-widest text-gray-400 group-hover:text-white/80">Hindi</span>
-                                        </button>
-                                    </div>
-                                </div>
-                            ) : (
-                                /* Chat Interface */
-                                <>
-                                    <div
-                                        className="flex-1 overflow-y-auto p-4 space-y-4 bg-black/95 relative cursor-auto"
-                                        ref={scrollRef}
-                                        onPointerDownCapture={(e) => e.stopPropagation()}
+                                    <button
+                                        type="button"
+                                        onClick={() => setLanguage(null)}
+                                        className="p-2 text-faint hover:text-hi transition-colors duration-fast"
+                                        title="Change Language"
+                                        aria-label="Change language"
                                     >
-                                        {messages.length === 0 && (
-                                            <div className="absolute inset-0 flex flex-col justify-center items-center p-6 space-y-4 opacity-70 pointer-events-none">
-                                                <Cpu className="w-12 h-12 text-white/10" />
-                                                <div className="grid gap-2 w-full pointer-events-auto">
-                                                    {SUGGESTIONS[language].map((s, i) => (
-                                                        <button
-                                                            key={i}
-                                                            onClick={() => handleSend(s.text)}
-                                                            className="flex items-center gap-3 p-3 border border-white/10 hover:bg-white/10 hover:border-gym-red/50 text-left transition-colors rounded-xl backdrop-blur-sm bg-black/50"
-                                                        >
-                                                            <s.icon className="w-4 h-4 text-gym-red shrink-0" />
-                                                            <span className="text-xs font-bold text-gray-200">{s.text}</span>
-                                                        </button>
-                                                    ))}
-                                                </div>
-                                            </div>
-                                        )}
-
-                                        {messages.map((msg, i) => (
-                                            <motion.div
-                                                key={i}
-                                                initial={{ opacity: 0, scale: 0.9, y: 10 }}
-                                                animate={{ opacity: 1, scale: 1, y: 0 }}
-                                                className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
-                                            >
-                                                <div className={`max-w-[85%] ${msg.role === "user"
-                                                    ? ""
-                                                    : "space-y-2"
-                                                    }`}>
-                                                    <div className={`p-3 text-sm rounded-2xl shadow-sm ${msg.role === "user"
-                                                        ? "bg-gym-red text-white font-medium rounded-tr-none"
-                                                        : `${msg.isError ? "bg-red-900/20 border-red-500/30" : "bg-white/10"} text-gray-100 border border-white/10 rounded-tl-none`
-                                                        }`}>
-                                                        {msg.text}
-                                                    </div>
-                                                    {msg.isError && msg.retryText && (
-                                                        <button
-                                                            onClick={() => handleSend(msg.retryText!)}
-                                                            className="text-xs text-gym-red hover:text-white border border-gym-red/30 hover:border-gym-red px-3 py-1 rounded-full transition-colors"
-                                                            aria-label="Retry failed message"
-                                                        >
-                                                            Retry
-                                                        </button>
-                                                    )}
-                                                </div>
-                                            </motion.div>
-                                        ))}
-                                        {loading && (
-                                            <div className="flex justify-start">
-                                                <div className="bg-white/5 p-3 rounded-2xl rounded-tl-none border border-white/5">
-                                                    <div className="flex gap-1">
-                                                        <motion.div animate={{ scale: [1, 1.2, 1] }} transition={{ repeat: Infinity, duration: 0.6 }} className="w-1.5 h-1.5 bg-gym-red rounded-full" />
-                                                        <motion.div animate={{ scale: [1, 1.2, 1] }} transition={{ repeat: Infinity, duration: 0.6, delay: 0.2 }} className="w-1.5 h-1.5 bg-gym-red rounded-full" />
-                                                        <motion.div animate={{ scale: [1, 1.2, 1] }} transition={{ repeat: Infinity, duration: 0.6, delay: 0.4 }} className="w-1.5 h-1.5 bg-gym-red rounded-full" />
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        )}
-                                    </div>
-
-                                    {/* Input */}
-                                    <form
-                                        onSubmit={(e) => { e.preventDefault(); handleSend(input); }}
-                                        className="p-3 border-t border-white/10 bg-black flex gap-2 cursor-auto"
-                                        onPointerDownCapture={(e) => e.stopPropagation()}
+                                        <Languages className="w-5 h-5" />
+                                    </button>
+                                    <input
+                                        value={input}
+                                        onChange={(e) => setInput(e.target.value)}
+                                        placeholder={language === "hi" ? "Poochhein..." : "Ask BroFit..."}
+                                        className="input-field flex-1"
+                                        disabled={isLoggedIn && remainingCredits <= 0}
+                                    />
+                                    <button
+                                        type="submit"
+                                        disabled={loading || !input.trim() || (isLoggedIn && remainingCredits <= 0)}
+                                        className="bg-accent text-white p-2 hover:bg-accent-hover disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-fast"
+                                        aria-label="Send message"
                                     >
-                                        <button
-                                            type="button"
-                                            onClick={() => setLanguage(null)}
-                                            className="p-2 text-gray-500 hover:text-white transition-colors"
-                                            title="Change Language"
-                                            aria-label="Change language"
-                                        >
-                                            <Languages className="w-5 h-5" />
-                                        </button>
-                                        <input
-                                            value={input}
-                                            onChange={(e) => setInput(e.target.value)}
-                                            placeholder={language === "hi" ? "Poochhein..." : "Ask BroFit..."}
-                                            className="flex-1 bg-white/5 border border-white/10 rounded-xl px-4 py-2 text-sm text-white focus:outline-none focus:border-gym-red transition-colors placeholder:text-gray-600"
-                                        />
-                                        <button
-                                            type="submit"
-                                            disabled={loading || !input.trim()}
-                                            className="bg-gym-red p-2 rounded-xl text-white hover:bg-white hover:text-black disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                                            aria-label="Send message"
-                                        >
-                                            <Send className="w-5 h-5" />
-                                        </button>
-                                    </form>
-                                </>
-                            )}
-                        </motion.div>
+                                        <SendArrow sending={sentFlash} />
+                                    </button>
+                                </form>
+                            </>
+                        )}
                     </div>
-                )}
-            </AnimatePresence >
+                </div>
+            )}
 
-            {/* Login Modal */}
-            < LoginModal
-                isOpen={showLoginModal}
-                onClose={() => setShowLoginModal(false)
-                }
-                onSuccess={() => setShowLoginModal(false)}
-            />
         </>
     );
 }
+

@@ -1,7 +1,5 @@
 ﻿"use client";
-import { useState, useEffect, useRef } from "react";
-import { motion } from "framer-motion";
-import { useTacticalSound } from "@/components/TacticalSoundContext"; // Import hook
+import { useState, useEffect } from "react";
 
 const QUOTES = [
   "PAIN IS TEMPORARY. PRIDE IS FOREVER.",
@@ -15,31 +13,6 @@ export default function QuoteCycler() {
   const [text, setText] = useState("");
   const [loopNum, setLoopNum] = useState(0);
   const [isWaiting, setIsWaiting] = useState(false);
-
-  const { soundEnabled } = useTacticalSound(); // Get sound state
-  const audioRef = useRef<HTMLAudioElement | null>(null);
-
-  // Initialize Audio
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      audioRef.current = new Audio("/audio/keytype.mp3");
-      audioRef.current.volume = 0.4;
-      audioRef.current.loop = true;
-    }
-  }, []);
-
-  // Control Audio based on isEnabled context
-  useEffect(() => {
-    if (!audioRef.current) return;
-
-    // Play only if Sound is Enabled AND Not Waiting AND Text is Typing
-    if (soundEnabled && !isWaiting && text.length > 0) {
-      audioRef.current.play().catch(() => { });
-    } else {
-      audioRef.current.pause();
-      audioRef.current.currentTime = 0;
-    }
-  }, [isWaiting, text, soundEnabled]);
 
   // Typing Logic
   useEffect(() => {
@@ -62,20 +35,15 @@ export default function QuoteCycler() {
       }, 50);
       return () => clearTimeout(timer);
     }
-
   }, [text, loopNum, isWaiting]);
 
   return (
-    <div className="h-[60px] md:h-[40px] flex items-center justify-center w-full px-4">
-      <motion.h3
-        className="text-xs md:text-xl font-dot font-bold tracking-[0.15em] text-white uppercase text-center leading-relaxed"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-      >
-        <span className="mr-2 text-gym-red">{">"}</span>
-        {text}
-        <span className="animate-pulse text-gym-red ml-1">_</span>
-      </motion.h3>
+    <div className="surface-card flex items-center justify-center p-8 md:p-12 relative overflow-hidden group">
+      <div className="absolute inset-0 bg-accent/5 opacity-0 group-hover:opacity-100 transition-opacity duration-1000" />
+      <h2 className="heading-display text-2xl md:text-3xl text-center leading-relaxed relative z-10 text-hi max-w-4xl mx-auto min-h-[80px] md:min-h-[100px] flex items-center justify-center">
+        <span>"{text}<span className="animate-pulse text-accent">_</span>"</span>
+      </h2>
     </div>
   );
 }
+

@@ -1,21 +1,29 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 /** Shows a ticking MM:SS countdown that fires onComplete when it hits zero. */
 export default function CountdownTimer({ duration, onComplete }: { duration: number; onComplete?: () => void }) {
     const [timeLeft, setTimeLeft] = useState(duration);
+    const onCompleteRef = useRef(onComplete);
+    const firedRef = useRef(false);
+
+    // Keep the ref current without re-running the timer effect.
+    onCompleteRef.current = onComplete;
 
     useEffect(() => {
         if (timeLeft <= 0) {
-            onComplete?.();
+            if (!firedRef.current) {
+                firedRef.current = true;
+                onCompleteRef.current?.();
+            }
             return;
         }
         const timerId = setInterval(() => {
             setTimeLeft((prev) => prev - 1);
         }, 1000);
         return () => clearInterval(timerId);
-    }, [timeLeft, onComplete]);
+    }, [timeLeft]);
 
     const formatTime = (seconds: number) => {
         const m = Math.floor(seconds / 60).toString().padStart(2, "0");
@@ -24,7 +32,7 @@ export default function CountdownTimer({ duration, onComplete }: { duration: num
     };
 
     return (
-        <div className="font-mono text-4xl font-black text-gym-red tabular-nums tracking-widest">
+        <div className="font-mono text-4xl font-black text-accent tabular-nums tracking-widest">
             {formatTime(timeLeft)}
         </div>
     );

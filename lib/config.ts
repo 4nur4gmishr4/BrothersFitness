@@ -34,6 +34,16 @@ export const CONTACT_INFO = {
 
 export const WHATSAPP_COUNTRY_CODE = '91';
 
+/** "Today" as YYYY-MM-DD in India Standard Time (credit day boundary is IST midnight). */
+export function istToday(): string {
+    return new Intl.DateTimeFormat('en-CA', {
+        timeZone: 'Asia/Kolkata',
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+    }).format(new Date());
+}
+
 export const GYM_NAME = "Brother's Fitness";
 
 // Daily AI credit cap per user, configurable via env so each deployment can

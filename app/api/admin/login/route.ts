@@ -99,7 +99,7 @@ export async function POST(req: Request) {
             NextResponse.json({
                 success: true,
                 token,
-                message: 'Welcome, Aman!'
+                message: 'Welcome back'
             }),
             requestId
         );

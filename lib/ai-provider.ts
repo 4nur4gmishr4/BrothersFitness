@@ -19,8 +19,13 @@ export interface AIResponse {
     providerUsed: string;
 }
 
-export const DEFAULT_TIMEOUT_MS = 30_000;
-export const DEFAULT_TOTAL_TIMEOUT_MS = 90_000;
+// Per-call timeout is deliberately tight (8s) so the whole 4-provider fallback
+// walk stays within standard serverless execution budgets (Vercel Hobby/Pro
+// edge functions default to a 10–60s cap). A hung provider costs at most 8s
+// instead of burning the entire invocation before the backup is even tried.
+export const DEFAULT_TIMEOUT_MS = 8_000;
+// Hard cap for the entire fallback walk across all providers.
+export const DEFAULT_TOTAL_TIMEOUT_MS = 60_000;
 
 /** AbortController tied to a timer; `clear()` must run in a finally block. */
 function createAbort(timeoutMs: number): { signal: AbortSignal; clear: () => void } {
@@ -92,8 +97,10 @@ function getOpenRouterClient() {
             baseURL: 'https://openrouter.ai/api/v1',
             apiKey: process.env.OPENROUTER_API_KEY,
             defaultHeaders: {
-                'HTTP-Referer': 'https://brofit.app',
-                'X-Title': 'BroFit App'
+                // L52: was 'https://brofit.app' — a domain we don't own. OpenRouter
+                // shows this referer to app creators, so point it at the real site.
+                'HTTP-Referer': process.env.NEXT_PUBLIC_SITE_URL || 'https://brothersfitness.in',
+                'X-Title': 'BroFit'
             }
         });
     }

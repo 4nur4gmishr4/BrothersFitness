@@ -1,15 +1,11 @@
-﻿"use client";
+"use client";
 
 import { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { Crosshair, Layers } from "lucide-react";
-import { TracingBeam } from "@/components/ui/tracing-beam";
-
-
+import AnimatedIcon from "@/components/ui/AnimatedIcon";
 
 const SPLITS = {
   standard: [
-    { day: "SUNDAY", focus: "REST & RECOVERY", type: "Active Mobility & CNS Reset" },
+    { day: "SUNDAY", focus: "REST & RECOVERY", type: "Active Recovery & Mobility" },
     { day: "MONDAY", focus: "CHEST", type: "Upper Pectoral & Mid-Chest Focus" },
     { day: "TUESDAY", focus: "BACK", type: "Lat Width & Rhomboid Thickness" },
     { day: "WEDNESDAY", focus: "SHOULDERS & TRAPS", type: "Deltoid Heads & Upper Trapezius" },
@@ -18,14 +14,14 @@ const SPLITS = {
     { day: "SATURDAY", focus: "LEGS", type: "Quad Sweep & Hamstring Isolation" },
   ],
   triple: [
-    { day: "SUNDAY", focus: "REST & RECOVERY", type: "System Reboot & Deep Sleep" },
+    { day: "SUNDAY", focus: "REST & RECOVERY", type: "Active Recovery & Mobility" },
     { day: "MONDAY", focus: "CHEST, TRICEPS, ABS", type: "Heavy Compound Push & Core" },
     { day: "TUESDAY", focus: "BACK, BICEPS, FOREARMS", type: "Heavy Compound Pull & Flexion" },
     { day: "WEDNESDAY", focus: "LEGS, SHOULDERS, TRAPS", type: "Squat Patterns & Overhead Press" },
     { day: "THURSDAY", focus: "CHEST, TRICEPS, ABS", type: "Volume Push & Accessory Isolation" },
     { day: "FRIDAY", focus: "BACK, BICEPS, FOREARMS", type: "Volume Pull & Peak Contraction" },
     { day: "SATURDAY", focus: "LEGS, SHOULDERS, TRAPS", type: "Lower Body & Deltoid Volume" },
-  ]
+  ],
 };
 
 export default function DailyProtocol() {
@@ -37,103 +33,83 @@ export default function DailyProtocol() {
   }, []);
 
   return (
-    <section id="protocol" className="min-h-screen bg-black text-white py-12 md:py-20">
-      <div className="max-w-7xl mx-auto px-4">
-        <motion.div
-          className="text-center mb-8 md:mb-10"
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
-        >
-          <h2 className="heading-display text-4xl md:text-6xl mb-4">
-            DAILY <span className="text-gym-red italic">PROTOCOL</span>
+    <div id="protocol" className="h-full surface-card p-6 md:p-8 relative overflow-hidden flex flex-col">
+      <div className="flex-1 w-full relative z-10">
+        <div className="text-center mb-10" data-reveal>
+          <p className="label-text text-accent mb-3">TRAINING</p>
+          <h2 className="heading-display text-4xl md:text-6xl mb-4 text-hi">
+            WEEKLY <span className="text-accent">SPLIT</span>
           </h2>
-          <p className="text-lg text-gray-400 font-dot">LIVE TRAINING SCHEDULE</p>
-        </motion.div>
+          <p className="body-text text-mid">PICK A SPLIT · FOLLOW THE PLAN</p>
+        </div>
 
         <div className="flex gap-4 justify-center mb-12">
           <TabButton
             label="BRO SPLIT"
-            icon={<Crosshair className="w-5 h-5" />}
+            icon={<AnimatedIcon name="dumbbell" className="w-5 h-5" label="BRO split" />}
             isActive={activeSplit === "standard"}
             onClick={() => setActiveSplit("standard")}
           />
           <TabButton
             label="TRIPLE SPLIT"
-            icon={<Layers className="w-5 h-5" />}
+            icon={<AnimatedIcon name="calendar" className="w-5 h-5" label="Triple split" />}
             isActive={activeSplit === "triple"}
             onClick={() => setActiveSplit("triple")}
           />
         </div>
 
-        <TracingBeam className="max-w-none">
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={activeSplit}
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -20 }}
-              transition={{ duration: 0.3 }}
-              className="grid gap-3 md:gap-5"
-            >
-            {SPLITS[activeSplit].map((item, idx) => {
-              const isToday = currentDay === idx;
-              return (
-                <motion.div
-                  key={`${activeSplit}-${item.day}`}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: idx * 0.05 }}
-                  className={`border p-6 md:p-8 relative ${isToday
-                    ? "border-gym-red bg-gym-red/10"
-                    : "border-white/20 hover:border-white/40"
-                    } transition-all`}
-                  whileHover={{ scale: 1.02 }}
-                >
-                  {isToday && (
-                    <motion.div
-                      className="absolute top-4 right-4 bg-gym-red text-white px-3 py-1 text-xs font-dot font-bold"
-                      animate={{
-                        boxShadow: [
-                          "0 0 10px rgba(215, 25, 33, 0.5)",
-                          "0 0 20px rgba(215, 25, 33, 0.8)",
-                          "0 0 10px rgba(215, 25, 33, 0.5)"
-                        ]
-                      }}
-                      transition={{ duration: 2, repeat: Infinity }}
-                    >
-                      ACTIVE
-                    </motion.div>
-                  )}
-                  <h3 className="text-2xl md:text-3xl font-display font-black uppercase tracking-wide mb-2">{item.day}</h3>
-                  <p className="text-xl md:text-2xl text-gym-red font-bold mb-1">{item.focus}</p>
-                  <p className="text-sm text-gray-400 font-dot">{item.type}</p>
-                </motion.div>
-              );
-            })}
-          </motion.div>
-        </AnimatePresence>
-        </TracingBeam>
+        <div className="grid gap-4">
+          {SPLITS[activeSplit].map((item, idx) => {
+            const isToday = currentDay === idx;
+            return (
+              <div
+                key={`${activeSplit}-${item.day}`}
+                className={`p-6 surface-card hairline transition-colors duration-fast ${
+                  isToday
+                    ? "border-accent bg-surface-elevated"
+                    : "hover:border-accent/50"
+                }`}
+              >
+                {isToday && (
+                  <div className="mb-3 inline-flex items-center gap-2 px-3 py-1 bg-accent-muted border border-accent">
+                    <span className="relative w-3 h-3 flex items-center justify-center" aria-hidden="true">
+                      <span className="absolute inset-0 rounded-full border border-status-success icon-ring" />
+                      <span className="w-1.5 h-1.5 bg-status-success rounded-full" />
+                    </span>
+                    <span className="label-text text-accent">ACTIVE TODAY</span>
+                  </div>
+                )}
+                <h3 className="heading-display text-2xl md:text-3xl mb-2 text-hi">{item.day}</h3>
+                <p className="heading-section text-xl md:text-2xl text-accent font-bold mb-1">{item.focus}</p>
+                <p className="body-text text-sm text-mid">{item.type}</p>
+              </div>
+            );
+          })}
+        </div>
       </div>
-    </section>
+    </div>
   );
 }
 
-function TabButton({ label, icon, isActive, onClick }: { label: string; icon: React.ReactNode; isActive: boolean; onClick: () => void }) {
+function TabButton({
+  label,
+  icon,
+  isActive,
+  onClick,
+}: {
+  label: string;
+  icon: React.ReactNode;
+  isActive: boolean;
+  onClick: () => void;
+}) {
   return (
-    <motion.button
+    <button
       onClick={onClick}
-      className={`flex items-center gap-2 px-6 py-3 font-dot font-bold text-xs uppercase tracking-widest border transition-all ${isActive
-        ? "bg-gym-red text-white border-gym-red"
-        : "bg-transparent text-gray-400 border-white/20 hover:border-gym-red hover:text-gym-red"
-        }`}
-      whileHover={{ scale: 1.05 }}
-      whileTap={{ scale: 0.95 }}
+      className={`category-tab ${isActive ? "category-tab--active" : ""}`}
+      aria-pressed={isActive}
     >
-      {icon}
+      <span className={isActive ? "text-accent" : ""}>{icon}</span>
       {label}
-    </motion.button>
+    </button>
   );
 }
-

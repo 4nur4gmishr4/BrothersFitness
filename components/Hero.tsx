@@ -1,196 +1,107 @@
-﻿"use client";
+"use client";
 
-import { motion } from "framer-motion";
 import { useState, useEffect } from "react";
 import HeroLoopManager from "./HeroLoopManager";
 import QuoteCycler from "./QuoteCycler";
-import CurvedLoop from "@/components/react-bits/CurvedLoop";
+import PulseDot from "@/components/animations/PulseDot";
+import BarGrowStats from "@/components/animations/BarGrowStats";
+
+const YEARS_ACTIVE = new Date().getFullYear() - 2026;
 
 export default function Hero() {
-  const [isMobile, setIsMobile] = useState(false);
-  const [mounted, setMounted] = useState(false);
   const [memberCount, setMemberCount] = useState(0);
+  const [grainOpacity, setGrainOpacity] = useState(0.07);
 
+  // H5 fix: AbortController prevents setState after unmount on quick navigation.
   useEffect(() => {
-    setMounted(true);
-    const checkMobile = () => setIsMobile(window.innerWidth < 768);
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
-  }, []);
-
-  // Fetch member count
-  useEffect(() => {
+    const controller = new AbortController();
     const fetchMemberCount = async () => {
       try {
-        const res = await fetch('/api/public/member-count');
+        const res = await fetch("/api/public/member-count", { signal: controller.signal });
         const data = await res.json();
         setMemberCount(data.count);
       } catch {
-        setMemberCount(0); // Fallback
+        if (!controller.signal.aborted) setMemberCount(0);
       }
     };
     fetchMemberCount();
+    return () => controller.abort();
+  }, []);
+
+  // Handle grain fade out on scroll
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollY = window.scrollY;
+      const fadeStart = 50;
+      const fadeEnd = 300;
+      if (scrollY <= fadeStart) {
+        setGrainOpacity(0.07);
+      } else if (scrollY >= fadeEnd) {
+        setGrainOpacity(0);
+      } else {
+        const progress = (scrollY - fadeStart) / (fadeEnd - fadeStart);
+        setGrainOpacity(0.07 * (1 - progress));
+      }
+    };
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   return (
-    <section className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden bg-black text-white py-16 md:py-0">
-      {/* Background grid animation - desktop only */}
-      {mounted && !isMobile && (
-        <div className="absolute inset-0 opacity-20">
-          <motion.div
-            className="absolute inset-0"
-            style={{
-              backgroundImage: `linear-gradient(rgba(215, 25, 33, 0.3) 1px, transparent 1px),
-                               linear-gradient(90deg, rgba(215, 25, 33, 0.3) 1px, transparent 1px)`,
-              backgroundSize: "50px 50px",
-            }}
-            animate={{
-              backgroundPosition: ["0px 0px", "50px 50px"],
-            }}
-            transition={{
-              duration: 20,
-              repeat: Infinity,
-              ease: "linear"
-            }}
-          />
+    <section className="relative min-h-[90svh] md:min-h-[100svh] flex flex-col items-center justify-center overflow-hidden py-4 md:py-0 bg-[#0a0a0a] text-white">
+      {/* Scroll-fading grain overlay */}
+      <div 
+        className="absolute inset-0 z-0 pointer-events-none transition-opacity duration-75"
+        style={{
+          opacity: grainOpacity,
+          backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox=\'0 0 256 256\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cfilter id=\'grain\'%3E%3CfeTurbulence type=\'fractalNoise\' baseFrequency=\'0.85\' numOctaves=\'4\' stitchTiles=\'stitch\'/%3E%3CfeColorMatrix type=\'saturate\' values=\'0\'/%3E%3C/filter%3E%3Crect width=\'100%25\' height=\'100%25\' filter=\'url(%23grain)\'/%3E%3C/svg%3E")',
+          backgroundRepeat: 'repeat',
+          backgroundSize: '256px 256px'
+        }}
+      />
 
-          <motion.div
-            className="absolute inset-0 pointer-events-none"
-            style={{
-              backgroundImage: "repeating-linear-gradient(0deg, rgba(255,255,255,0.03) 0px, transparent 2px, transparent 4px)",
-            }}
-            animate={{ y: ["0%", "100%"] }}
-            transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
-          />
-        </div>
-      )}
+      <div className="relative z-10 flex-1 flex flex-col items-center justify-center w-full max-w-4xl px-4 text-center mt-12 md:mt-0">
+        <p className="label-text mb-2 text-faint" style={{ color: '#888888', fontSize: '10px' }}>
+          BHOPAL · GYM &amp; FITNESS
+        </p>
 
-      {/* Glow blobs - desktop only */}
-      {mounted && !isMobile && (
-        <>
-          <motion.div
-            className="absolute top-1/4 left-1/4 w-96 h-96 bg-gym-red rounded-full blur-[120px] opacity-20"
-            animate={{
-              scale: [1, 1.2, 1],
-              x: [0, 50, 0],
-              y: [0, -30, 0],
-            }}
-            transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
-          />
-          <motion.div
-            className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-white rounded-full blur-[120px] opacity-10"
-            animate={{
-              scale: [1, 1.3, 1],
-              x: [0, -50, 0],
-              y: [0, 30, 0],
-            }}
-            transition={{ duration: 12, repeat: Infinity, ease: "easeInOut", delay: 2 }}
-          />
-        </>
-      )}
-
-      <div className="relative z-10 flex-1 flex flex-col items-center justify-center w-full max-w-7xl px-4 text-center">
-        <motion.div
-          className="mb-4 md:mb-6 font-mono text-xs md:text-sm tracking-ultra text-gray-400 uppercase font-medium"
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.2 }}
-        >
-          EST. 2024 // GYM OS
-        </motion.div>
-
-        <motion.div
-          className="mb-6 md:mb-8"
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.8, delay: 0.4 }}
-        >
+        <div className="mb-2 md:mb-3 transform scale-90 md:scale-100">
           <HeroLoopManager />
-        </motion.div>
+        </div>
 
-        <motion.div
-          className="mb-8 md:mb-10"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.6, delay: 1 }}
-        >
+        <div className="mb-3 transform scale-90 md:scale-100">
           <QuoteCycler />
-        </motion.div>
+        </div>
 
         {/* Member Count Badge */}
-        <motion.div
-          className="mb-8 md:mb-10 flex items-center gap-2 px-4 py-2 bg-white/5 border border-white/20 rounded-full backdrop-blur-sm"
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 1.2 }}
-        >
-          <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-          <span className="font-mono text-xs md:text-sm text-gray-300">
-            <span className="font-bold text-white">{memberCount}+</span> Active Members
+        <div className="mb-4 md:mb-5 inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs" style={{ background: '#1a1a1a', border: '1px solid #2a2a2a' }}>
+          <PulseDot />
+          <span className="label-text" style={{ color: '#cccccc' }}>
+            <span className="font-display" style={{ color: '#ffffff' }}>{memberCount}</span> Active Members
           </span>
-        </motion.div>
+        </div>
 
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 1.2 }}
-        >
-          <motion.a
+        {/* Animated stat bars: member count + years active */}
+        <div className="mb-4 md:mb-5 w-full max-w-[260px] transform scale-95 md:scale-100">
+          <BarGrowStats
+            items={[
+              { label: "Members", value: memberCount, max: Math.max(memberCount, 150), display: `${memberCount}`, rightLabel: "∞" },
+              { label: "Years Active", value: YEARS_ACTIVE, max: 5, display: `${YEARS_ACTIVE} yrs`, rightLabel: "∞" },
+            ]}
+          />
+        </div>
+
+        <div className="mt-2">
+          <a
             href="#protocol"
-            className="inline-block relative group"
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
+            className="inline-block btn-primary group relative overflow-hidden px-6 py-2.5 text-sm"
+            style={{ textDecoration: "none" }}
           >
-            <motion.div
-              className="absolute inset-0 bg-gym-red blur-xl opacity-50"
-              animate={{
-                scale: [1, 1.2, 1],
-                opacity: [0.5, 0.8, 0.5],
-              }}
-              transition={{ duration: 2, repeat: Infinity }}
-            />
-            <motion.button
-              className="relative bg-gym-red text-white px-8 md:px-14 py-4 md:py-6 font-mono font-bold text-xs md:text-base uppercase tracking-widest hover:bg-white hover:text-black transition-all duration-300 rounded-md shadow-[0_6px_0_#991218] active:shadow-none active:translate-y-[2px] overflow-hidden"
-              whileHover={{
-                boxShadow: "0 0 30px rgba(215, 25, 33, 0.6)",
-              }}
-            >
-              <motion.span
-                className="relative z-10"
-                animate={{
-                  letterSpacing: ["0.15em", "0.2em", "0.15em"],
-                }}
-                transition={{ duration: 3, repeat: Infinity }}
-              >
-                Initialize_Training
-              </motion.span>
-              <motion.div
-                className="absolute inset-0 bg-white"
-                initial={{ x: "-100%" }}
-                whileHover={{ x: "100%" }}
-                transition={{ duration: 0.5 }}
-              />
-            </motion.button>
-          </motion.a>
-        </motion.div>
+            <span className="relative z-10">Start Training</span>
+            <span className="absolute inset-0 bg-white/10 translate-x-full transition-transform duration-200 ease-clickhouse group-hover:translate-x-0" aria-hidden="true" />
+          </a>
+        </div>
       </div>
-
-      <motion.div
-        className="relative z-10 w-full mt-8 md:mt-0"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 1, delay: 1.5 }}
-      >
-        <CurvedLoop
-          marqueeText="No Pain, No Gain, Shut Up & Train"
-          speed={2}
-          className="w-full"
-          curveAmount={120}
-          direction="left"
-          interactive={true}
-        />
-      </motion.div>
     </section>
   );
 }
