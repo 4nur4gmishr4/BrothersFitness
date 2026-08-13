@@ -84,7 +84,6 @@ export const DietResponseSchema = z.object({
 export const MemberSchema = z.object({
     full_name: z.string().min(1, 'Name is required'),
     mobile: z.string().min(7, 'Mobile number is required').max(15, 'Mobile number is too long'),
-    email: z.string().nullable().optional(),
     address: z.string().nullable().optional(),
     date_of_birth: z.string().nullable().optional(),
     gender: z.string().nullable().optional(),
