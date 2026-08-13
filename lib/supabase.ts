@@ -25,7 +25,6 @@ export const supabase: SupabaseClient = new Proxy({} as SupabaseClient, {
 export type GymMember = {
     id: string;
     full_name: string;
-    email: string | null;
     mobile: string;
     address: string | null;
     date_of_birth: string | null;

@@ -25,7 +25,6 @@ export default function IncompleteProfiles({ members, onEdit }: IncompleteProfil
             if (!m.gender) missing.push('Gender');
             if (!m.height_cm || !m.weight_kg) missing.push('Height/Weight');
             if (!m.address) missing.push('Address');
-            if (!m.email) missing.push('Email');
 
             if (missing.length > 0 && m.membership_end) {
                 // Only active/expiring members, or generic check? Let's check all for now.
