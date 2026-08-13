@@ -8,37 +8,31 @@ import {
   useTransform,
 } from "framer-motion";
 
-/* ─── Brothers Fitness SmartPreloader ─────────────────────────────
- *  Native reimplementation of the Framer SmartPreloader component,
- *  customised for the BroFit brand. No external URL imports needed.
- *
- *  Behaviour:
- *    1. Full-screen dark overlay appears on mount
- *    2. Red progress bar fills bottom→top with a synced % counter
- *    3. On completion the overlay slides out, revealing the page
- *    4. Component unmounts itself from the DOM
- *
- *  Palette:
- *    overlay  → #0A0A0A  (--surface-canvas)
- *    progress → #D71921  (--accent / BroFit red)
- *    counter  → #FFFFFF  (--text-hi)
+/* ─── SmartPreloader (Native) ─────────────────────────────────────
+ *  Exact replica of the Framer SmartPreloader with BroFit branding.
+ *  Colors: overlay #0A0A0A, progress #D71921, counter #FFFFFF
+ *  Text:   Brand mark top-left, tagline bottom-left, counter bottom-right
+ *  Fully responsive for mobile & desktop.
  * ────────────────────────────────────────────────────────────────── */
 
 // ── Config ──────────────────────────────────────────────────────
 const OVERLAY_COLOR = "#0A0A0A";
 const PROGRESS_COLOR = "#D71921";
 const COUNTER_COLOR = "#FFFFFF";
-const BRAND_TEXT = "BROTHER'S_FITNESS";
-const START_DELAY_MS = 200;
-const REVEAL_MS = 1800;
-const EXIT_MS = 900;
 const DIRECTION: "bottom-to-top" | "top-to-bottom" | "left-to-right" | "right-to-left" = "bottom-to-top";
+const START_DELAY_MS = 200;
+const TOTAL_REVEAL_MS = 1600;
+const FADE_MS = 800;
+const COUNTER_PADDING = 40;
+const SLOW_STEP_1 = 27;
+const SLOW_STEP_2 = 82;
 
-// ── Easing (cubic-bezier matching the Framer "cinematic" preset) ─
+// ── Cubic-bezier evaluator ──────────────────────────────────────
 function cubicBezier(x1: number, y1: number, x2: number, y2: number) {
-  // Simple cubic-bezier evaluator using binary search
-  const sampleCurveX = (t: number) => ((1 - 3 * x2 + 3 * x1) * t + (3 * x2 - 6 * x1)) * t * t + 3 * x1 * t;
-  const sampleCurveY = (t: number) => ((1 - 3 * y2 + 3 * y1) * t + (3 * y2 - 6 * y1)) * t * t + 3 * y1 * t;
+  const sampleCurveX = (t: number) =>
+    ((1 - 3 * x2 + 3 * x1) * t + (3 * x2 - 6 * x1)) * t * t + 3 * x1 * t;
+  const sampleCurveY = (t: number) =>
+    ((1 - 3 * y2 + 3 * y1) * t + (3 * y2 - 6 * y1)) * t * t + 3 * y1 * t;
   return (x: number) => {
     let lo = 0, hi = 1, mid: number;
     for (let i = 0; i < 20; i++) {
@@ -53,7 +47,7 @@ function cubicBezier(x1: number, y1: number, x2: number, y2: number) {
 
 const EASING_FN = cubicBezier(0.83, 0, 0.17, 1);
 
-// ── Slow-warp: pauses briefly at 27% and 82% for dramatic effect ─
+// ── Slow-warp ───────────────────────────────────────────────────
 function createSlowWarp(slowSteps: number[]) {
   const windowPct = 16;
   const slowFactor = 0.12;
@@ -105,54 +99,60 @@ function createSlowWarp(slowSteps: number[]) {
   };
 }
 
-const slowWarp = createSlowWarp([27, 82]);
+const slowWarp = createSlowWarp([SLOW_STEP_1, SLOW_STEP_2]);
 
-// ── Exit translation helper ─────────────────────────────────────
-function exitTranslate(val: number, dir: string) {
+// ── Helpers ─────────────────────────────────────────────────────
+function getExitTranslate(val: number, dir: string) {
   if (dir === "left-to-right") return `translate3d(${val}%, 0%, 0)`;
   if (dir === "right-to-left") return `translate3d(${-val}%, 0%, 0)`;
   if (dir === "top-to-bottom") return `translate3d(0%, ${val}%, 0)`;
   return `translate3d(0%, ${-val}%, 0)`;
 }
 
-function progressOrigin(dir: string) {
+function getProgressOrigin(dir: string) {
   if (dir === "left-to-right") return "0% 50%";
   if (dir === "right-to-left") return "100% 50%";
   if (dir === "top-to-bottom") return "50% 0%";
   return "50% 100%";
 }
 
+function getExitClipPath(val: number, dir: string) {
+  const v = Math.max(0, Math.min(100, val));
+  if (dir === "left-to-right") return `inset(0% 0% 0% ${v}%)`;
+  if (dir === "right-to-left") return `inset(0% ${v}% 0% 0%)`;
+  if (dir === "top-to-bottom") return `inset(${v}% 0% 0% 0%)`;
+  return `inset(0% 0% ${v}% 0%)`;
+}
+
 // ══════════════════════════════════════════════════════════════════
 export default function SmartPreloaderWrapper() {
-  const [phase, setPhase] = useState<"idle" | "revealing" | "exiting" | "done">("idle");
+  const [phase, setPhase] = useState<
+    "idle" | "revealing" | "exiting" | "done"
+  >("idle");
   const [visible, setVisible] = useState(true);
   const counterRef = useRef<HTMLSpanElement>(null);
   const finalizedRef = useRef(false);
+  const counterOutTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Motion values
   const tNorm = useMotionValue(0);
   const exitMV = useMotionValue(0);
 
-  // Derived motion values
+  // Derived
   const revealProgress = useTransform(tNorm, (t) => slowWarp(t));
   const revealPercent = useTransform(revealProgress, (p) => p * 100);
-
   const exitEasedPct = useTransform(exitMV, (t) => EASING_FN(t) * 100);
 
-  // Overlay slide-out transform
+  // Overlay slide-out
   const overlayTransform = useTransform(exitEasedPct, (val) => {
     if (phase !== "exiting") return "translate3d(0%, 0%, 0)";
-    return exitTranslate(val, DIRECTION);
+    return getExitTranslate(val, DIRECTION);
   });
 
-  // Counter clip-path for exit
+  // Counter clip-path during exit
   const counterClipPath = useTransform(exitEasedPct, (val) => {
     if (phase !== "exiting") return "inset(0% 0% 0% 0%)";
-    const v = Math.max(0, Math.min(100, val));
-    if (DIRECTION === "left-to-right") return `inset(0% 0% 0% ${v}%)`;
-    if (DIRECTION === "right-to-left") return `inset(0% ${v}% 0% 0%)`;
-    if (DIRECTION === "top-to-bottom") return `inset(${v}% 0% 0% 0%)`;
-    return `inset(0% 0% ${v}% 0%)`;
+    return getExitClipPath(val, DIRECTION);
   });
 
   // Progress bar scale
@@ -160,7 +160,7 @@ export default function SmartPreloaderWrapper() {
   const scaleX = useTransform(revealProgress, (p) => (isHorizontal ? p : 1));
   const scaleY = useTransform(revealProgress, (p) => (isHorizontal ? 1 : p));
 
-  // ── Finalize: trigger exit animation then unmount ──────────────
+  // ── Finalize ──────────────────────────────────────────────────
   const finalize = useCallback(() => {
     if (finalizedRef.current) return;
     finalizedRef.current = true;
@@ -168,12 +168,15 @@ export default function SmartPreloaderWrapper() {
     window.setTimeout(() => {
       setPhase("done");
       setVisible(false);
-    }, EXIT_MS);
+    }, Math.max(0, FADE_MS));
   }, []);
 
-  // ── Kick-off after start delay ────────────────────────────────
+  // ── Start after delay ─────────────────────────────────────────
   useEffect(() => {
-    const timer = window.setTimeout(() => setPhase("revealing"), START_DELAY_MS);
+    const timer = window.setTimeout(
+      () => setPhase("revealing"),
+      Math.max(0, START_DELAY_MS)
+    );
     return () => window.clearTimeout(timer);
   }, []);
 
@@ -182,11 +185,15 @@ export default function SmartPreloaderWrapper() {
     if (phase !== "revealing") return;
     tNorm.set(0);
     const controls = animate(tNorm, 1, {
-      duration: REVEAL_MS / 1000,
-      ease: (t: number) => t, // linear — the slow-warp transform provides the feel
+      duration: Math.max(0.001, TOTAL_REVEAL_MS / 1000),
+      ease: (t: number) => t,
     });
     controls.then(() => {
-      window.setTimeout(() => finalize(), 100);
+      if (counterOutTimerRef.current != null) return;
+      counterOutTimerRef.current = setTimeout(() => {
+        counterOutTimerRef.current = null;
+        finalize();
+      }, 100);
     });
     return () => controls.stop();
   }, [phase, tNorm, finalize]);
@@ -199,13 +206,13 @@ export default function SmartPreloaderWrapper() {
     }
     exitMV.set(0);
     const controls = animate(exitMV, 1, {
-      duration: EXIT_MS / 1000,
+      duration: Math.max(0.001, FADE_MS / 1000),
       ease: (t: number) => t,
     });
     return () => controls.stop();
   }, [phase, exitMV]);
 
-  // ── Counter text updater (direct DOM for perf) ────────────────
+  // ── Counter text (direct DOM, synced mode) ────────────────────
   useEffect(() => {
     if (!visible || !counterRef.current) return;
     const clamp = (v: number) => Math.max(0, Math.min(100, v));
@@ -221,132 +228,335 @@ export default function SmartPreloaderWrapper() {
     return () => unsub();
   }, [visible, phase, revealPercent]);
 
-  // ── Scroll-lock while active ──────────────────────────────────
+  // ── Scroll-lock ───────────────────────────────────────────────
   useEffect(() => {
     if (!visible || phase === "done") return;
-    const prev = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    return () => { document.body.style.overflow = prev; };
+    const el = document.documentElement;
+    const prevOverflow = el.style.overflow;
+    const prevTouchAction = el.style.touchAction;
+    el.style.overflow = "hidden";
+    el.style.touchAction = "none";
+
+    const preventDefault = (e: Event) => e.preventDefault();
+    const preventKeys = (e: KeyboardEvent) => {
+      const keys = ["Space", "ArrowUp", "ArrowDown", "PageUp", "PageDown", "Home", "End"];
+      if (keys.includes(e.code)) e.preventDefault();
+    };
+
+    window.addEventListener("wheel", preventDefault, { passive: false });
+    window.addEventListener("touchmove", preventDefault, { passive: false });
+    window.addEventListener("keydown", preventKeys, { passive: false });
+
+    return () => {
+      el.style.overflow = prevOverflow;
+      el.style.touchAction = prevTouchAction;
+      window.removeEventListener("wheel", preventDefault);
+      window.removeEventListener("touchmove", preventDefault);
+      window.removeEventListener("keydown", preventKeys);
+    };
   }, [visible, phase]);
 
-  // ── Memoised styles ───────────────────────────────────────────
-  const origin = useMemo(() => progressOrigin(DIRECTION), []);
+  // ── Memoised ──────────────────────────────────────────────────
+  const origin = useMemo(() => getProgressOrigin(DIRECTION), []);
+  const pad = `${COUNTER_PADDING}px`;
+  const padMobile = `${Math.round(COUNTER_PADDING * 0.5)}px`;
 
   if (!visible || phase === "done") return null;
 
+  const displayPhase = phase;
+
   return (
-    <div
-      style={{
-        position: "fixed",
-        inset: 0,
-        zIndex: 99999,
-        overflow: "hidden",
-        pointerEvents: phase === "exiting" ? "none" : "auto",
-        touchAction: phase === "exiting" ? "auto" : "none",
-      }}
-      aria-label="Preloader"
-      aria-hidden={phase === "done" ? "true" : "false"}
-    >
-      {/* ── Counter overlay (clips during exit) ───────────────── */}
-      <motion.div
-        style={{
-          position: "absolute",
-          inset: 0,
-          overflow: "hidden",
-          pointerEvents: "none",
-          zIndex: 3,
-          clipPath: counterClipPath,
-        }}
-      >
-        {/* Brand text — centered horizontally, slightly above center */}
-        <div
-          style={{
-            position: "absolute",
-            top: "42%",
-            left: "50%",
-            transform: "translate(-50%, -50%)",
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            gap: "16px",
-            pointerEvents: "none",
-          }}
-        >
-          <span
-            style={{
-              color: COUNTER_COLOR,
-              fontFamily: "var(--font-display), Anton, sans-serif",
-              fontSize: "clamp(24px, 5vw, 56px)",
-              letterSpacing: "0.12em",
-              textTransform: "uppercase" as const,
-              lineHeight: 1,
-              opacity: 0.9,
-              whiteSpace: "nowrap",
-            }}
-          >
-            {BRAND_TEXT}
-          </span>
-          <span
-            style={{
-              color: PROGRESS_COLOR,
-              fontFamily: "var(--font-mono), JetBrains Mono, monospace",
-              fontSize: "clamp(12px, 2vw, 16px)",
-              letterSpacing: "0.25em",
-              textTransform: "uppercase" as const,
-              opacity: 0.6,
-            }}
-          >
-            PAIN IS TEMPORARY. PRIDE IS FOREVER.
-          </span>
-        </div>
+    <>
+      {/* Responsive styles */}
+      <style jsx global>{`
+        .preloader-container {
+          position: fixed;
+          inset: 0;
+          z-index: 99999;
+          width: 100%;
+          height: 100%;
+          overflow: hidden;
+        }
 
-        {/* Percentage counter — bottom-right */}
-        <div
-          style={{
-            position: "absolute",
-            bottom: "40px",
-            right: "40px",
-            color: COUNTER_COLOR,
-            fontFamily: "var(--font-mono), JetBrains Mono, monospace",
-            fontSize: "clamp(36px, 6vw, 72px)",
-            fontWeight: 600,
-            letterSpacing: "-0.02em",
-            lineHeight: "1em",
-            display: "flex",
-            alignItems: "center",
-            pointerEvents: "none",
-          }}
-        >
-          <span ref={counterRef}>0%</span>
-        </div>
-      </motion.div>
+        /* ── Brand mark — top-left ───────────────────────────── */
+        .preloader-brand {
+          position: absolute;
+          top: ${pad};
+          left: ${pad};
+          z-index: 4;
+          pointer-events: none;
+          display: flex;
+          flex-direction: column;
+          gap: 8px;
+        }
+        .preloader-brand-name {
+          color: ${COUNTER_COLOR};
+          font-family: var(--font-display), 'Anton', sans-serif;
+          font-size: 20px;
+          letter-spacing: 0.14em;
+          text-transform: uppercase;
+          line-height: 1;
+          white-space: nowrap;
+        }
+        .preloader-brand-name .accent {
+          color: ${PROGRESS_COLOR};
+        }
+        .preloader-brand-sub {
+          color: ${COUNTER_COLOR};
+          font-family: var(--font-mono), 'JetBrains Mono', monospace;
+          font-size: 10px;
+          letter-spacing: 0.3em;
+          text-transform: uppercase;
+          opacity: 0.35;
+          line-height: 1;
+        }
 
-      {/* ── Overlay panel (slides out on exit) ────────────────── */}
-      <motion.div
+        /* ── Tagline — bottom-left ───────────────────────────── */
+        .preloader-tagline {
+          position: absolute;
+          bottom: ${pad};
+          left: ${pad};
+          z-index: 4;
+          pointer-events: none;
+          display: flex;
+          flex-direction: column;
+          gap: 6px;
+        }
+        .preloader-tagline-text {
+          color: ${COUNTER_COLOR};
+          font-family: var(--font-mono), 'JetBrains Mono', monospace;
+          font-size: 11px;
+          letter-spacing: 0.2em;
+          text-transform: uppercase;
+          opacity: 0.4;
+          line-height: 1.4;
+        }
+        .preloader-tagline-line {
+          width: 32px;
+          height: 1px;
+          background: ${PROGRESS_COLOR};
+          opacity: 0.6;
+        }
+
+        /* ── Counter — bottom-right ──────────────────────────── */
+        .preloader-counter {
+          position: absolute;
+          bottom: ${pad};
+          right: ${pad};
+          z-index: 4;
+          pointer-events: none;
+          display: flex;
+          align-items: baseline;
+          gap: 4px;
+        }
+        .preloader-counter-value {
+          color: ${COUNTER_COLOR};
+          font-family: var(--font-mono), 'JetBrains Mono', monospace;
+          font-size: 56px;
+          font-weight: 600;
+          letter-spacing: -0.02em;
+          line-height: 1em;
+        }
+
+        /* ── Status dot — next to counter ────────────────────── */
+        .preloader-status {
+          position: absolute;
+          bottom: calc(${pad} + 72px);
+          right: ${pad};
+          z-index: 4;
+          pointer-events: none;
+          display: flex;
+          align-items: center;
+          gap: 8px;
+        }
+        .preloader-status-dot {
+          width: 6px;
+          height: 6px;
+          border-radius: 50%;
+          background: ${PROGRESS_COLOR};
+          animation: preloaderPulse 1.2s ease-in-out infinite;
+        }
+        .preloader-status-text {
+          color: ${COUNTER_COLOR};
+          font-family: var(--font-mono), 'JetBrains Mono', monospace;
+          font-size: 10px;
+          letter-spacing: 0.2em;
+          text-transform: uppercase;
+          opacity: 0.4;
+        }
+
+        @keyframes preloaderPulse {
+          0%, 100% { opacity: 1; }
+          50% { opacity: 0.3; }
+        }
+
+        /* ── Progress line indicator — thin horizontal line ──── */
+        .preloader-progress-line {
+          position: absolute;
+          bottom: 0;
+          left: 0;
+          width: 100%;
+          height: 2px;
+          z-index: 5;
+          pointer-events: none;
+          background: transparent;
+        }
+        .preloader-progress-line-fill {
+          height: 100%;
+          background: ${PROGRESS_COLOR};
+          transform-origin: 0% 50%;
+          will-change: transform;
+        }
+
+        /* ── Mobile responsive ───────────────────────────────── */
+        @media (max-width: 640px) {
+          .preloader-brand {
+            top: ${padMobile};
+            left: ${padMobile};
+            gap: 6px;
+          }
+          .preloader-brand-name {
+            font-size: 16px;
+            letter-spacing: 0.1em;
+          }
+          .preloader-brand-sub {
+            font-size: 8px;
+            letter-spacing: 0.2em;
+          }
+          .preloader-tagline {
+            bottom: ${padMobile};
+            left: ${padMobile};
+            max-width: 55%;
+          }
+          .preloader-tagline-text {
+            font-size: 9px;
+            letter-spacing: 0.15em;
+          }
+          .preloader-tagline-line {
+            width: 24px;
+          }
+          .preloader-counter {
+            bottom: ${padMobile};
+            right: ${padMobile};
+          }
+          .preloader-counter-value {
+            font-size: 36px;
+          }
+          .preloader-status {
+            bottom: calc(${padMobile} + 50px);
+            right: ${padMobile};
+          }
+          .preloader-status-dot {
+            width: 5px;
+            height: 5px;
+          }
+          .preloader-status-text {
+            font-size: 8px;
+          }
+        }
+
+        /* ── Tablet ──────────────────────────────────────────── */
+        @media (min-width: 641px) and (max-width: 1024px) {
+          .preloader-brand-name {
+            font-size: 18px;
+          }
+          .preloader-counter-value {
+            font-size: 48px;
+          }
+        }
+      `}</style>
+
+      <div
+        className="preloader-container"
         style={{
-          position: "absolute",
-          inset: 0,
-          overflow: "hidden",
-          background: OVERLAY_COLOR,
-          zIndex: 1,
-          willChange: "transform",
-          transform: overlayTransform,
+          pointerEvents: displayPhase === "exiting" ? "none" : "auto",
+          touchAction: displayPhase !== "exiting" ? "none" : "auto",
         }}
+        aria-label="Preloader"
+        aria-hidden="false"
       >
-        {/* Progress bar fill */}
+        {/* ── Text layer (clips during exit) ───────────────────── */}
         <motion.div
           style={{
             position: "absolute",
             inset: 0,
-            background: PROGRESS_COLOR,
-            willChange: "transform",
-            transformOrigin: origin,
-            scaleX,
-            scaleY,
-            opacity: 0.12,
+            overflow: "hidden",
+            pointerEvents: "none",
+            zIndex: 3,
+            willChange: displayPhase === "exiting" ? "clip-path" : undefined,
+            clipPath: counterClipPath,
           }}
-        />
-      </motion.div>
-    </div>
+        >
+          {/* Brand mark — top-left */}
+          <div className="preloader-brand">
+            <div className="preloader-brand-name">
+              BROTHER&apos;S<span className="accent">_</span>FITNESS
+            </div>
+            <div className="preloader-brand-sub">
+              EST. 2024 &bull; PREMIUM GYM
+            </div>
+          </div>
+
+          {/* Status indicator — above counter */}
+          <div className="preloader-status">
+            <div className="preloader-status-dot" />
+            <div className="preloader-status-text">INITIALIZING</div>
+          </div>
+
+          {/* Counter — bottom-right */}
+          <div className="preloader-counter">
+            <span className="preloader-counter-value" ref={counterRef}>
+              0%
+            </span>
+          </div>
+
+          {/* Tagline — bottom-left */}
+          <div className="preloader-tagline">
+            <div className="preloader-tagline-line" />
+            <div className="preloader-tagline-text">
+              PAIN IS TEMPORARY.
+              <br />
+              PRIDE IS FOREVER.
+            </div>
+          </div>
+        </motion.div>
+
+        {/* ── Overlay panel (slides out on exit) ───────────────── */}
+        <motion.div
+          style={{
+            position: "absolute",
+            inset: 0,
+            overflow: "hidden",
+            background: OVERLAY_COLOR,
+            zIndex: 1,
+            willChange: "transform",
+            transform: overlayTransform,
+          }}
+        >
+          {/* Progress bar fill — full opacity, no transparency */}
+          <motion.div
+            style={{
+              position: "absolute",
+              inset: 0,
+              background: PROGRESS_COLOR,
+              willChange: "transform",
+              transformOrigin: origin,
+              scaleX,
+              scaleY,
+            }}
+          />
+        </motion.div>
+
+        {/* ── Thin progress line at bottom (always visible above overlay) */}
+        <div className="preloader-progress-line" style={{ zIndex: 6 }}>
+          <motion.div
+            className="preloader-progress-line-fill"
+            style={{
+              scaleX: revealProgress,
+            }}
+          />
+        </div>
+      </div>
+    </>
   );
 }
