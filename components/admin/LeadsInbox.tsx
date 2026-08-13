@@ -162,7 +162,7 @@ export default function LeadsInbox({
                         </div>
                         <div className="flex gap-4 text-faint">
                             <MessageSquare className="w-5 h-5 cursor-pointer hover:text-hi transition-colors" />
-                            <button onClick={onClose} className="hover:text-hi transition-colors" aria-label="Close inbox"><X className="w-5 h-5" /></button>
+                            <button type="button" onClick={onClose} className="hover:text-hi transition-colors" aria-label="Close inbox"><X className="w-5 h-5" /></button>
                         </div>
                     </div>
 
@@ -222,7 +222,7 @@ export default function LeadsInbox({
                         <>
                             {/* Chat Header */}
                             <div className="surface-elevated hairline-b p-3 flex items-center gap-4">
-                                <button onClick={() => setSelectedLeadId(null)} className="md:hidden text-faint hover:text-hi transition-colors" aria-label="Back to list"><X className="w-5 h-5" /></button>
+                                <button type="button" onClick={() => setSelectedLeadId(null)} className="md:hidden text-faint hover:text-hi transition-colors" aria-label="Back to list"><X className="w-5 h-5" /></button>
                                 <div className="w-10 h-10 surface-modal hairline flex items-center justify-center">
                                     <User className="w-5 h-5 text-low" />
                                 </div>
@@ -231,6 +231,7 @@ export default function LeadsInbox({
                                     <p className="text-xs text-low">{selectedLead.phone || selectedLead.email}</p>
                                 </div>
                                 <button
+                                    type="button"
                                     onClick={() => handleDelete(selectedLead.id)}
                                     className="p-2 text-faint hover:text-status-danger transition-colors duration-fast"
                                     title="Delete Chat"
@@ -291,10 +292,10 @@ export default function LeadsInbox({
                                 <MessageSquare className="w-full h-full text-faint/30" />
                                 <div className="absolute top-0 right-0 w-8 h-8 bg-accent rounded-full" />
                             </div>
-                            <h3 className="heading-section text-2xl text-hi mb-4">BroFit Inbox for WhatsApp</h3>
+                            <h3 className="heading-section text-2xl text-hi mb-4">Brothers Fitness Inbox for WhatsApp</h3>
                             <p className="text-low max-w-md text-sm leading-relaxed">
                                 Send and receive messages without keeping your phone online.<br />
-                                Use BroFit Web on up to 4 linked devices and 1 phone.
+                                Use Brothers Fitness Web on up to 4 linked devices and 1 phone.
                             </p>
                             <div className="mt-8 flex items-center gap-2 text-faint text-xs">
                                 <Lock className="w-3 h-3" /> End-to-end encrypted

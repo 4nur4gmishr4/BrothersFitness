@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState, useMemo } from "react";
 import Image from "next/image";
@@ -15,6 +15,20 @@ interface FreeExercise {
   equipment: string;
   instructions: string[];
   images: string[];
+}
+
+// The free-exercise-db JSON ships relative image paths like "3_4_Sit-Up/0.jpg".
+// next/image requires an absolute URL or a leading-slash path, so prefix them.
+const IMAGE_BASE =
+  "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/";
+
+function resolveExerciseImage(path: string): string {
+  if (!path) return "";
+  // Already absolute — leave it alone.
+  if (path.startsWith("http://") || path.startsWith("https://")) return path;
+  // Already has a leading slash — leave it alone.
+  if (path.startsWith("/")) return path;
+  return `${IMAGE_BASE}${path}`;
 }
 
 const fetcher = () =>
@@ -130,7 +144,7 @@ export default function WorkoutLibrary() {
 
         {/* Search Input */}
         <div className="relative w-full">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-low" />
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-low z-10 pointer-events-none" />
           <input
             type="text"
             placeholder="Search exercises by name or equipment..."
@@ -139,7 +153,7 @@ export default function WorkoutLibrary() {
               setSearch(e.target.value);
               setPage(1);
             }}
-            className="w-full bg-[#050505] border border-surface-border text-hi pl-11 pr-4 py-3 rounded-md focus:outline-none focus:border-accent transition-colors text-sm font-mono placeholder:text-low/50"
+            className="w-full bg-[#050505] border border-surface-border text-hi !pl-11 pr-4 py-3 rounded-md focus:outline-none focus:border-accent transition-colors text-sm font-mono placeholder:text-low/50"
           />
         </div>
       </div>
@@ -155,7 +169,7 @@ export default function WorkoutLibrary() {
             <div className="aspect-video bg-[#050505] relative overflow-hidden">
               {exercise.images && exercise.images.length > 0 ? (
                 <Image
-                  src={exercise.images[0]}
+                  src={resolveExerciseImage(exercise.images[0])}
                   alt={exercise.name}
                   fill
                   className="object-cover opacity-80 group-hover:opacity-100 transition-opacity duration-slow"

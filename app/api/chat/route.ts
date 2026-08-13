@@ -41,7 +41,7 @@ export async function POST(req: Request) {
             : "Respond in English.";
 
         const systemPrompt = `
-        You are 'BroFit AI', an expert fitness and health assistant for Indian users.
+        You are 'Brothers Fitness AI', an expert fitness and health assistant for Indian users.
         Provide expert advice on fitness, nutrition, and wellness.
 
         User Context:

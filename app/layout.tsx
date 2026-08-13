@@ -10,7 +10,7 @@ import { ThemeProvider } from "@/components/ThemeProvider";
 import ThemedToaster from "@/components/ThemedToaster";
 import { AdminProvider } from "@/lib/auth-context";
 import { UserAuthProvider } from "@/lib/user-auth-context";
-import SmartPreloaderWrapper from "@/components/ui/SmartPreloaderWrapper";
+import PreloaderGate from "@/components/ui/PreloaderGate";
 // Runs before first paint to apply the stored theme and prevent a
 // flash of the wrong theme. Mirrors ThemeProvider's resolve logic.
 const themeScript = `(function(){try{var s=localStorage.getItem("brofit_theme");var t=(s==="light"||s==="dark"||s==="system")?s:"system";var r=t==="light"?"light":t==="dark"?"dark":(window.matchMedia("(prefers-color-scheme: light)").matches?"light":"dark");var el=document.documentElement;if(t==="system"){el.removeAttribute("data-theme");}else{el.setAttribute("data-theme",t);}el.style.colorScheme=r;}catch(e){}})();`;
@@ -105,7 +105,7 @@ export default function RootLayout({
       </head>
       <body className={`${inter.variable} ${anton.variable} ${jetBrainsMono.variable} font-sans surface-canvas text-hi antialiased`}>
         <ThemeProvider>
-          <SmartPreloaderWrapper />
+          <PreloaderGate />
           <ReadingProgressBar />
           <PwaUpdateToast />
           <ThemedToaster />

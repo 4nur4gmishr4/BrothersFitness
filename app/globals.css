@@ -1,9 +1,9 @@
-﻿@tailwind base;
+@tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 /* ============================================================
-   BroFit Ã— ClickHouse design system
+   Brothers Fitness × ClickHouse design system
    ------------------------------------------------------------
    Principles carried across from ClickHouse's own marketing &
    docs surfaces (see design analysis):
@@ -43,7 +43,7 @@
   --surface-modal: 46 46 46;
   --surface-border: 42 42 42;
 
-  /* Signature accent â€” BroFit gym red #D71921 substitutes for
+  /* Signature accent â€” Brothers Fitness gym red #D71921 substitutes for
      ClickHouse electric yellow #faff69 (accent substitution rule). */
   --accent: 215 25 33;
   --accent-hover: 232 30 38;
@@ -664,35 +664,47 @@ body {
   transform: none;
 }
 
+@layer base {
+  /* Prevent browser default webkit search decorations from overlapping text */
+  input[type="search"]::-webkit-search-decoration,
+  input[type="search"]::-webkit-search-cancel-button,
+  input[type="search"]::-webkit-search-results-button,
+  input[type="search"]::-webkit-search-results-decoration {
+    -webkit-appearance: none;
+  }
+}
+
 /* ============================================================
-   Inputs â€” flat, hairline, crisp focus
+   Inputs — flat, hairline, crisp focus
    ============================================================ */
 
-.input-field {
-  width: 100%;
-  padding: 0.625rem 0.875rem;
-  background-color: rgb(var(--surface-canvas));
-  color: rgb(var(--text-hi));
-  border: 1px solid rgb(var(--surface-border));
-  border-radius: 0.25rem;
-  font-size: 0.875rem;
-  line-height: 1.55;
-  transition: border-color var(--motion-normal) var(--ease-clickhouse);
-  outline: none;
-}
+@layer components {
+  .input-field {
+    width: 100%;
+    padding: 0.625rem 0.875rem;
+    background-color: rgb(var(--surface-canvas));
+    color: rgb(var(--text-hi));
+    border: 1px solid rgb(var(--surface-border));
+    border-radius: 0.25rem;
+    font-size: 0.875rem;
+    line-height: 1.55;
+    transition: border-color var(--motion-normal) var(--ease-clickhouse);
+    outline: none;
+  }
 
-.input-field::placeholder {
-  color: rgb(var(--text-faint));
-}
+  .input-field::placeholder {
+    color: rgb(var(--text-faint));
+  }
 
-.input-field:focus {
-  border-color: rgb(var(--accent));
-  box-shadow: 0 0 0 3px rgb(var(--accent-muted));
-}
+  .input-field:focus {
+    border-color: rgb(var(--accent));
+    box-shadow: 0 0 0 3px rgb(var(--accent-muted));
+  }
 
-.input-field:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
+  .input-field:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
 }
 
 /* ============================================================
@@ -794,10 +806,85 @@ body {
    Scrollbars â€” subtle, hairline, monochrome
    ============================================================ */
 
+/* ============================================================
+   Scrollbars — subtle, hairline, monochrome
+   ============================================================ */
+
 .scrollbar-hide {
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
+
+/* ============================================================
+   Shield Security Animations & Keyframes
+   ============================================================ */
+
+@keyframes shieldShake {
+  0%, 100% { transform: translateX(0); }
+  20%, 60% { transform: translateX(-6px); }
+  40%, 80% { transform: translateX(6px); }
+}
+
+@keyframes circuitFlow {
+  0% { stroke-dashoffset: 24; }
+  100% { stroke-dashoffset: 0; }
+}
+
+@keyframes circuitFlowRev {
+  0% { stroke-dashoffset: 0; }
+  100% { stroke-dashoffset: 24; }
+}
+
+@keyframes drawCheck {
+  0% { stroke-dasharray: 20; stroke-dashoffset: 20; }
+  100% { stroke-dasharray: 20; stroke-dashoffset: 0; }
+}
+
+@keyframes spinSlow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes pulseSlow {
+  0%, 100% { opacity: 0.4; transform: scale(0.95); }
+  50% { opacity: 1; transform: scale(1.05); }
+}
+
+.animate-shake {
+  animation: shieldShake 0.4s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+}
+
+.animate-circuit-flow {
+  animation: circuitFlow 0.8s linear infinite;
+}
+
+.animate-circuit-flow-rev {
+  animation: circuitFlowRev 0.8s linear infinite;
+}
+
+.animate-draw-check {
+  animation: drawCheck 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-spin-slow {
+  animation: spinSlow 3s linear infinite;
+}
+
+.animate-pulse-slow {
+  animation: pulseSlow 2.5s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-shake,
+  .animate-circuit-flow,
+  .animate-circuit-flow-rev,
+  .animate-draw-check,
+  .animate-spin-slow,
+  .animate-pulse-slow {
+    animation: none !important;
+  }
+}
+
 
 .scrollbar-hide::-webkit-scrollbar {
   display: none;
@@ -1472,3 +1559,89 @@ select option {
 
 body.mobile-menu-open #tactical-chatbot { display: none !important; }
 
+
+/* ============================================================
+   btn-ghost — transparent, no-border text button
+   Used throughout the admin panel for low-priority actions
+   (Refresh, Clear, Deselect, etc.)
+   ============================================================ */
+
+.btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.625rem 1rem;
+  background-color: transparent;
+  color: rgb(var(--text-low));
+  font-family: var(--font-mono), "JetBrains Mono", Consolas, monospace;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  border: 1px solid transparent;
+  transition: color var(--motion-normal) var(--ease-clickhouse),
+    background-color var(--motion-normal) var(--ease-clickhouse),
+    transform var(--motion-fast) var(--ease-clickhouse);
+  cursor: pointer;
+}
+
+.btn-ghost:hover {
+  color: rgb(var(--text-hi));
+  background-color: rgb(var(--surface-elevated));
+}
+
+.btn-ghost:active {
+  transform: translateY(1px) scale(0.98);
+}
+
+.btn-ghost:focus-visible {
+  outline: 2px solid rgb(var(--accent));
+  outline-offset: 2px;
+}
+
+.btn-ghost:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* ============================================================
+   Accent surface helpers — referenced in admin pages and
+   cannot be generated by Tailwind JIT from CSS variables alone.
+   ============================================================ */
+
+.bg-accent-muted {
+  background-color: rgb(var(--accent-muted));
+}
+
+.bg-accent-hover {
+  background-color: rgb(var(--accent-hover));
+}
+
+.hover\:bg-accent-hover:hover {
+  background-color: rgb(var(--accent-hover));
+}
+
+.text-accent-hover {
+  color: rgb(var(--accent-hover));
+}
+
+/* hairline-r — right-side 1px border for sidebar */
+.hairline-r {
+  border-right: 1px solid rgb(var(--surface-border));
+}
+
+/* duration-fast / duration-normal helpers used in admin transitions */
+.duration-fast {
+  transition-duration: var(--motion-fast);
+}
+
+.duration-normal {
+  transition-duration: var(--motion-normal);
+}
+
+/* ease-clickhouse */
+.ease-clickhouse {
+  transition-timing-function: var(--ease-clickhouse);
+}

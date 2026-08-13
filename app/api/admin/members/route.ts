@@ -153,7 +153,7 @@ export async function POST(req: Request) {
             `📅 Start: ${data.membership_start}\n` +
             `📅 End: ${data.membership_end}\n\n` +
             `Let's crush those goals together! 🔥\n\n` +
-            `- Team BroFit`
+            `- Team Brothers Fitness`
         );
         // L47: avoid `91` + `91xxx` = `9191xxx` — use the same country-code
         // dedup pattern applied in LeadsInbox (M29).
@@ -182,8 +182,16 @@ export async function DELETE(req: Request) {
     if (auth instanceof NextResponse) return auth;
 
     try {
-        const { searchParams } = new URL(req.url);
-        const id = searchParams.get('id');
+        let id = searchParams.get('id');
+
+        if (!id) {
+            try {
+                const body = await req.json();
+                id = body?.id || null;
+            } catch {
+                // Not JSON or empty body
+            }
+        }
 
         if (!id) {
             return NextResponse.json(
@@ -193,13 +201,15 @@ export async function DELETE(req: Request) {
         }
 
         // First, get the member to retrieve photo_url and name for logging
-        const { data: member } = await getServiceSupabase()
+        const { data: member, error: fetchError } = await getServiceSupabase()
             .from('gym_members')
             .select('photo_url, full_name, mobile')
             .eq('id', id)
-            .single();
+            .maybeSingle();
 
-        // L48: return 404 instead of reporting success for a non-existent member.
+        if (fetchError) throw fetchError;
+
+        // Return 404 instead of reporting success for a non-existent member.
         if (!member) {
             return NextResponse.json(
                 { error: 'Member not found' },
@@ -245,7 +255,9 @@ export async function DELETE(req: Request) {
     }
 }
 
-// PUT update member
+const PartialMemberSchema = MemberSchema.partial();
+
+// PUT update member (supports partial updates)
 export async function PUT(req: Request) {
     const auth = await requireAdminToken(req);
     if (auth instanceof NextResponse) return auth;
@@ -261,7 +273,15 @@ export async function PUT(req: Request) {
             );
         }
 
-        const parsed = MemberSchema.safeParse(updateData);
+        const hasFields = Object.keys(updateData).length > 0;
+        if (!hasFields) {
+            return NextResponse.json(
+                { error: 'No fields provided for update' },
+                { status: 400 }
+            );
+        }
+
+        const parsed = PartialMemberSchema.safeParse(updateData);
         if (!parsed.success) {
             return NextResponse.json(
                 { error: parsed.error.issues[0]?.message || 'Invalid member data' },

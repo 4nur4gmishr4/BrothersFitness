@@ -18,7 +18,7 @@ export async function POST(req: Request) {
         if (!rateCheck.allowed) {
             return withRequestId(
                 NextResponse.json(
-                    { error: `Too many login attempts. Try again in ${rateCheck.resetIn} seconds.` },
+                    { error: `Too many login attempts. Try again in ${rateCheck.resetIn} seconds.`, resetIn: rateCheck.resetIn },
                     { status: 429 }
                 ),
                 requestId

@@ -1,785 +1,1459 @@
 "use client";
 
-import { useState, useEffect, useMemo, useCallback } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect, useMemo, useCallback, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
-    Plus, Search, X, Shield, Users, LogOut, AlertTriangle, AlertCircle, CheckCircle,
-    Download, IndianRupee, Send, BarChart3, Clock, Mail
-} from 'lucide-react';
-import { toast } from 'sonner';
-import { useAdmin } from '@/lib/auth-context';
-import type { GymMember } from '@/lib/supabase';
-import Navbar from '@/components/Navbar';
-import Image from 'next/image';
-import dynamic from 'next/dynamic';
-import { PLAN_PRICES, WHATSAPP_COUNTRY_CODE } from '@/lib/config';
-import { todayIST, getMemberStatus, getDaysUntil } from '@/lib/member-utils';
-import MemberCard from '@/components/admin/MemberCard';
-import MemberFormModal from '@/components/admin/MemberFormModal';
-import MemberReceiptModal from '@/components/admin/MemberReceiptModal';
+  UserPlus,
+  FileDown,
+  Search,
+  Filter,
+  ArrowUpDown,
+  Edit2,
+  Trash2,
+  MessageCircle,
+  Phone,
+  Receipt,
+  RefreshCw,
+  Grid3X3,
+  List,
+  Users,
+  Send,
+  ChevronDown,
+  ChevronRight,
+  AlertTriangle,
+  X,
+  AlertCircle,
+} from "lucide-react";
+import { toast } from "sonner";
+import Image from "next/image";
+import dynamic from "next/dynamic";
+import Link from "next/link";
+import type { GymMember } from "@/lib/supabase";
+import {
+  StatCard,
+  PageHeader,
+  SectionCard,
+  StatusBadge,
+  EmptyState,
+  DataTableSkeleton,
+  SearchField,
+  Skeleton,
+} from "@/components/admin/AdminUI";
+import { useAllMembers } from "@/lib/use-admin-stats";
+import { getMemberStatus, formatDate, parseLocalDate } from "@/lib/member-utils";
+import {
+  adminFetch,
+  openWhatsApp,
+  buildWhatsAppUrl,
+} from "@/lib/admin-api";
+import { PLAN_PRICES, getPlanPrice } from "@/lib/config";
 
-const BulkMessageModal = dynamic(() => import('@/components/admin/BulkMessageModal'), {
-    loading: () => <div className="fixed inset-0 bg-black/50 z-[60]" />
-});
+const MemberFormModal = dynamic(
+  () => import("@/components/admin/MemberFormModal"),
+  {
+    loading: () => (
+      <div className="fixed inset-0 bg-black/80 z-[60] flex items-center justify-center">
+        <div className="w-8 h-8 border-2 border-accent border-t-transparent rounded-full animate-spin" />
+      </div>
+    ),
+  }
+);
 
-const AnalyticsPanel = dynamic(() => import('@/components/admin/AnalyticsPanel'), {
-    loading: () => <div className="h-64 skeleton mb-6" />
-});
+const MemberReceiptModal = dynamic(
+  () => import("@/components/admin/MemberReceiptModal"),
+  { ssr: false }
+);
 
-const ActivityLogPanel = dynamic(() => import('@/components/admin/ActivityLogPanel'));
-const LeadsInbox = dynamic(() => import('@/components/admin/LeadsInbox'));
-import DeploymentAlerts from '@/components/admin/DeploymentAlerts';
-const ExpiringMembersTable = dynamic(() => import('@/components/admin/ExpiringMembersTable'), {
-    loading: () => <div className="h-48 skeleton mb-8" />
-});
-import IncompleteProfiles from '@/components/admin/IncompleteProfiles';
+const BulkMessageModal = dynamic(
+  () => import("@/components/admin/BulkMessageModal"),
+  { ssr: false }
+);
 
-type FilterStatus = 'all' | 'active' | 'expiring' | 'expired' | 'incomplete';
+type FilterStatus =
+  | "all"
+  | "active"
+  | "expiring"
+  | "expired"
+  | "incomplete";
 
-export default function MembersPage() {
-    const router = useRouter();
-    const { isAdmin, isLoading, logout } = useAdmin();
-    const [members, setMembers] = useState<GymMember[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [showForm, setShowForm] = useState(false);
-    const [editingMember, setEditingMember] = useState<GymMember | null>(null);
-    const [renewMode, setRenewMode] = useState(false);
-    const [searchQuery, setSearchQuery] = useState('');
-    const [filterStatus, setFilterStatus] = useState<FilterStatus>('all');
-    const [sortBy, setSortBy] = useState<'newest' | 'oldest' | 'a-z' | 'z-a'>('newest');
-    const [error, setError] = useState('');
-    const [selectedImageUrl, setSelectedImageUrl] = useState<string | null>(null);
-    const [showBulkMessage, setShowBulkMessage] = useState(false);
-    const [showAnalytics, setShowAnalytics] = useState(false);
-    const [receiptMember, setReceiptMember] = useState<GymMember | null>(null);
-    const [showActivityLog, setShowActivityLog] = useState(false);
-    const [showLeadsInbox, setShowLeadsInbox] = useState(false);
-    const [unreadLeadsCount, setUnreadLeadsCount] = useState(0);
-    const [showExpiringSoon, setShowExpiringSoon] = useState(false);
+type SortKey =
+  | "newest"
+  | "oldest"
+  | "a-z"
+  | "z-a"
+  | "expiring-soon"
+  | "expired-oldest";
 
-    // Fetch unread leads count
-    const fetchUnreadCount = useCallback(async () => {
-        try {
-            const token = sessionStorage.getItem('admin_token');
-            if (!token) return;
+type ViewMode = "table" | "card";
 
-            const res = await fetch('/api/admin/leads', {
-                headers: { 'Authorization': `Bearer ${token}` },
-                cache: 'no-store'
-            });
-            const data = await res.json();
+function initials(name: string | null): string {
+  const parts = String(name || "").trim().split(/\s+/);
+  if (!parts[0]) return "—";
+  const a = parts[0][0];
+  const b = parts[1]?.[0];
+  return `${a}${b || ""}`.toUpperCase();
+}
 
-            if (res.ok && data.leads) {
-                // L43: corrupt localStorage value would throw and abort the
-                // whole fetch, leaving the unread count stale forever.
-                let readLeads: string[] = [];
-                try {
-                    readLeads = JSON.parse(localStorage.getItem('brofit_admin_read_leads') || '[]');
-                } catch {
-                    // Corrupt value — treat as no read leads (all unread).
-                }
-                const unread = data.leads.filter((l: { id: string }) => !readLeads.includes(l.id)).length;
-                setUnreadLeadsCount(unread);
-            }
-        } catch (err) {
-            console.error('Failed to fetch lead count', err);
+function hasIncompleteProfile(m: GymMember): boolean {
+  return (
+    !m.photo_url ||
+    !m.date_of_birth ||
+    !m.gender ||
+    !m.height_cm ||
+    !m.weight_kg ||
+    !m.address
+  );
+}
+
+function countIncompleteFields(m: GymMember): number {
+  let n = 0;
+  if (!m.photo_url) n++;
+  if (!m.date_of_birth) n++;
+  if (!m.gender) n++;
+  if (!m.height_cm) n++;
+  if (!m.weight_kg) n++;
+  if (!m.address) n++;
+  return n;
+}
+
+function csvSafeCell(val: unknown): string {
+  const s = String(val ?? "").replace(/"/g, '""');
+  // Tab goes OUTSIDE the quotes: \t"content" — breaks formula parsing while
+  // keeping the value properly double-quoted for CSV parsers.
+  return /^[=+\-@\t\r\n]/.test(s) ? `\t"${s}"` : `"${s}"`;
+}
+
+export default function AdminMembersPage() {
+  return (
+    <Suspense fallback={null}>
+      <AdminMembersPageInner />
+    </Suspense>
+  );
+}
+
+function AdminMembersPageInner() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const { members, loading, error, refresh, setMembers } = useAllMembers();
+
+  const [viewMode, setViewMode] = useState<ViewMode>("table");
+  const [search, setSearch] = useState("");
+  const [filterStatus, setFilterStatus] = useState<FilterStatus>("all");
+  const [sortKey, setSortKey] = useState<SortKey>("newest");
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+
+  const [showForm, setShowForm] = useState(false);
+  const [editingMember, setEditingMember] = useState<GymMember | null>(null);
+  const [renewMode, setRenewMode] = useState(false);
+  const [receiptFor, setReceiptFor] = useState<GymMember | null>(null);
+  const [showBulk, setShowBulk] = useState(false);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [deleteConfirmText, setDeleteConfirmText] = useState("");
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [filterOpen, setFilterOpen] = useState(false);
+  const [sortOpen, setSortOpen] = useState(false);
+
+  // Read URL params to deep-link: ?new=1, ?edit=id, ?renew=id, ?filter=expiring
+  useEffect(() => {
+    const f = searchParams.get("filter");
+    if (
+      f &&
+      ["all", "active", "expiring", "expired", "incomplete"].includes(f)
+    ) {
+      setFilterStatus(f as FilterStatus);
+    }
+    if (searchParams.get("new") === "1") {
+      setEditingMember(null);
+      setRenewMode(false);
+      setShowForm(true);
+    }
+    const editId = searchParams.get("edit");
+    const renewId = searchParams.get("renew");
+    if (editId || renewId) {
+      const id = (editId || renewId) as string;
+      // Wait for members to load, then match.
+      const tryMatch = () => {
+        const m = members.find((x) => x.id === id);
+        if (m) {
+          setEditingMember(m);
+          setRenewMode(!!renewId);
+          setShowForm(true);
         }
-    }, []);
+      };
+      if (members.length > 0) tryMatch();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams, members.length]);
 
-    // Poll for unread messages every 30s
-    useEffect(() => {
-        if (isAdmin) {
-            fetchUnreadCount();
-            const interval = setInterval(fetchUnreadCount, 30000);
-            return () => clearInterval(interval);
-        }
-    }, [isAdmin, fetchUnreadCount]);
+  const counts = useMemo(() => {
+    let active = 0,
+      expiring = 0,
+      expired = 0,
+      incomplete = 0;
+    for (const m of members) {
+      const s = getMemberStatus(m.membership_end);
+      if (s === "active") active++;
+      else if (s === "expiring") expiring++;
+      else expired++;
+      if (hasIncompleteProfile(m)) incomplete++;
+    }
+    return { active, expiring, expired, incomplete, total: members.length };
+  }, [members]);
 
-    // Refresh count when inbox closes
-    useEffect(() => {
-        if (!showLeadsInbox) {
-            fetchUnreadCount();
-        }
-    }, [showLeadsInbox, fetchUnreadCount]);
-    // Redirect if not admin
-    useEffect(() => {
-        if (!isLoading && !isAdmin) {
-            router.push('/admin/login');
-        }
-    }, [isAdmin, isLoading, router]);
-
-    const fetchMembers = useCallback(async () => {
-        try {
-            const token = sessionStorage.getItem('admin_token');
-            const res = await fetch('/api/admin/members', {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-            // M14: expired token silently showed an empty grid — redirect to
-            // login instead.
-            if (res.status === 401 || res.status === 403) {
-                sessionStorage.removeItem('admin_token');
-                router.push('/admin/login');
-                return;
-            }
-            if (!res.ok) throw new Error(`HTTP ${res.status}`);
-            const data = await res.json();
-            if (data.members) {
-                setMembers(data.members);
-            }
-        } catch (err) {
-            console.error('Error fetching members:', err);
-            setError('Failed to load members');
-        } finally {
-            setLoading(false);
-        }
-    }, [router]);
-
-    // Fetch members
-    useEffect(() => {
-        if (isAdmin) {
-            fetchMembers();
-        }
-    }, [isAdmin, fetchMembers]);
-
-    // Calculate Stats with Birthday, Expiry Alerts, and Analytics
-    const stats = useMemo(() => {
-        const total = members.length;
-        const expired = members.filter(m => getMemberStatus(m.membership_end) === 'expired').length;
-        const expiring = members.filter(m => getMemberStatus(m.membership_end) === 'expiring').length;
-        const active = total - expired - expiring;
-
-        // Revenue & Plan Calculation
-        let monthlyCount = 0, quarterlyCount = 0, halfYearlyCount = 0, fifteenDaysCount = 0;
-        let monthly = 0, quarterly = 0, halfYearly = 0, fifteenDays = 0;
-        members.forEach(m => {
-            const price = (PLAN_PRICES as Record<string, number>)[m.membership_type || 'Monthly'] || 0;
-            if (m.membership_type === 'Monthly' || m.membership_type === '1 Month') { monthly += price; monthlyCount++; }
-            else if (m.membership_type === 'Quarterly' || m.membership_type === '3 Months') { quarterly += price; quarterlyCount++; }
-            else if (m.membership_type === 'Half-Yearly' || m.membership_type === '6 Months') { halfYearly += price; halfYearlyCount++; }
-            else if (m.membership_type === '15 Days') { fifteenDays += price; fifteenDaysCount++; }
-        });
-        const totalRevenue = monthly + quarterly + halfYearly + fifteenDays;
-
-        // Growth Analytics - members joined this month vs last month
-        const now = new Date();
-        const thisMonthStart = new Date(now.getFullYear(), now.getMonth(), 1);
-        const lastMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1);
-        const lastMonthEnd = new Date(now.getFullYear(), now.getMonth(), 0);
-
-        const joinedThisMonth = members.filter(m => {
-            if (!m.created_at) return false;
-            const created = new Date(m.created_at);
-            return created >= thisMonthStart;
-        }).length;
-
-        const joinedLastMonth = members.filter(m => {
-            if (!m.created_at) return false;
-            const created = new Date(m.created_at);
-            return created >= lastMonthStart && created <= lastMonthEnd;
-        }).length;
-
-        // Revenue projection (based on expiring memberships)
-        const potentialRenewalRevenue = members.filter(m => getMemberStatus(m.membership_end) === 'expiring').reduce((sum, m) => {
-            return sum + ((PLAN_PRICES as Record<string, number>)[m.membership_type || 'Monthly'] || 0);
-        }, 0);
-
-        // Birthday & Expiry Alerts
-        const today = new Date();
-        const todayMonth = today.getMonth();
-        const todayDate = today.getDate();
-
-        const birthdays = members.filter(m => {
-            if (!m.date_of_birth) return false;
-            const dob = new Date(m.date_of_birth);
-            return dob.getMonth() === todayMonth && dob.getDate() === todayDate;
-        });
-
-        // Upcoming birthdays in next 7 days (excluding today)
-        const upcomingBirthdays = members.filter(m => {
-            if (!m.date_of_birth) return false;
-            const days = getDaysUntil(m.date_of_birth);
-            return days > 0 && days <= 7;
-        }).map(m => ({ ...m, daysUntil: getDaysUntil(m.date_of_birth!) })).sort((a, b) => a.daysUntil - b.daysUntil);
-
-        const expiringToday = members.filter(m => {
-            if (!m.membership_end) return false;
-            const end = new Date(m.membership_end);
-            // L46: match the full date, not just month+day — otherwise a
-            // membership that expired a year ago on this date still flags.
-            return end.getFullYear() === today.getFullYear() &&
-                end.getMonth() === todayMonth && end.getDate() === todayDate;
-        });
-
-        return {
-            total, active, expiring, expired,
-            revenue: { monthly, quarterly, halfYearly, fifteenDays, total: totalRevenue },
-            plans: { monthly: monthlyCount, quarterly: quarterlyCount, halfYearly: halfYearlyCount, fifteenDays: fifteenDaysCount },
-            growth: { thisMonth: joinedThisMonth, lastMonth: joinedLastMonth, projectedRevenue: potentialRenewalRevenue },
-            alerts: { birthdays, upcomingBirthdays, expiringToday }
-        };
-    }, [members]);
-
-    // Debounced search
-    const [debouncedSearch, setDebouncedSearch] = useState('');
-    useEffect(() => {
-        const timer = setTimeout(() => setDebouncedSearch(searchQuery), 300);
-        return () => clearTimeout(timer);
-    }, [searchQuery]);
-
-    // Server-side search results (page 1). The full `members` list stays for
-    // stats/analytics/export; the grid prefers these server rows while a query
-    // is active, so a large member table never ships wholesale to the client.
-    const [serverSearchResults, setServerSearchResults] = useState<GymMember[] | null>(null);
-    useEffect(() => {
-        const q = debouncedSearch.trim();
-        if (!q) { setServerSearchResults(null); return; }
-        let cancelled = false;
-        (async () => {
-            try {
-                const token = sessionStorage.getItem('admin_token');
-                const res = await fetch(`/api/admin/members?search=${encodeURIComponent(q)}&pageSize=100`, {
-                    headers: token ? { 'Authorization': `Bearer ${token}` } : {},
-                    cache: 'no-store'
-                });
-                const data = await res.json();
-                if (!cancelled && data.members) setServerSearchResults(data.members);
-            } catch (err) {
-                console.error('Error searching members:', err);
-                if (!cancelled) setServerSearchResults([]);
-            }
-        })();
-        return () => { cancelled = true; };
-    }, [debouncedSearch]);
-
-
-    // Export members to CSV
-    const exportToCSV = useCallback(() => {
-        const headers = ['Name', 'Mobile', 'Plan', 'Start Date', 'End Date', 'Status'];
-
-        // Neutralize CSV injection: Excel treats leading = + - @ as formulas.
-        // A tab prefix neutralises the formula without affecting display.
-        const safeCell = (val: string) => {
-            const escaped = val.replace(/"/g, '""');
-            return /^[=+\-@\t\r\n]/.test(escaped) ? `\t${escaped}` : `"${escaped}"`;
-        };
-
-        const rows = members.map(m => [
-            m.full_name || '',
-            m.mobile || '',
-            m.membership_type || '',
-            m.membership_start || '',
-            m.membership_end || '',
-            getMemberStatus(m.membership_end).toUpperCase()
-        ]);
-        const csvContent = [headers.join(','), ...rows.map(r => r.map(safeCell).join(','))].join('\n');
-        const blob = new Blob([csvContent], { type: 'text/csv' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `members_${todayIST()}.csv`;
-        a.click();
-        URL.revokeObjectURL(url);
-        toast.success('CSV Exported Successfully! 📁');
-    }, [members]);
-
-    // WhatsApp helper
-    const openWhatsApp = (mobile: string, name: string) => {
-        const message = encodeURIComponent(`Hi ${name}, this is a reminder from Brother's Fitness! 💪`);
-        // L44: use the config country code AND dedup it so a stored "91xxx"
-        // number doesn't become "9191xxx".
-        const digits = mobile.replace(/\D/g, '');
-        const number = digits.startsWith(WHATSAPP_COUNTRY_CODE) ? digits : WHATSAPP_COUNTRY_CODE + digits;
-        window.open(`https://wa.me/${number}?text=${message}`, '_blank');
-    };
-
-    const handleDelete = async (id: string) => {
-        if (!confirm('Are you sure you want to delete this member?')) return;
-
-        try {
-            const token = sessionStorage.getItem('admin_token');
-            const res = await fetch(`/api/admin/members?id=${id}`, {
-                method: 'DELETE',
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-            if (!res.ok) throw new Error('Failed to delete');
-            await fetchMembers();
-            toast.success('Member Deleted');
-        } catch {
-            toast.error('Failed to delete member');
-            setError('Failed to delete member');
-        }
-    };
-
-    // The form modal seeds its own fields from the member prop, so these
-    // handlers just pick the mode + target and let MemberFormModal take over.
-    const openNewMember = () => {
-        setEditingMember(null);
-        setRenewMode(false);
-        setShowForm(true);
-    };
-
-    const handleEdit = (member: GymMember) => {
-        setEditingMember(member);
-        setRenewMode(false);
-        setShowForm(true);
-    };
-
-    const handleRenew = (member: GymMember) => {
-        setEditingMember(member);
-        setRenewMode(true);
-        setShowForm(true);
-        toast.info(`Renewing membership for ${member.full_name}`);
-    };
-
-    const filteredMembers = useMemo(() => {
-        // Server-side search results take precedence while a query is active;
-        // otherwise fall back to the client list. The API filters name/mobile
-        // via ILIKE, so no client-side fuzzy matching is needed.
-        let searchResults = members;
-        if (debouncedSearch.trim() && serverSearchResults) {
-            searchResults = serverSearchResults;
-        }
-
-        // Apply status filter
-        let filtered = searchResults.filter(m => {
-            if (filterStatus === 'all') return true;
-            if (filterStatus === 'incomplete') return true; // Pass all searched members to IncompleteProfiles component for internal filtering
-            const status = getMemberStatus(m.membership_end);
-            if (filterStatus === 'active') return status === 'active' || status === 'expiring';
-            return status === filterStatus;
-        });
-
-        // Apply sorting
-        filtered = [...filtered].sort((a, b) => {
-            switch (sortBy) {
-                case 'a-z':
-                    return (a.full_name || '').localeCompare(b.full_name || '');
-                case 'z-a':
-                    return (b.full_name || '').localeCompare(a.full_name || '');
-                case 'oldest':
-                    return new Date(a.created_at || 0).getTime() - new Date(b.created_at || 0).getTime();
-                case 'newest':
-                default:
-                    return new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime();
-            }
-        });
-
-        return filtered;
-    }, [members, serverSearchResults, debouncedSearch, filterStatus, sortBy]);
-
-    if (isLoading) {
-        return (
-            <div className="min-h-[100svh] surface-canvas flex items-center justify-center">
-                <div className="text-hi">Loading...</div>
-            </div>
-        );
+  const filtered = useMemo(() => {
+    let list = members;
+    if (filterStatus === "active") {
+      list = list.filter((m) => getMemberStatus(m.membership_end) === "active");
+    } else if (filterStatus === "expiring") {
+      list = list.filter(
+        (m) => getMemberStatus(m.membership_end) === "expiring"
+      );
+    } else if (filterStatus === "expired") {
+      list = list.filter((m) => getMemberStatus(m.membership_end) === "expired");
+    } else if (filterStatus === "incomplete") {
+      list = list.filter(hasIncompleteProfile);
     }
 
-    if (!isAdmin) return null;
+    if (search.trim()) {
+      const q = search.trim().toLowerCase();
+      list = list.filter((m) => {
+        return (
+          (m.full_name || "").toLowerCase().includes(q) ||
+          (m.mobile || "").replace(/\D/g, "").includes(q.replace(/\D/g, "")) ||
+          (m.address || "").toLowerCase().includes(q) ||
+          (m.membership_type || "").toLowerCase().includes(q) ||
+          (m.notes || "").toLowerCase().includes(q)
+        );
+      });
+    }
 
-    return (
-        <>
-            <Navbar />
-            <div className="min-h-[100svh] surface-canvas text-hi p-4 md:p-8 pb-20 overflow-x-hidden">
-                {/* Header */}
-                <div className="max-w-6xl mx-auto overflow-x-hidden">
-                    <div className="flex justify-between items-center mb-8 hairline-b pb-4 flex-wrap gap-4">
-                        <div className="flex items-center gap-4">
-                            <div>
-                                <h1 className="heading-display text-2xl uppercase flex items-center gap-2">
-                                    <Users className="w-6 h-6 text-accent" />
-                                    Manage Dashboard
-                                </h1>
-                                {/* L45: no admin identity exists in the password-only
-                                    auth system, so avoid a hardcoded name that would
-                                    mislabel any other admin who logs in. */}
-                                <p className="text-low text-sm">Welcome back</p>
-                            </div>
-                        </div>
-                        <div className="flex items-center gap-2 ml-auto flex-wrap">
-                            {/* Expiring Soon Toggle */}
-                            <button
-                                onClick={() => setShowExpiringSoon(!showExpiringSoon)}
-                                className={`px-4 py-2 font-bold transition-colors duration-fast flex items-center gap-2 border ${showExpiringSoon
-                                    ? 'bg-status-warning text-status-on border-status-warning'
-                                    : 'surface-card hairline text-hi hover:border-accent'
-                                    }`}
-                            >
-                                <AlertTriangle className={`w-4 h-4 ${showExpiringSoon ? 'fill-black stroke-black' : 'text-status-warning'}`} />
-                                Expiring Soon
-                            </button>
+    const copy = [...list];
+    switch (sortKey) {
+      case "oldest":
+        copy.sort(
+          (a, b) =>
+            new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+        );
+        break;
+      case "a-z":
+        copy.sort((a, b) =>
+          (a.full_name || "").localeCompare(b.full_name || "")
+        );
+        break;
+      case "z-a":
+        copy.sort((a, b) =>
+          (b.full_name || "").localeCompare(a.full_name || "")
+        );
+        break;
+      case "expiring-soon":
+        copy.sort((a, b) => {
+          const aEnd = a.membership_end ? new Date(a.membership_end).getTime() : Infinity;
+          const bEnd = b.membership_end ? new Date(b.membership_end).getTime() : Infinity;
+          return aEnd - bEnd;
+        });
+        break;
+      case "expired-oldest":
+        copy.sort((a, b) => {
+          const aEnd = a.membership_end ? new Date(a.membership_end).getTime() : -Infinity;
+          const bEnd = b.membership_end ? new Date(b.membership_end).getTime() : -Infinity;
+          return bEnd - aEnd;
+        });
+        break;
+      case "newest":
+      default:
+        copy.sort(
+          (a, b) =>
+            new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+        );
+    }
+    return copy;
+  }, [members, filterStatus, search, sortKey]);
 
-                            <div className="w-px h-8 surface-border mx-2" />
+  const expiringSummaryCounts = useMemo(() => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    let todayCount = 0;
+    let next7 = 0;
+    let next30 = 0;
+    for (const m of members) {
+      if (!m.membership_end) continue;
+      const end = parseLocalDate(m.membership_end);
+      if (!end) continue;
+      const d = Math.ceil((end.getTime() - today.getTime()) / 86400000);
+      if (d === 0) todayCount++;
+      if (d >= 0 && d <= 7) next7++;
+      if (d >= 0 && d <= 30) next30++;
+    }
+    return { todayCount, next7, next30 };
+  }, [members]);
 
-                            <button
-                                onClick={() => setShowBulkMessage(true)}
-                                className="surface-card hairline text-status-success px-3 py-2 hover:border-accent transition-colors duration-fast flex items-center gap-2"
-                                title="Bulk WhatsApp"
-                            >
-                                <Send className="w-4 h-4" />
-                                <span className="inline">Bulk Message</span>
-                            </button>
-                            <button
-                                onClick={() => setShowAnalytics(!showAnalytics)}
-                                className="surface-card hairline text-status-info px-3 py-2 hover:border-accent transition-colors duration-fast flex items-center gap-2"
-                                title="Analytics"
-                            >
-                                <BarChart3 className="w-4 h-4" />
-                                <span className="inline">Analytics</span>
-                            </button>
-                            <button
-                                onClick={() => setShowActivityLog(true)}
-                                className="surface-card hairline text-status-warning px-3 py-2 hover:border-accent transition-colors duration-fast flex items-center gap-2"
-                                title="Activity Log"
-                            >
-                                <Clock className="w-4 h-4" />
-                                <span className="inline">History</span>
-                            </button>
-                            <button
-                                onClick={() => setShowLeadsInbox(true)}
-                                className="surface-card hairline text-accent px-3 py-2 hover:border-accent transition-colors duration-fast flex items-center gap-2 relative"
-                                title="Leads Inbox"
-                            >
-                                <Mail className="w-4 h-4" />
-                                <span className="inline">Inbox</span>
-                                {unreadLeadsCount > 0 && (
-                                    <span className="absolute -top-1 -right-1 w-4 h-4 bg-accent text-white text-[10px] font-bold rounded-full flex items-center justify-center">
-                                        {unreadLeadsCount}
-                                    </span>
-                                )}
-                            </button>
-                            <button
-                                onClick={exportToCSV}
-                                className="surface-card hairline text-hi px-3 py-2 hover:border-accent transition-colors duration-fast flex items-center gap-2"
-                                title="Export Members"
-                            >
-                                <Download className="w-4 h-4" />
-                                <span className="inline">Export</span>
-                            </button>
-                            <button
-                                onClick={async () => {
-                                    try {
-                                        toast.loading('Creating backup...', { id: 'backup' });
-                                        const token = sessionStorage.getItem('admin_token');
-                                        if (!token) throw new Error('No admin token found');
+  const toggleSelect = (id: string) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
 
-                                        const res = await fetch('/api/admin/backup', {
-                                            method: 'POST',
-                                            headers: { Authorization: `Bearer ${token}` }
-                                        });
+  const selectAllVisible = () => {
+    if (selectedIds.size === filtered.length && filtered.length > 0) {
+      setSelectedIds(new Set());
+    } else {
+      setSelectedIds(new Set(filtered.map((m) => m.id)));
+    }
+  };
 
-                                        const data = await res.json();
+  const clearSelection = () => setSelectedIds(new Set());
 
-                                        if (!res.ok) {
-                                            if (res.status === 401) {
-                                                toast.error('Session expired. Please login again.', { id: 'backup' });
-                                                logout();
-                                                router.push('/');
-                                                return;
-                                            }
-                                            throw new Error(data.details || data.error || 'Backup failed');
-                                        }
+  const handleExport = useCallback(() => {
+    const headers = [
+      "Full Name",
+      "Mobile",
+      "Gender",
+      "DOB",
+      "Height (cm)",
+      "Weight (kg)",
+      "Address",
+      "Plan",
+      "Start Date",
+      "End Date",
+      "Status",
+      "Amount (₹)",
+      "Created At",
+      "Notes",
+    ];
+    const rows = filtered.map((m) => {
+      const status = getMemberStatus(m.membership_end);
+      return [
+        m.full_name || "",
+        m.mobile || "",
+        m.gender || "",
+        m.date_of_birth || "",
+        m.height_cm ?? "",
+        m.weight_kg ?? "",
+        m.address || "",
+        m.membership_type || "",
+        m.membership_start || "",
+        m.membership_end || "",
+        status.toUpperCase(),
+        getPlanPrice(m.membership_type),
+        m.created_at ? m.created_at.split("T")[0] : "",
+        m.notes || "",
+      ];
+    });
+    const csv = [
+      headers.join(","),
+      ...rows.map((r) => r.map(csvSafeCell).join(",")),
+    ].join("\n");
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `members_${filterStatus}_${new Date().toISOString().split("T")[0]}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    toast.success(`Exported ${rows.length} member${rows.length === 1 ? "" : "s"}`);
+  }, [filtered, filterStatus]);
 
-                                        // Download as file
-                                        const blob = new Blob([JSON.stringify(data.data, null, 2)], { type: 'application/json' });
-                                        const url = URL.createObjectURL(blob);
-                                        const a = document.createElement('a');
-                                        a.href = url;
-                                        a.download = data.filename || 'backup.json';
-                                        a.click();
-                                        URL.revokeObjectURL(url);
+  const openNew = () => {
+    setEditingMember(null);
+    setRenewMode(false);
+    setShowForm(true);
+  };
 
-                                        toast.success(`Backup created: ${data.total_members} members`, { id: 'backup' });
-                                    } catch (err: unknown) {
-                                        console.error('Backup error:', err);
-                                        toast.error(`Backup failed: ${(err as Error).message}`, { id: 'backup' });
-                                    }
-                                }}
-                                className="surface-card hairline text-status-info px-3 py-2 hover:border-accent transition-colors duration-fast flex items-center gap-2"
-                                title="Backup Database"
-                            >
-                                <Shield className="w-4 h-4" />
-                                <span className="inline">Backup</span>
-                            </button>
-                            <button
-                                onClick={() => { logout(); router.push('/'); }}
-                                className="surface-card hairline text-hi px-3 py-2 hover:border-accent transition-colors duration-fast flex items-center gap-2"
-                            >
-                                <LogOut className="w-4 h-4" />
-                                <span className="inline">Logout</span>
-                            </button>
-                        </div>
+  const openEdit = (m: GymMember) => {
+    setEditingMember(m);
+    setRenewMode(false);
+    setShowForm(true);
+  };
+
+  const openRenew = (m: GymMember) => {
+    setEditingMember(m);
+    setRenewMode(true);
+    setShowForm(true);
+  };
+
+  const confirmDelete = (m: GymMember) => {
+    setDeletingId(m.id);
+    setDeleteConfirmText("");
+  };
+
+  const executeDelete = async () => {
+    if (!deletingId) return;
+    if (deleteConfirmText.trim() !== "DELETE") {
+      toast.error('Type "DELETE" to confirm');
+      return;
+    }
+    setIsDeleting(true);
+    try {
+      const res = await adminFetch("/api/admin/members", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: deletingId }),
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      setMembers((prev) => prev.filter((m) => m.id !== deletingId));
+      setSelectedIds((prev) => {
+        const n = new Set(prev);
+        n.delete(deletingId);
+        return n;
+      });
+      toast.success("Member deleted");
+      setDeletingId(null);
+      setDeleteConfirmText("");
+    } catch (e) {
+      toast.error("Failed to delete member");
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  const bulkWhatsApp = () => {
+    const chosen = members.filter((m) => selectedIds.has(m.id));
+    if (chosen.length === 0) {
+      toast.error("Select at least one member");
+      return;
+    }
+    setShowBulk(true);
+  };
+
+  const onSaved = () => {
+    refresh();
+    clearSelection();
+  };
+
+  const deletingMember = deletingId
+    ? members.find((m) => m.id === deletingId) || null
+    : null;
+
+  return (
+    <div className="p-4 sm:p-6 lg:p-8 max-w-[1700px] w-full mx-auto">
+      <PageHeader
+        title="Members"
+        subtitle={`Manage ${counts.total} gym members. Register new joiners, renew plans, send receipts, and fix incomplete profiles.`}
+        icon={Users}
+        actions={
+          <>
+            <button
+              type="button"
+              onClick={refresh}
+              className="btn-ghost text-xs min-h-[40px]"
+              title="Refresh members list"
+              aria-label="Refresh"
+            >
+              <RefreshCw className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">Refresh</span>
+            </button>
+            <button
+              type="button"
+              onClick={handleExport}
+              className="btn-secondary text-xs min-h-[40px]"
+              title="Export filtered members as CSV"
+              disabled={filtered.length === 0}
+            >
+              <FileDown className="w-3.5 h-3.5" />
+              Export CSV
+            </button>
+            <button
+              type="button"
+              onClick={openNew}
+              className="btn-primary text-xs min-h-[40px]"
+            >
+              <UserPlus className="w-3.5 h-3.5" />
+              Register Member
+            </button>
+          </>
+        }
+      />
+
+      <div className="grid gap-3 sm:gap-4 grid-cols-2 lg:grid-cols-4 mb-6">
+        <StatCard
+          label="Total"
+          value={counts.total.toLocaleString()}
+          sublabel={
+            counts.total === 0
+              ? "No members yet"
+              : `Showing ${filtered.length} of ${counts.total}`
+          }
+          icon={Users}
+          variant="info"
+          onClick={() => {
+            setFilterStatus("all");
+            setSearch("");
+          }}
+        />
+        <StatCard
+          label="Active"
+          value={counts.active.toLocaleString()}
+          sublabel={`${expiringSummaryCounts.next30} renew in next 30d`}
+          variant="success"
+          onClick={() => setFilterStatus("active")}
+        />
+        <StatCard
+          label="Expiring Soon"
+          value={counts.expiring.toLocaleString()}
+          sublabel={
+            expiringSummaryCounts.todayCount > 0
+              ? `${expiringSummaryCounts.todayCount} ending today — urgent`
+              : "Next 7 days"
+          }
+          variant="warning"
+          onClick={() => setFilterStatus("expiring")}
+        />
+        <StatCard
+          label="Expired"
+          value={counts.expired.toLocaleString()}
+          sublabel={`${counts.incomplete} profiles incomplete`}
+          variant="danger"
+          onClick={() => setFilterStatus("expired")}
+        />
+      </div>
+
+      <SectionCard
+        title="Members Directory"
+        subtitle={
+          filterStatus !== "all"
+            ? `Filter: ${filterStatus.toUpperCase()} · ${filtered.length} of ${counts.total}`
+            : `Sort: ${sortKey} · ${filtered.length} of ${counts.total}`
+        }
+        icon={Users}
+        action={
+          <div className="flex items-center gap-1.5 w-full sm:w-auto">
+            <div className="flex items-center gap-1 hairline surface-elevated p-0.5">
+              <button
+                onClick={() => setViewMode("table")}
+                className={`p-1.5 transition-colors ${
+                  viewMode === "table"
+                    ? "bg-surface-card text-hi"
+                    : "text-low hover:text-mid"
+                }`}
+                aria-label="Table view"
+                title="Table view"
+              >
+                <List className="w-3.5 h-3.5" />
+              </button>
+              <button
+                onClick={() => setViewMode("card")}
+                className={`p-1.5 transition-colors ${
+                  viewMode === "card"
+                    ? "bg-surface-card text-hi"
+                    : "text-low hover:text-mid"
+                }`}
+                aria-label="Card view"
+                title="Card view"
+              >
+                <Grid3X3 className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          </div>
+        }
+      >
+        {loading ? (
+          viewMode === "table" ? (
+            <DataTableSkeleton cols={7} rows={8} />
+          ) : (
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+              {Array.from({ length: 8 }).map((_, i) => (
+                <div key={i} className="hairline surface-card p-4 space-y-3">
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 skeleton" />
+                    <div className="flex-1 space-y-2">
+                      <Skeleton className="h-3 w-2/3" />
+                      <Skeleton className="h-2.5 w-1/2" />
                     </div>
+                  </div>
+                  <Skeleton className="h-10" />
                 </div>
-
-                {/* Expiring Members Table - Controlled by Toggle */}
-                {showExpiringSoon && (
-                    <div className="mb-8">
-                        <ExpiringMembersTable members={members} />
-                    </div>
-                )}
-
-                {/* Deployment Alerts (Birthdays Only) */}
-                <DeploymentAlerts members={members} />
-
-                {/* Analytics Panel */}
-                {showAnalytics && (
-                    <AnalyticsPanel
-                        members={members}
-                        onClose={() => setShowAnalytics(false)}
-                    />
-                )}
-
-                {/* Dashboard Stats */}
-                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8 max-w-full">
-                    <div className="surface-card hairline p-4 hover:border-accent transition-colors duration-fast">
-                        <div className="flex justify-between items-start mb-2">
-                            <span className="label-text text-faint uppercase tracking-widest">Total Members</span>
-                            <Users className="w-4 h-4 text-status-info" />
-                        </div>
-                        <div className="heading-section text-2xl text-hi">{stats.total}</div>
-                    </div>
-                    <div className="surface-card hairline p-4 hover:border-accent transition-colors duration-fast">
-                        <div className="flex justify-between items-start mb-2">
-                            <span className="label-text text-faint uppercase tracking-widest">Active</span>
-                            <CheckCircle className="w-4 h-4 text-status-success" />
-                        </div>
-                        <div className="heading-section text-2xl text-status-success">{stats.active}</div>
-                    </div>
-                    <div className="surface-card hairline p-4 hover:border-accent transition-colors duration-fast">
-                        <div className="flex justify-between items-start mb-2">
-                            <span className="label-text text-faint uppercase tracking-widest">Expiring Soon</span>
-                            <AlertTriangle className="w-4 h-4 text-status-warning" />
-                        </div>
-                        <div className="heading-section text-2xl text-status-warning">{stats.expiring}</div>
-                        <div className="label-text text-faint text-[10px] mt-1">Expire in &lt; 7 days</div>
-                    </div>
-                    <div className="surface-card hairline p-4 hover:border-accent transition-colors duration-fast">
-                        <div className="flex justify-between items-start mb-2">
-                            <span className="label-text text-faint uppercase tracking-widest">Expired</span>
-                            <AlertCircle className="w-4 h-4 text-status-danger" />
-                        </div>
-                        <div className="heading-section text-2xl text-status-danger">{stats.expired}</div>
-                    </div>
-                    {/* Revenue Card */}
-                    <div className="surface-elevated hairline p-4 col-span-2 lg:col-span-4 relative overflow-hidden group hover:border-accent transition-colors duration-fast">
-                        <div className="flex justify-between items-start mb-2 relative z-10">
-                            <span className="label-text text-faint uppercase tracking-widest">Estimated Revenue</span>
-                            <IndianRupee className="w-4 h-4 text-status-success" />
-                        </div>
-                        <div className="heading-section text-2xl text-status-success flex items-baseline gap-1 relative z-10">
-                            <span className="text-base text-faint">₹</span>
-                            {stats.revenue.total.toLocaleString('en-IN')}
-                        </div>
-                        <div className="grid grid-cols-4 gap-2 mt-3 text-[10px] text-faint hairline-t pt-2 relative z-10">
-                            <div>
-                                <span className="block label-text text-low mb-0.5">15d</span>
-                                ₹{stats.revenue.fifteenDays.toLocaleString('en-IN')}
-                            </div>
-                            <div>
-                                <span className="block label-text text-low mb-0.5">Mo</span>
-                                ₹{stats.revenue.monthly.toLocaleString('en-IN')}
-                            </div>
-                            <div>
-                                <span className="block label-text text-low mb-0.5">Qr</span>
-                                ₹{stats.revenue.quarterly.toLocaleString('en-IN')}
-                            </div>
-                            <div>
-                                <span className="block label-text text-low mb-0.5">Hy</span>
-                                ₹{stats.revenue.halfYearly.toLocaleString('en-IN')}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Controls Area: Search + Add + Filter */}
-                <div className="flex flex-col gap-4 mb-6">
-                    {/* Row 1: Search */}
-                    <div className="relative w-full">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-faint" />
-                        <input
-                            type="text"
-                            placeholder="Find member by name, mobile..."
-                            value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
-                            className="input-field pl-9 pr-4"
-                        />
-                    </div>
-
-                    {/* Row 2: Filter Tabs + Sort + New Member Button */}
-                    <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center">
-                        {/* Filter Tabs */}
-                        <div className="surface-card hairline p-1 flex flex-shrink-0">
-                            {[
-                                { id: 'all', label: 'All' },
-                                { id: 'active', label: 'Active' },
-                                { id: 'expiring', label: 'Expiring' },
-                                { id: 'expired', label: 'Expired' },
-                                { id: 'incomplete', label: 'Incomplete' }
-                            ].map((tab) => (
-                                <button
-                                    key={tab.id}
-                                    onClick={() => setFilterStatus(tab.id as FilterStatus)}
-                                    className={`px-3 py-1.5 text-xs font-bold transition-colors duration-fast ${filterStatus === tab.id
-                                        ? 'bg-accent text-white'
-                                        : 'text-faint hover:text-hi hover:bg-surface-elevated'
-                                        }`}
-                                >
-                                    {tab.label}
-                                </button>
-                            ))}
-                        </div>
-
-                        {/* Sort Dropdown */}
-                        <select
-                            value={sortBy}
-                            onChange={(e) => setSortBy(e.target.value as 'newest' | 'oldest' | 'a-z' | 'z-a')}
-                            className="input-field px-3 py-2 pr-8 text-xs font-bold flex-shrink-0 cursor-pointer appearance-none"
-                            style={{
-                                backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23666' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E")`,
-                                backgroundPosition: 'right 8px center',
-                                backgroundRepeat: 'no-repeat'
+              ))}
+            </div>
+          )
+        ) : error ? (
+          <div className="hairline border-status-danger/30 bg-status-danger/5 p-6 text-center">
+            <AlertCircle className="w-10 h-10 text-status-danger mx-auto mb-3" />
+            <div className="font-display uppercase text-lg text-status-danger mb-1">
+              Failed to load members
+            </div>
+            <div className="text-sm text-mid mb-4">{error}</div>
+            <button onClick={refresh} className="btn-secondary text-xs">
+              <RefreshCw className="w-3.5 h-3.5" /> Retry
+            </button>
+          </div>
+        ) : (
+          <>
+            <div className="flex flex-col lg:flex-row gap-3 mb-4 lg:items-center">
+              <SearchField
+                value={search}
+                onChange={setSearch}
+                placeholder="Search name, mobile, plan, address…"
+                className="flex-1 min-w-0"
+              />
+              <div className="flex flex-wrap items-center gap-2 shrink-0">
+                <div className="relative">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setFilterOpen((v) => !v);
+                      setSortOpen(false);
+                    }}
+                    className="btn-secondary text-xs min-h-[40px] gap-2 relative"
+                    aria-haspopup="listbox"
+                    aria-expanded={filterOpen}
+                  >
+                    <Filter className="w-3.5 h-3.5" />
+                    <span className="hidden sm:inline">Filter:</span>
+                    <span className="capitalize">{filterStatus}</span>
+                    {filterStatus !== "all" && (
+                      <span className="absolute -top-1 -right-1 w-2 h-2 bg-accent rounded-full" />
+                    )}
+                    <ChevronDown className="w-3 h-3 opacity-60" />
+                  </button>
+                  {filterOpen && (
+                    <>
+                      <div
+                        className="fixed inset-0 z-30"
+                        onClick={() => setFilterOpen(false)}
+                        aria-hidden="true"
+                      />
+                      <div
+                        role="listbox"
+                        className="absolute right-0 mt-2 z-40 hairline surface-modal w-56 overflow-hidden shadow-lg"
+                      >
+                        {(
+                          [
+                            ["all", "All Members", counts.total],
+                            ["active", "Active", counts.active],
+                            ["expiring", "Expiring (≤7d)", counts.expiring],
+                            ["expired", "Expired", counts.expired],
+                            [
+                              "incomplete",
+                              "Incomplete Profiles",
+                              counts.incomplete,
+                            ],
+                          ] as [FilterStatus, string, number][]
+                        ).map(([key, label, count]) => (
+                          <button
+                            key={key}
+                            onClick={() => {
+                              setFilterStatus(key);
+                              setFilterOpen(false);
                             }}
-                        >
-                            <option value="newest" className="surface-canvas text-hi">Newest First</option>
-                            <option value="oldest" className="surface-canvas text-hi">Oldest First</option>
-                            <option value="a-z" className="surface-canvas text-hi">A → Z</option>
-                            <option value="z-a" className="surface-canvas text-hi">Z → A</option>
-                        </select>
-
-
-                        {/* New Member Button */}
-                        <button
-                            onClick={openNewMember}
-                            className="btn-primary flex-shrink-0 sm:ml-auto"
-                        >
-                            <Plus className="w-4 h-4" />
-                            <span className="text-sm font-bold">New Member</span>
-                        </button>
-                    </div>
+                            role="option"
+                            aria-selected={filterStatus === key}
+                            className={`w-full flex items-center justify-between px-3 py-2.5 text-xs text-left label-text uppercase tracking-wider transition-colors hairline-b last:hairline-b-0 ${
+                              filterStatus === key
+                                ? "bg-accent-muted text-hi"
+                                : "hover:bg-surface-elevated text-mid"
+                            }`}
+                          >
+                            <span>{label}</span>
+                            <span className="font-mono text-[0.65rem] opacity-70">
+                              {count}
+                            </span>
+                          </button>
+                        ))}
+                      </div>
+                    </>
+                  )}
                 </div>
 
-                {error && (
-                    <div className="surface-card hairline border-status-danger text-status-danger label-text p-3 mb-4 flex items-center gap-2">
-                        <AlertCircle className="w-4 h-4" />
-                        {error}
-                    </div>
-                )}
-
-                {/* Members Grid or Incomplete List */}
-                {filterStatus === 'incomplete' ? (
-                    <IncompleteProfiles
-                        members={filteredMembers}
-                        onEdit={handleEdit}
-                    />
-                ) : loading ? (
-                    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        {[...Array(6)].map((_, i) => (
-                            <div key={i} className="surface-card hairline p-4">
-                                <div className="flex items-start gap-4 mb-4">
-                                    <div className="w-14 h-14 skeleton shrink-0" />
-                                    <div className="flex-1 space-y-2">
-                                        <div className="h-4 w-3/4 skeleton" />
-                                        <div className="h-3 w-1/2 skeleton" />
-                                        <div className="h-3 w-1/4 skeleton" />
-                                    </div>
-                                </div>
-                                <div className="skeleton h-12 mb-4" />
-                                <div className="flex gap-2">
-                                    <div className="flex-1 h-9 skeleton" />
-                                    <div className="w-10 h-9 skeleton" />
-                                </div>
-                            </div>
+                <div className="relative">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSortOpen((v) => !v);
+                      setFilterOpen(false);
+                    }}
+                    className="btn-secondary text-xs min-h-[40px] gap-2"
+                    aria-haspopup="listbox"
+                    aria-expanded={sortOpen}
+                  >
+                    <ArrowUpDown className="w-3.5 h-3.5" />
+                    <span className="hidden sm:inline">Sort</span>
+                    <ChevronDown className="w-3 h-3 opacity-60" />
+                  </button>
+                  {sortOpen && (
+                    <>
+                      <div
+                        className="fixed inset-0 z-30"
+                        onClick={() => setSortOpen(false)}
+                        aria-hidden="true"
+                      />
+                      <div
+                        role="listbox"
+                        className="absolute right-0 mt-2 z-40 hairline surface-modal w-64 overflow-hidden shadow-lg"
+                      >
+                        {(
+                          [
+                            ["newest", "Newest first"],
+                            ["oldest", "Oldest first"],
+                            ["a-z", "Name A → Z"],
+                            ["z-a", "Name Z → A"],
+                            ["expiring-soon", "Expiring soonest first"],
+                            ["expired-oldest", "Most recently expired"],
+                          ] as [SortKey, string][]
+                        ).map(([key, label]) => (
+                          <button
+                            key={key}
+                            onClick={() => {
+                              setSortKey(key);
+                              setSortOpen(false);
+                            }}
+                            role="option"
+                            aria-selected={sortKey === key}
+                            className={`w-full flex items-center justify-between px-3 py-2.5 text-xs text-left label-text uppercase tracking-wider transition-colors hairline-b last:hairline-b-0 ${
+                              sortKey === key
+                                ? "bg-accent-muted text-hi"
+                                : "hover:bg-surface-elevated text-mid"
+                            }`}
+                          >
+                            <span>{label}</span>
+                            {sortKey === key && (
+                              <ChevronRight className="w-3 h-3 text-accent" />
+                            )}
+                          </button>
                         ))}
-                    </div>
-                ) : filteredMembers.length === 0 ? (
-                    <div className="text-center py-20 text-low border border-dashed border-surface-border">
-                        <div className="surface-card hairline w-16 h-16 flex items-center justify-center mx-auto mb-4">
-                            <Users className="w-8 h-8 text-faint" />
-                        </div>
-                        <p className="heading-section text-lg text-hi">No members found</p>
-                        <p className="text-sm text-low">Try adjusting your search or filters.</p>
-                    </div>
-                ) : (
-                    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        {filteredMembers.map((member) => (
-                            <MemberCard
-                                key={member.id}
-                                member={member}
-                                onWhatsApp={openWhatsApp}
-                                onRenew={handleRenew}
-                                onEdit={handleEdit}
-                                onDelete={handleDelete}
-                                onViewPhoto={setSelectedImageUrl}
-                                onReceipt={setReceiptMember}
-                            />
-                        ))}
-                    </div>
-                )}
-            </div >
+                      </div>
+                    </>
+                  )}
+                </div>
 
-            {/* Add/Edit Form Modal */}
-            <MemberFormModal
-                open={showForm}
-                member={editingMember}
-                renew={renewMode}
-                onClose={() => { setShowForm(false); setEditingMember(null); setRenewMode(false); }}
-                onSaved={fetchMembers}
-            />
+                {filterStatus !== "all" || search ? (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setFilterStatus("all");
+                      setSearch("");
+                    }}
+                    className="btn-ghost text-xs min-h-[40px] text-status-warning hover:text-status-warning"
+                    title="Clear filters and search"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                    Clear
+                  </button>
+                ) : null}
+              </div>
+            </div>
 
-            {/* Fullscreen Image Modal */}
-            {
-                selectedImageUrl && (
-                    <div
-                        className="fixed inset-0 z-[80] bg-black/95 flex items-center justify-center p-4 modal-overlay-in"
-                        onClick={() => setSelectedImageUrl(null)}
+            {selectedIds.size > 0 && (
+              <div className="mb-4 hairline bg-accent-muted border-accent/40 px-3 sm:px-4 py-2.5 flex flex-wrap items-center gap-2 sm:gap-3">
+                <span className="label-text uppercase tracking-wider text-[0.7rem] text-accent shrink-0">
+                  {selectedIds.size} selected
+                </span>
+                <div className="flex-1 min-w-0" />
+                <button
+                  type="button"
+                  onClick={bulkWhatsApp}
+                  className="btn-secondary text-xs min-h-[34px] py-1"
+                  title="Send WhatsApp message to selected members"
+                >
+                  <Send className="w-3 h-3" />
+                  Bulk WhatsApp
+                </button>
+                <button
+                  type="button"
+                  onClick={clearSelection}
+                  className="btn-ghost text-xs min-h-[34px] py-1 text-mid hover:text-hi"
+                >
+                  <X className="w-3 h-3" />
+                  Deselect
+                </button>
+              </div>
+            )}
+
+            {filtered.length === 0 ? (
+              <EmptyState
+                icon={Users}
+                title={
+                  members.length === 0
+                    ? "No members registered yet"
+                    : "No members match your filters"
+                }
+                description={
+                  members.length === 0
+                    ? "Register your first member to begin tracking memberships and revenue."
+                    : "Try clearing filters, adjusting the search query, or checking a different status."
+                }
+                action={
+                  members.length === 0 ? (
+                    <button type="button" onClick={openNew} className="btn-primary text-xs">
+                      <UserPlus className="w-3.5 h-3.5" />
+                      Register First Member
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setFilterStatus("all");
+                        setSearch("");
+                      }}
+                      className="btn-secondary text-xs"
                     >
-                        <div
-                            className="relative max-w-md max-h-[80vh] w-full modal-panel-in"
-                            onClick={(e) => e.stopPropagation()}
-                        >
-                            <Image
-                                src={selectedImageUrl}
-                                alt="Member Photo"
-                                width={400}
-                                height={600}
-                                className="w-full h-auto object-contain"
-                            />
-                            <button
-                                onClick={() => setSelectedImageUrl(null)}
-                                className="absolute -top-3 -right-3 bg-accent p-2 hover:bg-accent-hover transition-colors duration-fast"
-                            >
-                                <X className="w-5 h-5 text-white" />
-                            </button>
+                      Reset Filters
+                    </button>
+                  )
+                }
+              />
+            ) : viewMode === "table" ? (
+              <MembersTableView
+                members={filtered}
+                selectedIds={selectedIds}
+                toggleSelect={toggleSelect}
+                selectAllVisible={selectAllVisible}
+                onEdit={openEdit}
+                onRenew={openRenew}
+                onReceipt={setReceiptFor}
+                onDelete={confirmDelete}
+              />
+            ) : (
+              <MembersCardView
+                members={filtered}
+                selectedIds={selectedIds}
+                toggleSelect={toggleSelect}
+                onEdit={openEdit}
+                onRenew={openRenew}
+                onReceipt={setReceiptFor}
+                onDelete={confirmDelete}
+              />
+            )}
+          </>
+        )}
+      </SectionCard>
+
+      {showForm && (
+        <MemberFormModal
+          open={showForm}
+          member={editingMember}
+          renew={renewMode}
+          onClose={() => setShowForm(false)}
+          onSaved={onSaved}
+        />
+      )}
+      {receiptFor && (
+        <MemberReceiptModal
+          member={receiptFor}
+          onClose={() => setReceiptFor(null)}
+        />
+      )}
+      {showBulk && (
+        <BulkMessageModal
+          open={showBulk}
+          recipients={members.filter((m) => selectedIds.has(m.id))}
+          allMembers={members}
+          onClose={() => setShowBulk(false)}
+        />
+      )}
+      {deletingMember && (
+        <DeleteConfirmDialog
+          member={deletingMember}
+          confirmText={deleteConfirmText}
+          onConfirmText={setDeleteConfirmText}
+          onCancel={() => {
+            setDeletingId(null);
+            setDeleteConfirmText("");
+          }}
+          onConfirm={executeDelete}
+          isDeleting={isDeleting}
+        />
+      )}
+    </div>
+  );
+}
+
+function statusBadgeFor(endDate: string | null) {
+  const s = getMemberStatus(endDate);
+  if (s === "active")
+    return <StatusBadge tone="success" prefix="A:" label="ACTIVE" />;
+  if (s === "expiring")
+    return <StatusBadge tone="warning" prefix="W:" label="EXPIRING" />;
+  return <StatusBadge tone="danger" prefix="E:" label="EXPIRED" />;
+}
+
+function getDaysRemaining(endDate: string | null): number | null {
+  if (!endDate) return null;
+  const end = parseLocalDate(endDate);
+  if (!end) return null;
+  const now = new Date();
+  now.setHours(0, 0, 0, 0);
+  return Math.ceil((end.getTime() - now.getTime()) / 86400000);
+}
+
+function MembersTableView({
+  members,
+  selectedIds,
+  toggleSelect,
+  selectAllVisible,
+  onEdit,
+  onRenew,
+  onReceipt,
+  onDelete,
+}: {
+  members: GymMember[];
+  selectedIds: Set<string>;
+  toggleSelect: (id: string) => void;
+  selectAllVisible: () => void;
+  onEdit: (m: GymMember) => void;
+  onRenew: (m: GymMember) => void;
+  onReceipt: (m: GymMember) => void;
+  onDelete: (m: GymMember) => void;
+}) {
+  const allChecked =
+    members.length > 0 && members.every((m) => selectedIds.has(m.id));
+  return (
+    <div className="-mx-4 sm:-mx-5 overflow-x-auto">
+      <table className="min-w-full w-full border-collapse">
+        <thead>
+          <tr className="surface-elevated text-left">
+            <th className="sticky left-0 z-10 surface-elevated w-12 px-3 py-3 hairline-b">
+              <input
+                type="checkbox"
+                checked={allChecked}
+                onChange={selectAllVisible}
+                className="w-4 h-4 accent-accent"
+                aria-label={allChecked ? "Deselect all" : "Select all visible"}
+              />
+            </th>
+            <th className="px-3 py-3 hairline-b label-text uppercase tracking-widest text-[0.65rem] text-faint">
+              Member
+            </th>
+            <th className="px-3 py-3 hairline-b label-text uppercase tracking-widest text-[0.65rem] text-faint hidden lg:table-cell">
+              Plan
+            </th>
+            <th className="px-3 py-3 hairline-b label-text uppercase tracking-widest text-[0.65rem] text-faint hidden md:table-cell">
+              Start
+            </th>
+            <th className="px-3 py-3 hairline-b label-text uppercase tracking-widest text-[0.65rem] text-faint">
+              End
+            </th>
+            <th className="px-3 py-3 hairline-b label-text uppercase tracking-widest text-[0.65rem] text-faint hidden sm:table-cell">
+              Status
+            </th>
+            <th className="px-3 py-3 hairline-b label-text uppercase tracking-widest text-[0.65rem] text-faint text-right">
+              Actions
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          {members.map((m) => {
+            const checked = selectedIds.has(m.id);
+            const days = getDaysRemaining(m.membership_end);
+            const status = getMemberStatus(m.membership_end);
+            return (
+              <tr
+                key={m.id}
+                className={`group transition-colors ${
+                  checked ? "bg-accent-muted/40" : "hover:bg-surface-elevated"
+                }`}
+              >
+                <td className="sticky left-0 z-10 px-3 py-3 hairline-b surface-canvas group-hover:bg-surface-elevated [.bg-accent-muted/40_&]:bg-accent-muted/40">
+                  <input
+                    type="checkbox"
+                    checked={checked}
+                    onChange={() => toggleSelect(m.id)}
+                    className="w-4 h-4 accent-accent"
+                    aria-label={`Select ${m.full_name || "member"}`}
+                  />
+                </td>
+                <td className="px-3 py-3 hairline-b align-middle min-w-[200px]">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 hairline surface-modal overflow-hidden shrink-0 relative">
+                      {m.photo_url ? (
+                        <Image
+                          src={m.photo_url}
+                          alt=""
+                          fill
+                          sizes="40px"
+                          className="object-cover"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-[0.7rem] font-mono text-low">
+                          {initials(m.full_name)}
                         </div>
+                      )}
                     </div>
-                )
-            }
+                    <div className="min-w-0">
+                      <div className="text-sm text-hi truncate font-medium">
+                        {m.full_name || <span className="text-faint">—</span>}
+                      </div>
+                      <div className="flex items-center gap-2 text-[0.7rem] text-low flex-wrap">
+                        {m.mobile ? (
+                          <a
+                            href={`tel:${m.mobile}`}
+                            className="hover:text-accent whitespace-nowrap"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            📞 {m.mobile}
+                          </a>
+                        ) : (
+                          <span className="text-faint">📞 —</span>
+                        )}
+                        {hasIncompleteProfile(m) && (
+                          <span className="text-status-warning label-text uppercase tracking-wider text-[0.6rem] flex items-center gap-0.5">
+                            <AlertTriangle className="w-2.5 h-2.5" />
+                            Incomplete
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </td>
+                <td className="px-3 py-3 hairline-b align-middle hidden lg:table-cell">
+                  <div className="text-sm text-hi whitespace-nowrap">
+                    {m.membership_type || "—"}
+                  </div>
+                  <div className="text-[0.65rem] font-mono text-low">
+                    ₹{getPlanPrice(m.membership_type).toLocaleString("en-IN")}
+                  </div>
+                </td>
+                <td className="px-3 py-3 hairline-b align-middle hidden md:table-cell text-xs text-mid whitespace-nowrap font-mono">
+                  {formatDate(m.membership_start)}
+                </td>
+                <td className="px-3 py-3 hairline-b align-middle whitespace-nowrap">
+                  <div
+                    className={`text-xs font-mono ${
+                      days === null
+                        ? "text-mid"
+                        : days < 0
+                        ? "text-status-danger"
+                        : days <= 2
+                        ? "text-status-warning font-bold"
+                        : days <= 7
+                        ? "text-status-warning"
+                        : "text-hi"
+                    }`}
+                  >
+                    {formatDate(m.membership_end)}
+                  </div>
+                  {days !== null && (
+                    <div className="text-[0.6rem] font-mono text-low mt-0.5">
+                      {days < 0
+                        ? `${Math.abs(days)}d overdue`
+                        : days === 0
+                        ? "ends today"
+                        : `${days}d left`}
+                    </div>
+                  )}
+                </td>
+                <td className="px-3 py-3 hairline-b align-middle hidden sm:table-cell">
+                  {statusBadgeFor(m.membership_end)}
+                </td>
+                <td className="px-3 py-3 hairline-b align-middle">
+                  <div className="flex items-center justify-end gap-1">
+                    <button
+                      type="button"
+                      onClick={() =>
+                        openWhatsApp(
+                          m.mobile,
+                          `Hi ${m.full_name || "there"}! 👋\n\nBrother's Fitness checking in. 💪\n\nYour plan status: ${status.toUpperCase()}${
+                            m.membership_end
+                              ? ` · valid until ${formatDate(m.membership_end)}`
+                              : ""
+                          }`
+                        )
+                      }
+                      className="p-2 text-low hover:text-status-success hover:bg-surface-card transition-colors"
+                      title="Message via WhatsApp"
+                      aria-label="WhatsApp"
+                    >
+                      <MessageCircle className="w-3.5 h-3.5" />
+                    </button>
+                    <a
+                      href={`tel:${m.mobile || ""}`}
+                      className="p-2 text-low hover:text-status-info hover:bg-surface-card transition-colors"
+                      title="Call member"
+                      aria-label="Call"
+                    >
+                      <Phone className="w-3.5 h-3.5" />
+                    </a>
+                    <button
+                      type="button"
+                      onClick={() => onReceipt(m)}
+                      className="p-2 text-low hover:text-accent hover:bg-surface-card transition-colors"
+                      title="Generate receipt"
+                      aria-label="Receipt"
+                    >
+                      <Receipt className="w-3.5 h-3.5" />
+                    </button>
+                    {status === "expired" || status === "expiring" ? (
+                      <button
+                        type="button"
+                        onClick={() => onRenew(m)}
+                        className="p-2 text-low hover:bg-accent hover:text-white transition-colors"
+                        title="Renew membership"
+                        aria-label="Renew"
+                      >
+                        <RefreshCw className="w-3.5 h-3.5" />
+                      </button>
+                    ) : null}
+                    <button
+                      type="button"
+                      onClick={() => onEdit(m)}
+                      className="p-2 text-low hover:text-accent hover:bg-surface-card transition-colors"
+                      title="Edit member"
+                      aria-label="Edit"
+                    >
+                      <Edit2 className="w-3.5 h-3.5" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => onDelete(m)}
+                      className="p-2 text-low hover:text-status-danger hover:bg-status-danger/10 transition-colors"
+                      title="Delete member"
+                      aria-label="Delete"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+    </div>
+  );
+}
 
-            {/* Modals */}
-            <ActivityLogPanel
-                isOpen={showActivityLog}
-                onClose={() => setShowActivityLog(false)}
-            />
-            <LeadsInbox
-                isOpen={showLeadsInbox}
-                onClose={() => setShowLeadsInbox(false)}
-            />
+function MembersCardView({
+  members,
+  selectedIds,
+  toggleSelect,
+  onEdit,
+  onRenew,
+  onReceipt,
+  onDelete,
+}: {
+  members: GymMember[];
+  selectedIds: Set<string>;
+  toggleSelect: (id: string) => void;
+  onEdit: (m: GymMember) => void;
+  onRenew: (m: GymMember) => void;
+  onReceipt: (m: GymMember) => void;
+  onDelete: (m: GymMember) => void;
+}) {
+  return (
+    <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
+      {members.map((m) => {
+        const checked = selectedIds.has(m.id);
+        const days = getDaysRemaining(m.membership_end);
+        const status = getMemberStatus(m.membership_end);
+        return (
+          <div
+            key={m.id}
+            className={`hairline surface-card transition-colors overflow-hidden flex flex-col ${
+              checked ? "ring-1 ring-accent border-accent/60" : ""
+            }`}
+          >
+            <div className="p-3 flex items-start gap-3">
+              <input
+                type="checkbox"
+                checked={checked}
+                onChange={() => toggleSelect(m.id)}
+                className="mt-1 w-4 h-4 accent-accent shrink-0"
+                aria-label={`Select ${m.full_name || "member"}`}
+              />
+              <div className="w-14 h-14 hairline surface-modal overflow-hidden shrink-0 relative">
+                {m.photo_url ? (
+                  <Image
+                    src={m.photo_url}
+                    alt=""
+                    fill
+                    sizes="56px"
+                    className="object-cover"
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center text-sm font-mono text-low">
+                    {initials(m.full_name)}
+                  </div>
+                )}
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-start justify-between gap-1">
+                  <div className="min-w-0">
+                    <div className="text-sm text-hi truncate font-medium">
+                      {m.full_name || "—"}
+                    </div>
+                    <a
+                      href={`tel:${m.mobile || ""}`}
+                      className="text-[0.7rem] text-low hover:text-accent"
+                    >
+                      {m.mobile || "No mobile"}
+                    </a>
+                  </div>
+                  {statusBadgeFor(m.membership_end)}
+                </div>
+                {hasIncompleteProfile(m) && (
+                  <div className="mt-1.5 flex items-center gap-1 text-[0.6rem] text-status-warning label-text uppercase tracking-wider">
+                    <AlertTriangle className="w-2.5 h-2.5" />
+                    {countIncompleteFields(m)} missing field
+                    {countIncompleteFields(m) === 1 ? "" : "s"}
+                  </div>
+                )}
+              </div>
+            </div>
 
-            {showBulkMessage && (
-                <BulkMessageModal
-                    members={filteredMembers}
-                    onClose={() => setShowBulkMessage(false)}
+            <div className="px-3 pb-3 space-y-1.5 hairline-b">
+              <div className="flex justify-between text-xs">
+                <span className="text-faint label-text uppercase tracking-wider text-[0.6rem]">
+                  Plan
+                </span>
+                <span className="text-hi whitespace-nowrap">
+                  {m.membership_type || "—"} · ₹
+                  {getPlanPrice(m.membership_type).toLocaleString("en-IN")}
+                </span>
+              </div>
+              <div className="flex justify-between text-xs">
+                <span className="text-faint label-text uppercase tracking-wider text-[0.6rem]">
+                  Valid
+                </span>
+                <span className="text-mid font-mono whitespace-nowrap">
+                  {formatDate(m.membership_start)} →{" "}
+                  {formatDate(m.membership_end)}
+                </span>
+              </div>
+              {days !== null && (
+                <div className="flex justify-between text-xs">
+                  <span className="text-faint label-text uppercase tracking-wider text-[0.6rem]">
+                    {days < 0 ? "Overdue" : "Remaining"}
+                  </span>
+                  <span
+                    className={`font-mono font-bold ${
+                      days < 0
+                        ? "text-status-danger"
+                        : days === 0
+                        ? "text-status-danger"
+                        : days <= 2
+                        ? "text-status-warning"
+                        : days <= 7
+                        ? "text-status-warning"
+                        : "text-status-success"
+                    }`}
+                  >
+                    {days < 0
+                      ? `${Math.abs(days)}d past`
+                      : days === 0
+                      ? "TODAY"
+                      : `${days}d`}
+                  </span>
+                </div>
+              )}
+            </div>
+
+            <div className="p-2 grid grid-cols-6 gap-1">
+              <button
+                type="button"
+                onClick={() =>
+                  openWhatsApp(
+                    m.mobile,
+                    `Hi ${m.full_name || "there"}! 👋\n\nBrother's Fitness checking in. 💪\n\nYour plan status: ${status.toUpperCase()}${
+                      m.membership_end
+                        ? ` · valid until ${formatDate(m.membership_end)}`
+                        : ""
+                    }`
+                  )
+                }
+                className="p-2 text-low hover:text-status-success hover:bg-surface-elevated flex items-center justify-center"
+                title="WhatsApp"
+                aria-label="WhatsApp"
+              >
+                <MessageCircle className="w-3.5 h-3.5" />
+              </button>
+              {m.mobile ? (
+                <a
+                  href={`tel:${m.mobile}`}
+                  className="p-2 text-low hover:text-status-info hover:bg-surface-elevated flex items-center justify-center"
+                  title="Call"
+                  aria-label="Call"
+                >
+                  <Phone className="w-3.5 h-3.5" />
+                </a>
+              ) : (
+                <button
+                  type="button"
+                  disabled
+                  className="p-2 text-low opacity-30 flex items-center justify-center cursor-not-allowed"
+                  title="No phone number"
+                  aria-label="No phone"
+                >
+                  <Phone className="w-3.5 h-3.5" />
+                </button>
+              )}
+              <button
+                type="button"
+                onClick={() => onReceipt(m)}
+                className="p-2 text-low hover:text-accent hover:bg-surface-elevated flex items-center justify-center"
+                title="Receipt"
+                aria-label="Receipt"
+              >
+                <Receipt className="w-3.5 h-3.5" />
+              </button>
+              <button
+                type="button"
+                onClick={() => onRenew(m)}
+                className="p-2 text-low hover:text-accent hover:bg-surface-elevated flex items-center justify-center"
+                title="Renew"
+                aria-label="Renew"
+              >
+                <RefreshCw className="w-3.5 h-3.5" />
+              </button>
+              <button
+                type="button"
+                onClick={() => onEdit(m)}
+                className="p-2 text-low hover:text-accent hover:bg-surface-elevated flex items-center justify-center"
+                title="Edit"
+                aria-label="Edit"
+              >
+                <Edit2 className="w-3.5 h-3.5" />
+              </button>
+              <button
+                type="button"
+                onClick={() => onDelete(m)}
+                className="p-2 text-low hover:text-status-danger hover:bg-status-danger/10 flex items-center justify-center"
+                title="Delete"
+                aria-label="Delete"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+function DeleteConfirmDialog({
+  member,
+  confirmText,
+  onConfirmText,
+  onCancel,
+  onConfirm,
+  isDeleting,
+}: {
+  member: GymMember;
+  confirmText: string;
+  onConfirmText: (s: string) => void;
+  onCancel: () => void;
+  onConfirm: () => void;
+  isDeleting: boolean;
+}) {
+  return (
+    <div
+      className="fixed inset-0 bg-black/80 z-[70] flex items-center justify-center p-4"
+      onClick={onCancel}
+    >
+      <div
+        className="surface-modal hairline w-full max-w-md"
+        onClick={(e) => e.stopPropagation()}
+        role="alertdialog"
+        aria-labelledby="del-title"
+        aria-describedby="del-desc"
+      >
+        <div className="hairline-b p-4 flex items-start gap-3 bg-status-danger/5">
+          <div className="w-10 h-10 hairline bg-status-danger/10 border-status-danger/30 flex items-center justify-center shrink-0 text-status-danger">
+            <AlertTriangle className="w-5 h-5" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <h2
+              id="del-title"
+              className="font-display uppercase tracking-wide text-base text-status-danger"
+            >
+              Permanently Delete Member
+            </h2>
+            <p id="del-desc" className="mt-1 text-xs text-low">
+              This action cannot be undone. The member's row in the database and
+              all associated data will be removed.
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={onCancel}
+            className="p-1.5 text-low hover:text-hi hover:bg-surface-elevated"
+            aria-label="Close"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+        <div className="p-4 hairline-b surface-card">
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 hairline surface-modal overflow-hidden shrink-0 relative">
+              {member.photo_url ? (
+                <Image
+                  src={member.photo_url}
+                  alt=""
+                  fill
+                  sizes="48px"
+                  className="object-cover"
                 />
-            )}
-
-            {/* PDF Receipt Modal */}
-            {receiptMember && (
-                <MemberReceiptModal
-                    member={receiptMember}
-                    onClose={() => setReceiptMember(null)}
-                />
-            )}
-        </>
-    );
+              ) : (
+                <div className="w-full h-full flex items-center justify-center text-[0.7rem] font-mono text-low">
+                  {initials(member.full_name)}
+                </div>
+              )}
+            </div>
+            <div className="min-w-0 flex-1">
+              <div className="text-sm text-hi font-medium truncate">
+                {member.full_name || "Unnamed member"}
+              </div>
+              <div className="text-[0.7rem] text-low font-mono">
+                {member.mobile || "—"} · {member.membership_type || "No plan"}
+              </div>
+            </div>
+          </div>
+        </div>
+        <div className="p-4 space-y-3">
+          <div>
+            <label
+              htmlFor="del-confirm"
+              className="block label-text uppercase tracking-wider text-[0.65rem] text-faint mb-1.5"
+            >
+              Type <span className="text-status-danger font-bold">DELETE</span>{" "}
+              to confirm
+            </label>
+            <input
+              id="del-confirm"
+              type="text"
+              autoFocus
+              value={confirmText}
+              onChange={(e) => onConfirmText(e.target.value)}
+              className="input-field font-mono"
+              placeholder="DELETE"
+              autoComplete="off"
+              disabled={isDeleting}
+            />
+          </div>
+          <div className="flex gap-3">
+            <button
+              type="button"
+              onClick={onCancel}
+              className="btn-secondary flex-1 text-xs"
+              disabled={isDeleting}
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              onClick={onConfirm}
+              className="btn-primary flex-1 text-xs bg-status-danger hover:bg-status-danger border-status-danger"
+              disabled={isDeleting || confirmText.trim() !== "DELETE"}
+            >
+              {isDeleting ? (
+                <>
+                  <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  Deleting…
+                </>
+              ) : (
+                <>
+                  <Trash2 className="w-3.5 h-3.5" />
+                  Delete Member
+                </>
+              )}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 }

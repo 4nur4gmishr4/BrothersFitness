@@ -83,7 +83,7 @@ export async function POST(req: Request) {
         const calorieAdjustment = Math.round(rateNum * 1100);
 
         const prompt = `
-      You are an expert fitness nutritionist for 'BroFit', optimizing for an **Indian User**.
+      You are an expert fitness nutritionist for 'Brothers Fitness', optimizing for an **Indian User**.
 
       **User Biometrics**
       - Gender: ${gender}

@@ -100,7 +100,7 @@ function getOpenRouterClient() {
             apiKey: process.env.OPENROUTER_API_KEY,
             defaultHeaders: {
                 'HTTP-Referer': process.env.NEXT_PUBLIC_SITE_URL || 'https://brothersfitness.in',
-                'X-Title': 'BroFit'
+                'X-Title': 'Brothers Fitness'
             }
         });
     }
