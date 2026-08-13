@@ -68,7 +68,7 @@ export default function Navbar() {
               className="relative z-50 group flex items-center gap-3 transition-colors duration-200"
             >
               <div className="font-display text-sm sm:text-lg md:text-xl tracking-widest text-hi font-bold cursor-default select-none group-hover:text-accent transition-colors duration-200">
-                BROTHER'S<span className="text-accent group-hover:animate-pulse">_</span>FITNESS
+                BROTHER&apos;S<span className="text-accent group-hover:animate-pulse">_</span>FITNESS
               </div>
             </button>
 
