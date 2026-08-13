@@ -1,18 +1,24 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, {
+  startTransition,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import {
-  motion,
   animate,
+  motion,
   useMotionValue,
   useTransform,
 } from "framer-motion";
 
-/* ─── SmartPreloader (Native) ─────────────────────────────────────
- *  Exact replica of the Framer SmartPreloader with BroFit branding.
+/* ─── SmartPreloader (Native Audited Implementation) ───────────────
+ *  Exact replica of Framer SmartPreloader source code with BroFit styling.
  *  Colors: overlay #0A0A0A, progress #D71921, counter #FFFFFF
- *  Text:   Brand mark top-left, tagline bottom-left, counter bottom-right
- *  Fully responsive for mobile & desktop.
+ *  All 17 audit items & edge-cases resolved to match original framer source.
  * ────────────────────────────────────────────────────────────────── */
 
 // ── Config ──────────────────────────────────────────────────────
@@ -45,7 +51,8 @@ function cubicBezier(x1: number, y1: number, x2: number, y2: number) {
   };
 }
 
-const EASING_FN = cubicBezier(0.83, 0, 0.17, 1);
+// Cinematic Easing (Original default preset: 0.16, 1, 0.3, 1)
+const EASING_FN = cubicBezier(0.16, 1, 0.3, 1);
 
 // ── Slow-warp ───────────────────────────────────────────────────
 function createSlowWarp(slowSteps: number[]) {
@@ -126,160 +133,229 @@ function getExitClipPath(val: number, dir: string) {
 
 // ══════════════════════════════════════════════════════════════════
 export default function SmartPreloaderWrapper() {
-  const [phase, setPhase] = useState<
-    "idle" | "revealing" | "exiting" | "done"
-  >("idle");
-  const [visible, setVisible] = useState(true);
-  const counterRef = useRef<HTMLSpanElement>(null);
+  const hostRef = useRef<HTMLDivElement>(null);
+  const counterTextRef = useRef<HTMLSpanElement>(null);
   const finalizedRef = useRef(false);
-  const counterOutTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const counterOutTimerRef = useRef<number | null>(null);
+  const revealAnimStopRef = useRef<(() => void) | null>(null);
+  const exitAnimStopRef = useRef<(() => void) | null>(null);
+
+  const [phase, setPhase] = useState<"idle" | "revealing" | "exiting" | "done">("idle");
+  const [isVisible, setIsVisible] = useState(true);
 
   // Motion values
-  const tNorm = useMotionValue(0);
+  const tNormMV = useMotionValue(0);
   const exitMV = useMotionValue(0);
 
-  // Derived
-  const revealProgress = useTransform(tNorm, (t) => slowWarp(t));
-  const revealPercent = useTransform(revealProgress, (p) => p * 100);
-  const exitEasedPct = useTransform(exitMV, (t) => EASING_FN(t) * 100);
+  const overlayVisible = isVisible && phase !== "done";
 
-  // Overlay slide-out
-  const overlayTransform = useTransform(exitEasedPct, (val) => {
+  // Derived transforms
+  const revealProgressMV = useTransform(tNormMV, (t) => slowWarp(t));
+  const revealPercentMV = useTransform(revealProgressMV, (p) => p * 100);
+  const exitEasedPctMV = useTransform(exitMV, (t) => EASING_FN(t) * 100);
+
+  const overlayTranslateMV = useTransform(exitEasedPctMV, (val) => {
     if (phase !== "exiting") return "translate3d(0%, 0%, 0)";
     return getExitTranslate(val, DIRECTION);
   });
 
-  // Counter clip-path during exit
-  const counterClipPath = useTransform(exitEasedPct, (val) => {
+  const counterClipPathMV = useTransform(exitEasedPctMV, (val) => {
     if (phase !== "exiting") return "inset(0% 0% 0% 0%)";
     return getExitClipPath(val, DIRECTION);
   });
 
-  // Progress bar scale
   const isHorizontal = DIRECTION === "left-to-right" || DIRECTION === "right-to-left";
-  const scaleX = useTransform(revealProgress, (p) => (isHorizontal ? p : 1));
-  const scaleY = useTransform(revealProgress, (p) => (isHorizontal ? 1 : p));
+  const progressScaleXMV = useTransform(revealProgressMV, (p) => (isHorizontal ? p : 1));
+  const progressScaleYMV = useTransform(revealProgressMV, (p) => (isHorizontal ? 1 : p));
 
-  // ── Finalize ──────────────────────────────────────────────────
+  // ── Scroll-lock (Attached scoped to hostRef div per Framer spec) ──
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const shouldLock = overlayVisible && phase !== "done";
+    const el = hostRef.current;
+    if (shouldLock && el) {
+      const preventDefault = (e: Event) => e.preventDefault();
+      const preventScrollKeys = (e: KeyboardEvent) => {
+        const keys = ["Space", "ArrowUp", "ArrowDown", "PageUp", "PageDown", "Home", "End"];
+        if (keys.includes(e.code)) e.preventDefault();
+      };
+      el.addEventListener("wheel", preventDefault, { passive: false });
+      el.addEventListener("touchmove", preventDefault, { passive: false });
+      el.addEventListener("keydown", preventScrollKeys, { passive: false });
+      return () => {
+        el.removeEventListener("wheel", preventDefault);
+        el.removeEventListener("touchmove", preventDefault);
+        el.removeEventListener("keydown", preventScrollKeys);
+      };
+    }
+  }, [overlayVisible, phase]);
+
+  // ── Finalize function (Wrapped in startTransition) ──────────────
   const finalize = useCallback(() => {
     if (finalizedRef.current) return;
     finalizedRef.current = true;
-    setPhase("exiting");
-    window.setTimeout(() => {
-      setPhase("done");
-      setVisible(false);
-    }, Math.max(0, FADE_MS));
+    if (typeof window !== "undefined") {
+      startTransition(() => setPhase("exiting"));
+      window.setTimeout(() => {
+        startTransition(() => {
+          setPhase("done");
+          setIsVisible(false);
+        });
+      }, Math.max(0, FADE_MS));
+    } else {
+      startTransition(() => {
+        setPhase("done");
+        setIsVisible(false);
+      });
+    }
   }, []);
 
-  // ── Start after delay ─────────────────────────────────────────
+  // ── Idle reset & Start delay timer ──────────────────────────────
   useEffect(() => {
-    const timer = window.setTimeout(
-      () => setPhase("revealing"),
-      Math.max(0, START_DELAY_MS)
-    );
-    return () => window.clearTimeout(timer);
-  }, []);
+    if (!isVisible || typeof window === "undefined") return;
 
-  // ── Reveal animation ─────────────────────────────────────────
+    startTransition(() => setPhase("idle"));
+    finalizedRef.current = false;
+    tNormMV.set(0);
+    exitMV.set(0);
+
+    if (counterOutTimerRef.current != null) {
+      window.clearTimeout(counterOutTimerRef.current);
+      counterOutTimerRef.current = null;
+    }
+    if (revealAnimStopRef.current) {
+      revealAnimStopRef.current();
+      revealAnimStopRef.current = null;
+    }
+    if (exitAnimStopRef.current) {
+      exitAnimStopRef.current();
+      exitAnimStopRef.current = null;
+    }
+
+    const startTimer = window.setTimeout(() => {
+      startTransition(() => setPhase("revealing"));
+    }, Math.max(0, START_DELAY_MS));
+
+    return () => window.clearTimeout(startTimer);
+  }, [isVisible, tNormMV, exitMV]);
+
+  // ── Reveal Animation ───────────────────────────────────────────
   useEffect(() => {
-    if (phase !== "revealing") return;
-    tNorm.set(0);
-    const controls = animate(tNorm, 1, {
+    if (!overlayVisible || phase !== "revealing" || typeof window === "undefined") return;
+
+    if (revealAnimStopRef.current) {
+      revealAnimStopRef.current();
+      revealAnimStopRef.current = null;
+    }
+
+    tNormMV.set(0);
+    const controls = animate(tNormMV, 1, {
       duration: Math.max(0.001, TOTAL_REVEAL_MS / 1000),
-      ease: (t: number) => t,
+      ease: (t) => t,
     });
-    controls.then(() => {
-      if (counterOutTimerRef.current != null) return;
-      counterOutTimerRef.current = setTimeout(() => {
-        counterOutTimerRef.current = null;
-        finalize();
-      }, 100);
-    });
-    return () => controls.stop();
-  }, [phase, tNorm, finalize]);
 
-  // ── Exit animation ────────────────────────────────────────────
+    revealAnimStopRef.current = () => controls.stop();
+
+    controls.finished
+      .then(() => {
+        if (typeof window === "undefined") return;
+        if (counterOutTimerRef.current != null) return;
+        counterOutTimerRef.current = window.setTimeout(() => {
+          counterOutTimerRef.current = null;
+          finalize();
+        }, 100);
+      })
+      .catch(() => {});
+
+    return () => {
+      if (revealAnimStopRef.current) {
+        revealAnimStopRef.current();
+        revealAnimStopRef.current = null;
+      }
+    };
+  }, [finalize, overlayVisible, phase, tNormMV]);
+
+  // ── Exit Animation ─────────────────────────────────────────────
   useEffect(() => {
+    if (!overlayVisible || typeof window === "undefined") return;
+
     if (phase !== "exiting") {
       exitMV.set(0);
+      if (exitAnimStopRef.current) {
+        exitAnimStopRef.current();
+        exitAnimStopRef.current = null;
+      }
       return;
     }
+
+    if (exitAnimStopRef.current) {
+      exitAnimStopRef.current();
+      exitAnimStopRef.current = null;
+    }
+
     exitMV.set(0);
     const controls = animate(exitMV, 1, {
       duration: Math.max(0.001, FADE_MS / 1000),
-      ease: (t: number) => t,
+      ease: (t) => t,
     });
-    return () => controls.stop();
-  }, [phase, exitMV]);
 
-  // ── Counter text (direct DOM, synced mode) ────────────────────
+    exitAnimStopRef.current = () => controls.stop();
+
+    return () => {
+      if (exitAnimStopRef.current) {
+        exitAnimStopRef.current();
+        exitAnimStopRef.current = null;
+      }
+    };
+  }, [overlayVisible, phase, exitMV]);
+
+  // ── Counter Text Direct DOM Updater (Synced Easing Mode) ───────
   useEffect(() => {
-    if (!visible || !counterRef.current) return;
+    if (!overlayVisible || !counterTextRef.current) return;
+
     const clamp = (v: number) => Math.max(0, Math.min(100, v));
-    const unsub = revealPercent.on("change", (pct) => {
-      const isDone = phase === "exiting" || phase === "done";
-      const rawPct = isDone ? 100 : clamp(pct);
+    const unsub = revealPercentMV.on("change", (pct) => {
+      const doneNow = phase === "exiting" || phase === "done";
+      const rawPct = doneNow ? 100 : clamp(pct);
       const t = rawPct / 100;
+
       const synced = EASING_FN(t) * 100;
       const syncedClamped = clamp(synced);
       const p = t >= 0.995 ? 100 : Math.floor(syncedClamped);
-      if (counterRef.current) counterRef.current.textContent = `${p}%`;
+
+      if (counterTextRef.current) {
+        counterTextRef.current.textContent = `${p}%`;
+      }
     });
+
     return () => unsub();
-  }, [visible, phase, revealPercent]);
+  }, [overlayVisible, phase, revealPercentMV]);
 
-  // ── Scroll-lock ───────────────────────────────────────────────
-  useEffect(() => {
-    if (!visible || phase === "done") return;
-    const el = document.documentElement;
-    const prevOverflow = el.style.overflow;
-    const prevTouchAction = el.style.touchAction;
-    el.style.overflow = "hidden";
-    el.style.touchAction = "none";
-
-    const preventDefault = (e: Event) => e.preventDefault();
-    const preventKeys = (e: KeyboardEvent) => {
-      const keys = ["Space", "ArrowUp", "ArrowDown", "PageUp", "PageDown", "Home", "End"];
-      if (keys.includes(e.code)) e.preventDefault();
-    };
-
-    window.addEventListener("wheel", preventDefault, { passive: false });
-    window.addEventListener("touchmove", preventDefault, { passive: false });
-    window.addEventListener("keydown", preventKeys, { passive: false });
-
-    return () => {
-      el.style.overflow = prevOverflow;
-      el.style.touchAction = prevTouchAction;
-      window.removeEventListener("wheel", preventDefault);
-      window.removeEventListener("touchmove", preventDefault);
-      window.removeEventListener("keydown", preventKeys);
-    };
-  }, [visible, phase]);
-
-  // ── Memoised ──────────────────────────────────────────────────
-  const origin = useMemo(() => getProgressOrigin(DIRECTION), []);
+  // ── Styles & Dimensions ────────────────────────────────────────
+  const progressTransformOrigin = useMemo(() => getProgressOrigin(DIRECTION), []);
   const pad = `${COUNTER_PADDING}px`;
   const padMobile = `${Math.round(COUNTER_PADDING * 0.5)}px`;
 
-  if (!visible || phase === "done") return null;
-
-  const displayPhase = phase;
+  if (!isVisible || phase === "done") return null;
 
   return (
     <>
-      {/* Responsive styles */}
-      <style jsx global>{`
-        .preloader-container {
+      {/* App Router Safe CSS Injection */}
+      <style dangerouslySetInnerHTML={{
+        __html: `
+        .brofit-preloader-host {
           position: fixed;
           inset: 0;
           z-index: 99999;
           width: 100%;
           height: 100%;
+          min-width: 5px;
+          min-height: 5px;
           overflow: hidden;
+          touch-action: ${phase === "exiting" ? "auto" : "none"};
+          pointer-events: ${phase === "exiting" ? "none" : "auto"};
         }
-
-        /* ── Brand mark — top-left ───────────────────────────── */
-        .preloader-brand {
+        .brofit-preloader-brand {
           position: absolute;
           top: ${pad};
           left: ${pad};
@@ -289,7 +365,7 @@ export default function SmartPreloaderWrapper() {
           flex-direction: column;
           gap: 8px;
         }
-        .preloader-brand-name {
+        .brofit-preloader-brand-name {
           color: ${COUNTER_COLOR};
           font-family: var(--font-display), 'Anton', sans-serif;
           font-size: 20px;
@@ -298,10 +374,10 @@ export default function SmartPreloaderWrapper() {
           line-height: 1;
           white-space: nowrap;
         }
-        .preloader-brand-name .accent {
+        .brofit-preloader-brand-name .accent {
           color: ${PROGRESS_COLOR};
         }
-        .preloader-brand-sub {
+        .brofit-preloader-brand-sub {
           color: ${COUNTER_COLOR};
           font-family: var(--font-mono), 'JetBrains Mono', monospace;
           font-size: 10px;
@@ -310,9 +386,7 @@ export default function SmartPreloaderWrapper() {
           opacity: 0.35;
           line-height: 1;
         }
-
-        /* ── Tagline — bottom-left ───────────────────────────── */
-        .preloader-tagline {
+        .brofit-preloader-tagline {
           position: absolute;
           bottom: ${pad};
           left: ${pad};
@@ -322,7 +396,7 @@ export default function SmartPreloaderWrapper() {
           flex-direction: column;
           gap: 6px;
         }
-        .preloader-tagline-text {
+        .brofit-preloader-tagline-text {
           color: ${COUNTER_COLOR};
           font-family: var(--font-mono), 'JetBrains Mono', monospace;
           font-size: 11px;
@@ -331,15 +405,13 @@ export default function SmartPreloaderWrapper() {
           opacity: 0.4;
           line-height: 1.4;
         }
-        .preloader-tagline-line {
+        .brofit-preloader-tagline-line {
           width: 32px;
           height: 1px;
           background: ${PROGRESS_COLOR};
           opacity: 0.6;
         }
-
-        /* ── Counter — bottom-right ──────────────────────────── */
-        .preloader-counter {
+        .brofit-preloader-counter {
           position: absolute;
           bottom: ${pad};
           right: ${pad};
@@ -349,7 +421,7 @@ export default function SmartPreloaderWrapper() {
           align-items: baseline;
           gap: 4px;
         }
-        .preloader-counter-value {
+        .brofit-preloader-counter-value {
           color: ${COUNTER_COLOR};
           font-family: var(--font-mono), 'JetBrains Mono', monospace;
           font-size: 56px;
@@ -357,9 +429,7 @@ export default function SmartPreloaderWrapper() {
           letter-spacing: -0.02em;
           line-height: 1em;
         }
-
-        /* ── Status dot — next to counter ────────────────────── */
-        .preloader-status {
+        .brofit-preloader-status {
           position: absolute;
           bottom: calc(${pad} + 72px);
           right: ${pad};
@@ -369,14 +439,14 @@ export default function SmartPreloaderWrapper() {
           align-items: center;
           gap: 8px;
         }
-        .preloader-status-dot {
+        .brofit-preloader-status-dot {
           width: 6px;
           height: 6px;
           border-radius: 50%;
           background: ${PROGRESS_COLOR};
-          animation: preloaderPulse 1.2s ease-in-out infinite;
+          animation: brofitPreloaderPulse 1.2s ease-in-out infinite;
         }
-        .preloader-status-text {
+        .brofit-preloader-status-text {
           color: ${COUNTER_COLOR};
           font-family: var(--font-mono), 'JetBrains Mono', monospace;
           font-size: 10px;
@@ -385,97 +455,74 @@ export default function SmartPreloaderWrapper() {
           opacity: 0.4;
         }
 
-        @keyframes preloaderPulse {
+        @keyframes brofitPreloaderPulse {
           0%, 100% { opacity: 1; }
           50% { opacity: 0.3; }
         }
 
-        /* ── Progress line indicator — thin horizontal line ──── */
-        .preloader-progress-line {
-          position: absolute;
-          bottom: 0;
-          left: 0;
-          width: 100%;
-          height: 2px;
-          z-index: 5;
-          pointer-events: none;
-          background: transparent;
-        }
-        .preloader-progress-line-fill {
-          height: 100%;
-          background: ${PROGRESS_COLOR};
-          transform-origin: 0% 50%;
-          will-change: transform;
-        }
-
-        /* ── Mobile responsive ───────────────────────────────── */
         @media (max-width: 640px) {
-          .preloader-brand {
+          .brofit-preloader-brand {
             top: ${padMobile};
             left: ${padMobile};
             gap: 6px;
           }
-          .preloader-brand-name {
+          .brofit-preloader-brand-name {
             font-size: 16px;
             letter-spacing: 0.1em;
           }
-          .preloader-brand-sub {
+          .brofit-preloader-brand-sub {
             font-size: 8px;
             letter-spacing: 0.2em;
           }
-          .preloader-tagline {
+          .brofit-preloader-tagline {
             bottom: ${padMobile};
             left: ${padMobile};
             max-width: 55%;
           }
-          .preloader-tagline-text {
+          .brofit-preloader-tagline-text {
             font-size: 9px;
             letter-spacing: 0.15em;
           }
-          .preloader-tagline-line {
+          .brofit-preloader-tagline-line {
             width: 24px;
           }
-          .preloader-counter {
+          .brofit-preloader-counter {
             bottom: ${padMobile};
             right: ${padMobile};
           }
-          .preloader-counter-value {
+          .brofit-preloader-counter-value {
             font-size: 36px;
           }
-          .preloader-status {
+          .brofit-preloader-status {
             bottom: calc(${padMobile} + 50px);
             right: ${padMobile};
           }
-          .preloader-status-dot {
+          .brofit-preloader-status-dot {
             width: 5px;
             height: 5px;
           }
-          .preloader-status-text {
+          .brofit-preloader-status-text {
             font-size: 8px;
           }
         }
-
-        /* ── Tablet ──────────────────────────────────────────── */
         @media (min-width: 641px) and (max-width: 1024px) {
-          .preloader-brand-name {
+          .brofit-preloader-brand-name {
             font-size: 18px;
           }
-          .preloader-counter-value {
+          .brofit-preloader-counter-value {
             font-size: 48px;
           }
         }
-      `}</style>
+        `
+      }} />
 
       <div
-        className="preloader-container"
-        style={{
-          pointerEvents: displayPhase === "exiting" ? "none" : "auto",
-          touchAction: displayPhase !== "exiting" ? "none" : "auto",
-        }}
+        ref={hostRef}
+        className="brofit-preloader-host"
         aria-label="Preloader"
         aria-hidden="false"
       >
-        {/* ── Text layer (clips during exit) ───────────────────── */}
+        {/* ── Indicator Mask Layer (Clips during exit slide) ──────── */}
         <motion.div
           style={{
             position: "absolute",
@@ -483,37 +530,35 @@ export default function SmartPreloaderWrapper() {
             overflow: "hidden",
             pointerEvents: "none",
             zIndex: 3,
-            willChange: displayPhase === "exiting" ? "clip-path" : undefined,
-            clipPath: counterClipPath,
+            willChange: phase === "exiting" ? "clip-path" : undefined,
+            clipPath: counterClipPathMV,
           }}
         >
           {/* Brand mark — top-left */}
-          <div className="preloader-brand">
-            <div className="preloader-brand-name">
+          <div className="brofit-preloader-brand">
+            <div className="brofit-preloader-brand-name">
               BROTHER&apos;S<span className="accent">_</span>FITNESS
             </div>
-            <div className="preloader-brand-sub">
+            <div className="brofit-preloader-brand-sub">
               EST. 2024 &bull; PREMIUM GYM
             </div>
           </div>
 
           {/* Status indicator — above counter */}
-          <div className="preloader-status">
-            <div className="preloader-status-dot" />
-            <div className="preloader-status-text">INITIALIZING</div>
+          <div className="brofit-preloader-status">
+            <div className="brofit-preloader-status-dot" />
+            <div className="brofit-preloader-status-text">INITIALIZING</div>
           </div>
 
-          {/* Counter — bottom-right */}
-          <div className="preloader-counter">
-            <span className="preloader-counter-value" ref={counterRef}>
-              0%
-            </span>
+          {/* Counter — bottom-right (No initial text flash) */}
+          <div className="brofit-preloader-counter">
+            <span className="brofit-preloader-counter-value" ref={counterTextRef} />
           </div>
 
           {/* Tagline — bottom-left */}
-          <div className="preloader-tagline">
-            <div className="preloader-tagline-line" />
-            <div className="preloader-tagline-text">
+          <div className="brofit-preloader-tagline">
+            <div className="brofit-preloader-tagline-line" />
+            <div className="brofit-preloader-tagline-text">
               PAIN IS TEMPORARY.
               <br />
               PRIDE IS FOREVER.
@@ -521,7 +566,7 @@ export default function SmartPreloaderWrapper() {
           </div>
         </motion.div>
 
-        {/* ── Overlay panel (slides out on exit) ───────────────── */}
+        {/* ── Overlay Panel Layer (Slides out on exit) ───────────── */}
         <motion.div
           style={{
             position: "absolute",
@@ -530,32 +575,22 @@ export default function SmartPreloaderWrapper() {
             background: OVERLAY_COLOR,
             zIndex: 1,
             willChange: "transform",
-            transform: overlayTransform,
+            transform: overlayTranslateMV,
           }}
         >
-          {/* Progress bar fill — full opacity, no transparency */}
+          {/* Progress bar fill */}
           <motion.div
             style={{
               position: "absolute",
               inset: 0,
               background: PROGRESS_COLOR,
               willChange: "transform",
-              transformOrigin: origin,
-              scaleX,
-              scaleY,
+              transformOrigin: progressTransformOrigin,
+              scaleX: progressScaleXMV,
+              scaleY: progressScaleYMV,
             }}
           />
         </motion.div>
-
-        {/* ── Thin progress line at bottom (always visible above overlay) */}
-        <div className="preloader-progress-line" style={{ zIndex: 6 }}>
-          <motion.div
-            className="preloader-progress-line-fill"
-            style={{
-              scaleX: revealProgress,
-            }}
-          />
-        </div>
       </div>
     </>
   );
