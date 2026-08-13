@@ -1,4 +1,4 @@
-﻿import type { Metadata, Viewport } from "next";
+import type { Metadata, Viewport } from "next";
 import { Inter, Anton, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import PageWrapper from "@/components/PageWrapper";
@@ -105,6 +105,7 @@ export default function RootLayout({
       </head>
       <body className={`${inter.variable} ${anton.variable} ${jetBrainsMono.variable} font-sans surface-canvas text-hi antialiased`}>
         <ThemeProvider>
+          <SmartPreloaderWrapper />
           <ReadingProgressBar />
           <PwaUpdateToast />
           <ThemedToaster />
