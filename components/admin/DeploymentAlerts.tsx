@@ -3,6 +3,7 @@
 import { useMemo } from 'react';
 import { Gift, MessageCircle } from 'lucide-react';
 import type { GymMember } from '@/lib/supabase';
+import { openWhatsApp } from '@/lib/admin-api';
 
 interface DeploymentAlertsProps {
     members: GymMember[];
@@ -22,9 +23,8 @@ export default function DeploymentAlerts({ members }: DeploymentAlertsProps) {
     }, [members]);
 
     const sendWhatsAppBirthday = (member: GymMember) => {
-        const message = `🎂 Happy Birthday, ${member.full_name}! 🎉\n\nBrother's Fitness wishes you a power-packed year ahead! Keep crushing those goals! 💪\n\n- Team BroFit`;
-        const encodedMessage = encodeURIComponent(message);
-        window.open(`https://wa.me/91${member.mobile.replace(/\D/g, '')}?text=${encodedMessage}`, '_blank');
+        const message = `🎂 Happy Birthday, ${member.full_name}! 🎉\n\nBrother's Fitness wishes you a power-packed year ahead! Keep crushing those goals! 💪\n\n- Team Brothers Fitness`;
+        openWhatsApp(member.mobile, message);
     };
 
     if (birthdays.length === 0) return null;

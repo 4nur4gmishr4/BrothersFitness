@@ -1,6 +1,6 @@
-﻿"use client";
+"use client";
 
-import { MapPin, Phone, Mail, Sparkles, FolderOpen, Star, Instagram } from "lucide-react";
+import { MapPin, Phone, Mail, Sparkles, FolderOpen, Code, Instagram } from "lucide-react";
 import Link from "next/link";
 import { useState, useEffect } from "react";
 const taglines = [
@@ -140,7 +140,7 @@ export default function Footer() {
             <div className="flex items-center gap-4">
               <div className="w-12 h-12 bg-accent/10 border border-accent flex items-center justify-center shrink-0 shadow-[0_0_15px_rgba(215,25,33,0.3)]">
                 <div className="w-6 h-6">
-                  <Star className="w-full h-full text-accent group-hover:scale-110 transition-all duration-300" />
+                  <Code className="w-full h-full text-accent group-hover:scale-110 transition-all duration-300" />
                 </div>
               </div>
               <div>

@@ -4,6 +4,19 @@
  * what counts as active/expiring/expired.
  */
 
+/** Safely parse a YYYY-MM-DD date string as local time without UTC offset skewing the day. */
+export function parseLocalDate(dateStr: string | null | undefined): Date | null {
+    if (!dateStr) return null;
+    const clean = String(dateStr).trim().split('T')[0];
+    const parts = clean.split('-');
+    if (parts.length < 3) return null;
+    const y = parseInt(parts[0], 10);
+    const m = parseInt(parts[1], 10) - 1;
+    const d = parseInt(parts[2], 10);
+    if (isNaN(y) || isNaN(m) || isNaN(d)) return null;
+    return new Date(y, m, d);
+}
+
 /** "Today" as YYYY-MM-DD in India Standard Time (5:30 AM reset). */
 export function todayIST(): string {
     return new Intl.DateTimeFormat('en-CA', {
@@ -17,10 +30,10 @@ export function todayIST(): string {
 /** Categorise a membership by its end date relative to today. */
 export function getMemberStatus(endDateString: string | null): 'active' | 'expiring' | 'expired' {
     if (!endDateString) return 'active';
-    const end = new Date(endDateString);
+    const end = parseLocalDate(endDateString);
+    if (!end) return 'active';
     const now = new Date();
     now.setHours(0, 0, 0, 0);
-    end.setHours(0, 0, 0, 0);
 
     const diffTime = end.getTime() - now.getTime();
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
@@ -35,7 +48,8 @@ const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', '
 /** DD/Mon/YYYY (e.g. 04/Aug/2026) — or "-" for null/empty. */
 export function formatDate(dateString: string | null): string {
     if (!dateString) return '-';
-    const date = new Date(dateString);
+    const date = parseLocalDate(dateString);
+    if (!date) return '-';
     const day = date.getDate().toString().padStart(2, '0');
     return `${day}/${MONTHS[date.getMonth()]}/${date.getFullYear()}`;
 }
@@ -63,8 +77,8 @@ export function getDaysUntil(dateString: string): number {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    const born = new Date(dateString);
-    if (Number.isNaN(born.getTime())) return 0;
+    const born = parseLocalDate(dateString);
+    if (!born) return 0;
 
     // Build the birthday from month/day parts so a Feb 29 birthday clamps to
     // Feb 28 on non-leap years instead of the Date constructor silently

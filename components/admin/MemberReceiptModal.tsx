@@ -5,6 +5,7 @@ import { toast } from 'sonner';
 import { PLAN_PRICES } from '@/lib/config';
 import { formatDate, formatTodayIST } from '@/lib/member-utils';
 import { useModalDismiss } from '@/components/hooks/useModalDismiss';
+import { openWhatsApp } from '@/lib/admin-api';
 import type { GymMember } from '@/lib/supabase';
 
 interface MemberReceiptModalProps {
@@ -17,25 +18,9 @@ export default function MemberReceiptModal({ member, onClose }: MemberReceiptMod
     const modalProps = useModalDismiss(onClose);
 
     const sendViaWhatsApp = () => {
-        // encodeURIComponent the whole message so member names/dates with
-        // special characters can't break the wa.me URL.
-        const message = encodeURIComponent(
-            `🏋️ *BROTHER'S FITNESS RECEIPT*\n\n👤 Member: ${member.full_name}\n📱 Mobile: ${member.mobile}\n📋 Plan: ${member.membership_type}\n📅 Valid: ${formatDate(member.membership_start)} to ${formatDate(member.membership_end)}\n💰 Amount: ₹${amount}\n\n_Pain is Temporary. Pride is Forever._ 💪`
-        );
-        // M28: an <a>.click() is a user-gesture navigation, not a popup, so
-        // popup blockers don't swallow it (window.open with noopener features
-        // always returns null, and window.open can be blocked outright — both
-        // would make a "sent!" toast a lie). The anchor is appended, clicked,
-        // and removed; rel=noopener prevents the new tab from reaching back.
-        const link = document.createElement('a');
-        link.href = `https://wa.me/91${member.mobile.replace(/\D/g, '')}?text=${message}`;
-        link.target = '_blank';
-        link.rel = 'noopener noreferrer';
-        link.style.display = 'none';
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-
+        const message =
+            `🏋️ *BROTHER'S FITNESS RECEIPT*\n\n👤 Member: ${member.full_name}\n📱 Mobile: ${member.mobile}\n📋 Plan: ${member.membership_type}\n📅 Valid: ${formatDate(member.membership_start)} to ${formatDate(member.membership_end)}\n💰 Amount: ₹${amount}\n\n_Pain is Temporary. Pride is Forever._ 💪`;
+        openWhatsApp(member.mobile, message);
         toast.success('Receipt sent via WhatsApp!');
         onClose();
     };
@@ -85,12 +70,14 @@ export default function MemberReceiptModal({ member, onClose }: MemberReceiptMod
                 </div>
                 <div className="flex gap-3">
                     <button
+                        type="button"
                         onClick={sendViaWhatsApp}
                         className="btn-primary flex-1"
                     >
                         <MessageCircle className="w-4 h-4" /> Send via WhatsApp
                     </button>
                     <button
+                        type="button"
                         onClick={onClose}
                         className="btn-secondary px-4"
                     >

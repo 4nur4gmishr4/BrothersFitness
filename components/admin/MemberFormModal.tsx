@@ -8,7 +8,7 @@ import { toast } from 'sonner';
 import Image from 'next/image';
 import { useModalDismiss } from '@/components/hooks/useModalDismiss';
 import { PLAN_PRICES, MEMBERSHIP_PLAN_DETAILS } from '@/lib/config';
-import { todayIST } from '@/lib/member-utils';
+import { todayIST, parseLocalDate } from '@/lib/member-utils';
 import type { GymMember } from '@/lib/supabase';
 import imageCompression from 'browser-image-compression';
 
@@ -77,36 +77,36 @@ export default function MemberFormModal({ open, member, renew = false, onClose, 
     // auto-calc doesn't silently overwrite it (renew/empty-end still recalcs).
     useEffect(() => {
         if (formData.membership_start && formData.membership_type && (!formData.membership_end || !member)) {
-            const start = new Date(formData.membership_start);
-            let daysToAdd = 30; // Default Monthly
+            const start = parseLocalDate(formData.membership_start);
+            if (start) {
+                let daysToAdd = 30; // Default Monthly
 
-            switch (formData.membership_type) {
-                case '15 Days':
-                    daysToAdd = 15;
-                    break;
-                case '1 Month':
-                case 'Monthly': // Legacy support
-                    daysToAdd = 30;
-                    break;
-                case '3 Months':
-                case 'Quarterly': // Legacy support
-                    daysToAdd = 90;
-                    break;
-                case '6 Months':
-                case 'Half-Yearly': // Legacy support
-                    daysToAdd = 180;
-                    break;
+                switch (formData.membership_type) {
+                    case '15 Days':
+                        daysToAdd = 15;
+                        break;
+                    case '1 Month':
+                    case 'Monthly': // Legacy support
+                        daysToAdd = 30;
+                        break;
+                    case '3 Months':
+                    case 'Quarterly': // Legacy support
+                        daysToAdd = 90;
+                        break;
+                    case '6 Months':
+                    case 'Half-Yearly': // Legacy support
+                        daysToAdd = 180;
+                        break;
+                }
+
+                start.setDate(start.getDate() + daysToAdd);
+                const endStr = `${start.getFullYear()}-${String(start.getMonth() + 1).padStart(2, '0')}-${String(start.getDate()).padStart(2, '0')}`;
+                setFormData(prev => ({
+                    ...prev,
+                    membership_end: endStr
+                }));
             }
-
-            start.setDate(start.getDate() + daysToAdd);
-            setFormData(prev => ({
-                ...prev,
-                membership_end: start.toISOString().split('T')[0]
-            }));
         }
-    // Deliberately not depending on member/membership_end: listing them re-runs
-    // this effect when their identity changes (e.g. after save) and would
-    // overwrite a member's real, manually-set end date.
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [formData.membership_start, formData.membership_type]);
 
@@ -230,234 +230,232 @@ export default function MemberFormModal({ open, member, renew = false, onClose, 
     };
 
     return (
-        <div className="fixed inset-0 bg-black/80 z-[60] flex items-center justify-center p-4 overflow-y-auto modal-overlay-in">
-            <div
+        <div className="fixed inset-0 bg-black/80 z-[60] flex items-center justify-center p-3 sm:p-4 overflow-y-auto modal-overlay-in">
+            <form
                 {...modalProps}
+                onSubmit={handleSubmit}
                 aria-label={member ? "Edit member details" : "Register new member"}
-                className="surface-modal hairline w-full max-w-2xl my-8 max-h-[calc(100vh-4rem)] overflow-hidden flex flex-col modal-panel-in"
+                className="surface-modal hairline w-full max-w-2xl my-auto sm:my-8 max-h-[92dvh] sm:max-h-[calc(100vh-4rem)] overflow-hidden flex flex-col modal-panel-in"
             >
                 <div className="surface-elevated hairline-b p-4 flex justify-between items-center shrink-0">
-                    <h2 className="heading-section text-lg text-hi flex items-center gap-2">
+                    <h2 className="heading-section text-base sm:text-lg text-hi flex items-center gap-2">
                         <Shield className="w-5 h-5 text-accent" />
                         {member ? 'Edit Member Details' : 'Register New Member'}
                     </h2>
-                    <button onClick={onClose} className="text-low hover:text-hi p-1 hover:bg-surface-elevated transition-colors duration-fast" aria-label="Close">
+                    <button type="button" onClick={onClose} className="text-low hover:text-hi p-1.5 hover:bg-surface-elevated transition-colors duration-fast" aria-label="Close">
                         <X className="w-5 h-5" />
                     </button>
                 </div>
 
-                <div className="overflow-y-auto p-4 sm:p-6 flex-1">
-                    <form id="memberForm" onSubmit={handleSubmit} className="space-y-6">
-                        {/* Photo Section */}
-                        <div className="space-y-4">
-                            {/* Photo Preview */}
-                            <div className="flex justify-center">
-                                <div className="relative w-32 h-32 surface-canvas border-2 border-dashed border-surface-border flex items-center justify-center overflow-hidden shrink-0">
-                                    {photoPreview ? (
-                                        <Image
-                                            src={photoPreview}
-                                            alt="Preview"
-                                            fill
-                                            className="object-cover"
-                                            sizes="128px"
-                                        />
-                                    ) : (
-                                        <div className="text-center text-low">
-                                            <Camera className="w-10 h-10 mx-auto mb-1 opacity-50" />
-                                            <span className="label-text uppercase">Photo</span>
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
-
-                            {/* Large Visible Upload Buttons */}
-                            <div className="grid grid-cols-2 gap-3 max-w-sm mx-auto">
-                                <button
-                                    type="button"
-                                    onClick={() => cameraInputRef.current?.click()}
-                                    className="surface-modal hairline hover:border-accent text-hi py-4 px-4 flex flex-col items-center justify-center gap-2 transition-colors duration-fast"
-                                >
-                                    <Camera className="w-8 h-8" />
-                                    <span className="label-text uppercase">Open Camera</span>
-                                </button>
-                                <button
-                                    type="button"
-                                    onClick={() => galleryInputRef.current?.click()}
-                                    className="surface-modal hairline hover:border-accent text-hi py-4 px-4 flex flex-col items-center justify-center gap-2 transition-colors duration-fast"
-                                >
-                                    <div className="w-8 h-8 border hairline flex items-center justify-center">
-                                        <div className="w-4 h-4 bg-text-mid/30" />
+                <div className="overflow-y-auto p-4 sm:p-6 flex-1 space-y-6">
+                    {/* Photo Section */}
+                    <div className="space-y-4">
+                        {/* Photo Preview */}
+                        <div className="flex justify-center">
+                            <div className="relative w-28 h-28 sm:w-32 sm:h-32 surface-canvas border-2 border-dashed border-surface-border flex items-center justify-center overflow-hidden shrink-0">
+                                {photoPreview ? (
+                                    <Image
+                                        src={photoPreview}
+                                        alt="Preview"
+                                        fill
+                                        className="object-cover"
+                                        sizes="128px"
+                                    />
+                                ) : (
+                                    <div className="text-center text-low">
+                                        <Camera className="w-8 h-8 sm:w-10 sm:h-10 mx-auto mb-1 opacity-50" />
+                                        <span className="label-text uppercase text-[0.65rem] sm:text-xs">Photo</span>
                                     </div>
-                                    <span className="label-text uppercase">Open Gallery</span>
-                                </button>
+                                )}
                             </div>
-
-                            {/* Hidden Inputs */}
-                            <input
-                                ref={cameraInputRef}
-                                type="file"
-                                accept="image/*"
-                                capture="environment"
-                                onChange={handlePhotoCapture}
-                                className="hidden"
-                            />
-                            <input
-                                ref={galleryInputRef}
-                                type="file"
-                                accept="image/*"
-                                onChange={handlePhotoCapture}
-                                className="hidden"
-                            />
                         </div>
 
-                        {/* Form Fields */}
-                        <div className="grid md:grid-cols-2 gap-5">
-                            <div className="md:col-span-2 space-y-4">
-                                <h3 className="label-text text-low flex items-center gap-2 hairline-b pb-2">
-                                    <User className="w-3.5 h-3.5" /> Personal Info
-                                </h3>
-                                <div className="grid md:grid-cols-2 gap-4">
-                                    <div>
-                                        <label className="label-text text-mid block mb-1.5">Full Name *</label>
-                                        <input
-                                            type="text"
-                                            required
-                                            value={formData.full_name}
-                                            onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
-                                            className="input-field"
-                                            placeholder="e.g. Rahul Sharma"
-                                        />
-                                    </div>
-                                    <div>
-                                        <label className="label-text text-mid block mb-1.5">Mobile Number *</label>
-                                        <input
-                                            type="tel"
-                                            required
-                                            value={formData.mobile || ''}
-                                            onChange={(e) => setFormData({ ...formData, mobile: e.target.value })}
-                                            className="input-field"
-                                            placeholder="10-digit mobile"
-                                        />
-                                    </div>
-                                    <div>
-                                        <label className="label-text text-mid block mb-1.5">Date of Birth *</label>
-                                        <input
-                                            type="date"
-                                            required
-                                            value={formData.date_of_birth || ''}
-                                            onChange={(e) => setFormData({ ...formData, date_of_birth: e.target.value })}
-                                            className="input-field"
-                                        />
-                                    </div>
+                        {/* Large Visible Upload Buttons */}
+                        <div className="grid grid-cols-2 gap-3 max-w-sm mx-auto">
+                            <button
+                                type="button"
+                                onClick={() => cameraInputRef.current?.click()}
+                                className="surface-modal hairline hover:border-accent text-hi py-3 sm:py-4 px-3 flex flex-col items-center justify-center gap-1.5 transition-colors duration-fast active:bg-surface-elevated"
+                            >
+                                <Camera className="w-6 h-6 sm:w-8 sm:h-8" />
+                                <span className="label-text uppercase text-[0.65rem] sm:text-xs">Open Camera</span>
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => galleryInputRef.current?.click()}
+                                className="surface-modal hairline hover:border-accent text-hi py-3 sm:py-4 px-3 flex flex-col items-center justify-center gap-1.5 transition-colors duration-fast active:bg-surface-elevated"
+                            >
+                                <div className="w-6 h-6 sm:w-8 sm:h-8 border hairline flex items-center justify-center">
+                                    <div className="w-3 h-3 sm:w-4 sm:h-4 bg-text-mid/30" />
                                 </div>
-                            </div>
+                                <span className="label-text uppercase text-[0.65rem] sm:text-xs">Open Gallery</span>
+                            </button>
+                        </div>
 
-                            <div className="md:col-span-2 space-y-4">
-                                <h3 className="label-text text-low flex items-center gap-2 hairline-b pb-2">
-                                    <TrendingUp className="w-3.5 h-3.5" /> Membership Details
-                                </h3>
-                                <div className="grid md:grid-cols-2 gap-4">
-                                    <div>
-                                        <label className="label-text text-mid block mb-1.5">Plan Type</label>
-                                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                                            {MEMBERSHIP_PLAN_DETAILS.map(plan => (
-                                                <button
-                                                    key={plan.value}
-                                                    type="button"
-                                                    onClick={() => setFormData({ ...formData, membership_type: plan.value })}
-                                                    className={`border p-2 text-center transition-colors duration-fast ${formData.membership_type === plan.value
-                                                        ? 'bg-accent border-accent text-white'
-                                                        : 'surface-modal hairline text-mid hover:border-accent'
-                                                        }`}
-                                                >
-                                                    <div className="label-text text-[10px] uppercase">{plan.label}</div>
-                                                    <div className="heading-section text-sm font-bold">₹{PLAN_PRICES[plan.value]}</div>
-                                                </button>
-                                            ))}
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <div className="flex justify-between">
-                                            <label className="label-text text-mid block mb-1.5">Start Date</label>
-                                            <span className="text-[10px] text-faint pt-0.5">Ends: {formData.membership_end}</span>
-                                        </div>
-                                        <input
-                                            type="date"
-                                            required
-                                            value={formData.membership_start || ''}
-                                            onChange={(e) => setFormData({ ...formData, membership_start: e.target.value })}
-                                            className="input-field"
-                                        />
-                                    </div>
-                                </div>
-                            </div>
+                        {/* Hidden Inputs */}
+                        <input
+                            ref={cameraInputRef}
+                            type="file"
+                            accept="image/*"
+                            capture="environment"
+                            onChange={handlePhotoCapture}
+                            className="hidden"
+                        />
+                        <input
+                            ref={galleryInputRef}
+                            type="file"
+                            accept="image/*"
+                            onChange={handlePhotoCapture}
+                            className="hidden"
+                        />
+                    </div>
 
-                            <div className="md:col-span-2 grid grid-cols-3 gap-4">
+                    {/* Form Fields */}
+                    <div className="grid md:grid-cols-2 gap-5">
+                        <div className="md:col-span-2 space-y-4">
+                            <h3 className="label-text text-low flex items-center gap-2 hairline-b pb-2">
+                                <User className="w-3.5 h-3.5" /> Personal Info
+                            </h3>
+                            <div className="grid md:grid-cols-2 gap-4">
                                 <div>
-                                    <label className="label-text text-mid block mb-1.5">Gender *</label>
-                                    <select
-                                        required
-                                        value={formData.gender || 'Male'}
-                                        onChange={(e) => setFormData({ ...formData, gender: e.target.value })}
-                                        className="input-field"
-                                    >
-                                        <option value="Male">Male</option>
-                                        <option value="Female">Female</option>
-                                        <option value="Other">Other</option>
-                                    </select>
-                                </div>
-                                <div>
-                                    <label className="label-text text-mid block mb-1.5">Height (cm) *</label>
+                                    <label className="label-text text-mid block mb-1.5">Full Name *</label>
                                     <input
-                                        type="number"
+                                        type="text"
                                         required
-                                        value={formData.height_cm || ''}
-                                        onChange={e => setFormData({ ...formData, height_cm: parseFloat(e.target.value) || null })}
+                                        value={formData.full_name}
+                                        onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
                                         className="input-field"
-                                        placeholder="e.g. 175"
+                                        placeholder="e.g. Rahul Sharma"
                                     />
                                 </div>
                                 <div>
-                                    <label className="label-text text-mid block mb-1.5">Weight (kg) *</label>
+                                    <label className="label-text text-mid block mb-1.5">Mobile Number *</label>
                                     <input
-                                        type="number"
+                                        type="tel"
                                         required
-                                        value={formData.weight_kg || ''}
-                                        onChange={e => setFormData({ ...formData, weight_kg: parseFloat(e.target.value) || null })}
+                                        value={formData.mobile || ''}
+                                        onChange={(e) => setFormData({ ...formData, mobile: e.target.value })}
                                         className="input-field"
-                                        placeholder="e.g. 75"
+                                        placeholder="10-digit mobile"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="label-text text-mid block mb-1.5">Date of Birth *</label>
+                                    <input
+                                        type="date"
+                                        required
+                                        value={formData.date_of_birth || ''}
+                                        onChange={(e) => setFormData({ ...formData, date_of_birth: e.target.value })}
+                                        className="input-field"
                                     />
                                 </div>
                             </div>
+                        </div>
 
-                            <div className="md:col-span-2">
-                                <label className="label-text text-mid block mb-1.5">Address / Notes (Optional)</label>
-                                <textarea
-                                    value={formData.address || ''}
-                                    onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                                    rows={2}
+                        <div className="md:col-span-2 space-y-4">
+                            <h3 className="label-text text-low flex items-center gap-2 hairline-b pb-2">
+                                <TrendingUp className="w-3.5 h-3.5" /> Membership Details
+                            </h3>
+                            <div className="grid md:grid-cols-2 gap-4">
+                                <div>
+                                    <label className="label-text text-mid block mb-1.5">Plan Type</label>
+                                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                                        {MEMBERSHIP_PLAN_DETAILS.map(plan => (
+                                            <button
+                                                key={plan.value}
+                                                type="button"
+                                                onClick={() => setFormData({ ...formData, membership_type: plan.value })}
+                                                className={`border p-2 text-center transition-colors duration-fast ${formData.membership_type === plan.value
+                                                    ? 'bg-accent border-accent text-white'
+                                                    : 'surface-modal hairline text-mid hover:border-accent'
+                                                    }`}
+                                            >
+                                                <div className="label-text text-[10px] uppercase">{plan.label}</div>
+                                                <div className="heading-section text-sm font-bold">₹{PLAN_PRICES[plan.value]}</div>
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+                                <div>
+                                    <div className="flex justify-between">
+                                        <label className="label-text text-mid block mb-1.5">Start Date</label>
+                                        <span className="text-[10px] text-faint pt-0.5">Ends: {formData.membership_end}</span>
+                                    </div>
+                                    <input
+                                        type="date"
+                                        required
+                                        value={formData.membership_start || ''}
+                                        onChange={(e) => setFormData({ ...formData, membership_start: e.target.value })}
+                                        className="input-field"
+                                    />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="md:col-span-2 grid grid-cols-3 gap-4">
+                            <div>
+                                <label className="label-text text-mid block mb-1.5">Gender *</label>
+                                <select
+                                    required
+                                    value={formData.gender || 'Male'}
+                                    onChange={(e) => setFormData({ ...formData, gender: e.target.value })}
+                                    className="input-field cursor-pointer"
+                                >
+                                    <option value="Male">Male</option>
+                                    <option value="Female">Female</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label className="label-text text-mid block mb-1.5">Height (cm) *</label>
+                                <input
+                                    type="number"
+                                    required
+                                    value={formData.height_cm || ''}
+                                    onChange={e => setFormData({ ...formData, height_cm: parseFloat(e.target.value) || null })}
                                     className="input-field"
-                                    placeholder="Optional: Enter address or notes..."
+                                    placeholder="e.g. 175"
+                                />
+                            </div>
+                            <div>
+                                <label className="label-text text-mid block mb-1.5">Weight (kg) *</label>
+                                <input
+                                    type="number"
+                                    required
+                                    value={formData.weight_kg || ''}
+                                    onChange={e => setFormData({ ...formData, weight_kg: parseFloat(e.target.value) || null })}
+                                    className="input-field"
+                                    placeholder="e.g. 75"
                                 />
                             </div>
                         </div>
-                    </form>
+
+                        <div className="md:col-span-2">
+                            <label className="label-text text-mid block mb-1.5">Address / Notes (Optional)</label>
+                            <textarea
+                                value={formData.address || ''}
+                                onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+                                rows={2}
+                                className="input-field"
+                                placeholder="Optional: Enter address or notes..."
+                            />
+                        </div>
+                    </div>
                 </div>
 
-                <div className="p-4 hairline-t surface-elevated shrink-0 flex gap-3">
+                <div className="p-3 sm:p-4 hairline-t surface-elevated shrink-0 flex gap-3">
                     <button
                         type="button"
                         onClick={onClose}
                         disabled={isSubmitting}
-                        className="btn-secondary flex-1"
+                        className="btn-secondary flex-1 min-h-[44px] text-xs"
                     >
                         Cancel
                     </button>
                     <button
                         type="submit"
-                        form="memberForm"
                         disabled={isSubmitting}
-                        className="btn-primary flex-[2]"
+                        className="btn-primary flex-[2] min-h-[44px] text-xs"
                     >
                         {isSubmitting ? (
                             <>
@@ -472,7 +470,7 @@ export default function MemberFormModal({ open, member, renew = false, onClose, 
                         )}
                     </button>
                 </div>
-            </div>
+            </form>
         </div>
     );
 }

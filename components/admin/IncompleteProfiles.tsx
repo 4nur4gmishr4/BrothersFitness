@@ -41,7 +41,7 @@ export default function IncompleteProfiles({ members, onEdit }: IncompleteProfil
     const sendWhatsAppRequest = (member: IncompleteMember) => {
         const fields = member.missingFields.join(', ');
         const message = encodeURIComponent(
-            `Hi ${member.full_name}! 👋\n\nWe noticed some details are missing from your profile at Brother's Fitness: ${fields}.\n\nPlease visit the gym to update them or reply with the details. Keeping your profile complete helps us track your progress better! 💪\n\n- Team BroFit`
+            `Hi ${member.full_name}! 👋\n\nWe noticed some details are missing from your profile at Brother's Fitness: ${fields}.\n\nPlease visit the gym to update them or reply with the details. Keeping your profile complete helps us track your progress better! 💪\n\n- Team Brothers Fitness`
         );
         window.open(`https://wa.me/91${member.mobile.replace(/\D/g, '')}?text=${message}`, '_blank');
     };

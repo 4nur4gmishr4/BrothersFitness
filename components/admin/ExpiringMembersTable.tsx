@@ -4,6 +4,7 @@ import { useMemo } from 'react';
 import { AlertTriangle, MessageCircle, Calendar, Clock, User } from 'lucide-react';
 import type { GymMember } from '@/lib/supabase';
 import Image from 'next/image';
+import { openWhatsApp } from '@/lib/admin-api';
 
 interface ExpiringMembersTableProps {
     members: GymMember[];
@@ -20,8 +21,8 @@ export default function ExpiringMembersTable({ members }: ExpiringMembersTablePr
             end.setHours(0, 0, 0, 0);
             const diffDays = Math.ceil((end.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
 
-            // Filter: Active but expiring in <= 7 days
-            return diffDays >= 0 && diffDays < 7;
+            // Filter: Active but expiring within 7 days (inclusive of day 7)
+            return diffDays >= 0 && diffDays <= 7;
         }).map(m => {
             const end = new Date(m.membership_end!);
             end.setHours(0, 0, 0, 0);
@@ -37,10 +38,8 @@ export default function ExpiringMembersTable({ members }: ExpiringMembersTablePr
     }, [expiringMembers]);
 
     const sendWhatsAppReminder = (member: GymMember & { daysRemaining: number }) => {
-        const msg = encodeURIComponent(
-            `Hi ${member.full_name}! 👋\n\nYour Brother's Fitness membership expires in ${member.daysRemaining === 0 ? 'TODAY' : member.daysRemaining + ' days'}. Renew now to continue your fitness journey without interruption! 💪\n\nVisit us or reply to renew.\n\n- Brother's Fitness`
-        );
-        window.open(`https://wa.me/91${member.mobile.replace(/\D/g, '')}?text=${msg}`, '_blank');
+        const msg = `Hi ${member.full_name}! 👋\n\nYour Brother's Fitness membership expires ${member.daysRemaining === 0 ? 'TODAY' : `in ${member.daysRemaining} day${member.daysRemaining === 1 ? '' : 's'}`}. Renew now to continue your fitness journey without interruption! 💪\n\nVisit us or reply to renew.\n\n- Brother's Fitness`;
+        openWhatsApp(member.mobile, msg);
     };
 
     if (expiringMembers.length === 0) return null;
@@ -138,7 +137,7 @@ export default function ExpiringMembersTable({ members }: ExpiringMembersTablePr
                                     <tr className="bg-status-warning/5">
                                         <td colSpan={4} className="py-2 px-6">
                                             <div className="flex items-center gap-2 text-xs font-bold text-status-warning uppercase tracking-widest">
-                                                <Calendar className="w-3 h-3" /> Upcoming (1-6 Days)
+                                                <Calendar className="w-3 h-3" /> Upcoming (1–7 Days)
                                             </div>
                                         </td>
                                     </tr>
@@ -249,7 +248,7 @@ export default function ExpiringMembersTable({ members }: ExpiringMembersTablePr
                     {groupedMembers.upcoming.length > 0 && (
                         <div className={groupedMembers.today.length > 0 ? "pt-4" : ""}>
                             <div className="flex items-center gap-2 mb-3 text-xs font-bold text-status-warning uppercase tracking-widest pl-1">
-                                <Calendar className="w-3 h-3" /> Upcoming (1-6 Days)
+                                <Calendar className="w-3 h-3" /> Upcoming (1–7 Days)
                             </div>
                             <div className="space-y-3">
                                 {groupedMembers.upcoming.map(m => (

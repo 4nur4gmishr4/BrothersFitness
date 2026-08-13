@@ -66,7 +66,7 @@ export default function DietResultView({
                 heightLeft -= pdfHeight;
             }
 
-            pdf.save(`BroFit_Diet_Plan_${new Date().toISOString().split('T')[0]}.pdf`);
+            pdf.save(`Brothers_Fitness_Diet_Plan_${new Date().toISOString().split('T')[0]}.pdf`);
             toast.success(
                 <span className="flex items-center gap-2">
                     <CheckDraw />

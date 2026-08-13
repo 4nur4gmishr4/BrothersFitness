@@ -6,7 +6,7 @@ import { useTheme } from "@/components/ThemeProvider";
 import { useUserAuth } from "@/lib/user-auth-context";
 import dynamic from "next/dynamic";
 import Image from "next/image";
-import { Phone, Menu, X, Star, ChevronRight, Github, Instagram } from "lucide-react";
+import { Phone, Menu, X, Sun, Moon, Monitor, ChevronRight, Github, Instagram, Bell, Code } from "lucide-react";
 
 const WhatsAppIcon = ({ className }: { className?: string }) => ( <svg xmlns="http://www.w3.org/2000/svg" className={className} viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z" /></svg> );
 
@@ -14,12 +14,12 @@ const ProfileModal = dynamic(() => import("@/components/ProfileModal"), { ssr: f
 const LoginModal = dynamic(() => import("@/components/LoginModal"), { ssr: false });
 const WelcomeModal = dynamic(() => import("@/components/WelcomeModal"), { ssr: false });
 
-export default function Navbar() {
+export default function Navbar({ unreadLeads = 0 }: { unreadLeads?: number } = {}) {
   const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
   const { showLoginModal, setShowLoginModal, showWelcome, setShowWelcome } = useUserAuth();
-  const { resolvedTheme, setTheme } = useTheme();
+  const { theme, resolvedTheme, setTheme, mounted } = useTheme();
   const { user, isLoggedIn, isLoading } = useUserAuth();
   const pathname = usePathname();
   const router = useRouter();
@@ -30,15 +30,26 @@ export default function Navbar() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  const menuItems = [
-    { name: "Home", id: "/", isRoute: true },
-    { name: "Workouts", id: "/workouts", isRoute: true },
-    { name: "Diet Planner", id: "/fuel", isRoute: true },
-    { name: "Calculators", id: "/calculators", isRoute: true },
-    { name: "Pricing", id: "/pricing", isRoute: true },
-    { name: "Quotes", id: "/quotes", isRoute: true },
-    { name: "Trophy Room", id: "/trophy-room", isRoute: true },
-  ];
+  const isAdminMode = pathname.startsWith("/admin") && pathname !== "/admin/login";
+
+  const menuItems = isAdminMode
+    ? [
+        { name: "Dashboard", id: "/admin/dashboard", isRoute: true },
+        { name: "Members", id: "/admin/members", isRoute: true },
+        { name: "Leads Inbox", id: "/admin/leads", isRoute: true },
+        { name: "Analytics", id: "/admin/analytics", isRoute: true },
+        { name: "Activity", id: "/admin/activity", isRoute: true },
+        { name: "Settings", id: "/admin/settings", isRoute: true },
+      ]
+    : [
+        { name: "Home", id: "/", isRoute: true },
+        { name: "Workouts", id: "/workouts", isRoute: true },
+        { name: "Diet Planner", id: "/fuel", isRoute: true },
+        { name: "Calculators", id: "/calculators", isRoute: true },
+        { name: "Pricing", id: "/pricing", isRoute: true },
+        { name: "Quotes", id: "/quotes", isRoute: true },
+        { name: "Trophy Room", id: "/trophy-room", isRoute: true },
+      ];
 
   const handleMenuClick = (item: (typeof menuItems)[0]) => {
     router.push(item.id);
@@ -76,73 +87,101 @@ export default function Navbar() {
 
             {/* Action Buttons (Always 5 buttons) */}
             <div className="flex items-center gap-2">
-              {/* Theme Toggle */}
-              <button
-                onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
-                className="w-10 h-10 flex items-center justify-center border border-surface-border bg-surface-card hover:border-accent transition-colors duration-200"
-                aria-label="Toggle theme"
-              >
-                <div className="w-5 h-5">
-                  <Star className="w-full h-full text-hi group-hover:scale-110 group-hover:text-accent transition-all duration-300" />
-                </div>
-              </button>
-
-              {/* Instagram (Brothers Fitness) */}
-              <a
-                href="https://www.instagram.com/brothers_fitness_17"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-10 h-10 flex items-center justify-center border border-surface-border bg-surface-card hover:border-accent group transition-colors duration-200"
-                aria-label="Instagram"
-              >
-                <div className="w-5 h-5">
-                  <Instagram className="w-full h-full text-hi group-hover:scale-110 group-hover:text-accent transition-all duration-300" />
-                </div>
-              </a>
-
-              {/* WhatsApp (Aman) */}
-              <a
-                href="https://wa.me/919131179343"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-10 h-10 flex items-center justify-center border border-surface-border bg-surface-card hover:border-accent group transition-colors duration-200"
-                aria-label="WhatsApp Aman"
-              >
-                <div className="w-5 h-5">
-                  <WhatsAppIcon className="w-full h-full text-hi group-hover:scale-110 group-hover:text-accent transition-all duration-300" />
-                </div>
-              </a>
-
-              {/* Profile Icon */}
-              <button
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  if (isLoggedIn) {
-                    setShowProfileModal(true);
-                  } else {
-                    setShowLoginModal(true);
-                  }
-                }}
-                className="w-10 h-10 flex items-center justify-center border border-surface-border bg-surface-card hover:border-accent group transition-colors duration-200"
-                aria-label="Profile"
-              >
-                {isLoading ? (
-                  <div className="w-4 h-4 rounded-full skeleton" />
-                ) : isLoggedIn && user?.photo_url ? (
-                  <Image
-                    src={user.photo_url}
-                    alt="Profile"
-                    width={24}
-                    height={24}
-                    className="w-6 h-6 object-cover border border-accent"
-                  />
-                ) : (
-                  <div className="w-5 h-5 flex items-center justify-center">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-hi group-hover:scale-110 group-hover:text-accent transition-all duration-300"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+              {/* Theme Toggle Dropdown */}
+              <div className="relative group">
+                <button
+                  className="w-10 h-10 flex items-center justify-center border border-surface-border bg-surface-card hover:border-accent transition-colors duration-200"
+                  aria-label="Toggle theme"
+                >
+                  <div className="w-5 h-5 flex items-center justify-center text-hi group-hover:scale-110 group-hover:text-accent transition-all duration-300">
+                    {!mounted ? <Monitor className="w-full h-full" /> : theme === "system" ? <Monitor className="w-full h-full" /> : theme === "dark" ? <Moon className="w-full h-full" /> : <Sun className="w-full h-full" />}
                   </div>
-                )}
-              </button>
+                </button>
+                <div className="absolute top-full right-0 mt-2 w-40 bg-surface-card border border-surface-border opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-[100] flex flex-col shadow-xl">
+                  <button onClick={() => setTheme("system")} className={`px-4 py-3 text-left text-xs uppercase tracking-widest flex items-center gap-3 hover:bg-surface-elevated transition-colors ${theme === "system" ? "text-accent" : "text-hi"}`}>
+                    <Monitor className="w-4 h-4" /> Automatic
+                  </button>
+                  <button onClick={() => setTheme("light")} className={`px-4 py-3 text-left text-xs uppercase tracking-widest flex items-center gap-3 hover:bg-surface-elevated transition-colors border-t border-surface-border ${theme === "light" ? "text-accent" : "text-hi"}`}>
+                    <Sun className="w-4 h-4" /> Light
+                  </button>
+                  <button onClick={() => setTheme("dark")} className={`px-4 py-3 text-left text-xs uppercase tracking-widest flex items-center gap-3 hover:bg-surface-elevated transition-colors border-t border-surface-border ${theme === "dark" ? "text-accent" : "text-hi"}`}>
+                    <Moon className="w-4 h-4" /> Dark
+                  </button>
+                </div>
+              </div>
+
+              {isAdminMode ? (
+                <button
+                  onClick={() => router.push("/admin/leads")}
+                  className="relative w-10 h-10 flex items-center justify-center border border-surface-border bg-surface-card hover:border-accent group transition-colors duration-200"
+                  aria-label="Notifications"
+                >
+                  <div className="w-5 h-5">
+                    <Bell className="w-full h-full text-hi group-hover:scale-110 group-hover:text-accent transition-all duration-300" />
+                  </div>
+                  {unreadLeads > 0 && (
+                    <span className="absolute top-1 right-1 min-w-[14px] h-[14px] px-1 bg-accent text-white text-[9px] font-bold rounded-full flex items-center justify-center">
+                      {unreadLeads > 9 ? "9+" : unreadLeads}
+                    </span>
+                  )}
+                </button>
+              ) : (
+                <>
+                  <a
+                    href="https://www.instagram.com/brothers_fitness_17"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-10 h-10 flex items-center justify-center border border-surface-border bg-surface-card hover:border-accent group transition-colors duration-200"
+                    aria-label="Instagram"
+                  >
+                    <div className="w-5 h-5">
+                      <Instagram className="w-full h-full text-hi group-hover:scale-110 group-hover:text-accent transition-all duration-300" />
+                    </div>
+                  </a>
+
+                  <a
+                    href="https://wa.me/919131179343"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-10 h-10 flex items-center justify-center border border-surface-border bg-surface-card hover:border-accent group transition-colors duration-200"
+                    aria-label="WhatsApp Aman"
+                  >
+                    <div className="w-5 h-5">
+                      <WhatsAppIcon className="w-full h-full text-hi group-hover:scale-110 group-hover:text-accent transition-all duration-300" />
+                    </div>
+                  </a>
+
+                  <button
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      if (isLoggedIn) {
+                        setShowProfileModal(true);
+                      } else {
+                        setShowLoginModal(true);
+                      }
+                    }}
+                    className="w-10 h-10 flex items-center justify-center border border-surface-border bg-surface-card hover:border-accent group transition-colors duration-200"
+                    aria-label="Profile"
+                  >
+                    {isLoading ? (
+                      <div className="w-4 h-4 rounded-full skeleton" />
+                    ) : isLoggedIn && user?.photo_url ? (
+                      <Image
+                        src={user.photo_url}
+                        alt="Profile"
+                        width={24}
+                        height={24}
+                        className="w-6 h-6 object-cover border border-accent"
+                      />
+                    ) : (
+                      <div className="w-5 h-5 flex items-center justify-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-hi group-hover:scale-110 group-hover:text-accent transition-all duration-300"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                      </div>
+                    )}
+                  </button>
+                </>
+              )}
 
               {/* Hamburger */}
               <button
@@ -186,19 +225,19 @@ export default function Navbar() {
                       <div
                         className={`flex items-center justify-between p-6 border transition-all duration-300 ${
                           isActive
-                            ? "border-accent bg-accent/5"
+                            ? "border-accent bg-accent text-white"
                             : "border-surface-border bg-[#111] hover:border-accent hover:bg-accent/10"
                         }`}
                       >
                         <span
                           className={`text-lg font-display tracking-widest uppercase transition-colors duration-fast ${
-                            isActive ? "text-accent" : "text-hi group-hover:text-accent"
+                            isActive ? "text-white" : "text-hi group-hover:text-accent"
                           }`}
                         >
                           {item.name}
                         </span>
                         <div className="w-6 h-6 opacity-50 group-hover:opacity-100 transition-opacity">
-                           <ChevronRight className="w-full h-full text-accent group-hover:translate-x-1 transition-transform duration-300" />
+                           <ChevronRight className={`w-full h-full transition-transform duration-300 ${isActive ? "text-white" : "text-accent group-hover:translate-x-1"}`} />
                         </div>
                       </div>
                       {/* Technical corner accents */}
