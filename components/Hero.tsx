@@ -2,15 +2,22 @@
 
 import { useState, useEffect } from "react";
 import HeroLoopManager from "./HeroLoopManager";
-import QuoteCycler from "./QuoteCycler";
 import PulseDot from "@/components/animations/PulseDot";
 import BarGrowStats from "@/components/animations/BarGrowStats";
+import AiDietPlannerFlex from "./AiDietPlannerFlex";
+import { Dumbbell } from "lucide-react";
+import { motion } from "framer-motion";
 
-const YEARS_ACTIVE = new Date().getFullYear() - 2026;
+const YEARS_ACTIVE = new Date().getFullYear() - 2024;
 
 export default function Hero() {
   const [memberCount, setMemberCount] = useState(0);
   const [grainOpacity, setGrainOpacity] = useState(0.07);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // H5 fix: AbortController prevents setState after unmount on quick navigation.
   useEffect(() => {
@@ -48,7 +55,7 @@ export default function Hero() {
   }, []);
 
   return (
-    <section className="relative min-h-[90svh] md:min-h-[100svh] flex flex-col items-center justify-center overflow-hidden py-4 md:py-0 bg-[#0a0a0a] text-white">
+    <section className="relative min-h-[90svh] md:min-h-[100svh] flex flex-col items-center justify-center overflow-hidden py-4 md:py-0 bg-surface-canvas text-hi">
       {/* Scroll-fading grain overlay */}
       <div 
         className="absolute inset-0 z-0 pointer-events-none transition-opacity duration-75"
@@ -60,47 +67,84 @@ export default function Hero() {
         }}
       />
 
-      <div className="relative z-10 flex-1 flex flex-col items-center justify-center w-full max-w-4xl px-4 text-center mt-12 md:mt-0">
-        <p className="label-text mb-2 text-faint" style={{ color: '#888888', fontSize: '10px' }}>
-          BHOPAL · GYM &amp; FITNESS
-        </p>
+      <div className="relative z-10 w-full max-w-7xl px-4 md:px-8 mt-16 md:mt-0">
+        
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
+          
+          {/* LEFT SECTION - Brand & Typewriter */}
+          <div className="lg:col-span-7 flex flex-col justify-center">
+            
+            <motion.div 
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.5 }}
+              className="flex items-center gap-3 mb-6 text-accent"
+            >
+              <Dumbbell className="w-8 h-8 md:w-12 md:h-12" />
+              <p className="label-text text-[10px] tracking-widest text-low uppercase">
+                EST. 2024 // BHOPAL
+              </p>
+            </motion.div>
+            
+            <div className="mb-8">
+              <HeroLoopManager />
+            </div>
 
-        <div className="mb-2 md:mb-3 transform scale-90 md:scale-100">
-          <HeroLoopManager />
+            <motion.div 
+               initial={{ opacity: 0, y: 20 }}
+               animate={{ opacity: 1, y: 0 }}
+               transition={{ duration: 0.5, delay: 0.5 }}
+            >
+              <a
+                href="#protocol"
+                className="inline-block btn-primary group relative overflow-hidden px-8 py-3 text-sm tracking-widest uppercase font-bold"
+                style={{ textDecoration: "none" }}
+              >
+                <span className="relative z-10">Initialize Training</span>
+                <span className="absolute inset-0 bg-white/10 translate-x-full transition-transform duration-200 ease-clickhouse group-hover:translate-x-0" aria-hidden="true" />
+              </a>
+            </motion.div>
+          </div>
+
+          {/* RIGHT SECTION - Metrics & AI Widget */}
+          <div className="lg:col-span-5 flex flex-col gap-6">
+            
+            {/* Top Right - Metrics */}
+            <motion.div 
+               initial={{ opacity: 0, scale: 0.95 }}
+               animate={{ opacity: 1, scale: 1 }}
+               transition={{ duration: 0.5, delay: 0.2 }}
+               className="p-6 border border-surface-border bg-surface-card rounded-md flex flex-col gap-6"
+            >
+              <div className="inline-flex items-center gap-3 px-3 py-1.5 rounded-full text-xs w-max bg-[#1a1a1a] border border-[#2a2a2a]">
+                <PulseDot />
+                <span className="label-text text-mid">
+                  <span className="font-display text-hi text-sm">{memberCount}</span> Active Members
+                </span>
+              </div>
+
+              <div className="w-full">
+                <BarGrowStats
+                  items={[
+                    { label: "Members", value: memberCount, max: Math.max(memberCount, 150), display: `${memberCount}`, rightLabel: "∞" },
+                    { label: "Years Active", value: YEARS_ACTIVE, max: 5, display: `${YEARS_ACTIVE} yrs`, rightLabel: "∞" },
+                  ]}
+                />
+              </div>
+            </motion.div>
+
+            {/* Bottom Right - AI Diet Planner Flex */}
+            <motion.div
+               initial={{ opacity: 0, y: 20 }}
+               animate={{ opacity: 1, y: 0 }}
+               transition={{ duration: 0.5, delay: 0.4 }}
+            >
+               <AiDietPlannerFlex />
+            </motion.div>
+
+          </div>
         </div>
 
-        <div className="mb-3 transform scale-90 md:scale-100">
-          <QuoteCycler />
-        </div>
-
-        {/* Member Count Badge */}
-        <div className="mb-4 md:mb-5 inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs" style={{ background: '#1a1a1a', border: '1px solid #2a2a2a' }}>
-          <PulseDot />
-          <span className="label-text" style={{ color: '#cccccc' }}>
-            <span className="font-display" style={{ color: '#ffffff' }}>{memberCount}</span> Active Members
-          </span>
-        </div>
-
-        {/* Animated stat bars: member count + years active */}
-        <div className="mb-4 md:mb-5 w-full max-w-[260px] transform scale-95 md:scale-100">
-          <BarGrowStats
-            items={[
-              { label: "Members", value: memberCount, max: Math.max(memberCount, 150), display: `${memberCount}`, rightLabel: "∞" },
-              { label: "Years Active", value: YEARS_ACTIVE, max: 5, display: `${YEARS_ACTIVE} yrs`, rightLabel: "∞" },
-            ]}
-          />
-        </div>
-
-        <div className="mt-2">
-          <a
-            href="#protocol"
-            className="inline-block btn-primary group relative overflow-hidden px-6 py-2.5 text-sm"
-            style={{ textDecoration: "none" }}
-          >
-            <span className="relative z-10">Start Training</span>
-            <span className="absolute inset-0 bg-white/10 translate-x-full transition-transform duration-200 ease-clickhouse group-hover:translate-x-0" aria-hidden="true" />
-          </a>
-        </div>
       </div>
     </section>
   );
