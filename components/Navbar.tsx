@@ -72,21 +72,11 @@ export default function Navbar() {
               </div>
             </button>
 
-            {/* Desktop Navigation Links */}
-            <div className="hidden lg:flex items-center gap-8 absolute left-1/2 -translate-x-1/2">
-              {menuItems.slice(0, 5).map((item) => (
-                <button
-                  key={item.name}
-                  onClick={(e) => { e.preventDefault(); handleMenuClick(item); }}
-                  className="text-sm font-display tracking-widest uppercase text-hi hover:text-accent transition-colors duration-200"
-                >
-                  {item.name}
-                </button>
-              ))}
-            </div>
+            {/* Desktop Navigation Links (Removed in favor of 5 Action Buttons) */}
 
-            {/* Action Buttons */}
+            {/* Action Buttons (Always 5 buttons) */}
             <div className="flex items-center gap-2">
+              {/* Theme Toggle */}
               <button
                 onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
                 className="w-10 h-10 flex items-center justify-center border border-surface-border bg-surface-card hover:border-accent transition-colors duration-200"
@@ -97,6 +87,33 @@ export default function Navbar() {
                 </div>
               </button>
 
+              {/* Instagram (Brothers Fitness) */}
+              <a
+                href="https://www.instagram.com/brothers_fitness_17"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-10 h-10 flex items-center justify-center border border-surface-border bg-surface-card hover:border-accent group transition-colors duration-200"
+                aria-label="Instagram"
+              >
+                <div className="w-5 h-5">
+                  <Instagram className="w-full h-full text-hi group-hover:scale-110 group-hover:text-accent transition-all duration-300" />
+                </div>
+              </a>
+
+              {/* WhatsApp (Aman) */}
+              <a
+                href="https://wa.me/919131179343"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-10 h-10 flex items-center justify-center border border-surface-border bg-surface-card hover:border-accent group transition-colors duration-200"
+                aria-label="WhatsApp Aman"
+              >
+                <div className="w-5 h-5">
+                  <WhatsAppIcon className="w-full h-full text-hi group-hover:scale-110 group-hover:text-accent transition-all duration-300" />
+                </div>
+              </a>
+
+              {/* Profile Icon */}
               <button
                 onClick={(e) => {
                   e.preventDefault();
@@ -107,7 +124,7 @@ export default function Navbar() {
                     setShowLoginModal(true);
                   }
                 }}
-                className="w-10 h-10 flex items-center justify-center border border-surface-border bg-surface-card hover:border-accent transition-colors duration-200"
+                className="w-10 h-10 flex items-center justify-center border border-surface-border bg-surface-card hover:border-accent group transition-colors duration-200"
                 aria-label="Profile"
               >
                 {isLoading ? (
@@ -121,15 +138,16 @@ export default function Navbar() {
                     className="w-6 h-6 object-cover border border-accent"
                   />
                 ) : (
-                  <div className="w-5 h-5">
-                    <Star className="w-full h-full text-hi group-hover:scale-110 group-hover:text-accent transition-all duration-300" />
+                  <div className="w-5 h-5 flex items-center justify-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-hi group-hover:scale-110 group-hover:text-accent transition-all duration-300"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
                   </div>
                 )}
               </button>
 
+              {/* Hamburger */}
               <button
                 onClick={() => setIsOpen(!isOpen)}
-                className="w-10 h-10 flex items-center justify-center border border-surface-border bg-accent text-white hover:bg-hi hover:text-canvas transition-colors duration-200 lg:hidden"
+                className="w-10 h-10 flex items-center justify-center border border-surface-border bg-accent text-white hover:bg-hi hover:text-canvas transition-colors duration-200"
                 aria-label="Toggle Menu"
               >
                 <div className="relative w-6 h-6 flex items-center justify-center">
