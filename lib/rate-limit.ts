@@ -216,52 +216,6 @@ export function getClientIp(req: Request): string {
     return UNKNOWN_IP;
 }
 
-/**
- * Read current rate-limit state WITHOUT incrementing the counter.
- * Used by read-only endpoints (e.g. /api/rate-limit-status) so that
- * a status check does not itself consume a quota slot.
- *
- * NOTE: non-consuming peeks are only supported on the in-memory path.
- * Upstash's Ratelimit sliding-window API exposes no non-consuming read of its
- * internal counters, and the old Redis branch here read a `:peek:` key that was
- * never written — so it silently reported full quota to exhausted users. No
- * production route calls this anymore; the status endpoint reads the
- * authoritative Supabase credit row instead. The Redis branch below therefore
- * returns the optimistic "full budget" result rather than lying about a counter
- * it cannot see.
- */
-export async function peekRateLimit(
-    identifier: string,
-    config: RateLimitConfig
-): Promise<RateLimitResult> {
-    if (USING_REDIS) {
-        // Cannot observe the real sliding-window counter without consuming it.
-        // Report the cap so callers never see a fabricated "exhausted" state.
-        return {
-            allowed: true,
-            remaining: config.maxRequests,
-            resetIn: Math.ceil(config.windowMs / 1000)
-        };
-    }
-
-    const now = Date.now();
-    lazyCleanup(now);
-    const entry = rateLimitMap.get(identifier);
-
-    if (!entry || entry.resetTime < now) {
-        return {
-            allowed: true,
-            remaining: config.maxRequests,
-            resetIn: Math.ceil(config.windowMs / 1000)
-        };
-    }
-
-    return {
-        allowed: entry.count < config.maxRequests,
-        remaining: Math.max(0, config.maxRequests - entry.count),
-        resetIn: Math.ceil((entry.resetTime - now) / 1000)
-    };
-}
 
 // Preset configurations
 //

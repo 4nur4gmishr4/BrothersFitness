@@ -6,7 +6,8 @@ type AdminContextType = {
     isAdmin: boolean;
     isLoading: boolean;
     login: (password: string) => Promise<boolean>;
-    logout: () => void;
+    establishSession: (token: string) => void;
+    logout: () => Promise<void>;
 };
 
 const AdminContext = createContext<AdminContextType | undefined>(undefined);
@@ -40,6 +41,11 @@ export function AdminProvider({ children }: { children: ReactNode }) {
         checkSession();
     }, []);
 
+    const establishSession = (token: string) => {
+        sessionStorage.setItem('admin_token', token);
+        setIsAdmin(true);
+    };
+
     const login = async (password: string): Promise<boolean> => {
         try {
             const res = await fetch('/api/admin/login', {
@@ -50,8 +56,7 @@ export function AdminProvider({ children }: { children: ReactNode }) {
 
             if (res.ok) {
                 const { token } = await res.json();
-                sessionStorage.setItem('admin_token', token);
-                setIsAdmin(true);
+                establishSession(token);
                 return true;
             }
             return false;
@@ -60,21 +65,23 @@ export function AdminProvider({ children }: { children: ReactNode }) {
         }
     };
 
-    const logout = () => {
+    const logout = async () => {
         // Revoke the token server-side before clearing it locally.
         const token = sessionStorage.getItem('admin_token');
         if (token) {
-            fetch('/api/admin/logout', {
-                method: 'POST',
-                headers: { 'Authorization': `Bearer ${token}` }
-            }).catch(() => { /* revocation is best-effort */ });
+            try {
+                await fetch('/api/admin/logout', {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+            } catch { /* revocation is best-effort */ }
         }
         sessionStorage.removeItem('admin_token');
         setIsAdmin(false);
     };
 
     return (
-        <AdminContext.Provider value={{ isAdmin, isLoading, login, logout }}>
+        <AdminContext.Provider value={{ isAdmin, isLoading, login, establishSession, logout }}>
             {children}
         </AdminContext.Provider>
     );
