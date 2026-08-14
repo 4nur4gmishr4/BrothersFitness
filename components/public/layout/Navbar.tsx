@@ -199,17 +199,17 @@ export default function Navbar({ unreadLeads = 0 }: { unreadLeads?: number } = {
 
       {/* Full Screen Menu */}
       {isOpen && (
-        <>
+        <div className="fixed inset-0 z-40 flex flex-col pointer-events-auto">
           <div
-            className="fixed inset-0 bg-surface-canvas z-40 modal-overlay-in"
+            className="absolute inset-0 bg-surface-canvas modal-overlay-in"
             aria-hidden="true"
           />
 
           <div 
-            className="fixed inset-0 z-40 overflow-y-auto overscroll-contain"
+            className="relative flex-1 overflow-y-auto overscroll-none scroll-smooth"
             onClick={() => setIsOpen(false)}
           >
-            <div className="min-h-[100dvh] flex flex-col items-center px-4 pt-24 pb-12 pointer-events-auto">
+            <div className="w-full flex flex-col items-center px-4 pt-28 pb-16 min-h-max">
               <div 
                 className="w-full max-w-2xl"
                 onClick={(e) => e.stopPropagation()}
@@ -295,7 +295,7 @@ export default function Navbar({ unreadLeads = 0 }: { unreadLeads?: number } = {
               </div>
             </div>
           </div>
-        </>
+        </div>
       )}
 
       {/* Modals */}
