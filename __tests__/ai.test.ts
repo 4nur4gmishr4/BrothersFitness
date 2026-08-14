@@ -106,6 +106,11 @@ describe('AI Provider Stack', () => {
         delete process.env.MISTRAL_API_KEY;
         delete process.env.COHERE_API_KEY;
         process.env.OPENROUTER_API_KEY = 'test-openrouter-key';
+        
+        // Vercel provider comes before OpenRouter and is activated by OPENROUTER_API_KEY.
+        // Make Vercel fail so the fallback lands on OpenRouter.
+        mockCreate.mockRejectedValueOnce(new Error('vercel down'));
+        
         const response = await generateTextWithFallback({ prompt: 'Hi' });
         expect(response.providerUsed).toBe('openrouter');
         expect(response.modelUsed).toBe('Llama 3.3 70B Instruct (OpenRouter)');
