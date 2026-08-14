@@ -83,18 +83,18 @@ export default function Hero() {
               </div>
 
               <p className="text-base md:text-lg text-mid max-w-2xl leading-relaxed mb-6 md:mb-8">
-                Brothers Fitness isn't just a gym—it's a high-performance training ground engineered for absolute results. With elite coaching, state-of-the-art equipment, and a 10/10 community, we transform discipline into unyielding strength.
+                Brothers Fitness isn&apos;t just a gym—it&apos;s a high-performance training ground engineered for absolute results. With elite coaching, state-of-the-art equipment, and a 10/10 community, we transform discipline into unyielding strength.
               </p>
               
               <div className="flex flex-wrap gap-2 md:gap-3 mb-8 md:mb-12">
                 <span className="px-2 py-1 md:px-3 md:py-1.5 bg-surface-elevated border border-surface-border text-xs md:text-xs font-mono text-low uppercase tracking-wider">
-                  /// Hammer Strength Equipped
+                  {"/// Hammer Strength Equipped"}
                 </span>
                 <span className="px-2 py-1 md:px-3 md:py-1.5 bg-surface-elevated border border-surface-border text-xs md:text-xs font-mono text-low uppercase tracking-wider">
-                  /// Biometric Analysis
+                  {"/// Biometric Analysis"}
                 </span>
                 <span className="px-2 py-1 md:px-3 md:py-1.5 bg-surface-elevated border border-surface-border text-xs md:text-xs font-mono text-low uppercase tracking-wider">
-                  /// Lakhnadon, MP
+                  {"/// Lakhnadon, MP"}
                 </span>
               </div>
             </div>

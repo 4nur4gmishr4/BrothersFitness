@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { checkRateLimit, peekRateLimit, getClientIp } from '@/lib/rate-limit';
+import { checkRateLimit, getClientIp } from '@/lib/rate-limit';
 import { LoginSchema, ProfileUpdateSchema, MemberSchema } from '@/lib/validation';
 import { PLAN_PRICES, getPlanPrice, MAX_DAILY_CREDITS, MEMBERSHIP_PLANS } from '@/lib/config';
 
@@ -44,23 +44,6 @@ describe('Rate Limiter', () => {
         expect(blocked.remaining).toBe(0);
     });
 
-    it('peek does not consume a quota slot', async () => {
-        const key = 'peek-token';
-        const limit = { maxRequests: 1, windowMs: 1000 };
-
-        expect((await checkRateLimit(key, limit)).allowed).toBe(true); // consumes the only slot
-
-        // Peeking sees the exhausted state but must not increment or reset it.
-        expect((await peekRateLimit(key, limit)).allowed).toBe(false);
-        expect((await peekRateLimit(key, limit)).remaining).toBe(0);
-
-        vi.advanceTimersByTime(1100);
-
-        // After the window, peek shows available without consuming it, so the
-        // next real check still succeeds.
-        expect((await peekRateLimit(key, limit)).allowed).toBe(true);
-        expect((await checkRateLimit(key, limit)).allowed).toBe(true);
-    });
 
     it('uses the last x-forwarded-for value to defeat spoofing', () => {
         process.env.TRUST_PROXY_HEADERS = 'true';

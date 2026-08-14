@@ -83,7 +83,7 @@ export default function FeaturesOverview() {
               </h2>
               
               <p className="text-mid md:text-base font-mono text-xs leading-relaxed max-w-sm mb-12 uppercase tracking-wide opacity-80">
-                Brother's Fitness provides a unified digital ecosystem to track, calibrate, and optimize your physical transformation. No generic tools. Only precision engineering.
+                Brother&apos;s Fitness provides a unified digital ecosystem to track, calibrate, and optimize your physical transformation. No generic tools. Only precision engineering.
               </p>
             </div>
 
