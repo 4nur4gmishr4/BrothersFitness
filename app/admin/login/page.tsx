@@ -28,7 +28,7 @@ function LoginForm() {
   const searchParams = useSearchParams();
   const redirected = searchParams.get("redirected");
 
-  const { login, isAdmin, isLoading } = useAdmin();
+  const { login, establishSession, isAdmin, isLoading } = useAdmin();
 
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -126,8 +126,8 @@ function LoginForm() {
         return;
       }
 
-      const ok = await login(password);
-      if (ok) {
+      if (data.token) {
+        establishSession(data.token);
         setSubmitState("success");
         setShieldState("success");
         // Allow access granted animation sequence to display fully before redirect
@@ -183,7 +183,7 @@ function LoginForm() {
           <div>
             <label
               htmlFor="admin-password"
-              className="block label-text uppercase tracking-widest text-[0.7rem] text-mid mb-2"
+              className="block label-text uppercase tracking-widest text-xs text-mid mb-2"
             >
               Admin Passcode
             </label>
@@ -235,7 +235,7 @@ function LoginForm() {
             {capsLock && !error && (
               <p
                 id="capslock-hint"
-                className="mt-2 text-[0.7rem] label-text uppercase tracking-widest text-status-warning"
+                className="mt-2 text-xs label-text uppercase tracking-widest text-status-warning"
               >
                 ⚠ Caps Lock is on
               </p>
@@ -271,7 +271,7 @@ function LoginForm() {
           >
             {submitState === "submitting" ? (
               <>
-                <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                <span className="w-4 h-4 border-2 border-surface-border border-t-transparent rounded-full animate-spin" />
                 Authenticating Passcode...
               </>
             ) : submitState === "success" ? (
@@ -312,7 +312,7 @@ export default function AdminLoginPage() {
         </Link>
         <div className="flex items-center gap-2 text-faint">
           <Timer className="w-3.5 h-3.5" />
-          <span className="label-text uppercase tracking-widest text-[0.65rem]">
+          <span className="label-text uppercase tracking-widest text-xs">
             Sessions expire after 24h
           </span>
         </div>
@@ -324,7 +324,7 @@ export default function AdminLoginPage() {
             <LoginForm />
           </Suspense>
 
-          <p className="mt-6 text-center text-[0.7rem] label-text uppercase tracking-widest text-faint">
+          <p className="mt-6 text-center text-xs label-text uppercase tracking-widest text-faint">
             Restricted to authorised gym personnel only
           </p>
         </div>

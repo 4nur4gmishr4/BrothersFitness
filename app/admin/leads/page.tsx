@@ -79,7 +79,9 @@ export default function AdminLeadsPage() {
 
   const saveRead = useCallback((ids: Set<string>) => {
     try {
-      localStorage.setItem(READ_KEY, JSON.stringify(Array.from(ids)));
+      // Cap at 500 most recently added IDs to prevent unbounded localStorage growth
+      const arr = Array.from(ids).slice(-500);
+      localStorage.setItem(READ_KEY, JSON.stringify(arr));
     } catch {
       // Storage full or disabled — non-fatal, read status won't persist across reloads.
     }
@@ -348,15 +350,15 @@ export default function AdminLeadsPage() {
                               <span className="shrink-0 w-2 h-2 bg-accent rounded-full" />
                             )}
                           </div>
-                          <div className="text-[0.7rem] text-low truncate font-mono">
+                          <div className="text-xs text-low truncate font-mono">
                             {l.phone || l.email || "no contact"}
                           </div>
-                          <p className="text-[0.7rem] text-faint mt-1 line-clamp-1">
+                          <p className="text-xs text-faint mt-1 line-clamp-1">
                             {l.message}
                           </p>
                         </div>
                         <div className="flex flex-col items-end gap-1 shrink-0">
-                          <span className="text-[0.6rem] text-faint font-mono whitespace-nowrap">
+                          <span className="text-xs text-faint font-mono whitespace-nowrap">
                             {formatTime(l.created_at)}
                           </span>
                           <ChevronRight
@@ -446,7 +448,7 @@ export default function AdminLeadsPage() {
                 <div className="space-y-5">
                   <div className="grid gap-4 sm:grid-cols-2">
                     <div>
-                      <div className="label-text uppercase tracking-widest text-[0.65rem] text-faint mb-1">
+                      <div className="label-text uppercase tracking-widest text-xs text-faint mb-1">
                         Full name
                       </div>
                       <div className="text-sm text-hi">
@@ -454,7 +456,7 @@ export default function AdminLeadsPage() {
                       </div>
                     </div>
                     <div>
-                      <div className="label-text uppercase tracking-widest text-[0.65rem] text-faint mb-1">
+                      <div className="label-text uppercase tracking-widest text-xs text-faint mb-1">
                         Email
                       </div>
                       <div className="text-sm text-hi break-all">
@@ -471,7 +473,7 @@ export default function AdminLeadsPage() {
                       </div>
                     </div>
                     <div>
-                      <div className="label-text uppercase tracking-widest text-[0.65rem] text-faint mb-1">
+                      <div className="label-text uppercase tracking-widest text-xs text-faint mb-1">
                         Phone
                       </div>
                       <div className="text-sm text-hi font-mono">
@@ -485,7 +487,7 @@ export default function AdminLeadsPage() {
                       </div>
                     </div>
                     <div>
-                      <div className="label-text uppercase tracking-widest text-[0.65rem] text-faint mb-1">
+                      <div className="label-text uppercase tracking-widest text-xs text-faint mb-1">
                         Submitted
                       </div>
                       <div className="text-sm text-hi font-mono">
@@ -497,7 +499,7 @@ export default function AdminLeadsPage() {
                     </div>
                   </div>
                   <div>
-                    <div className="label-text uppercase tracking-widest text-[0.65rem] text-faint mb-2">
+                    <div className="label-text uppercase tracking-widest text-xs text-faint mb-2">
                       Message
                     </div>
                     <div className="hairline surface-elevated p-4 text-sm text-hi whitespace-pre-wrap break-words leading-relaxed">

@@ -28,8 +28,8 @@ import {
 import {
   useAllMembers,
   useAdminStats,
-} from "@/lib/use-admin-stats";
-import { formatDate, parseLocalDate } from "@/lib/member-utils";
+} from "@/hooks/use-admin-stats";
+import { formatDate, parseLocalDate, getMemberStatus } from "@/lib/member-utils";
 import { openWhatsApp } from "@/lib/admin-api";
 import Image from "next/image";
 import Link from "next/link";
@@ -51,12 +51,13 @@ export default function AdminDashboardPage() {
     ];
     const safeCell = (val: string) => {
       // Escape internal double-quotes, then always wrap in quotes.
-      // Prefix dangerous-first-char values with a tab so spreadsheets don't
-      // interpret them as formulas. The tab goes OUTSIDE the quotes so it
-      // acts as a visual spacer and breaks formula parsing.
-      const escaped = String(val ?? "").replace(/"/g, '""');
-      const wrapped = `"${escaped}"`;
-      return /^[=+\-@\t\r\n]/.test(escaped) ? `\t${wrapped}` : wrapped;
+      // Prefix dangerous-first-char values with a single quote to prevent
+      // CSV injection (formula evaluation in spreadsheets).
+      let escaped = String(val ?? "").replace(/"/g, '""');
+      if (/^[=+\-@\t\r\n]/.test(escaped)) {
+        escaped = `'${escaped}`;
+      }
+      return `"${escaped}"`;
     };
     const rows = members.map((m) => [
       m.full_name || "",
@@ -64,7 +65,7 @@ export default function AdminDashboardPage() {
       m.membership_type || "",
       m.membership_start || "",
       m.membership_end || "",
-      statusOf(m),
+      getMemberStatus(m.membership_end).toUpperCase(),
     ]);
     const csv = [headers.join(","), ...rows.map((r) => r.map(safeCell).join(","))].join(
       "\n"
@@ -179,7 +180,7 @@ export default function AdminDashboardPage() {
                       <IndianRupee className="w-5 h-5" />
                     </div>
                     <div>
-                      <div className="label-text uppercase tracking-widest text-[0.65rem] sm:text-[0.7rem] text-faint">
+                      <div className="label-text uppercase tracking-widest text-xs sm:text-xs text-faint">
                         Estimated Membership Revenue
                       </div>
                       <div className="mt-2 font-display text-3xl sm:text-4xl text-status-success leading-none">
@@ -190,7 +191,7 @@ export default function AdminDashboardPage() {
                       </div>
                       {(stats.growth.thisMonth !== 0 ||
                         stats.growth.lastMonth !== 0) && (
-                        <div className="mt-2 inline-flex items-center gap-2 text-[0.7rem] font-mono uppercase tracking-wider text-status-success">
+                        <div className="mt-2 inline-flex items-center gap-2 text-xs font-mono uppercase tracking-wider text-status-success">
                           <TrendingUp className="w-3 h-3" />
                           {stats.growth.thisMonth} new this month
                           {stats.growth.lastMonth > 0 && (
@@ -266,14 +267,14 @@ export default function AdminDashboardPage() {
                             className="object-cover"
                           />
                         ) : (
-                          <div className="w-full h-full flex items-center justify-center text-[0.7rem] font-mono text-low">
+                          <div className="w-full h-full flex items-center justify-center text-xs font-mono text-low">
                             {initials(m.full_name)}
                           </div>
                         )}
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="text-sm text-hi truncate">{m.full_name}</div>
-                        <div className="text-[0.7rem] text-low">
+                        <div className="text-xs text-low">
                           {m.membership_type || "Member"}
                         </div>
                       </div>
@@ -285,7 +286,7 @@ export default function AdminDashboardPage() {
                             `🎂 Happy Birthday, ${m.full_name || "there"}! 🎉\n\nBrother's Fitness wishes you a power-packed year ahead! Keep crushing those goals! 💪\n\n- Team Brothers Fitness`
                           )
                         }
-                        className="shrink-0 inline-flex items-center gap-1.5 px-2.5 py-1.5 text-[0.7rem] label-text uppercase tracking-wider hairline border-status-success/30 text-status-success hover:bg-status-success/10 transition-colors"
+                        className="shrink-0 inline-flex items-center gap-1.5 px-2.5 py-1.5 text-xs label-text uppercase tracking-wider hairline border-status-success/30 text-status-success hover:bg-status-success/10 transition-colors"
                       >
                         <MessageCircle className="w-3 h-3" />
                         Wish
@@ -331,7 +332,7 @@ export default function AdminDashboardPage() {
                             className="object-cover"
                           />
                         ) : (
-                          <div className="w-full h-full flex items-center justify-center text-[0.7rem] font-mono text-low">
+                          <div className="w-full h-full flex items-center justify-center text-xs font-mono text-low">
                             {initials(m.full_name)}
                           </div>
                         )}
@@ -343,13 +344,13 @@ export default function AdminDashboardPage() {
                             <StatusBadge tone="danger" prefix="0d" label="ENDS" />
                           </span>
                         </div>
-                        <div className="text-[0.7rem] text-low">
+                        <div className="text-xs text-low">
                           {m.mobile} · {m.membership_type || "Plan"}
                         </div>
                       </div>
                       <Link
                         href={`/admin/members?renew=${m.id}`}
-                        className="shrink-0 inline-flex items-center gap-1.5 px-2.5 py-1.5 text-[0.7rem] label-text uppercase tracking-wider bg-accent text-white hover:bg-accent-hover transition-colors"
+                        className="shrink-0 inline-flex items-center gap-1.5 px-2.5 py-1.5 text-xs label-text uppercase tracking-wider bg-accent text-white hover:bg-accent-hover transition-colors"
                       >
                         <Edit2 className="w-3 h-3" />
                         Renew
@@ -377,7 +378,7 @@ export default function AdminDashboardPage() {
                 <div className="space-y-4 -mx-1">
                   {stats.alerts.expiringSoon.length > 0 && (
                     <div>
-                      <div className="label-text uppercase tracking-widest text-[0.65rem] text-low mb-2 px-1">
+                      <div className="label-text uppercase tracking-widest text-xs text-low mb-2 px-1">
                         Expiring plans
                       </div>
                       <ul className="divide-y divide-surface-border">
@@ -387,7 +388,7 @@ export default function AdminDashboardPage() {
                             className="py-2 px-1 flex items-center gap-3"
                           >
                             <span
-                              className={`shrink-0 w-9 h-9 flex items-center justify-center text-[0.7rem] font-mono font-bold hairline ${
+                              className={`shrink-0 w-9 h-9 flex items-center justify-center text-xs font-mono font-bold hairline ${
                                 (m.daysRemaining ?? 0) <= 2
                                   ? "bg-status-warning/10 text-status-warning border-status-warning/30"
                                   : "bg-surface-elevated text-mid"
@@ -399,7 +400,7 @@ export default function AdminDashboardPage() {
                               <div className="text-sm text-hi truncate">
                                 {m.full_name}
                               </div>
-                              <div className="text-[0.7rem] text-low">
+                              <div className="text-xs text-low">
                                 Ends {formatDate(m.membership_end)}
                               </div>
                             </div>
@@ -409,7 +410,7 @@ export default function AdminDashboardPage() {
                           <li className="pt-2 pb-0.5 px-1">
                             <Link
                               href="/admin/members?filter=expiring"
-                              className="text-[0.7rem] label-text uppercase tracking-wider text-accent hover:underline"
+                              className="text-xs label-text uppercase tracking-wider text-accent hover:underline"
                             >
                               View all {stats.alerts.expiringSoon.length} →
                             </Link>
@@ -421,7 +422,7 @@ export default function AdminDashboardPage() {
 
                   {stats.alerts.upcomingBirthdays.length > 0 && (
                     <div className={stats.alerts.expiringSoon.length > 0 ? "pt-1" : ""}>
-                      <div className="label-text uppercase tracking-widest text-[0.65rem] text-low mb-2 px-1">
+                      <div className="label-text uppercase tracking-widest text-xs text-low mb-2 px-1">
                         Upcoming birthdays
                       </div>
                       <ul className="divide-y divide-surface-border">
@@ -430,14 +431,14 @@ export default function AdminDashboardPage() {
                             key={`bday-${m.id}`}
                             className="py-2 px-1 flex items-center gap-3"
                           >
-                            <span className="shrink-0 w-9 h-9 flex items-center justify-center text-[0.7rem] font-mono font-bold hairline bg-status-success/10 text-status-success border-status-success/30">
+                            <span className="shrink-0 w-9 h-9 flex items-center justify-center text-xs font-mono font-bold hairline bg-status-success/10 text-status-success border-status-success/30">
                               {m.daysUntil}d
                             </span>
                             <div className="flex-1 min-w-0">
                               <div className="text-sm text-hi truncate">
                                 {m.full_name}
                               </div>
-                              <div className="text-[0.7rem] text-low">
+                              <div className="text-xs text-low">
                                 {formatDate(m.date_of_birth)}
                               </div>
                             </div>
@@ -459,7 +460,7 @@ export default function AdminDashboardPage() {
               action={
                 <Link
                   href="/admin/members?filter=incomplete"
-                  className="label-text uppercase tracking-wider text-[0.7rem] text-accent hover:underline"
+                  className="label-text uppercase tracking-wider text-xs text-accent hover:underline"
                 >
                   Open filter →
                 </Link>
@@ -482,7 +483,7 @@ export default function AdminDashboardPage() {
                           className="object-cover"
                         />
                       ) : (
-                        <div className="w-full h-full flex items-center justify-center text-[0.7rem] font-mono text-status-warning">
+                        <div className="w-full h-full flex items-center justify-center text-xs font-mono text-status-warning">
                           {initials(m.full_name)}
                         </div>
                       )}
@@ -491,7 +492,7 @@ export default function AdminDashboardPage() {
                       <div className="text-sm text-hi truncate group-hover:text-accent transition-colors">
                         {m.full_name}
                       </div>
-                      <div className="text-[0.7rem] text-low">
+                      <div className="text-xs text-low">
                         {missingFields(m).join(" · ")}
                       </div>
                     </div>
@@ -517,13 +518,13 @@ function PlanRev({
 }) {
   return (
     <div className="hairline bg-surface-elevated p-2.5 sm:p-3">
-      <div className="label-text uppercase tracking-widest text-[0.6rem] text-faint">
+      <div className="label-text uppercase tracking-widest text-xs text-faint">
         {label}
       </div>
       <div className="mt-1 font-display text-base sm:text-lg text-hi leading-none">
         ₹{value.toLocaleString("en-IN")}
       </div>
-      <div className="mt-0.5 text-[0.7rem] text-low">
+      <div className="mt-0.5 text-xs text-low">
         {count} member{count === 1 ? "" : "s"}
       </div>
     </div>
@@ -543,19 +544,6 @@ function pct(n: number, total: number): string {
   return `${Math.round((n / total) * 100)}%`;
 }
 
-function statusOf(m: { membership_end: string | null }): string {
-  const s = m.membership_end;
-  if (!s) return "ACTIVE";
-  const end = parseLocalDate(s);
-  if (!end) return "ACTIVE";
-  const now = new Date();
-  now.setHours(0, 0, 0, 0);
-  const d = Math.ceil((end.getTime() - now.getTime()) / 86400000);
-  if (d < 0) return "EXPIRED";
-  if (d <= 7) return "EXPIRING";
-  return "ACTIVE";
-}
-
 function missingFields(m: {
   photo_url: string | null;
   date_of_birth: string | null;
@@ -570,6 +558,5 @@ function missingFields(m: {
   if (!m.gender) out.push("Gender");
   if (!m.height_cm) out.push("Height");
   if (!m.weight_kg) out.push("Weight");
-  if (!m.address) out.push("Address");
   return out;
 }
