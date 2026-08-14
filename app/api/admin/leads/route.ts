@@ -33,10 +33,11 @@ export async function DELETE(req: Request) {
     if (auth instanceof NextResponse) return auth;
 
     try {
-        const { searchParams } = new URL(req.url);
+        const { searchParams } = new URL(req.url, 'http://localhost');
         const id = searchParams.get('id');
 
-        if (!id) return NextResponse.json({ error: 'ID required' }, { status: 400 });
+        const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+        if (!id || !uuidRegex.test(id)) return NextResponse.json({ error: 'Valid UUID required' }, { status: 400 });
 
         // Fetch the lead first so we can log what was deleted
         const { data: lead } = await getServiceSupabase()

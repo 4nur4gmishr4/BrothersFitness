@@ -19,6 +19,6 @@ export async function POST(req: Request) {
         return withRequestId(NextResponse.json({ success: true }), requestId);
     } catch (error) {
         log.error('Logout error', { error: error instanceof Error ? error.message : 'Unknown' });
-        return withRequestId(NextResponse.json({ success: true }, { status: 200 }), requestId);
+        return withRequestId(NextResponse.json({ error: 'Failed to logout' }, { status: 500 }), requestId);
     }
 }

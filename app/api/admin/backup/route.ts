@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getServiceSupabase } from '@/lib/server-supabase';
 import { requireAdminToken } from '@/lib/admin-auth';
+import { logger } from '@/lib/logger';
 
 // POST (not GET) so a crawled/CSRF'd GET can't trigger a data dump side-effect.
 export async function POST(req: Request) {
@@ -43,9 +44,11 @@ export async function POST(req: Request) {
                     .from('backups')
                     .getPublicUrl(filename);
                 storageUrl = urlData.publicUrl;
+            } else if (uploadError) {
+                logger.warn('Storage upload error', { error: uploadError.message });
             }
         } catch (storageError) {
-            console.warn('Storage upload failed (bucket may not exist):', storageError);
+            logger.warn('Storage upload failed (bucket may not exist)', { error: storageError instanceof Error ? storageError.message : 'Unknown' });
         }
 
         // Audit the backup
@@ -57,24 +60,19 @@ export async function POST(req: Request) {
                 details: { filename, total_members: members?.length || 0 }
             }]);
         } catch (logError) {
-            console.warn('Failed to log backup:', logError);
+            logger.warn('Failed to log backup', { error: logError instanceof Error ? logError.message : 'Unknown' });
         }
 
         return NextResponse.json({
             success: true,
             filename,
             total_members: members?.length || 0,
-            storage_url: storageUrl,
-            // Also return the data directly for download
-            data: JSON.parse(backupData)
+            storage_url: storageUrl
         });
     } catch (error: unknown) {
-        console.error('Backup error:', error);
+        logger.error('Backup error', { error: error instanceof Error ? error.message : 'Unknown' });
         return NextResponse.json(
-            {
-                error: 'Failed to create backup',
-                details: error instanceof Error ? error.message : String(error)
-            },
+            { error: 'Failed to create backup' },
             { status: 500 }
         );
     }
