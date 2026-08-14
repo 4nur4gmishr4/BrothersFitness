@@ -8,7 +8,7 @@ import ResultReveal from "@/components/animations/ResultReveal";
 import SliderThumb from "@/components/animations/SliderThumb";
 import RepProgressRing from "@/components/animations/RepProgressRing";
 
-const ShareMissionReport = dynamic(() => import("./ShareMissionReport"), { ssr: false });
+const ShareMissionReport = dynamic(() => import("@/components/features/gamification/ShareMissionReport"), { ssr: false });
 
 export default function Diagnostics() {
   const [activeTab, setActiveTab] = useState("bmi");
