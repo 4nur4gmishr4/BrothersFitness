@@ -1,30 +1,19 @@
-﻿"use client";
+"use client";
 
-import { useEffect, useState } from "react";
+import { motion, useScroll, useSpring } from "framer-motion";
 
 export default function ReadingProgressBar() {
-    const [progress, setProgress] = useState(0);
-
-    useEffect(() => {
-        const onScroll = () => {
-            const doc = document.documentElement;
-            const max = doc.scrollHeight - doc.clientHeight;
-            setProgress(max > 0 ? doc.scrollTop / max : 0);
-        };
-
-        onScroll();
-        window.addEventListener("scroll", onScroll, { passive: true });
-        window.addEventListener("resize", onScroll);
-        return () => {
-            window.removeEventListener("scroll", onScroll);
-            window.removeEventListener("resize", onScroll);
-        };
-    }, []);
+    const { scrollYProgress } = useScroll();
+    const scaleX = useSpring(scrollYProgress, {
+        stiffness: 100,
+        damping: 30,
+        restDelta: 0.001
+    });
 
     return (
-        <div
+        <motion.div
             className="fixed top-0 left-0 right-0 h-1 bg-accent origin-left z-[110]"
-            style={{ transform: `scaleX(${progress})` }}
+            style={{ scaleX }}
         />
     );
 }

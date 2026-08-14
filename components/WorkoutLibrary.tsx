@@ -181,7 +181,7 @@ export default function WorkoutLibrary() {
                 </div>
               )}
 
-              <div className="absolute top-2 right-2 surface-modal hairline px-2 py-1 z-10 bg-black/50 backdrop-blur-md">
+              <div className="absolute top-2 right-2 surface-modal hairline px-2 py-1 z-10 bg-surface-canvas">
                 <span className="text-[9px] font-mono tracking-widest text-accent uppercase">
                   {exercise.category || "STRENGTH"}
                 </span>

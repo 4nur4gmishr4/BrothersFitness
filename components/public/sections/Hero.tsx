@@ -175,11 +175,12 @@ export default function Hero() {
                             
                             {/* Bar Fill with Red Gradient */}
                             <motion.div
-                              className={`w-full relative bg-gradient-to-t from-accent/50 via-accent/80 to-accent ${
-                                isToday ? "shadow-[0_0_12px_rgba(215,25,33,0.6)] brightness-110" : "opacity-85 group-hover/bar:opacity-100"
+                              className={`w-full absolute bottom-0 bg-gradient-to-t from-accent/50 via-accent/80 to-accent origin-bottom ${
+                                isToday ? "border-t border-accent brightness-110" : "opacity-85 group-hover/bar:opacity-100"
                               }`}
-                              initial={{ height: "0%" }}
-                              animate={{ height: `${Math.max(heightPct, 8)}%` }}
+                              style={{ height: `${Math.max(heightPct, 8)}%` }}
+                              initial={{ scaleY: 0 }}
+                              animate={{ scaleY: 1 }}
                               transition={{ duration: 0.8, delay: idx * 0.08, ease: [0.16, 1, 0.3, 1] }}
                             >
                               {/* Glowing Top Cap */}
