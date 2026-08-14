@@ -210,10 +210,13 @@ body {
 }
 
 /* ---------- Universal Theme Transition Sync ---------- */
-/* Ensures every component flips colors in exactly 300ms synchronously */
-*, *::before, *::after {
+/* Ensures every component flips colors in exactly 150ms synchronously */
+.theme-transition,
+.theme-transition *,
+.theme-transition *::before,
+.theme-transition *::after {
   transition-property: background-color, border-color, color, fill, stroke !important;
-  transition-duration: 300ms !important;
+  transition-duration: 150ms !important;
   transition-timing-function: cubic-bezier(0.2, 0, 0, 1) !important;
 }
 

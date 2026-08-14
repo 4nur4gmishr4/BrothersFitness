@@ -59,7 +59,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
             
             window.setTimeout(() => {
                 root.classList.remove("theme-transition");
-            }, 300);
+            }, 150);
         };
 
         resolve();
