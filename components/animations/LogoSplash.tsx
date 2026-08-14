@@ -68,7 +68,7 @@ export default function LogoSplash({ fading = false }: { fading?: boolean }) {
       </svg>
 
       <p
-        className="mt-4 font-mono text-[10px] uppercase tracking-widest text-low logo-fade-in flex items-center gap-2"
+        className="mt-4 font-mono text-xs uppercase tracking-widest text-low logo-fade-in flex items-center gap-2"
         style={{ animationDelay: "1300ms" } as React.CSSProperties}
       >
         <Dumbbell className="w-3 h-3 text-accent" />

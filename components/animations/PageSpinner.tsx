@@ -8,7 +8,7 @@ export default function PageSpinner({ label = "LOADING" }: { label?: string }) {
         className="w-16 h-16"
         themeColor="accent"
       />
-      <p className="font-mono text-[10px] uppercase tracking-widest text-low">
+      <p className="font-mono text-xs uppercase tracking-widest text-low">
         {label}
       </p>
     </div>
