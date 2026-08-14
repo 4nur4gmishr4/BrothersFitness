@@ -4,7 +4,7 @@ import { useState, useEffect, Suspense, useCallback, useMemo } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { ArrowLeft, Cpu, Calculator } from "lucide-react";
 import { toast } from "sonner";
-import Navbar from "@/components/Navbar";
+import Navbar from "@/components/public/layout/Navbar";
 import { useUserAuth } from "@/lib/user-auth-context";
 import { MAX_DAILY_CREDITS } from "@/lib/config";
 import type { DietPlan } from "@/lib/fuel-types";
@@ -283,7 +283,7 @@ function FuelSynthesizerContent() {
                             className="flex items-center gap-2 text-low hover:text-accent transition-colors duration-fast"
                         >
                             <ArrowLeft className="w-5 h-5" />
-                            <span className="font-mono text-[10px] uppercase tracking-widest hidden sm:inline">Back</span>
+                            <span className="font-mono text-xs uppercase tracking-widest hidden sm:inline">Back</span>
                         </button>
                         {isLoggedIn && user && (
                             <div className="flex items-center gap-1.5 surface-card hairline px-3 py-1.5">
@@ -308,26 +308,26 @@ function FuelSynthesizerContent() {
 
                             <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
                                 <div>
-                                    <label className="block label-text text-[10px] text-faint uppercase tracking-widest mb-2">Gender</label>
+                                    <label className="block label-text text-xs text-faint uppercase tracking-widest mb-2">Gender</label>
                                     <select value={gender} onChange={(e) => setGender(e.target.value)} className="input-field w-full">
                                         <option>Male</option>
                                         <option>Female</option>
                                     </select>
                                 </div>
                                 <div>
-                                    <label className="block label-text text-[10px] text-faint uppercase tracking-widest mb-2">Age <span className="text-accent">*</span></label>
+                                    <label className="block label-text text-xs text-faint uppercase tracking-widest mb-2">Age <span className="text-accent">*</span></label>
                                     <input type="number" value={age} onFocus={(e) => e.target.select()} onChange={(e) => setAge(e.target.value)} placeholder="25" className="input-field w-full" />
                                 </div>
                                 <div>
-                                    <label className="block label-text text-[10px] text-faint uppercase tracking-widest mb-2">Height (cm) <span className="text-accent">*</span></label>
+                                    <label className="block label-text text-xs text-faint uppercase tracking-widest mb-2">Height (cm) <span className="text-accent">*</span></label>
                                     <input type="number" value={height} onFocus={(e) => e.target.select()} onChange={(e) => setHeight(e.target.value)} placeholder="175" className="input-field w-full" />
                                 </div>
                                 <div>
-                                    <label className="block label-text text-[10px] text-faint uppercase tracking-widest mb-2">Current Weight (kg) <span className="text-accent">*</span></label>
+                                    <label className="block label-text text-xs text-faint uppercase tracking-widest mb-2">Current Weight (kg) <span className="text-accent">*</span></label>
                                     <input type="number" value={currentWeight} onFocus={(e) => e.target.select()} onChange={(e) => setCurrentWeight(e.target.value)} placeholder="70" className="input-field w-full" />
                                 </div>
                                 <div>
-                                    <label className="block label-text text-[10px] text-faint uppercase tracking-widest mb-2">Target Weight (kg) <span className="text-accent">*</span></label>
+                                    <label className="block label-text text-xs text-faint uppercase tracking-widest mb-2">Target Weight (kg) <span className="text-accent">*</span></label>
                                     <input type="number" value={targetWeight} onFocus={(e) => e.target.select()} onChange={(e) => setTargetWeight(e.target.value)} placeholder="75" className="input-field w-full text-accent" />
                                 </div>
                             </div>
@@ -411,7 +411,7 @@ function FuelSynthesizerContent() {
                                                     <p className="label-text text-xs text-faint uppercase mt-1">KCAL/DAY</p>
                                                     <button
                                                         onClick={handleCalculateCalories}
-                                                        className="label-text text-[10px] font-bold uppercase text-faint hover:text-accent hairline hover:border-accent px-3 py-1 mt-3 transition-colors duration-fast"
+                                                        className="label-text text-xs font-bold uppercase text-faint hover:text-accent hairline hover:border-accent px-3 py-1 mt-3 transition-colors duration-fast"
                                                     >
                                                         Recalculate
                                                     </button>
@@ -467,37 +467,37 @@ function FuelSynthesizerContent() {
                                     </div>
                                     <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
                                         <div className="surface-canvas hairline p-2 text-center">
-                                            <span className="block text-[10px] text-faint uppercase">Daily Calories</span>
+                                            <span className="block text-xs text-faint uppercase">Daily Calories</span>
                                             <span className="font-black text-accent text-lg">{calculatedCalories} kcal</span>
                                         </div>
                                         <div className="surface-canvas hairline p-2 text-center">
-                                            <span className="block text-[10px] text-faint uppercase">Weight Change</span>
+                                            <span className="block text-xs text-faint uppercase">Weight Change</span>
                                             <span className="font-bold text-hi">{weightChangeRate} kg/week</span>
                                         </div>
                                         <div className="surface-canvas hairline p-2 text-center">
-                                            <span className="block text-[10px] text-faint uppercase">Activity</span>
+                                            <span className="block text-xs text-faint uppercase">Activity</span>
                                             <span className="font-bold text-hi text-xs">{activityLevel.split(" ")[0]}</span>
                                         </div>
                                         <div className="surface-canvas hairline p-2 text-center">
-                                            <span className="block text-[10px] text-faint uppercase">Mode</span>
+                                            <span className="block text-xs text-faint uppercase">Mode</span>
                                             <span className="font-bold text-hi">{mode.toUpperCase()}</span>
                                         </div>
                                     </div>
                                     <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm mt-3">
                                         <div className="surface-canvas hairline p-2 text-center">
-                                            <span className="block text-[10px] text-faint uppercase">Diet Type</span>
+                                            <span className="block text-xs text-faint uppercase">Diet Type</span>
                                             <span className="font-bold text-hi text-xs">{dietType}</span>
                                         </div>
                                         <div className="surface-canvas hairline p-2 text-center">
-                                            <span className="block text-[10px] text-faint uppercase">Budget</span>
+                                            <span className="block text-xs text-faint uppercase">Budget</span>
                                             <span className="font-bold text-hi text-xs">{budget}</span>
                                         </div>
                                         <div className="surface-canvas hairline p-2 text-center">
-                                            <span className="block text-[10px] text-faint uppercase">Current → Target</span>
+                                            <span className="block text-xs text-faint uppercase">Current → Target</span>
                                             <span className="font-bold text-hi text-xs">{currentWeight}kg → {targetWeight}kg</span>
                                         </div>
                                         <div className="surface-canvas hairline p-2 text-center">
-                                            <span className="block text-[10px] text-faint uppercase">Body Stats</span>
+                                            <span className="block text-xs text-faint uppercase">Body Stats</span>
                                             <span className="font-bold text-hi text-xs">{gender}, {age}y, {height}cm</span>
                                         </div>
                                     </div>
@@ -535,7 +535,7 @@ function FuelSynthesizerContent() {
                                 <p className="font-black text-xl uppercase animate-pulse">Generating your plan...</p>
                                 <CountdownTimer duration={60} />
                                 <LoadingStatus />
-                                <p className="text-[10px] text-faint font-mono mt-4 hairline p-2 inline-block">
+                                <p className="text-xs text-faint font-mono mt-4 hairline p-2 inline-block">
                                     NOTE: Building your bilingual meal plan and pricing.<br />
                                     Estimated time: under a minute.
                                 </p>

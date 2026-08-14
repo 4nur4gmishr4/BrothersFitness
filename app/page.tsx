@@ -1,11 +1,11 @@
-﻿import Navbar from "@/components/Navbar";
-import Hero from "@/components/Hero";
-import FeaturesOverview from "@/components/FeaturesOverview";
-import InfoSection from "@/components/InfoSection";
+import Navbar from "@/components/public/layout/Navbar";
+import Hero from "@/components/public/sections/Hero";
+import FeaturesOverview from "@/components/public/sections/FeaturesOverview";
+import InfoSection from "@/components/public/sections/InfoSection";
 import DailyProtocol from "@/components/DailyProtocol";
 import Architects from "@/components/Architects";
-import ContactForm from "@/components/ContactForm";
-import Footer from "@/components/Footer";
+import ContactForm from "@/components/ui/primitives/ContactForm";
+import Footer from "@/components/public/layout/Footer";
 import PageWrapper from "@/components/PageWrapper";
 
 export default function Home() {
