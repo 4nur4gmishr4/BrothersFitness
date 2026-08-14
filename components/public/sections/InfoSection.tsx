@@ -46,10 +46,8 @@ export default function InfoSection() {
         <div className="flex flex-col lg:flex-row gap-8 lg:gap-12 items-start">
           
           {/* Header Panel */}
-          <motion.div 
-            initial={{ opacity: 0, x: -20 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
+          <div 
+            data-reveal
             className="w-full lg:w-[40%] flex flex-col gap-6 sticky top-24"
           >
             <div className="inline-flex items-center gap-3">
@@ -72,7 +70,7 @@ export default function InfoSection() {
                  <div key={i} className="bg-hi h-full" style={{ width: `${w * 2}px` }} />
                ))}
             </div>
-          </motion.div>
+          </div>
 
           {/* Data Table */}
           <div className="w-full lg:w-[60%] flex flex-col border border-surface-border bg-surface-card rounded-none p-1 shrink-0">
@@ -87,12 +85,10 @@ export default function InfoSection() {
             {/* Table Rows */}
             <div className="flex flex-col">
               {schedules.map((row, idx) => (
-                <motion.div 
+                <div 
                   key={row.id}
-                  initial={{ opacity: 0, y: 10 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: idx * 0.1 }}
+                  data-reveal
+                  style={{ "--reveal-delay": `${idx * 100}ms` } as React.CSSProperties}
                   className={`grid grid-cols-1 md:grid-cols-12 gap-4 md:gap-4 px-6 py-5 border-b border-surface-border/50 last:border-0 items-center transition-colors duration-300 ${row.highlight ? 'bg-accent/5 hover:bg-accent/10' : 'hover:bg-surface-elevated'}`}
                 >
                   <div className="md:col-span-2 flex items-center justify-between md:block">
@@ -123,7 +119,7 @@ export default function InfoSection() {
                       </span>
                     </div>
                   </div>
-                </motion.div>
+                </div>
               ))}
             </div>
             

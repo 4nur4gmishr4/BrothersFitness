@@ -66,10 +66,8 @@ export default function FeaturesOverview() {
         <div className="flex flex-col lg:flex-row items-stretch gap-6 lg:gap-8">
           
           {/* LEFT: Technical Header */}
-          <motion.div 
-            initial={{ opacity: 0, x: -20 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
+          <div 
+            data-reveal
             className="w-full lg:w-[35%] p-8 md:p-10 border border-surface-border bg-surface-card rounded-none flex flex-col justify-between shrink-0"
           >
             <div>
@@ -96,17 +94,15 @@ export default function FeaturesOverview() {
                 </div>
               </Link>
             </div>
-          </motion.div>
+          </div>
 
           {/* RIGHT: Grid of Modules */}
           <div className="w-full lg:w-[65%] grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-5 flex-grow">
             {features.map((feature, i) => (
-              <motion.div 
+              <div 
                 key={feature.title}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.1 }}
+                data-reveal
+                style={{ "--reveal-delay": `${i * 100}ms` } as React.CSSProperties}
                 className="group block h-full"
               >
                 <Link href={feature.link} className="block h-full">
@@ -139,7 +135,7 @@ export default function FeaturesOverview() {
                     </div>
                   </div>
                 </Link>
-              </motion.div>
+              </div>
             ))}
           </div>
 

@@ -64,12 +64,10 @@ export default function Architects() {
         {/* Grid Layout (Replaced 3D Carousel) */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
           {personnel.map((p, idx) => (
-            <motion.div 
+            <div 
               key={p.id}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: idx * 0.1 }}
+              data-reveal
+              style={{ "--reveal-delay": `${idx * 100}ms` } as React.CSSProperties}
               className="flex flex-col lg:flex-row border border-surface-border bg-surface-card rounded-none group hover:border-accent transition-colors duration-300"
             >
               {/* Photo Section */}
@@ -83,7 +81,7 @@ export default function Architects() {
                 />
                 
                 {/* HUD Elements */}
-                <div className="absolute top-4 left-4 bg-black/60 backdrop-blur-sm border border-surface-border/50 px-2 py-1">
+                <div className="absolute top-4 left-4 bg-surface-canvas border border-surface-border/50 px-2 py-1">
                   <span className="font-mono text-[9px] tracking-widest text-accent uppercase">{p.id}</span>
                 </div>
                 
@@ -135,7 +133,7 @@ export default function Architects() {
                 </div>
               </div>
 
-            </motion.div>
+            </div>
           ))}
         </div>
 
