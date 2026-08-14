@@ -1,6 +1,6 @@
-import Navbar from "@/components/Navbar";
+import Navbar from "@/components/public/layout/Navbar";
 import Diagnostics from "@/components/Diagnostics";
-import Footer from "@/components/Footer";
+import Footer from "@/components/public/layout/Footer";
 
 export default function CalculatorsPage() {
     return (

@@ -1,9 +1,9 @@
-﻿"use client";
+"use client";
 
 import { useState, useEffect } from "react";
 import { Flame, Brain, Target, Laugh, ArrowLeft, LayoutGrid, List, Heart, Sparkles } from "lucide-react";
 import Link from "next/link";
-import Footer from "@/components/Footer";
+import Footer from "@/components/public/layout/Footer";
 
 const quotes = {
   intensity: [

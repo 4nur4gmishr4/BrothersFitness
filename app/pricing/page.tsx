@@ -1,6 +1,6 @@
-import Navbar from "@/components/Navbar";
-import PaymentSection from "@/components/PaymentSection";
-import Footer from "@/components/Footer";
+import Navbar from "@/components/public/layout/Navbar";
+import PaymentSection from "@/components/public/sections/PaymentSection";
+import Footer from "@/components/public/layout/Footer";
 
 export default function PricingPage() {
     return (
