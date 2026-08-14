@@ -1,8 +1,8 @@
-﻿"use client";
+"use client";
 
 import { useState, useEffect, useMemo } from 'react';
 import { Trophy, X, Award, Lock } from 'lucide-react';
-import { useGamification, MEDALS } from './GamificationContext';
+import { useGamification, MEDALS } from '@/components/ui/providers/GamificationContext';
 import TrophyShine from '@/components/animations/TrophyShine';
 import FlameFlicker from '@/components/animations/FlameFlicker';
 import ConfettiBurst from '@/components/animations/ConfettiBurst';
@@ -91,7 +91,7 @@ function TrophyContent({ onClose }: { onClose?: () => void }) {
                                 <FlameFlicker className="w-5 h-5 text-status-danger" />
                             </div>
                             <div>
-                                <p className="label-text text-[10px] text-faint uppercase tracking-wider font-bold">Streak</p>
+                                <p className="label-text text-xs text-faint uppercase tracking-wider font-bold">Streak</p>
                                 <p className="stat-callout__value text-xl font-black text-status-danger">
                                     {visitStreak}
                                     <span className="text-xs ml-1 text-status-danger/70 font-bold">DAYS</span>
@@ -110,7 +110,7 @@ function TrophyContent({ onClose }: { onClose?: () => void }) {
                                 </div>
                             </div>
                             <div>
-                                <p className="label-text text-[10px] text-faint uppercase tracking-wider font-bold">Rank</p>
+                                <p className="label-text text-xs text-faint uppercase tracking-wider font-bold">Rank</p>
                                 <p className="stat-callout__value text-xl font-black text-hi">
                                     {medals.length}
                                     <span className="text-xs text-faint font-bold">/{allMedals.length}</span>
@@ -225,7 +225,7 @@ export default function TrophyRoom({ isModal = false, isPage = false, onClose }:
                 >
                     <Trophy className="w-4 h-4 sm:w-5 sm:h-5" />
                     {!hasViewed && (
-                        <span className="absolute -top-1 -right-1 w-4 h-4 bg-accent text-white text-[10px] font-bold flex items-center justify-center">
+                        <span className="absolute -top-1 -right-1 w-4 h-4 bg-accent text-white text-xs font-bold flex items-center justify-center">
                             !
                         </span>
                     )}

@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState, useEffect, useCallback } from "react";
 import { Timer, Play, Pause, RotateCcw, X, TrendingUp, TrendingDown, Bell } from "lucide-react";
@@ -175,7 +175,7 @@ export default function TacticalStopwatch() {
                     {/* Quick Presets - Only for Countdown */}
                     {mode === "countdown" && (
                         <div className="pt-4 hairline-t">
-                            <p className="label-text text-[10px] uppercase tracking-widest text-faint mb-3">Rest Presets</p>
+                            <p className="label-text text-xs uppercase tracking-widest text-faint mb-3">Rest Presets</p>
                             <div className="grid grid-cols-3 gap-2">
                                 {[30, 60, 90, 120, 180, 300].map(sec => (
                                     <button

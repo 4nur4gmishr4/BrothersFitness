@@ -106,7 +106,7 @@ export default function WorkoutLibrary() {
 
   if (isLoading && !allExercises) {
     return (
-      <div className="flex items-center justify-center py-20 text-accent font-mono text-[10px] tracking-widest animate-pulse">
+      <div className="flex items-center justify-center py-20 text-accent font-mono text-xs tracking-widest animate-pulse">
         LOADING WORKOUT DATABASE...
       </div>
     );
@@ -114,7 +114,7 @@ export default function WorkoutLibrary() {
 
   if (error) {
     return (
-      <div className="text-center p-10 surface-card hairline border-status-danger text-status-danger font-mono text-[10px]">
+      <div className="text-center p-10 surface-card hairline border-status-danger text-status-danger font-mono text-xs">
         FAILED TO LOAD EXERCISES. RETRY REQUIRED.
       </div>
     );
@@ -131,7 +131,7 @@ export default function WorkoutLibrary() {
             <button
               key={f}
               onClick={() => { setActiveFilter(f); setPage(1); }}
-              className={`whitespace-nowrap px-5 py-2.5 rounded-full border transition-all duration-300 font-mono text-[10px] tracking-[0.2em] uppercase ${
+              className={`whitespace-nowrap px-5 py-2.5 rounded-full border transition-all duration-300 font-mono text-xs tracking-[0.2em] uppercase ${
                 activeFilter === f 
                   ? "bg-accent border-accent text-white shadow-[0_0_15px_rgba(215,25,33,0.4)]"
                   : "bg-surface-canvas border-surface-border text-mid hover:text-hi hover:border-hi"
@@ -215,7 +215,7 @@ export default function WorkoutLibrary() {
       </div>
 
       {filteredExercises.length === 0 && (
-        <div className="text-center py-20 text-[10px] font-mono tracking-widest text-faint uppercase">NO MATCHING EXERCISES FOUND.</div>
+        <div className="text-center py-20 text-xs font-mono tracking-widest text-faint uppercase">NO MATCHING EXERCISES FOUND.</div>
       )}
 
       {/* Pagination controls */}
@@ -223,19 +223,19 @@ export default function WorkoutLibrary() {
         <button
           onClick={() => setPage((p) => Math.max(1, p - 1))}
           disabled={page === 1}
-          className="btn-secondary disabled:opacity-50 text-[10px]"
+          className="btn-secondary disabled:opacity-50 text-xs"
         >
           <ChevronLeft className="w-4 h-4 mr-1" /> PREV
         </button>
 
-        <span className="text-[10px] font-mono tracking-[0.2em] text-accent uppercase">
+        <span className="text-xs font-mono tracking-[0.2em] text-accent uppercase">
           PAGE {page} <span className="text-faint">/ {maxPage}</span>
         </span>
 
         <button
           onClick={() => setPage((p) => Math.min(maxPage, p + 1))}
           disabled={page >= maxPage}
-          className="btn-secondary disabled:opacity-50 text-[10px]"
+          className="btn-secondary disabled:opacity-50 text-xs"
         >
           NEXT <ChevronRight className="w-4 h-4 ml-1" />
         </button>

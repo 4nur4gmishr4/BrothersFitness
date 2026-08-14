@@ -3,14 +3,14 @@
 import { useState, useRef, useEffect } from "react";
 import { Cpu, X, Dumbbell, Utensils, Zap, Languages } from "lucide-react";
 import { useUserAuth } from "@/lib/user-auth-context";
-import { useModalDismiss } from "@/components/hooks/useModalDismiss";
+import { useModalDismiss } from "@/hooks/useModalDismiss";
 import { MAX_DAILY_CREDITS } from "@/lib/config";
 import TypingDots from "@/components/animations/TypingDots";
 import SendArrow from "@/components/animations/SendArrow";
-import DecryptedText from "@/components/react-bits/DecryptedText";
+import DecryptedText from "@/components/ui/animations/DecryptedText";
 import dynamic from "next/dynamic";
 
-const LoginModal = dynamic(() => import("@/components/LoginModal"), { ssr: false });
+const LoginModal = dynamic(() => import("@/components/ui/primitives/LoginModal"), { ssr: false });
 
 type ChatMessage = {
     role: "user" | "model";
@@ -233,14 +233,14 @@ export default function TacticalChatbot() {
                                         className="surface-card hairline p-4 hover:border-accent transition-colors duration-fast group"
                                     >
                                         <span className="block text-xl font-black text-hi group-hover:text-accent">EN</span>
-                                        <span className="label-text text-[10px] uppercase tracking-widest text-low group-hover:text-mid">English</span>
+                                        <span className="label-text text-xs uppercase tracking-widest text-low group-hover:text-mid">English</span>
                                     </button>
                                     <button
                                         onClick={() => handleLanguageChange("hi")}
                                         className="surface-card hairline p-4 hover:border-accent transition-colors duration-fast group"
                                     >
                                         <span className="block text-xl font-black text-hi group-hover:text-accent">HI</span>
-                                        <span className="label-text text-[10px] uppercase tracking-widest text-low group-hover:text-mid">Hindi</span>
+                                        <span className="label-text text-xs uppercase tracking-widest text-low group-hover:text-mid">Hindi</span>
                                     </button>
                                 </div>
                             </div>
