@@ -22,7 +22,7 @@ import {
   EmptyState,
   DataTableSkeleton,
 } from "@/components/admin/AdminUI";
-import { useAllMembers, useAdminStats } from "@/lib/use-admin-stats";
+import { useAllMembers, useAdminStats } from "@/hooks/use-admin-stats";
 import { PLAN_PRICES, getPlanPrice } from "@/lib/config";
 import { formatDate, parseLocalDate } from "@/lib/member-utils";
 import { AlertCircle as Alert } from "lucide-react";
@@ -219,7 +219,7 @@ export default function AdminAnalyticsPage() {
             }
             icon={IndianRupee}
             action={
-              <div className="flex items-center gap-2 text-[0.7rem] font-mono text-low">
+              <div className="flex items-center gap-2 text-xs font-mono text-low">
                 <span className="w-3 h-3 bg-accent" /> Revenue
                 <span className="w-3 h-3 surface-elevated hairline ml-3" /> Joining count
               </div>
@@ -258,14 +258,14 @@ export default function AdminAnalyticsPage() {
                       />
                     </div>
                     <div
-                      className={`text-[0.6rem] text-center font-mono ${
+                      className={`text-xs text-center font-mono ${
                         active ? "text-accent font-bold" : "text-faint"
                       }`}
                     >
                       {d.shortLabel}
                     </div>
                     {active && d.amount > 0 && (
-                      <div className="absolute -top-10 left-1/2 -translate-x-1/2 surface-modal hairline px-2 py-1 text-[0.65rem] font-mono whitespace-nowrap z-10 text-hi">
+                      <div className="absolute -top-10 left-1/2 -translate-x-1/2 surface-modal hairline px-2 py-1 text-xs font-mono whitespace-nowrap z-10 text-hi">
                         ₹{d.amount.toLocaleString("en-IN")}
                         <span className="text-faint"> · {d.count}</span>
                       </div>
@@ -281,7 +281,7 @@ export default function AdminAnalyticsPage() {
                   <h3 className="label-text uppercase tracking-wider text-xs text-hi">
                     {selectedMonthData.label} — joined this month
                   </h3>
-                  <span className="text-[0.65rem] font-mono text-low">
+                  <span className="text-xs font-mono text-low">
                     {selectedMonthData.members.length} member
                     {selectedMonthData.members.length === 1 ? "" : "s"}
                   </span>
@@ -296,13 +296,13 @@ export default function AdminAnalyticsPage() {
                     <table className="min-w-full w-full border-collapse">
                       <thead>
                         <tr className="surface-elevated text-left">
-                          <th className="px-3 py-2 hairline-b text-[0.65rem] uppercase tracking-widest text-faint">
+                          <th className="px-3 py-2 hairline-b text-xs uppercase tracking-widest text-faint">
                             Name
                           </th>
-                          <th className="px-3 py-2 hairline-b text-[0.65rem] uppercase tracking-widest text-faint hidden sm:table-cell">
+                          <th className="px-3 py-2 hairline-b text-xs uppercase tracking-widest text-faint hidden sm:table-cell">
                             Plan
                           </th>
-                          <th className="px-3 py-2 hairline-b text-[0.65rem] uppercase tracking-widest text-faint text-right">
+                          <th className="px-3 py-2 hairline-b text-xs uppercase tracking-widest text-faint text-right">
                             Amount
                           </th>
                         </tr>
@@ -369,7 +369,7 @@ export default function AdminAnalyticsPage() {
                           <div className="text-hi font-mono">
                             ₹{p.revenue.toLocaleString("en-IN")}
                           </div>
-                          <div className="text-[0.6rem] font-mono text-faint">
+                          <div className="text-xs font-mono text-faint">
                             {p.pctCount.toFixed(0)}% of members · {p.pctRev.toFixed(0)}% rev
                           </div>
                         </div>
@@ -410,7 +410,7 @@ export default function AdminAnalyticsPage() {
                           <span className="font-mono text-hi">{c.label}</span>
                           <span className="font-mono text-faint">n={c.total}</span>
                         </div>
-                        <div className="flex items-center gap-2 text-[0.65rem] font-mono">
+                        <div className="flex items-center gap-2 text-xs font-mono">
                           <span className="text-status-success">{c.active}A</span>
                           <span className="text-status-warning">{c.expiring}E</span>
                           <span className="text-status-danger">{c.expired}X</span>
@@ -435,7 +435,7 @@ export default function AdminAnalyticsPage() {
                       </div>
                     </div>
                   ))}
-                  <div className="flex flex-wrap gap-3 pt-2 text-[0.7rem] font-mono text-low">
+                  <div className="flex flex-wrap gap-3 pt-2 text-xs font-mono text-low">
                     <span className="flex items-center gap-1.5">
                       <span className="w-2.5 h-2.5 bg-status-success/80" /> Active
                     </span>

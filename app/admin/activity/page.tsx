@@ -277,7 +277,7 @@ export default function AdminActivityPage() {
                     />
                     <div
                       role="listbox"
-                      className="absolute right-0 mt-2 z-40 hairline surface-modal w-64 overflow-hidden shadow-lg"
+                      className="absolute right-0 mt-2 z-40 hairline surface-modal w-64 overflow-hidden shadow-modal"
                     >
                       {FILTERS.map((f) => (
                         <button
@@ -296,7 +296,7 @@ export default function AdminActivityPage() {
                           }`}
                         >
                           <span>{f.label}</span>
-                          <span className="font-mono text-[0.65rem] opacity-70">
+                          <span className="font-mono text-xs opacity-70">
                             {counts[f.key] ?? 0}
                           </span>
                         </button>
@@ -403,7 +403,7 @@ export default function AdminActivityPage() {
                                   : "Unknown subject")}
                             </span>
                           </div>
-                          <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1 text-[0.7rem] text-low font-mono">
+                          <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1 text-xs text-low font-mono">
                             <span>{formatTime(l.created_at)}</span>
                             {l.admin_id && <span>admin: {l.admin_id.slice(0, 8)}</span>}
                             {l.ip_address && <span>IP: {l.ip_address}</span>}
@@ -432,7 +432,7 @@ export default function AdminActivityPage() {
 
                       {expanded && detailsText && (
                         <div className="mt-3 ml-12">
-                          <pre className="text-[0.7rem] text-mid surface-canvas hairline p-3 overflow-x-auto font-mono whitespace-pre-wrap break-words leading-relaxed">
+                          <pre className="text-xs text-mid surface-canvas hairline p-3 overflow-x-auto font-mono whitespace-pre-wrap break-words leading-relaxed">
                             {detailsText}
                           </pre>
                         </div>
