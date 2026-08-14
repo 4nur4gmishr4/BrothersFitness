@@ -134,7 +134,7 @@ export default function Footer() {
         */}
         <div className="mt-12 p-1 relative group overflow-hidden">
           {/* Animated gradient border wrapper */}
-          <div className="absolute inset-0 bg-gradient-to-r from-accent via-transparent to-accent opacity-20 group-hover:opacity-100 transition-opacity duration-700" />
+          <div className="absolute inset-0 bg-gradient-to-r from-accent via-transparent to-accent opacity-20 group-hover:opacity-100 transition-opacity duration-300" />
           
           <div className="relative bg-surface-soft border border-accent/30 p-6 md:p-8 flex flex-col md:flex-row items-center justify-between gap-6">
             <div className="flex items-center gap-4">

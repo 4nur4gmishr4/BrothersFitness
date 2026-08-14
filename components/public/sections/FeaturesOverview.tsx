@@ -75,15 +75,15 @@ export default function FeaturesOverview() {
             <div>
               <div className="flex items-center gap-3 mb-6">
                 <div className="w-2 h-2 bg-accent animate-pulse" />
-                <p className="font-mono text-xs tracking-[0.3em] text-accent uppercase font-bold">SYSTEM CAPABILITIES</p>
+                <p className="font-mono text-xs tracking-[0.3em] text-accent uppercase font-bold">GYM FEATURES</p>
               </div>
               
               <h2 className="heading-display text-4xl md:text-5xl lg:text-6xl text-hi leading-[0.9] mb-6 uppercase">
-                TECHNICAL<br/><span className="text-accent">INFRASTRUCTURE</span>
+                FACILITIES &<br/><span className="text-accent">EQUIPMENT</span>
               </h2>
               
               <p className="text-mid md:text-base font-mono text-xs leading-relaxed max-w-sm mb-12 uppercase tracking-wide opacity-80">
-                Brother&apos;s Fitness provides a unified digital ecosystem to track, calibrate, and optimize your physical transformation. No generic tools. Only precision engineering.
+                Train with the best equipment in Lakhnadon. From heavy free weights to dedicated cardio zones, we have everything you need to push your limits safely.
               </p>
             </div>
 
@@ -91,7 +91,7 @@ export default function FeaturesOverview() {
               <div className="h-[1px] w-full bg-surface-border/50" />
               <Link href="#timings" className="group">
                 <div className="inline-flex items-center justify-between w-full p-4 border border-surface-border bg-surface-elevated hover:border-accent transition-colors duration-300">
-                  <span className="font-mono text-[11px] tracking-widest text-hi uppercase group-hover:text-accent transition-colors">INITIALIZE PROTOCOL</span>
+                  <span className="font-mono text-[11px] tracking-widest text-hi uppercase group-hover:text-accent transition-colors">VIEW OUR PLANS</span>
                   <AnimatedIcon name="dumbbell" className="w-5 h-5 text-accent" label="Start" />
                 </div>
               </Link>

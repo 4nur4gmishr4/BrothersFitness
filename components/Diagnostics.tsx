@@ -17,11 +17,11 @@ export default function Diagnostics() {
     <section id="diagnostics" className="surface-canvas py-16 md:py-24">
       <div className="max-w-4xl mx-auto px-4">
         <div className="text-center mb-12 md:mb-16" data-reveal>
-          <p className="label-text text-accent mb-3">CALIBRATE</p>
+          <p className="label-text text-accent mb-3">CALCULATE</p>
           <h2 className="heading-display text-4xl md:text-6xl mb-4 text-hi">
-            CALIBRATE YOUR <span className="text-accent">METRICS</span>
+            CHECK YOUR <span className="text-accent">STATS</span>
           </h2>
-          <p className="body-text text-mid">ANALYZE PERFORMANCE // OPTIMIZE RESULTS</p>
+          <p className="body-text text-mid">TRACK PROGRESS // STAY ACCOUNTABLE</p>
         </div>
 
         {/* Tabs */}
