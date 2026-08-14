@@ -39,9 +39,9 @@ interface TokenPayload {
 }
 
 function getSecret(): string {
-    const secret = process.env.ADMIN_PASSWORD;
+    const secret = process.env.ADMIN_TOKEN_SECRET || process.env.ADMIN_PASSWORD;
     if (!secret) {
-        throw new Error('CRITICAL: ADMIN_PASSWORD environment variable is not set.');
+        throw new Error('CRITICAL: ADMIN_PASSWORD or ADMIN_TOKEN_SECRET environment variable is not set.');
     }
     return secret;
 }
