@@ -209,7 +209,7 @@ export default function Navbar({ unreadLeads = 0 }: { unreadLeads?: number } = {
             className="fixed inset-0 z-40 overflow-y-auto overscroll-contain"
             onClick={() => setIsOpen(false)}
           >
-            <div className="min-h-full flex flex-col items-center px-4 pt-24 pb-6 pointer-events-auto">
+            <div className="min-h-[100dvh] flex flex-col items-center px-4 pt-24 pb-12 pointer-events-auto">
               <div 
                 className="w-full max-w-2xl"
                 onClick={(e) => e.stopPropagation()}
