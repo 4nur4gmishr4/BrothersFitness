@@ -1,5 +1,5 @@
 import Navbar from "@/components/public/layout/Navbar";
-import Diagnostics from "@/components/Diagnostics";
+import Diagnostics from "@/components/public/widgets/Diagnostics";
 import Footer from "@/components/public/layout/Footer";
 
 export default function CalculatorsPage() {

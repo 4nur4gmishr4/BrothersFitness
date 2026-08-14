@@ -2,11 +2,11 @@ import Navbar from "@/components/public/layout/Navbar";
 import Hero from "@/components/public/sections/Hero";
 import FeaturesOverview from "@/components/public/sections/FeaturesOverview";
 import InfoSection from "@/components/public/sections/InfoSection";
-import DailyProtocol from "@/components/DailyProtocol";
-import Architects from "@/components/Architects";
+import DailyProtocol from "@/components/features/gamification/DailyProtocol";
+import Architects from "@/components/public/sections/Architects";
 import ContactForm from "@/components/ui/primitives/ContactForm";
 import Footer from "@/components/public/layout/Footer";
-import PageWrapper from "@/components/PageWrapper";
+import PageWrapper from "@/components/layout/PageWrapper";
 
 export default function Home() {
   return (
