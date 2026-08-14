@@ -352,7 +352,7 @@ function FuelSynthesizerContent() {
                                                     value={option.value}
                                                     checked={weightChangeRate === option.value}
                                                     onChange={(e) => setWeightChangeRate(e.target.value)}
-                                                    className="w-4 h-4 accent-[#D71921] cursor-pointer"
+                                                    className="w-4 h-4 accent-accent cursor-pointer"
                                                 />
                                                 <span className="text-sm font-medium text-mid group-hover:text-accent transition-colors duration-fast">
                                                     {option.label}

@@ -193,7 +193,7 @@ export default function AdminLeadsPage() {
             <button
               type="button"
               onClick={fetchLeads}
-              className="btn-ghost text-xs min-h-[40px]"
+              className="btn-ghost text-xs"
               title="Refresh"
               aria-label="Refresh"
             >
@@ -203,7 +203,7 @@ export default function AdminLeadsPage() {
             <button
               type="button"
               onClick={markAllRead}
-              className="btn-secondary text-xs min-h-[40px]"
+              className="btn-secondary text-xs"
               disabled={unreadCount === 0}
               aria-disabled={unreadCount === 0}
               title="Mark all leads as read"
@@ -393,7 +393,7 @@ export default function AdminLeadsPage() {
                       <>
                         <a
                           href={`tel:${selected.phone}`}
-                          className="btn-ghost text-xs min-h-[34px] py-1"
+                          className="btn-ghost text-xs py-1"
                           title="Call"
                         >
                           <Phone className="w-3.5 h-3.5" />
@@ -407,7 +407,7 @@ export default function AdminLeadsPage() {
                               `Hi ${selected.name || "there"}! 👋\n\nThanks for reaching out to Brother's Fitness. We got your message:\n\n"${selected.message}"\n\nHow can we help you get started? 💪`
                             )
                           }
-                          className="btn-secondary text-xs min-h-[34px] py-1 text-status-success hover:text-status-success border-status-success/40 hover:bg-status-success/10"
+                          className="btn-secondary text-xs py-1 text-status-success hover:text-status-success border-status-success/40 hover:bg-status-success/10"
                         >
                           <MessageCircle className="w-3.5 h-3.5" />
                           WhatsApp
@@ -419,14 +419,14 @@ export default function AdminLeadsPage() {
                         <button
                           type="button"
                           onClick={() => handleDelete(selected.id)}
-                          className="btn-primary text-xs min-h-[34px] py-1 bg-status-danger hover:bg-status-danger border-status-danger"
+                          className="btn-primary text-xs py-1 bg-status-danger hover:bg-status-danger border-status-danger"
                         >
                           <Trash2 className="w-3 h-3" /> Confirm
                         </button>
                         <button
                           type="button"
                           onClick={() => setDeletingId(null)}
-                          className="btn-ghost text-xs min-h-[34px] py-1"
+                          className="btn-ghost text-xs py-1"
                         >
                           <X className="w-3 h-3" />
                         </button>
@@ -435,7 +435,7 @@ export default function AdminLeadsPage() {
                       <button
                         type="button"
                         onClick={() => setDeletingId(selected.id)}
-                        className="btn-ghost text-xs min-h-[34px] py-1 text-status-danger hover:text-status-danger"
+                        className="btn-ghost text-xs py-1 text-status-danger hover:text-status-danger"
                         title="Delete lead"
                       >
                         <Trash2 className="w-3.5 h-3.5" />

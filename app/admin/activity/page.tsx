@@ -176,7 +176,7 @@ export default function AdminActivityPage() {
   }, [logs, actionFilter, search]);
 
   return (
-    <div className="p-4 sm:p-6 lg:p-8 max-w-[1500px] w-full mx-auto">
+    <div className="p-4 sm:p-6 lg:p-8 max-w-[1600px] w-full mx-auto">
       <PageHeader
         title="Activity Log"
         subtitle="Immutable audit trail of every admin action — member creates, edits, deletes, and admin session events."
@@ -185,7 +185,7 @@ export default function AdminActivityPage() {
           <button
             type="button"
             onClick={fetchLogs}
-            className="btn-ghost text-xs min-h-[40px]"
+            className="btn-ghost text-xs"
             title="Refresh"
             aria-label="Refresh"
           >
@@ -261,7 +261,7 @@ export default function AdminActivityPage() {
                 <button
                   type="button"
                   onClick={() => setFilterOpen((v) => !v)}
-                  className="btn-secondary text-xs min-h-[40px] w-full sm:w-auto gap-2"
+                  className="btn-secondary text-xs w-full sm:w-auto gap-2"
                   aria-haspopup="listbox"
                   aria-expanded={filterOpen}
                 >

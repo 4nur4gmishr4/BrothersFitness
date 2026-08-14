@@ -133,7 +133,7 @@ export default function WorkoutLibrary() {
               onClick={() => { setActiveFilter(f); setPage(1); }}
               className={`whitespace-nowrap px-5 py-2.5 rounded-full border transition-all duration-300 font-mono text-xs tracking-[0.2em] uppercase ${
                 activeFilter === f 
-                  ? "bg-accent border-accent text-white shadow-[0_0_15px_rgba(215,25,33,0.4)]"
+                  ? "bg-accent border-accent text-white "
                   : "bg-surface-canvas border-surface-border text-mid hover:text-hi hover:border-hi"
               }`}
             >

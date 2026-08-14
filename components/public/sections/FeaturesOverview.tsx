@@ -61,7 +61,7 @@ export default function FeaturesOverview() {
            style={{ backgroundImage: 'linear-gradient(var(--hi) 1px, transparent 1px), linear-gradient(90deg, var(--hi) 1px, transparent 1px)', backgroundSize: '40px 40px' }} 
       />
 
-      <div className="max-w-[1500px] mx-auto px-4 md:px-6 relative z-10">
+      <div className="max-w-[1600px] mx-auto px-4 md:px-6 relative z-10">
         
         <div className="flex flex-col lg:flex-row items-stretch gap-6 lg:gap-8">
           

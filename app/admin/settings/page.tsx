@@ -73,7 +73,7 @@ export default function AdminSettingsPage() {
   }, []);
 
   return (
-    <div className="p-4 sm:p-6 lg:p-8 max-w-[1200px] w-full mx-auto">
+    <div className="p-4 sm:p-6 lg:p-8 max-w-[1600px] w-full mx-auto">
       <PageHeader
         title="Settings"
         subtitle="System info, membership plan reference, data backup, and security overview."
@@ -147,7 +147,7 @@ export default function AdminSettingsPage() {
               type="button"
               onClick={runBackup}
               disabled={backupState === "running"}
-              className="btn-primary text-xs min-h-[40px]"
+              className="btn-primary text-xs"
             >
               {backupState === "running" ? (
                 <>

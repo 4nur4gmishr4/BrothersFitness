@@ -215,7 +215,7 @@ function LoginForm() {
                     ? "capslock-hint"
                     : undefined
                 }
-                className="input-field pl-10 pr-12 min-h-[44px]"
+                className="input-field pl-10 pr-12"
                 required
               />
               <button
@@ -267,7 +267,7 @@ function LoginForm() {
           <button
             type="submit"
             disabled={inputDisabled || !password.trim()}
-            className="btn-primary w-full min-h-[46px] relative overflow-hidden group"
+            className="btn-primary w-full relative overflow-hidden group"
           >
             {submitState === "submitting" ? (
               <>
