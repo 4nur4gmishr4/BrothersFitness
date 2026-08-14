@@ -140,11 +140,15 @@ export async function POST(req: Request) {
 
         if (error) throw error;
 
-        // Log the creation
-        await logActivity('CREATE', data.id, data.full_name, {
-            membership_type: data.membership_type,
-            mobile: data.mobile
-        });
+        // Log the creation (best-effort)
+        try {
+            await logActivity('CREATE', data.id, data.full_name, {
+                membership_type: data.membership_type,
+                mobile: data.mobile
+            });
+        } catch (logError) {
+            logger.warn('Failed to log member creation activity', { error: logError instanceof Error ? logError.message : 'Unknown' });
+        }
 
         // Generate WhatsApp welcome message URL
         const welcomeMessage = encodeURIComponent(
@@ -182,6 +186,7 @@ export async function DELETE(req: Request) {
     if (auth instanceof NextResponse) return auth;
 
     try {
+        const { searchParams } = new URL(req.url, 'http://localhost');
         let id = searchParams.get('id');
 
         if (!id) {
@@ -240,10 +245,14 @@ export async function DELETE(req: Request) {
 
         if (error) throw error;
 
-        // Log the deletion
-        await logActivity('DELETE', id, member?.full_name || null, {
-            mobile: member?.mobile
-        });
+        // Log the deletion (best-effort)
+        try {
+            await logActivity('DELETE', id, member?.full_name || null, {
+                mobile: member?.mobile
+            });
+        } catch (logError) {
+            logger.warn('Failed to log member deletion activity', { error: logError instanceof Error ? logError.message : 'Unknown' });
+        }
 
         return NextResponse.json({ success: true });
     } catch (error) {
@@ -255,12 +264,12 @@ export async function DELETE(req: Request) {
     }
 }
 
-const PartialMemberSchema = MemberSchema.partial();
-
 // PUT update member (supports partial updates)
 export async function PUT(req: Request) {
     const auth = await requireAdminToken(req);
     if (auth instanceof NextResponse) return auth;
+
+    const PartialMemberSchema = MemberSchema.partial();
 
     try {
         const body = await req.json();

@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getServiceSupabase } from '@/lib/server-supabase';
 import { requireAdminToken } from '@/lib/admin-auth';
+import { logger } from '@/lib/logger';
 
 const MAX_FILE_SIZE_BYTES = 5 * 1024 * 1024; // 5 MB
 const ALLOWED_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/avif', 'image/gif']);
@@ -59,7 +60,8 @@ export async function POST(req: Request) {
         }
 
         // Validate by magic bytes, not the client-claimed MIME type.
-        const ext = sniffImageExt(await file.arrayBuffer());
+        const fileBuffer = await file.arrayBuffer();
+        const ext = sniffImageExt(fileBuffer);
         if (!ext || !ALLOWED_TYPES.has(`image/${ext === 'jpg' ? 'jpeg' : ext}`)) {
             return NextResponse.json(
                 { error: 'Only image files (JPEG, PNG, WebP, AVIF, GIF) are allowed' },
@@ -74,7 +76,8 @@ export async function POST(req: Request) {
 
         const { data, error } = await getServiceSupabase().storage
             .from('member-photos')
-            .upload(fileName, file, {
+            .upload(fileName, fileBuffer, {
+                contentType: `image/${ext === 'jpg' ? 'jpeg' : ext}`,
                 cacheControl: '3600',
                 upsert: true
             });
@@ -91,7 +94,7 @@ export async function POST(req: Request) {
             path: data.path
         });
     } catch (error) {
-        console.error('Error uploading photo:', error);
+        logger.error('Error uploading photo', { error: error instanceof Error ? error.message : 'Unknown' });
         return NextResponse.json(
             { error: 'Failed to upload photo' },
             { status: 500 }
