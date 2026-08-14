@@ -23,10 +23,8 @@ export function ShieldSecurityVisual({ state, className = "" }: ShieldSecurityVi
 
   // Dynamic stroke & fill colors
   let shieldStroke = "rgba(215, 25, 33, 0.3)"; // muted Brothers Fitness red in locked
-  let shieldFill = "rgba(10, 10, 10, 0.8)";
   let circuitStroke = "rgba(215, 25, 33, 0.25)";
   let nodeFill = "#3a1517";
-  let coreGlowColor = "#D71921";
   let statusBadgeText = "LOCKED";
   let statusBadgeColor = "text-low border-surface-border bg-surface-card/60";
 
@@ -46,14 +44,12 @@ export function ShieldSecurityVisual({ state, className = "" }: ShieldSecurityVi
     shieldStroke = "#22c55e";
     circuitStroke = "rgba(34, 197, 94, 0.8)";
     nodeFill = "#22c55e";
-    coreGlowColor = "#22c55e";
     statusBadgeText = "ACCESS GRANTED";
     statusBadgeColor = "text-status-success border-status-success/50 bg-status-success/10";
   } else if (isError) {
     shieldStroke = "#ef4444";
     circuitStroke = "rgba(239, 68, 68, 0.8)";
     nodeFill = "#ef4444";
-    coreGlowColor = "#ef4444";
     statusBadgeText = "ACCESS DENIED";
     statusBadgeColor = "text-status-danger border-status-danger/50 bg-status-danger/10";
   }
@@ -109,7 +105,7 @@ export function ShieldSecurityVisual({ state, className = "" }: ShieldSecurityVi
                 strokeWidth="2.2"
                 strokeLinejoin="round"
                 strokeLinecap="round"
-                fill={shieldFill}
+                fill="rgba(10, 10, 10, 0.8)"
                 className="transition-colors duration-300"
                 d="M0,13C0,13,1.858,11.63,1.858,11.63C9.179,6.234,12.485,-2.513,10.371,-10.892C10.371,-10.892,10.371,-10.892,10.371,-10.892C10.371,-10.892,7,-13,0,-13C-7,-13,-10.371,-10.892,-10.371,-10.892C-10.371,-10.892,-10.371,-10.892,-10.371,-10.892C-12.485,-2.513,-9.179,6.234,-1.858,11.63C-1.858,11.63,0,13,0,13Z"
               />
@@ -240,7 +236,7 @@ export function ShieldSecurityVisual({ state, className = "" }: ShieldSecurityVi
       {/* Security Status Badge */}
       <div className="mt-3 flex items-center gap-1.5">
         <span
-          className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-mono tracking-widest font-bold border uppercase transition-all duration-300 ${statusBadgeColor}`}
+          className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-mono tracking-widest font-bold border uppercase transition-all duration-300 ${statusBadgeColor}`}
         >
           <span
             className={`w-1.5 h-1.5 rounded-full ${

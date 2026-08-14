@@ -6,7 +6,7 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import Image from 'next/image';
-import { useModalDismiss } from '@/components/hooks/useModalDismiss';
+import { useModalDismiss } from '@/hooks/useModalDismiss';
 import { PLAN_PRICES, MEMBERSHIP_PLAN_DETAILS } from '@/lib/config';
 import { todayIST, parseLocalDate } from '@/lib/member-utils';
 import type { GymMember } from '@/lib/supabase';
@@ -42,6 +42,7 @@ export default function MemberFormModal({ open, member, renew = false, onClose, 
     const [photoPreview, setPhotoPreview] = useState<string | null>(null);
     const [photoFile, setPhotoFile] = useState<File | null>(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [isManualEndDate, setIsManualEndDate] = useState(false);
     const cameraInputRef = useRef<HTMLInputElement>(null);
     const galleryInputRef = useRef<HTMLInputElement>(null);
 
@@ -69,6 +70,7 @@ export default function MemberFormModal({ open, member, renew = false, onClose, 
             setFormData(blankForm());
             setPhotoPreview(null);
         }
+        setIsManualEndDate(member ? Boolean(member.membership_end) && !renew : false);
         setPhotoFile(null);
     }, [open, member, renew]);
 
@@ -76,6 +78,7 @@ export default function MemberFormModal({ open, member, renew = false, onClose, 
     // Skip when EDITING a member whose real end date is already set, so the
     // auto-calc doesn't silently overwrite it (renew/empty-end still recalcs).
     useEffect(() => {
+        if (isManualEndDate) return;
         if (formData.membership_start && formData.membership_type && (!formData.membership_end || !member)) {
             const start = parseLocalDate(formData.membership_start);
             if (start) {
@@ -108,7 +111,7 @@ export default function MemberFormModal({ open, member, renew = false, onClose, 
             }
         }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [formData.membership_start, formData.membership_type]);
+    }, [formData.membership_start, formData.membership_type, isManualEndDate]);
 
     // M33: call unconditionally (hooks order) before the early return.
     const modalProps = useModalDismiss(onClose);
@@ -247,7 +250,7 @@ export default function MemberFormModal({ open, member, renew = false, onClose, 
                     </button>
                 </div>
 
-                <div className="overflow-y-auto p-4 sm:p-6 flex-1 space-y-6">
+                <div className="overflow-y-auto p-4 sm:p-6 flex-1 space-y-6 scroll-smooth">
                     {/* Photo Section */}
                     <div className="space-y-4">
                         {/* Photo Preview */}
@@ -264,7 +267,7 @@ export default function MemberFormModal({ open, member, renew = false, onClose, 
                                 ) : (
                                     <div className="text-center text-low">
                                         <Camera className="w-8 h-8 sm:w-10 sm:h-10 mx-auto mb-1 opacity-50" />
-                                        <span className="label-text uppercase text-[0.65rem] sm:text-xs">Photo</span>
+                                        <span className="label-text uppercase text-xs sm:text-xs">Photo</span>
                                     </div>
                                 )}
                             </div>
@@ -278,7 +281,7 @@ export default function MemberFormModal({ open, member, renew = false, onClose, 
                                 className="surface-modal hairline hover:border-accent text-hi py-3 sm:py-4 px-3 flex flex-col items-center justify-center gap-1.5 transition-colors duration-fast active:bg-surface-elevated"
                             >
                                 <Camera className="w-6 h-6 sm:w-8 sm:h-8" />
-                                <span className="label-text uppercase text-[0.65rem] sm:text-xs">Open Camera</span>
+                                <span className="label-text uppercase text-xs sm:text-xs">Open Camera</span>
                             </button>
                             <button
                                 type="button"
@@ -288,7 +291,7 @@ export default function MemberFormModal({ open, member, renew = false, onClose, 
                                 <div className="w-6 h-6 sm:w-8 sm:h-8 border hairline flex items-center justify-center">
                                     <div className="w-3 h-3 sm:w-4 sm:h-4 bg-text-mid/30" />
                                 </div>
-                                <span className="label-text uppercase text-[0.65rem] sm:text-xs">Open Gallery</span>
+                                <span className="label-text uppercase text-xs sm:text-xs">Open Gallery</span>
                             </button>
                         </div>
 
@@ -370,7 +373,7 @@ export default function MemberFormModal({ open, member, renew = false, onClose, 
                                                     : 'surface-modal hairline text-mid hover:border-accent'
                                                     }`}
                                             >
-                                                <div className="label-text text-[10px] uppercase">{plan.label}</div>
+                                                <div className="label-text text-xs uppercase">{plan.label}</div>
                                                 <div className="heading-section text-sm font-bold">₹{PLAN_PRICES[plan.value]}</div>
                                             </button>
                                         ))}
@@ -379,13 +382,28 @@ export default function MemberFormModal({ open, member, renew = false, onClose, 
                                 <div>
                                     <div className="flex justify-between">
                                         <label className="label-text text-mid block mb-1.5">Start Date</label>
-                                        <span className="text-[10px] text-faint pt-0.5">Ends: {formData.membership_end}</span>
+                                        <div className="text-xs text-faint flex items-center gap-1">
+                                            Ends: 
+                                            <input 
+                                                type="date" 
+                                                className="bg-transparent border-b border-surface-border outline-none w-20 text-hi cursor-pointer" 
+                                                value={formData.membership_end || ''} 
+                                                onChange={e => {
+                                                    setFormData({ ...formData, membership_end: e.target.value });
+                                                    setIsManualEndDate(true);
+                                                }}
+                                            />
+                                        </div>
                                     </div>
                                     <input
                                         type="date"
                                         required
                                         value={formData.membership_start || ''}
-                                        onChange={(e) => setFormData({ ...formData, membership_start: e.target.value })}
+                                        onChange={(e) => {
+                                            setFormData({ ...formData, membership_start: e.target.value });
+                                            // Changing start date explicitly triggers auto-calc again
+                                            setIsManualEndDate(false);
+                                        }}
                                         className="input-field"
                                     />
                                 </div>
@@ -433,12 +451,13 @@ export default function MemberFormModal({ open, member, renew = false, onClose, 
                         <div className="md:col-span-2">
                             <label className="label-text text-mid block mb-1.5">Address / Notes (Optional)</label>
                             <textarea
-                                value={formData.address || ''}
-                                onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                                rows={2}
-                                className="input-field"
-                                placeholder="Optional: Enter address or notes..."
-                            />
+                                        value={formData.address || ''}
+                                        onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+                                        onFocus={(e) => e.target.scrollIntoView({ behavior: 'smooth', block: 'center' })}
+                                        rows={2}
+                                        className="input-field"
+                                        placeholder="Optional: Enter address or notes..."
+                                    />
                         </div>
                     </div>
                 </div>
@@ -459,7 +478,7 @@ export default function MemberFormModal({ open, member, renew = false, onClose, 
                     >
                         {isSubmitting ? (
                             <>
-                                <span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                                <span className="w-5 h-5 border-2 border-surface-border border-t-transparent rounded-full animate-spin" />
                                 {photoFile ? 'Uploading Photo...' : 'Registering...'}
                             </>
                         ) : (

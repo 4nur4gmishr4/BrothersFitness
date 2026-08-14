@@ -4,7 +4,7 @@ import { MessageCircle } from 'lucide-react';
 import { toast } from 'sonner';
 import { PLAN_PRICES } from '@/lib/config';
 import { formatDate, formatTodayIST } from '@/lib/member-utils';
-import { useModalDismiss } from '@/components/hooks/useModalDismiss';
+import { useModalDismiss } from '@/hooks/useModalDismiss';
 import { openWhatsApp } from '@/lib/admin-api';
 import type { GymMember } from '@/lib/supabase';
 
