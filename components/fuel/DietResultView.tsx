@@ -88,7 +88,7 @@ export default function DietResultView({
                 <div className="surface-card hairline p-4 flex justify-between items-center">
                     <div className="flex items-center gap-2">
                         <Globe className="w-4 h-4 text-accent" />
-                        <span className="label-text text-[10px]">Language</span>
+                        <span className="label-text text-xs">Language</span>
                     </div>
                     <div className="flex gap-2">
                         <button
@@ -108,13 +108,13 @@ export default function DietResultView({
 
                 {/* Brief */}
                 <div className="surface-elevated hairline-l-[3px] border-l-accent p-6">
-                    <h3 className="label-text text-[10px] text-accent mb-3">Your Plan</h3>
+                    <h3 className="label-text text-xs text-accent mb-3">Your Plan</h3>
                     <p className="font-medium text-lg text-hi mb-4">&quot;{data.summary[lang]}&quot;</p>
 
                     {/* User Inputs Summary */}
                     {data.user_inputs_summary && (
                         <div className="mt-4 pt-4 hairline-t border-accent/20">
-                            <h4 className="label-text text-[10px] text-low mb-3">Your Profile</h4>
+                            <h4 className="label-text text-xs text-low mb-3">Your Profile</h4>
                             <div className="grid grid-cols-3 md:grid-cols-5 gap-3 text-xs">
                                 <div className="surface-canvas hairline p-2 text-center">
                                     <span className="block text-faint">Gender</span>
@@ -140,15 +140,15 @@ export default function DietResultView({
                             <div className="grid grid-cols-2 md:grid-cols-5 gap-3 text-xs mt-3">
                                 <div className="surface-canvas hairline p-2 text-center">
                                     <span className="block text-faint">Activity</span>
-                                    <span className="font-bold text-hi text-[10px]">{data.user_inputs_summary.activity_level?.split(" ")[0] || "N/A"}</span>
+                                    <span className="font-bold text-hi text-xs">{data.user_inputs_summary.activity_level?.split(" ")[0] || "N/A"}</span>
                                 </div>
                                 <div className="surface-canvas hairline p-2 text-center">
                                     <span className="block text-faint">Diet Type</span>
-                                    <span className="font-bold text-hi text-[10px]">{data.user_inputs_summary.diet_type}</span>
+                                    <span className="font-bold text-hi text-xs">{data.user_inputs_summary.diet_type}</span>
                                 </div>
                                 <div className="surface-canvas hairline p-2 text-center">
                                     <span className="block text-faint">Budget</span>
-                                    <span className="font-bold text-hi text-[10px]">{data.user_inputs_summary.budget}</span>
+                                    <span className="font-bold text-hi text-xs">{data.user_inputs_summary.budget}</span>
                                 </div>
                                 <div className="surface-canvas hairline p-2 text-center">
                                     <span className="block text-faint">Mode</span>
@@ -167,13 +167,13 @@ export default function DietResultView({
                 {data.transformation_timeline && (
                     <div className="surface-card hairline p-6">
                         <div className="flex justify-between items-center mb-4">
-                            <h3 className="label-text text-[10px] text-low">Estimated Timeline</h3>
+                            <h3 className="label-text text-xs text-low">Estimated Timeline</h3>
                             <div className="flex gap-1">
                                 {(["days", "weeks", "months", "years"] as const).map((unit) => (
                                     <button
                                         key={unit}
                                         onClick={() => onTimelineUnitChange(unit)}
-                                        className={`px-2 py-1 text-[10px] font-bold uppercase transition-colors duration-fast ${timelineUnit === unit ? "bg-accent text-white border border-accent" : "surface-elevated hairline text-faint hover:text-hi hover:border-accent"}`}
+                                        className={`px-2 py-1 text-xs font-bold uppercase transition-colors duration-fast ${timelineUnit === unit ? "bg-accent text-white border border-accent" : "surface-elevated hairline text-faint hover:text-hi hover:border-accent"}`}
                                     >
                                         {unit}
                                     </button>
@@ -226,7 +226,7 @@ export default function DietResultView({
                                 {/* Ingredients List */}
                                 {meal.ingredients && meal.ingredients.length > 0 && (
                                     <div className="mb-3 p-2 surface-canvas hairline">
-                                        <p className="label-text text-[10px] text-faint mb-1">Ingredients</p>
+                                        <p className="label-text text-xs text-faint mb-1">Ingredients</p>
                                         <div className="flex flex-wrap gap-2">
                                             {meal.ingredients.map((ing, i) => (
                                                 <span key={i} className="badge">
@@ -240,13 +240,13 @@ export default function DietResultView({
                                 {/* Recipe */}
                                 {meal.recipe && (
                                     <div className="mb-3 p-2 surface-canvas hairline">
-                                        <p className="label-text text-[10px] text-faint mb-1">Recipe</p>
+                                        <p className="label-text text-xs text-faint mb-1">Recipe</p>
                                         <p className="text-xs text-mid leading-relaxed">{meal.recipe[lang]}</p>
                                     </div>
                                 )}
 
                                 {/* Macros */}
-                                <div className="flex flex-wrap gap-2 text-[10px] font-mono uppercase tracking-widest text-faint">
+                                <div className="flex flex-wrap gap-2 text-xs font-mono uppercase tracking-widest text-faint">
                                     <span className="surface-canvas hairline px-2 py-1">P: {meal.protein}g</span>
                                     <span className="surface-canvas hairline px-2 py-1">C: {meal.carbs}g</span>
                                     <span className="surface-canvas hairline px-2 py-1">F: {meal.fats}g</span>
@@ -272,7 +272,7 @@ export default function DietResultView({
                         </div>
                         <div className="flex items-center gap-4">
                             <div className="text-center">
-                                <p className="label-text text-[10px] text-faint">Total</p>
+                                <p className="label-text text-xs text-faint">Total</p>
                                 <div className="flex items-center gap-1 text-status-success font-bold text-lg">
                                     <IndianRupee className="w-4 h-4" />
                                     {data.shopping_list.total_estimated_cost}
@@ -280,7 +280,7 @@ export default function DietResultView({
                             </div>
                             <div className="h-8 w-[1px] surface-border" />
                             <div className="text-center">
-                                <p className="label-text text-[10px] text-faint">Avg/Day</p>
+                                <p className="label-text text-xs text-faint">Avg/Day</p>
                                 <div className="flex items-center gap-1 text-status-warning font-bold">
                                     <IndianRupee className="w-3 h-3" />
                                     {data.shopping_list.average_daily_cost || Math.round(data.shopping_list.total_estimated_cost / (data.shopping_list.duration_days || 15))}
@@ -298,7 +298,7 @@ export default function DietResultView({
                                 <div key={category}>
                                     <div className="flex items-center gap-2 mb-3 text-low">
                                         {category === "Home_Essentials" ? <Home className="w-4 h-4" /> : <Store className="w-4 h-4" />}
-                                        <h4 className="label-text text-[10px]">
+                                        <h4 className="label-text text-xs">
                                             {category === "Home_Essentials" ? (lang === "en" ? "Home Essentials" : "Ghar ka Samaan") : (lang === "en" ? "Market Purchase" : "Bazaar se Kharidein")}
                                         </h4>
                                     </div>
@@ -320,7 +320,7 @@ export default function DietResultView({
                         })}
                     </div>
                     <div className="mt-6 pt-4 hairline-t text-center">
-                        <p className="label-text text-[10px] text-faint">* Prices are Average Market Estimates (INR) for {data.shopping_list.duration_days || 15} Days</p>
+                        <p className="label-text text-xs text-faint">* Prices are Average Market Estimates (INR) for {data.shopping_list.duration_days || 15} Days</p>
                     </div>
                 </div>
 

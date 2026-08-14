@@ -69,7 +69,7 @@ export default function SliderThumb({
           style={{ left: `calc(${pct}% - 8px)` }}
         />
       </div>
-      <div className="flex justify-between mt-1 font-mono text-[10px] text-faint">
+      <div className="flex justify-between mt-1 font-mono text-xs text-faint">
         <span>{min}</span>
         <span>{max}</span>
       </div>
