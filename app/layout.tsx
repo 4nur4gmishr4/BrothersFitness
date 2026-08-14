@@ -137,6 +137,9 @@ export const metadata: Metadata = {
       url: '/assets/favicon.png',
     },
   },
+  verification: {
+    google: "dd97bf1f38ccebe0",
+  },
   manifest: "/manifest.json",
   category: "Health & Fitness",
 };
