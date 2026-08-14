@@ -1,7 +1,7 @@
 "use client";
 
-import Navbar from '@/components/Navbar';
-import Footer from '@/components/Footer';
+import Navbar from '@/components/public/layout/Navbar';
+import Footer from '@/components/public/layout/Footer';
 import TrophyRoom from '@/components/TrophyRoom';
 
 export default function TrophyRoomPage() {

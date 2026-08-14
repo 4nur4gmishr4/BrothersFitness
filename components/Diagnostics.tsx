@@ -277,7 +277,7 @@ function OneRepMaxCalculator() {
             <RepProgressRing reps={reps} target={20} />
           </div>
         </div>
-        <p className="text-[10px] text-faint font-mono uppercase tracking-widest">Reps drive the Epley estimate</p>
+        <p className="text-xs text-faint font-mono uppercase tracking-widest">Reps drive the Epley estimate</p>
       </div>
 
       <button onClick={calculate} disabled={isComputing} className="btn-primary w-full">

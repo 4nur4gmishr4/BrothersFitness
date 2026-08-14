@@ -1,8 +1,8 @@
 import { Suspense } from "react";
 import WorkoutLibrary from "@/components/WorkoutLibrary";
-import Navbar from "@/components/Navbar";
+import Navbar from "@/components/public/layout/Navbar";
 import TacticalStopwatch from "@/components/TacticalStopwatch";
-import Footer from "@/components/Footer";
+import Footer from "@/components/public/layout/Footer";
 
 export default function WorkoutsPage() {
   return (
