@@ -1,8 +1,7 @@
-﻿"use client";
+"use client";
 
 import Image from "next/image";
-import { useState } from "react";
-import { Scales } from "@/components/ui/scales";
+import { motion } from "framer-motion";
 
 const WhatsAppIcon = ({ className }: { className?: string }) => (
   <svg xmlns="http://www.w3.org/2000/svg" className={className} viewBox="0 0 24 24" fill="currentColor">
@@ -16,224 +15,131 @@ const InstagramIcon = ({ className }: { className?: string }) => (
   </svg>
 );
 
+const personnel = [
+  {
+    id: "OP-001",
+    name: "AMAN",
+    rank: "HEAD COACH // FOUNDER",
+    clearance: "LEVEL 5",
+    spec: "STRENGTH & CONDITIONING",
+    src: "/assets/aman.jpeg",
+    instagram: "https://www.instagram.com/aman_shrivastavaaa?igsh=MWJ5MHhodnJrY3BoNA==",
+    whatsapp: "919131179343",
+  },
+  {
+    id: "OP-002",
+    name: "PRADEEP",
+    rank: "SENIOR TRAINER",
+    clearance: "LEVEL 4",
+    spec: "FUNCTIONAL & HIIT",
+    src: "/assets/pradeep.jpeg",
+    instagram: "https://www.instagram.com/brothers_fitness_17",
+    whatsapp: "919131272754",
+  },
+];
+
 export default function Architects() {
-  const [tappedCard, setTappedCard] = useState<string | null>(null);
-  const [rotation, setRotation] = useState(0);
-  const [touchStartX, setTouchStartX] = useState(0);
-  const [touchEndX, setTouchEndX] = useState(0);
-
-  const trainers = [
-    {
-      name: "AMAN",
-      role: "HEAD COACH // FOUNDER",
-      spec: "STRENGTH & CONDITIONING",
-      src: "/assets/aman.jpeg",
-      id: "001",
-      isMain: true,
-      instagram: "https://www.instagram.com/aman_shrivastavaaa?igsh=MWJ5MHhodnJrY3BoNA==",
-      whatsapp: "919131179343", // Added WhatsApp for Aman
-    },
-    {
-      name: "PRADEEP",
-      role: "SENIOR TRAINER",
-      spec: "FUNCTIONAL & HIIT",
-      src: "/assets/pradeep.jpeg",
-      id: "002",
-      isMain: false,
-      instagram: "https://www.instagram.com/brothers_fitness_17", // Added Gym Insta for Pradeep
-      whatsapp: "919131272754",
-    },
-  ];
-
-  const handleTouchStart = (e: React.TouchEvent) => {
-    setTouchStartX(e.targetTouches[0].clientX);
-  };
-
-  const handleTouchMove = (e: React.TouchEvent) => {
-    setTouchEndX(e.targetTouches[0].clientX);
-  };
-
-  const handleTouchEnd = () => {
-    if (!touchStartX || !touchEndX) return;
-    const distance = touchStartX - touchEndX;
-    const minSwipeDistance = 50;
-
-    if (distance > minSwipeDistance) {
-      setRotation(prev => prev - 180);
-    } else if (distance < -minSwipeDistance) {
-      setRotation(prev => prev + 180);
-    }
-    
-    setTouchStartX(0);
-    setTouchEndX(0);
-  };
-
-  const TrainerCard = ({ t, isInteractive }: { t: any, isInteractive: boolean }) => (
-    <div
-      className="surface-card hairline p-6 md:p-7 hover:border-accent transition-colors duration-fast h-full w-full bg-surface-canvas relative border border-surface-border flex flex-col justify-between"
-    >
-      {/* Photo with scales ruler frame */}
-      <div
-        className={`relative w-full aspect-[4/3] mb-6 ${isInteractive ? "cursor-pointer" : ""}`}
-        role="button"
-        tabIndex={0}
-        aria-label={`View ${t.name}'s profile`}
-        onClick={() => {
-          if (isInteractive) setTappedCard(tappedCard === t.id ? null : t.id);
-        }}
-      >
-        <div
-          className="absolute -inset-y-3 -left-3 w-4 pointer-events-none md:-inset-y-6 md:-left-6 md:w-7"
-          style={{
-            WebkitMaskImage: "linear-gradient(to bottom, transparent, black 12%, black 88%, transparent)",
-            maskImage: "linear-gradient(to bottom, transparent, black 12%, black 88%, transparent)",
-          }}
-        >
-          <Scales orientation="vertical" size={8} color="rgba(215, 25, 33, 0.75)" />
-        </div>
-        <div
-          className="absolute -inset-y-3 -right-3 w-4 pointer-events-none md:-inset-y-6 md:-right-6 md:w-7"
-          style={{
-            WebkitMaskImage: "linear-gradient(to bottom, transparent, black 12%, black 88%, transparent)",
-            maskImage: "linear-gradient(to bottom, transparent, black 12%, black 88%, transparent)",
-          }}
-        >
-          <Scales orientation="vertical" size={8} color="rgba(215, 25, 33, 0.75)" />
-        </div>
-        <div
-          className="absolute -inset-x-3 -top-3 h-4 pointer-events-none md:-inset-x-6 md:-top-6 md:h-7"
-          style={{
-            WebkitMaskImage: "linear-gradient(to right, transparent, black 12%, black 88%, transparent)",
-            maskImage: "linear-gradient(to right, transparent, black 12%, black 88%, transparent)",
-          }}
-        >
-          <Scales orientation="horizontal" size={8} color="rgba(215, 25, 33, 0.75)" />
-        </div>
-        <div
-          className="absolute -inset-x-3 -bottom-3 h-4 pointer-events-none md:-inset-x-6 md:-bottom-6 md:h-7"
-          style={{
-            WebkitMaskImage: "linear-gradient(to right, transparent, black 12%, black 88%, transparent)",
-            maskImage: "linear-gradient(to right, transparent, black 12%, black 88%, transparent)",
-          }}
-        >
-          <Scales orientation="horizontal" size={8} color="rgba(215, 25, 33, 0.75)" />
-        </div>
-
-        <div className="relative w-full h-full overflow-hidden surface-canvas">
-          <div
-            className={`relative w-full h-full transition-all duration-slow ${tappedCard === t.id || !isInteractive ? "grayscale-0" : "grayscale"}`}
-          >
-            <Image
-              src={t.src}
-              alt={`Trainer ${t.name}`}
-              fill
-              className="object-contain"
-              sizes="(max-width: 768px) 100vw, 50vw"
-            />
-          </div>
-        </div>
-      </div>
-
-      <div className="space-y-3 relative z-10 flex flex-col h-full justify-between">
-        <div className="text-center">
-          <h3 className="heading-display text-2xl md:text-3xl text-hi tracking-wide">
-            {t.name}
-          </h3>
-          <p className="font-mono text-[10px] md:text-xs uppercase tracking-widest text-accent mt-1">
-            {t.role}
-          </p>
-        </div>
-        
-        <div className="pt-3 border-t border-surface-border text-center">
-          <p className="font-mono text-[9px] md:text-[10px] uppercase tracking-widest text-mid">
-            SPECIALIZATION //
-          </p>
-          <p className="body-text text-sm md:text-base text-hi mt-1">
-            {t.spec}
-          </p>
-        </div>
-
-        {/* BOTTOM MIDDLE SOCIALS */}
-        <div className="flex items-center justify-center gap-4 pt-4 mt-auto">
-          {t.instagram && (
-            <a
-              href={t.instagram}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="p-3 bg-[#111] hover:bg-accent hover:text-white border border-surface-border transition-all duration-300 text-mid"
-              aria-label={`Follow ${t.name} on Instagram`}
-            >
-              <InstagramIcon className="w-5 h-5" />
-            </a>
-          )}
-          {t.whatsapp && (
-            <a
-              href={`https://wa.me/${t.whatsapp}?text=Hi%20${t.name},%20I'm%20interested%20in%20joining%20Brother's%20Fitness!`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="p-3 bg-[#111] hover:bg-accent hover:text-white border border-surface-border transition-all duration-300 text-mid"
-              aria-label={`Contact ${t.name} on WhatsApp`}
-            >
-              <WhatsAppIcon className="w-5 h-5" />
-            </a>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-
   return (
-    <section id="architects" className="surface-canvas py-12 md:py-16">
-      <div className="max-w-7xl mx-auto px-4">
-        <div className="text-center mb-12 md:mb-16">
-          <p className="label-text text-accent mb-3">TRAINERS</p>
-          <h2 className="heading-display text-4xl md:text-6xl mb-4 text-hi">
-            OUR <span className="text-accent">TRAINERS</span>
-          </h2>
-          <p className="body-text text-mid">TRAINED. CERTIFIED. READY TO COACH YOU.</p>
-        </div>
-
-        {/* Swipe-to-Slide 3D Carousel (Mobile) */}
-        <div className="md:hidden relative w-full h-[650px] flex items-center justify-center perspective-[1200px] overflow-hidden">
-          <div 
-            className="w-[85vw] h-full absolute transition-transform duration-700 ease-[cubic-bezier(0.2,0.8,0.2,1)]"
-            style={{
-              transformStyle: "preserve-3d",
-              transform: `rotateY(${rotation}deg)`
-            }}
-            onTouchStart={handleTouchStart}
-            onTouchMove={handleTouchMove}
-            onTouchEnd={handleTouchEnd}
-          >
-            {trainers.map((t, index) => (
-              <div 
-                key={t.id}
-                className="absolute inset-0 w-full h-full"
-                style={{
-                  transform: `rotateY(${index * 180}deg) translateZ(${index === 0 ? '1px' : '-1px'})`,
-                  backfaceVisibility: "hidden",
-                  WebkitBackfaceVisibility: "hidden",
-                }}
-              >
-                <TrainerCard t={t} isInteractive={false} />
-              </div>
-            ))}
+    <section id="architects" className="surface-canvas py-16 md:py-24 border-b border-surface-border relative">
+      <div className="max-w-[1400px] mx-auto px-4 md:px-6 relative z-10">
+        
+        {/* Header */}
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-12 md:mb-16 gap-6">
+          <div>
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-1.5 h-1.5 bg-accent" />
+              <p className="font-mono text-[10px] tracking-[0.3em] text-accent uppercase font-bold">AUTHORIZED PERSONNEL</p>
+            </div>
+            <h2 className="heading-display text-4xl md:text-5xl lg:text-6xl text-hi leading-[0.9] uppercase">
+              PERSONNEL <span className="text-accent">DIRECTORY</span>
+            </h2>
           </div>
           
-          {/* Swipe Indicator */}
-          <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex items-center gap-3 opacity-50 pointer-events-none">
-             <span className="text-[10px] font-mono text-mid tracking-widest">&larr; SWIPE &rarr;</span>
+          <div className="flex flex-col items-start md:items-end gap-2 border-l-2 md:border-l-0 md:border-r-2 border-accent pl-4 md:pl-0 md:pr-4">
+            <p className="font-mono text-xs tracking-widest text-mid uppercase">Total Active Officers: 02</p>
+            <p className="font-mono text-[10px] tracking-widest text-faint uppercase">All personnel cleared for combat.</p>
           </div>
         </div>
 
-        {/* Desktop Grid */}
-        <div className="hidden md:grid md:grid-cols-2 gap-6 md:gap-8 max-w-5xl mx-auto">
-          {trainers.map((t) => (
-            <TrainerCard key={t.id} t={t} isInteractive={true} />
+        {/* Grid Layout (Replaced 3D Carousel) */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
+          {personnel.map((p, idx) => (
+            <motion.div 
+              key={p.id}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: idx * 0.1 }}
+              className="flex flex-col lg:flex-row border border-surface-border bg-surface-card rounded-none group hover:border-accent transition-colors duration-300"
+            >
+              {/* Photo Section */}
+              <div className="relative w-full lg:w-[45%] aspect-square lg:aspect-auto lg:h-[400px] bg-surface-elevated border-b lg:border-b-0 lg:border-r border-surface-border overflow-hidden">
+                <Image
+                  src={p.src}
+                  alt={`Officer ${p.name}`}
+                  fill
+                  className="object-cover grayscale group-hover:grayscale-0 transition-all duration-500 scale-100 group-hover:scale-105"
+                  sizes="(max-width: 1024px) 100vw, 50vw"
+                />
+                
+                {/* HUD Elements */}
+                <div className="absolute top-4 left-4 bg-black/60 backdrop-blur-sm border border-surface-border/50 px-2 py-1">
+                  <span className="font-mono text-[9px] tracking-widest text-accent uppercase">{p.id}</span>
+                </div>
+                
+                <div className="absolute bottom-4 right-4 flex gap-1">
+                  {[...Array(5)].map((_, i) => (
+                    <div key={i} className={`w-1 h-3 ${i < parseInt(p.clearance.split(' ')[1]) ? 'bg-accent' : 'bg-surface-border/50'}`} />
+                  ))}
+                </div>
+              </div>
+
+              {/* Data Section */}
+              <div className="w-full lg:w-[55%] flex flex-col justify-between p-6 md:p-8">
+                <div>
+                  <h3 className="heading-display text-3xl md:text-4xl text-hi mb-1 tracking-wider uppercase group-hover:text-accent transition-colors">
+                    {p.name}
+                  </h3>
+                  <div className="inline-flex px-2 py-1 bg-surface-elevated border border-surface-border mb-6">
+                    <span className="font-mono text-[10px] tracking-widest text-mid uppercase">{p.rank}</span>
+                  </div>
+
+                  <div className="space-y-4">
+                    <div className="flex flex-col gap-1">
+                      <span className="font-mono text-[9px] tracking-[0.2em] text-low uppercase">SPECIALIZATION</span>
+                      <span className="font-mono text-sm tracking-wide text-hi uppercase">{p.spec}</span>
+                    </div>
+                    
+                    <div className="flex flex-col gap-1">
+                      <span className="font-mono text-[9px] tracking-[0.2em] text-low uppercase">CLEARANCE LEVEL</span>
+                      <span className="font-mono text-sm tracking-wide text-hi uppercase">{p.clearance}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-8 pt-6 border-t border-surface-border flex items-center justify-between">
+                  <span className="font-mono text-[10px] tracking-widest text-low uppercase">INITIATE COMMS:</span>
+                  
+                  <div className="flex items-center gap-2">
+                    {p.instagram && (
+                      <a href={p.instagram} target="_blank" rel="noopener noreferrer" className="p-3 border border-surface-border bg-surface-elevated hover:border-accent hover:text-accent transition-colors duration-300 text-mid">
+                        <InstagramIcon className="w-4 h-4" />
+                      </a>
+                    )}
+                    {p.whatsapp && (
+                      <a href={`https://wa.me/${p.whatsapp}?text=Hi%20${p.name},%20I'm%20interested%20in%20joining%20Brother's%20Fitness!`} target="_blank" rel="noopener noreferrer" className="p-3 border border-surface-border bg-surface-elevated hover:border-accent hover:text-accent transition-colors duration-300 text-mid">
+                        <WhatsAppIcon className="w-4 h-4" />
+                      </a>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+            </motion.div>
           ))}
         </div>
+
       </div>
     </section>
   );
 }
-
