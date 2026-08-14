@@ -51,7 +51,7 @@ export default function Hero() {
   return (
     <section className="relative min-h-[calc(100vh-4rem)] lg:h-[calc(100vh-4.5rem)] flex flex-col items-center justify-center overflow-hidden py-3 lg:py-3 bg-surface-canvas text-hi">
       
-      <div className="relative z-10 w-full max-w-[1500px] h-full flex flex-col justify-center px-3 sm:px-4 md:px-6">
+      <div className="relative z-10 w-full max-w-[1600px] h-full flex flex-col justify-center px-3 sm:px-4 md:px-6">
         
         {/* Main 65% / 35% Flex Container for exact stretch */}
         <div className="flex flex-col lg:flex-row items-stretch gap-3 md:gap-5 w-full h-full">

@@ -141,7 +141,7 @@ export default function AdminAnalyticsPage() {
     : null;
 
   return (
-    <div className="p-4 sm:p-6 lg:p-8 max-w-[1700px] w-full mx-auto">
+    <div className="p-4 sm:p-6 lg:p-8 max-w-[1600px] w-full mx-auto">
       <PageHeader
         title="Analytics"
         subtitle="Revenue trends, plan breakdown, and cohort health across the full member history."
@@ -241,7 +241,7 @@ export default function AdminAnalyticsPage() {
                     className={`relative flex-1 min-w-0 h-full flex flex-col items-stretch justify-end gap-1 group focus:outline-none`}
                     aria-label={`${d.label}: ₹${d.amount.toLocaleString("en-IN")} revenue, ${d.count} joinings`}
                   >
-                    <div className="flex items-end justify-center gap-0.5 h-[calc(100%-1.5rem)] min-h-[40px]">
+                    <div className="flex items-end justify-center gap-0.5 h-[calc(100%-1.5rem)]">
                       <div
                         className={`flex-1 min-w-[40%] max-w-[70%] transition-all duration-500 ease-out ${
                           active ? "bg-accent" : "bg-accent/60 group-hover:bg-accent"
@@ -346,7 +346,7 @@ export default function AdminAnalyticsPage() {
                 <button
                   type="button"
                   onClick={() => setSortBy((s) => (s === "amount" ? "count" : "amount"))}
-                  className="btn-ghost text-xs min-h-[32px] py-1"
+                  className="btn-ghost text-xs py-1"
                   title="Toggle sort"
                 >
                   <ArrowUpDown className="w-3 h-3" />

@@ -467,14 +467,14 @@ export default function MemberFormModal({ open, member, renew = false, onClose, 
                         type="button"
                         onClick={onClose}
                         disabled={isSubmitting}
-                        className="btn-secondary flex-1 min-h-[44px] text-xs"
+                        className="btn-secondary flex-1 text-xs"
                     >
                         Cancel
                     </button>
                     <button
                         type="submit"
                         disabled={isSubmitting}
-                        className="btn-primary flex-[2] min-h-[44px] text-xs"
+                        className="btn-primary flex-[2] text-xs"
                     >
                         {isSubmitting ? (
                             <>

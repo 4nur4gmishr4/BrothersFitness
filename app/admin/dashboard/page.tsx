@@ -91,13 +91,13 @@ export default function AdminDashboardPage() {
             <button
               type="button"
               onClick={quickExport}
-              className="btn-secondary text-xs min-h-[40px]"
+              className="btn-secondary text-xs"
               title="Export all members as CSV"
             >
               <FileDown className="w-3.5 h-3.5" />
               Export CSV
             </button>
-            <Link href="/admin/members?new=1" className="btn-primary text-xs min-h-[40px]">
+            <Link href="/admin/members?new=1" className="btn-primary text-xs">
               <UserPlus className="w-3.5 h-3.5" />
               Register Member
             </Link>

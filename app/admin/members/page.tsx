@@ -430,7 +430,7 @@ function AdminMembersPageInner() {
     : null;
 
   return (
-    <div className="p-4 sm:p-6 lg:p-8 max-w-[1700px] w-full mx-auto">
+    <div className="p-4 sm:p-6 lg:p-8 max-w-[1600px] w-full mx-auto">
       <PageHeader
         title="Members"
         subtitle={`Manage ${counts.total} gym members. Register new joiners, renew plans, send receipts, and fix incomplete profiles.`}
@@ -440,7 +440,7 @@ function AdminMembersPageInner() {
             <button
               type="button"
               onClick={refresh}
-              className="btn-ghost text-xs min-h-[40px]"
+              className="btn-ghost text-xs"
               title="Refresh members list"
               aria-label="Refresh"
             >
@@ -450,7 +450,7 @@ function AdminMembersPageInner() {
             <button
               type="button"
               onClick={handleExport}
-              className="btn-secondary text-xs min-h-[40px]"
+              className="btn-secondary text-xs"
               title="Export filtered members as CSV"
               disabled={filtered.length === 0}
             >
@@ -460,7 +460,7 @@ function AdminMembersPageInner() {
             <button
               type="button"
               onClick={openNew}
-              className="btn-primary text-xs min-h-[40px]"
+              className="btn-primary text-xs"
             >
               <UserPlus className="w-3.5 h-3.5" />
               Register Member
@@ -598,7 +598,7 @@ function AdminMembersPageInner() {
                       setFilterOpen((v) => !v);
                       setSortOpen(false);
                     }}
-                    className="btn-secondary text-xs min-h-[40px] gap-2 relative"
+                    className="btn-secondary text-xs gap-2 relative"
                     aria-haspopup="listbox"
                     aria-expanded={filterOpen}
                   >
@@ -666,7 +666,7 @@ function AdminMembersPageInner() {
                       setSortOpen((v) => !v);
                       setFilterOpen(false);
                     }}
-                    className="btn-secondary text-xs min-h-[40px] gap-2"
+                    className="btn-secondary text-xs gap-2"
                     aria-haspopup="listbox"
                     aria-expanded={sortOpen}
                   >
@@ -727,7 +727,7 @@ function AdminMembersPageInner() {
                       setFilterStatus("all");
                       setSearch("");
                     }}
-                    className="btn-ghost text-xs min-h-[40px] text-status-warning hover:text-status-warning"
+                    className="btn-ghost text-xs text-status-warning hover:text-status-warning"
                     title="Clear filters and search"
                   >
                     <X className="w-3.5 h-3.5" />
@@ -746,7 +746,7 @@ function AdminMembersPageInner() {
                 <button
                   type="button"
                   onClick={bulkWhatsApp}
-                  className="btn-secondary text-xs min-h-[34px] py-1"
+                  className="btn-secondary text-xs py-1"
                   title="Send WhatsApp message to selected members"
                 >
                   <Send className="w-3 h-3" />
@@ -755,7 +755,7 @@ function AdminMembersPageInner() {
                 <button
                   type="button"
                   onClick={clearSelection}
-                  className="btn-ghost text-xs min-h-[34px] py-1 text-mid hover:text-hi"
+                  className="btn-ghost text-xs py-1 text-mid hover:text-hi"
                 >
                   <X className="w-3 h-3" />
                   Deselect

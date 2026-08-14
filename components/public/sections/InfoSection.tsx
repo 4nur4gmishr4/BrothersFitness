@@ -41,7 +41,7 @@ const schedules = [
 export default function InfoSection() {
   return (
     <section id="timings" className="surface-canvas py-16 md:py-24 border-b border-surface-border relative overflow-hidden">
-      <div className="max-w-[1200px] mx-auto px-4 md:px-6 relative z-10">
+      <div className="max-w-[1600px] mx-auto px-4 md:px-6 relative z-10">
         
         <div className="flex flex-col lg:flex-row gap-8 lg:gap-12 items-start">
           
