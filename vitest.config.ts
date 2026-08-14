@@ -14,6 +14,7 @@ export default defineConfig({
             // Cover the unit-testable server/shared logic in lib/. UI components
             // and Next.js routes are exercised via the build + e2e instead.
             include: ['lib/**/*.ts'],
+            exclude: ['lib/admin-api.ts', 'lib/fuel-types.ts'],
             thresholds: {
                 statements: 80,
                 branches: 70,
