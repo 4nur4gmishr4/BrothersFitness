@@ -198,50 +198,56 @@ export default function Navbar({ unreadLeads = 0 }: { unreadLeads?: number } = {
       </nav>
 
       {/* Full Screen Menu */}
-      {isOpen && (
-        <div className="fixed inset-0 z-40 flex flex-col pointer-events-auto">
-          <div
-            className="absolute inset-0 bg-surface-canvas modal-overlay-in"
-            aria-hidden="true"
-          />
+      <div 
+        className={`fixed inset-0 z-40 transition-opacity duration-300 ${
+          isOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
+        }`}
+        role="dialog" 
+        aria-modal="true"
+        aria-hidden={!isOpen}
+      >
+        {/* Background backdrop */}
+        <div
+          className="absolute inset-0 bg-surface-canvas"
+          onClick={() => setIsOpen(false)}
+        />
 
-          <div 
-            className="relative flex-1 overflow-y-auto overscroll-none scroll-smooth"
-            onClick={() => setIsOpen(false)}
-          >
-            <div className="w-full flex flex-col items-center px-4 pt-28 pb-16 min-h-max">
-              <div 
-                className="w-full max-w-2xl"
-                onClick={(e) => e.stopPropagation()}
-              >
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* Scrollable container */}
+        <div 
+          className="absolute inset-0 overflow-y-auto overflow-x-hidden"
+          onClick={() => setIsOpen(false)}
+        >
+          <div className="min-h-full px-4 pt-28 pb-24 flex flex-col items-center">
+            <div 
+              className="w-full max-w-2xl relative flex flex-col"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Menu Items Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {menuItems.map((item, i) => {
                   const isActive = pathname === item.id;
                   return (
                     <button
                       key={item.name}
                       onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleMenuClick(item); }}
-                      className="group menu-item-in relative"
-                      style={{ animationDelay: `${i * 40}ms` }}
+                      className={`group relative flex items-center justify-between p-6 border transition-all duration-300 ${
+                        isActive
+                          ? "border-accent bg-accent text-white"
+                          : "border-surface-border bg-surface-card hover:border-accent hover:bg-surface-elevated"
+                      } ${isOpen ? 'menu-item-in' : 'opacity-0 translate-y-4'}`}
+                      style={{ animationDelay: isOpen ? `${i * 40}ms` : '0ms' }}
                     >
-                      <div
-                        className={`flex items-center justify-between p-6 border transition-all duration-300 ${
-                          isActive
-                            ? "border-accent bg-accent text-white"
-                            : "border-surface-border bg-surface-card hover:border-accent hover:bg-surface-elevated"
+                      <span
+                        className={`text-lg font-display tracking-widest uppercase transition-colors duration-fast ${
+                          isActive ? "text-white" : "text-hi group-hover:text-accent"
                         }`}
                       >
-                        <span
-                          className={`text-lg font-display tracking-widest uppercase transition-colors duration-fast ${
-                            isActive ? "text-white" : "text-hi group-hover:text-accent"
-                          }`}
-                        >
-                          {item.name}
-                        </span>
-                        <div className="w-6 h-6 opacity-50 group-hover:opacity-100 transition-opacity">
-                           <ChevronRight className={`w-full h-full transition-transform duration-300 ${isActive ? "text-white" : "text-accent group-hover:translate-x-1"}`} />
-                        </div>
+                        {item.name}
+                      </span>
+                      <div className="w-6 h-6 opacity-50 group-hover:opacity-100 transition-opacity">
+                         <ChevronRight className={`w-full h-full transition-transform duration-300 ${isActive ? "text-white" : "text-accent group-hover:translate-x-1"}`} />
                       </div>
+                      
                       {/* Technical corner accents */}
                       <div className="absolute top-0 left-0 w-2 h-2 border-t border-l border-accent opacity-0 group-hover:opacity-100 transition-opacity" />
                       <div className="absolute bottom-0 right-0 w-2 h-2 border-b border-r border-accent opacity-0 group-hover:opacity-100 transition-opacity" />
@@ -251,7 +257,7 @@ export default function Navbar({ unreadLeads = 0 }: { unreadLeads?: number } = {
               </div>
 
               {/* Boxy Footer / Connect Section */}
-              <div className="mt-12 pt-8 border-t border-surface-border">
+              <div className={`mt-12 pt-8 border-t border-surface-border transition-all duration-500 delay-300 ${isOpen ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
                 {/* Gym Owners */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
                   <div className="p-4 border border-surface-border bg-surface-card flex flex-col items-center justify-between text-center">
@@ -292,11 +298,10 @@ export default function Navbar({ unreadLeads = 0 }: { unreadLeads?: number } = {
                   </div>
                 </div>
               </div>
-              </div>
             </div>
           </div>
         </div>
-      )}
+      </div>
 
       {/* Modals */}
       <ProfileModal isOpen={showProfileModal} onClose={() => setShowProfileModal(false)} />
