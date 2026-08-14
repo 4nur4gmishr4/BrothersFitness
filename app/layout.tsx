@@ -11,6 +11,8 @@ import ThemedToaster from "@/components/ui/primitives/ThemedToaster";
 import { AdminProvider } from "@/lib/auth-context";
 import { UserAuthProvider } from "@/lib/user-auth-context";
 import PreloaderGate from "@/components/ui/PreloaderGate";
+import { Analytics } from "@vercel/analytics/next";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 // Runs before first paint to apply the stored theme and prevent a
 // flash of the wrong theme. Mirrors ThemeProvider's resolve logic.
 const themeScript = `(function(){try{var s=localStorage.getItem("brofit_theme");var t=(s==="light"||s==="dark"||s==="system")?s:"system";var r=t==="light"?"light":t==="dark"?"dark":(window.matchMedia("(prefers-color-scheme: light)").matches?"light":"dark");var el=document.documentElement;if(t==="system"){el.removeAttribute("data-theme");}else{el.setAttribute("data-theme",t);}el.style.colorScheme=r;}catch(e){}})();`;
@@ -221,6 +223,8 @@ export default function RootLayout({
               </GamificationProvider>
             </UserAuthProvider>
           </AdminProvider>
+          <Analytics />
+          <SpeedInsights />
         </ThemeProvider>
       </body>
     </html>
