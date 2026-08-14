@@ -209,16 +209,9 @@ body {
   overflow-x: hidden;
 }
 
-/* ---------- Universal Theme Transition Sync ---------- */
-/* Ensures every component flips colors in exactly 150ms synchronously */
-.theme-transition,
-.theme-transition *,
-.theme-transition *::before,
-.theme-transition *::after {
-  transition-property: background-color, border-color, color, fill, stroke !important;
-  transition-duration: 150ms !important;
-  transition-timing-function: cubic-bezier(0.2, 0, 0, 1) !important;
-}
+/* Global transitions are removed for theme switching.
+   To achieve 120fps/60fps theme toggle on mobile, the switch must be instant (0ms). 
+   Animating colors globally on all DOM nodes inherently drops frames. */
 
 /* Note: we exclude layout properties like opacity or transform from 
    the universal transition to allow independent hover states to continue 
@@ -996,14 +989,23 @@ body {
     opacity: 0;
     transform: translateY(8px) scale(0.98);
   }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes modal-overlay-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 .modal-overlay-in {
-  animation: modal-overlay-in var(--motion-slow) var(--ease-clickhouse) both;
+  animation: modal-overlay-in var(--motion-fast) ease-out forwards;
 }
 
 .modal-panel-in {
-  animation: modal-panel-in var(--motion-slow) var(--ease-emphasis) both;
+  animation: modal-panel-in var(--motion-normal) var(--ease-emphasis) forwards;
 }
 
 /* Full-screen menu â€” items cascade in from below, 40ms apart.

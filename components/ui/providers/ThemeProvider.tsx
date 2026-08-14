@@ -44,8 +44,6 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
         const mq = window.matchMedia("(prefers-color-scheme: light)");
 
         const resolve = () => {
-            root.classList.add("theme-transition");
-            
             if (theme === "system") {
                 root.removeAttribute("data-theme");
                 const resolved = mq.matches ? "light" : "dark";
@@ -56,10 +54,6 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
                 setResolvedTheme(theme);
                 root.style.colorScheme = theme;
             }
-            
-            window.setTimeout(() => {
-                root.classList.remove("theme-transition");
-            }, 150);
         };
 
         resolve();
