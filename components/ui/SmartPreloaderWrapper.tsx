@@ -61,10 +61,11 @@ export default function SmartPreloaderWrapper() {
       {[0, 1, 2, 3, 4].map((i) => (
         <motion.div
           key={i}
-          initial={{ height: "100%" }}
-          animate={{ height: getHeight(i) }}
+          initial={{ scaleY: 1 }}
+          animate={{ scaleY: getHeight(i) === "0%" ? 0 : 1 }}
           transition={{ duration: 0.6, ease: customEase }}
-          className="flex-1 bg-accent border-l border-surface-border/50 first:border-l-0"
+          style={{ transformOrigin: "top" }}
+          className="flex-1 h-full bg-accent border-l border-surface-border/50 first:border-l-0"
         />
       ))}
     </div>
