@@ -56,7 +56,7 @@ export default function MemberCard({
                 <div className="flex-1 min-w-0">
                     <div className="flex justify-between items-start">
                         <h3 className="heading-section text-base text-hi truncate pr-2">{member.full_name}</h3>
-                        <span className={`label-text text-[10px] font-bold px-2 py-0.5 border ${statusColors[status]}`}>
+                        <span className={`label-text text-xs font-bold px-2 py-0.5 border ${statusColors[status]}`}>
                             {status.toUpperCase()}
                         </span>
                     </div>
@@ -64,7 +64,7 @@ export default function MemberCard({
                         <Phone className="w-3 h-3" /> {member.mobile}
                     </p>
                     <div className="flex items-center gap-2 mt-2">
-                        <span className="badge text-[10px]">
+                        <span className="badge text-xs">
                             {member.membership_type}
                         </span>
                     </div>

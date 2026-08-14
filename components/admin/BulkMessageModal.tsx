@@ -12,7 +12,7 @@ import {
   Check,
 } from "lucide-react";
 import { toast } from "sonner";
-import { useModalDismiss } from "@/components/hooks/useModalDismiss";
+import { useModalDismiss } from "@/hooks/useModalDismiss";
 import { openWhatsApp, buildWhatsAppUrl } from "@/lib/admin-api";
 import type { GymMember } from "@/lib/supabase";
 import { getMemberStatus, parseLocalDate } from "@/lib/member-utils";
@@ -258,7 +258,7 @@ export default function BulkMessageModal({
         {/* Message textarea */}
         <label
           htmlFor="bulk-message-body"
-          className="label-text uppercase tracking-wider text-[0.65rem] text-faint block mb-1.5 shrink-0"
+          className="label-text uppercase tracking-wider text-xs text-faint block mb-1.5 shrink-0"
         >
           Message body
         </label>
@@ -272,7 +272,7 @@ export default function BulkMessageModal({
 
         {/* Filter tabs */}
         <div className="mt-4 mb-3 shrink-0">
-          <div className="label-text uppercase tracking-wider text-[0.65rem] text-faint mb-2">
+          <div className="label-text uppercase tracking-wider text-xs text-faint mb-2">
             Target group
           </div>
           <div className="flex flex-wrap gap-1.5">
@@ -283,7 +283,7 @@ export default function BulkMessageModal({
                   key={f}
                   type="button"
                   onClick={() => setFilter(f)}
-                  className={`px-2.5 py-1.5 text-[0.7rem] font-mono uppercase transition-colors hairline ${
+                  className={`px-2.5 py-1.5 text-xs font-mono uppercase transition-colors hairline ${
                     filter === f
                       ? "bg-accent text-white border-accent"
                       : "surface-modal text-low hover:border-accent hover:text-hi"
@@ -347,7 +347,7 @@ export default function BulkMessageModal({
                       <div className="text-hi truncate text-sm">
                         {m.full_name || "Unnamed"}
                       </div>
-                      <div className="text-[0.65rem] text-faint font-mono truncate">
+                      <div className="text-xs text-faint font-mono truncate">
                         {m.mobile || "— no phone"}
                       </div>
                     </div>
