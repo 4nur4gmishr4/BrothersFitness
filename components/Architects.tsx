@@ -48,7 +48,7 @@ export default function Architects() {
           <div>
             <div className="flex items-center gap-3 mb-4">
               <div className="w-1.5 h-1.5 bg-accent" />
-              <p className="font-mono text-[10px] tracking-[0.3em] text-accent uppercase font-bold">AUTHORIZED PERSONNEL</p>
+              <p className="font-mono text-xs tracking-[0.3em] text-accent uppercase font-bold">AUTHORIZED PERSONNEL</p>
             </div>
             <h2 className="heading-display text-4xl md:text-5xl lg:text-6xl text-hi leading-[0.9] uppercase">
               PERSONNEL <span className="text-accent">DIRECTORY</span>
@@ -57,7 +57,7 @@ export default function Architects() {
           
           <div className="flex flex-col items-start md:items-end gap-2 border-l-2 md:border-l-0 md:border-r-2 border-accent pl-4 md:pl-0 md:pr-4">
             <p className="font-mono text-xs tracking-widest text-mid uppercase">Total Active Officers: 02</p>
-            <p className="font-mono text-[10px] tracking-widest text-faint uppercase">All personnel cleared for combat.</p>
+            <p className="font-mono text-xs tracking-widest text-faint uppercase">All personnel cleared for combat.</p>
           </div>
         </div>
 
@@ -101,7 +101,7 @@ export default function Architects() {
                     {p.name}
                   </h3>
                   <div className="inline-flex px-2 py-1 bg-surface-elevated border border-surface-border mb-6">
-                    <span className="font-mono text-[10px] tracking-widest text-mid uppercase">{p.rank}</span>
+                    <span className="font-mono text-xs tracking-widest text-mid uppercase">{p.rank}</span>
                   </div>
 
                   <div className="space-y-4">
@@ -118,7 +118,7 @@ export default function Architects() {
                 </div>
 
                 <div className="mt-8 pt-6 border-t border-surface-border flex items-center justify-between">
-                  <span className="font-mono text-[10px] tracking-widest text-low uppercase">INITIATE COMMS:</span>
+                  <span className="font-mono text-xs tracking-widest text-low uppercase">INITIATE COMMS:</span>
                   
                   <div className="flex items-center gap-2">
                     {p.instagram && (
