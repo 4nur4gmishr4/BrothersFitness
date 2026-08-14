@@ -82,7 +82,7 @@ export function StatCard({
     >
       <div className="flex items-start justify-between gap-3">
         <div className="flex-1 min-w-0">
-          <div className="label-text uppercase tracking-widest text-[0.65rem] sm:text-[0.7rem] text-faint whitespace-nowrap overflow-hidden text-ellipsis">
+          <div className="label-text uppercase tracking-widest text-xs sm:text-xs text-faint whitespace-nowrap overflow-hidden text-ellipsis">
             {label}
           </div>
           <div className={`mt-2 font-display ${s.text}`}>
@@ -93,7 +93,7 @@ export function StatCard({
           )}
           {trend && (
             <div
-              className={`mt-1.5 text-[0.7rem] font-mono uppercase tracking-wider ${
+              className={`mt-1.5 text-xs font-mono uppercase tracking-wider ${
                 trend.value >= 0 ? "text-status-success" : "text-status-danger"
               }`}
             >
@@ -138,7 +138,7 @@ export function StatusBadge({
   };
   return (
     <span
-      className={`inline-flex items-center gap-1.5 px-2 py-0.5 text-[0.65rem] font-mono uppercase tracking-widest font-bold border ${toneClasses[tone]} ${className}`}
+      className={`inline-flex items-center gap-1.5 px-2 py-0.5 text-xs font-mono uppercase tracking-widest font-bold border ${toneClasses[tone]} ${className}`}
     >
       {prefix && <span aria-hidden="true">{prefix}</span>}
       <span>{label}</span>

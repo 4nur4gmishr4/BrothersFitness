@@ -12,13 +12,11 @@ import {
   LogOut,
   Menu,
   X,
-  Bell,
   Settings,
   ChevronRight,
 } from "lucide-react";
 import Link from "next/link";
 import { useAdmin } from "@/lib/auth-context";
-import Navbar from "@/components/Navbar";
 
 type SidebarContextType = {
   open: boolean;
@@ -110,7 +108,7 @@ function SidebarContent({
               />
               <span className="flex-1 truncate text-xs">{item.label}</span>
               {badge && (
-                <span className="min-w-[1.25rem] h-5 px-1 bg-accent text-white text-[10px] font-bold rounded-full flex items-center justify-center">
+                <span className="min-w-[1.25rem] h-5 px-1 bg-accent text-white text-xs font-bold rounded-full flex items-center justify-center">
                   {badge > 99 ? "99+" : badge}
                 </span>
               )}
@@ -182,10 +180,9 @@ export function AdminLayout({ children }: { children: ReactNode }) {
         close: () => setSidebarOpen(false),
       }}
     >
-      <Navbar unreadLeads={unreadLeads} />
-      <div className="flex min-h-screen surface-canvas text-hi">
+      <div className="flex min-h-[100dvh] surface-canvas text-hi">
         <aside
-          className="hidden md:flex md:w-64 lg:w-72 flex-col surface-card hairline-r fixed md:sticky top-16 sm:top-20 h-[calc(100vh-4rem)] sm:h-[calc(100vh-5rem)] shrink-0"
+          className="hidden md:flex md:w-64 lg:w-72 flex-col surface-card hairline-r fixed md:sticky top-0 h-[100dvh] shrink-0"
           aria-label="Admin navigation"
         >
           <SidebarContent unreadLeads={unreadLeads} />
@@ -219,7 +216,7 @@ export function AdminLayout({ children }: { children: ReactNode }) {
         </aside>
 
         <div className="flex-1 flex flex-col min-w-0">
-          <header className="sticky top-16 sm:top-20 z-30 surface-card hairline-b">
+          <header className="sticky top-0 z-30 surface-card hairline-b">
             <div className="flex items-center gap-2 px-3 sm:px-5 h-14">
               <button
                 type="button"
@@ -232,7 +229,7 @@ export function AdminLayout({ children }: { children: ReactNode }) {
 
               <div className="flex items-center gap-2 mr-2">
                 <Shield className="w-4 h-4 text-accent" />
-                <span className="heading-section text-[10px] sm:text-xs uppercase text-hi leading-none">Admin Console</span>
+                <span className="heading-section text-xs sm:text-xs uppercase text-hi leading-none">Admin Console</span>
               </div>
               <div className="flex-1 min-w-0">
                 <AdminBreadcrumbs />
