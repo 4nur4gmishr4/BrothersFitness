@@ -103,13 +103,13 @@ export default function AdminSettingsPage() {
             <table className="min-w-full w-full border-collapse">
               <thead>
                 <tr className="surface-elevated text-left">
-                  <th className="px-4 sm:px-5 py-2.5 hairline-b label-text uppercase tracking-widest text-[0.65rem] text-faint">
+                  <th className="px-4 sm:px-5 py-2.5 hairline-b label-text uppercase tracking-widest text-xs text-faint">
                     Plan display name
                   </th>
-                  <th className="px-4 sm:px-5 py-2.5 hairline-b label-text uppercase tracking-widest text-[0.65rem] text-faint">
+                  <th className="px-4 sm:px-5 py-2.5 hairline-b label-text uppercase tracking-widest text-xs text-faint">
                     Stored value (membership_type)
                   </th>
-                  <th className="px-4 sm:px-5 py-2.5 hairline-b label-text uppercase tracking-widest text-[0.65rem] text-faint text-right">
+                  <th className="px-4 sm:px-5 py-2.5 hairline-b label-text uppercase tracking-widest text-xs text-faint text-right">
                     Price
                   </th>
                 </tr>
@@ -131,7 +131,7 @@ export default function AdminSettingsPage() {
               </tbody>
             </table>
           </div>
-          <p className="mt-3 text-[0.7rem] text-faint">
+          <p className="mt-3 text-xs text-faint">
             Legacy aliases (Monthly → 1 Month, Quarterly → 3 Months, Half-Yearly → 6 Months) map
             to the same price and are preserved for existing DB rows.
           </p>
@@ -186,8 +186,7 @@ export default function AdminSettingsPage() {
                   {backupResult.storageUrl && (
                     <a
                       href={backupResult.storageUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
+                      target="_blank" rel="noopener noreferrer"
                       className="mt-1 inline-flex items-center gap-1 underline"
                     >
                       <ExternalLink className="w-3 h-3" />
@@ -213,25 +212,25 @@ export default function AdminSettingsPage() {
 
             <div className="grid gap-3 sm:grid-cols-3 text-xs text-mid">
               <div className="hairline surface-elevated p-3">
-                <div className="label-text uppercase tracking-widest text-[0.6rem] text-faint mb-1">
+                <div className="label-text uppercase tracking-widest text-xs text-faint mb-1">
                   Format
                 </div>
                 <div className="font-mono text-hi">JSON</div>
-                <div className="text-[0.65rem] text-faint mt-0.5">Full member schema</div>
+                <div className="text-xs text-faint mt-0.5">Full member schema</div>
               </div>
               <div className="hairline surface-elevated p-3">
-                <div className="label-text uppercase tracking-widest text-[0.6rem] text-faint mb-1">
+                <div className="label-text uppercase tracking-widest text-xs text-faint mb-1">
                   Storage target
                 </div>
                 <div className="font-mono text-hi">supabase/backups</div>
-                <div className="text-[0.65rem] text-faint mt-0.5">Falls back to browser download</div>
+                <div className="text-xs text-faint mt-0.5">Falls back to browser download</div>
               </div>
               <div className="hairline surface-elevated p-3">
-                <div className="label-text uppercase tracking-widest text-[0.6rem] text-faint mb-1">
+                <div className="label-text uppercase tracking-widest text-xs text-faint mb-1">
                   Audit log
                 </div>
                 <div className="font-mono text-hi">BACKUP event</div>
-                <div className="text-[0.65rem] text-faint mt-0.5">Logged in Activity Log</div>
+                <div className="text-xs text-faint mt-0.5">Logged in Activity Log</div>
               </div>
             </div>
           </div>
@@ -311,7 +310,7 @@ export default function AdminSettingsPage() {
 function InfoRow({ label, value }: { label: string; value: string }) {
   return (
     <div className="hairline surface-elevated p-3">
-      <div className="label-text uppercase tracking-widest text-[0.6rem] text-faint mb-1">
+      <div className="label-text uppercase tracking-widest text-xs text-faint mb-1">
         {label}
       </div>
       <div className="text-sm text-hi font-mono">{value}</div>

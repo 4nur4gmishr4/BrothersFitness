@@ -39,7 +39,7 @@ import {
   SearchField,
   Skeleton,
 } from "@/components/admin/AdminUI";
-import { useAllMembers } from "@/lib/use-admin-stats";
+import { useAllMembers } from "@/hooks/use-admin-stats";
 import { getMemberStatus, formatDate, parseLocalDate } from "@/lib/member-utils";
 import {
   adminFetch,
@@ -619,7 +619,7 @@ function AdminMembersPageInner() {
                       />
                       <div
                         role="listbox"
-                        className="absolute right-0 mt-2 z-40 hairline surface-modal w-56 overflow-hidden shadow-lg"
+                        className="absolute right-0 mt-2 z-40 hairline surface-modal w-56 overflow-hidden shadow-modal"
                       >
                         {(
                           [
@@ -649,7 +649,7 @@ function AdminMembersPageInner() {
                             }`}
                           >
                             <span>{label}</span>
-                            <span className="font-mono text-[0.65rem] opacity-70">
+                            <span className="font-mono text-xs opacity-70">
                               {count}
                             </span>
                           </button>
@@ -683,7 +683,7 @@ function AdminMembersPageInner() {
                       />
                       <div
                         role="listbox"
-                        className="absolute right-0 mt-2 z-40 hairline surface-modal w-64 overflow-hidden shadow-lg"
+                        className="absolute right-0 mt-2 z-40 hairline surface-modal w-64 overflow-hidden shadow-modal"
                       >
                         {(
                           [
@@ -739,7 +739,7 @@ function AdminMembersPageInner() {
 
             {selectedIds.size > 0 && (
               <div className="mb-4 hairline bg-accent-muted border-accent/40 px-3 sm:px-4 py-2.5 flex flex-wrap items-center gap-2 sm:gap-3">
-                <span className="label-text uppercase tracking-wider text-[0.7rem] text-accent shrink-0">
+                <span className="label-text uppercase tracking-wider text-xs text-accent shrink-0">
                   {selectedIds.size} selected
                 </span>
                 <div className="flex-1 min-w-0" />
@@ -915,22 +915,22 @@ function MembersTableView({
                 aria-label={allChecked ? "Deselect all" : "Select all visible"}
               />
             </th>
-            <th className="px-3 py-3 hairline-b label-text uppercase tracking-widest text-[0.65rem] text-faint">
+            <th className="px-3 py-3 hairline-b label-text uppercase tracking-widest text-xs text-faint">
               Member
             </th>
-            <th className="px-3 py-3 hairline-b label-text uppercase tracking-widest text-[0.65rem] text-faint hidden lg:table-cell">
+            <th className="px-3 py-3 hairline-b label-text uppercase tracking-widest text-xs text-faint hidden lg:table-cell">
               Plan
             </th>
-            <th className="px-3 py-3 hairline-b label-text uppercase tracking-widest text-[0.65rem] text-faint hidden md:table-cell">
+            <th className="px-3 py-3 hairline-b label-text uppercase tracking-widest text-xs text-faint hidden md:table-cell">
               Start
             </th>
-            <th className="px-3 py-3 hairline-b label-text uppercase tracking-widest text-[0.65rem] text-faint">
+            <th className="px-3 py-3 hairline-b label-text uppercase tracking-widest text-xs text-faint">
               End
             </th>
-            <th className="px-3 py-3 hairline-b label-text uppercase tracking-widest text-[0.65rem] text-faint hidden sm:table-cell">
+            <th className="px-3 py-3 hairline-b label-text uppercase tracking-widest text-xs text-faint hidden sm:table-cell">
               Status
             </th>
-            <th className="px-3 py-3 hairline-b label-text uppercase tracking-widest text-[0.65rem] text-faint text-right">
+            <th className="px-3 py-3 hairline-b label-text uppercase tracking-widest text-xs text-faint text-right">
               Actions
             </th>
           </tr>
@@ -968,7 +968,7 @@ function MembersTableView({
                           className="object-cover"
                         />
                       ) : (
-                        <div className="w-full h-full flex items-center justify-center text-[0.7rem] font-mono text-low">
+                        <div className="w-full h-full flex items-center justify-center text-xs font-mono text-low">
                           {initials(m.full_name)}
                         </div>
                       )}
@@ -977,7 +977,7 @@ function MembersTableView({
                       <div className="text-sm text-hi truncate font-medium">
                         {m.full_name || <span className="text-faint">—</span>}
                       </div>
-                      <div className="flex items-center gap-2 text-[0.7rem] text-low flex-wrap">
+                      <div className="flex items-center gap-2 text-xs text-low flex-wrap">
                         {m.mobile ? (
                           <a
                             href={`tel:${m.mobile}`}
@@ -990,7 +990,7 @@ function MembersTableView({
                           <span className="text-faint">📞 —</span>
                         )}
                         {hasIncompleteProfile(m) && (
-                          <span className="text-status-warning label-text uppercase tracking-wider text-[0.6rem] flex items-center gap-0.5">
+                          <span className="text-status-warning label-text uppercase tracking-wider text-xs flex items-center gap-0.5">
                             <AlertTriangle className="w-2.5 h-2.5" />
                             Incomplete
                           </span>
@@ -1003,7 +1003,7 @@ function MembersTableView({
                   <div className="text-sm text-hi whitespace-nowrap">
                     {m.membership_type || "—"}
                   </div>
-                  <div className="text-[0.65rem] font-mono text-low">
+                  <div className="text-xs font-mono text-low">
                     ₹{getPlanPrice(m.membership_type).toLocaleString("en-IN")}
                   </div>
                 </td>
@@ -1027,7 +1027,7 @@ function MembersTableView({
                     {formatDate(m.membership_end)}
                   </div>
                   {days !== null && (
-                    <div className="text-[0.6rem] font-mono text-low mt-0.5">
+                    <div className="text-xs font-mono text-low mt-0.5">
                       {days < 0
                         ? `${Math.abs(days)}d overdue`
                         : days === 0
@@ -1177,7 +1177,7 @@ function MembersCardView({
                     </div>
                     <a
                       href={`tel:${m.mobile || ""}`}
-                      className="text-[0.7rem] text-low hover:text-accent"
+                      className="text-xs text-low hover:text-accent"
                     >
                       {m.mobile || "No mobile"}
                     </a>
@@ -1185,7 +1185,7 @@ function MembersCardView({
                   {statusBadgeFor(m.membership_end)}
                 </div>
                 {hasIncompleteProfile(m) && (
-                  <div className="mt-1.5 flex items-center gap-1 text-[0.6rem] text-status-warning label-text uppercase tracking-wider">
+                  <div className="mt-1.5 flex items-center gap-1 text-xs text-status-warning label-text uppercase tracking-wider">
                     <AlertTriangle className="w-2.5 h-2.5" />
                     {countIncompleteFields(m)} missing field
                     {countIncompleteFields(m) === 1 ? "" : "s"}
@@ -1196,7 +1196,7 @@ function MembersCardView({
 
             <div className="px-3 pb-3 space-y-1.5 hairline-b">
               <div className="flex justify-between text-xs">
-                <span className="text-faint label-text uppercase tracking-wider text-[0.6rem]">
+                <span className="text-faint label-text uppercase tracking-wider text-xs">
                   Plan
                 </span>
                 <span className="text-hi whitespace-nowrap">
@@ -1205,7 +1205,7 @@ function MembersCardView({
                 </span>
               </div>
               <div className="flex justify-between text-xs">
-                <span className="text-faint label-text uppercase tracking-wider text-[0.6rem]">
+                <span className="text-faint label-text uppercase tracking-wider text-xs">
                   Valid
                 </span>
                 <span className="text-mid font-mono whitespace-nowrap">
@@ -1215,7 +1215,7 @@ function MembersCardView({
               </div>
               {days !== null && (
                 <div className="flex justify-between text-xs">
-                  <span className="text-faint label-text uppercase tracking-wider text-[0.6rem]">
+                  <span className="text-faint label-text uppercase tracking-wider text-xs">
                     {days < 0 ? "Overdue" : "Remaining"}
                   </span>
                   <span
@@ -1388,7 +1388,7 @@ function DeleteConfirmDialog({
                   className="object-cover"
                 />
               ) : (
-                <div className="w-full h-full flex items-center justify-center text-[0.7rem] font-mono text-low">
+                <div className="w-full h-full flex items-center justify-center text-xs font-mono text-low">
                   {initials(member.full_name)}
                 </div>
               )}
@@ -1397,7 +1397,7 @@ function DeleteConfirmDialog({
               <div className="text-sm text-hi font-medium truncate">
                 {member.full_name || "Unnamed member"}
               </div>
-              <div className="text-[0.7rem] text-low font-mono">
+              <div className="text-xs text-low font-mono">
                 {member.mobile || "—"} · {member.membership_type || "No plan"}
               </div>
             </div>
@@ -1407,7 +1407,7 @@ function DeleteConfirmDialog({
           <div>
             <label
               htmlFor="del-confirm"
-              className="block label-text uppercase tracking-wider text-[0.65rem] text-faint mb-1.5"
+              className="block label-text uppercase tracking-wider text-xs text-faint mb-1.5"
             >
               Type <span className="text-status-danger font-bold">DELETE</span>{" "}
               to confirm
@@ -1441,7 +1441,7 @@ function DeleteConfirmDialog({
             >
               {isDeleting ? (
                 <>
-                  <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  <span className="w-4 h-4 border-2 border-surface-border border-t-transparent rounded-full animate-spin" />
                   Deleting…
                 </>
               ) : (

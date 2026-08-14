@@ -138,11 +138,11 @@ export default function AnalyticsPanel({ members, onClose }: AnalyticsPanelProps
                                         minHeight: data.amount > 0 ? '8px' : '2px',
                                     }}
                                 />
-                                <span className={`text-[10px] mt-2 font-bold ${selectedMonth === data.key ? 'text-hi' : 'text-faint'}`}>{data.month}</span>
+                                <span className={`text-xs mt-2 font-bold ${selectedMonth === data.key ? 'text-hi' : 'text-faint'}`}>{data.month}</span>
 
                                 {/* Tooltip amount above bar */}
                                 {data.amount > 0 && (
-                                    <div className="absolute -top-6 surface-modal hairline px-1.5 py-0.5 text-[10px] text-hi opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap">
+                                    <div className="absolute -top-6 surface-modal hairline px-1.5 py-0.5 text-xs text-hi opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap">
                                         ₹{(data.amount / 1000).toFixed(1)}k
                                     </div>
                                 )}
@@ -168,7 +168,7 @@ export default function AnalyticsPanel({ members, onClose }: AnalyticsPanelProps
                                         <div key={m.id} className="flex justify-between items-center text-xs surface-modal hairline hover:border-accent p-2 transition-colors duration-fast">
                                             <span className="text-hi truncate max-w-[120px]">{m.full_name}</span>
                                             <div className="flex gap-2 text-faint">
-                                                <span className="text-[10px] surface-canvas border border-surface-border px-1">{m.membership_type}</span>
+                                                <span className="text-xs surface-canvas border border-surface-border px-1">{m.membership_type}</span>
                                                 <span className="font-mono text-hi">₹{(PLAN_PRICES as Record<string, number>)[m.membership_type || '1 Month'] || 0}</span>
                                             </div>
                                         </div>

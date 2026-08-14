@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { X, FileText, Plus, Edit, Trash2, ShieldAlert, Clock } from 'lucide-react';
 import { toast } from 'sonner';
-import { useModalDismiss } from '@/components/hooks/useModalDismiss';
+import { useModalDismiss } from '@/hooks/useModalDismiss';
 
 interface Log {
     id: string;
@@ -33,7 +33,7 @@ export default function ActivityLogPanel({
     const fetchLogs = async () => {
         try {
             setLoading(true);
-            const token = sessionStorage.getItem('admin_token') || localStorage.getItem('admin_token');
+            const token = sessionStorage.getItem('admin_token');
             const res = await fetch('/api/admin/activity-logs', {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
@@ -119,11 +119,11 @@ export default function ActivityLogPanel({
                                             {log.action_type}
                                         </span>
                                     </div>
-                                    <span className="text-[10px] text-faint">{formatTime(log.created_at)}</span>
+                                    <span className="text-xs text-faint">{formatTime(log.created_at)}</span>
                                 </div>
                                 <p className="font-medium text-sm text-hi mt-1">{log.member_name || 'Unknown Member'}</p>
                                 {!!log.details && (
-                                    <pre className="mt-2 text-[10px] text-faint surface-canvas p-2 overflow-x-auto">
+                                    <pre className="mt-2 text-xs text-faint surface-canvas p-2 overflow-x-auto">
                                         {JSON.stringify(log.details, null, 2)}
                                     </pre>
                                 )}
