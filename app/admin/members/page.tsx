@@ -1363,7 +1363,7 @@ function DeleteConfirmDialog({
               Permanently Delete Member
             </h2>
             <p id="del-desc" className="mt-1 text-xs text-low">
-              This action cannot be undone. The member's row in the database and
+              This action cannot be undone. The member&apos;s row in the database and
               all associated data will be removed.
             </p>
           </div>

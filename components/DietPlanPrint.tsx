@@ -57,7 +57,7 @@ const DietPlanPrint = forwardRef<HTMLDivElement, DietPlanPrintProps>(({ data, la
                     <Zap className="w-5 h-5" />
                     Your Plan
                 </h3>
-                <p>"{data.summary[lang]}"</p>
+                <p>&quot;{data.summary[lang]}&quot;</p>
             </div>
 
             {/* Biometrics Snapshot */}

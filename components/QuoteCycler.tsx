@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 import { useState, useEffect } from "react";
 
 const QUOTES = [
@@ -41,7 +41,7 @@ export default function QuoteCycler() {
     <div className="surface-card flex items-center justify-center p-8 md:p-12 relative overflow-hidden group">
       <div className="absolute inset-0 bg-accent/5 opacity-0 group-hover:opacity-100 transition-opacity duration-1000" />
       <h2 className="heading-display text-2xl md:text-3xl text-center leading-relaxed relative z-10 text-hi max-w-4xl mx-auto min-h-[80px] md:min-h-[100px] flex items-center justify-center">
-        <span>"{text}<span className="animate-pulse text-accent">_</span>"</span>
+        <span>&quot;{text}<span className="animate-pulse text-accent">_</span>&quot;</span>
       </h2>
     </div>
   );
