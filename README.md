@@ -401,11 +401,14 @@ supabase db push
 ### `lib/config.ts` — Single Source of Truth
 ```typescript
 export const PLAN_PRICES = {
-  '1 Month': 700,
-  '3 Months': 1800,
-  '6 Months': 3300,
-  '12 Months': 6000,
-};
+    '1 Month': 700,
+    'Monthly': 700,
+    '3 Months': 1800,
+    'Quarterly': 1800,
+    '6 Months': 3300,
+    'Half-Yearly': 3300,
+    '15 Days': 350
+} as const;
 
 export const MAX_DAILY_CREDITS = parseInt(process.env.MAX_DAILY_CREDITS || '5', 10);
 export const MEMBERSHIP_PLANS = Object.keys(PLAN_PRICES) as const;
@@ -470,6 +473,6 @@ MIT License — see `LICENSE` file for details.
 
 **Built with ❤️ for the fitness community**
 
-[Report Bug](https://github.com/your-org/brofit/issues) · [Request Feature](https://github.com/your-org/brofit/issues) · [Documentation](https://github.com/your-org/brofit/wiki)
+[Report Bug](https://github.com/4nur4gmishr4/BrothersFitness/issues) · [Request Feature](https://github.com/4nur4gmishr4/BrothersFitness/issues) · [Documentation](https://github.com/4nur4gmishr4/BrothersFitness/wiki)
 
 </div>

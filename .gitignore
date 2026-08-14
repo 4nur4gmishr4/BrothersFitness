@@ -43,6 +43,7 @@ pnpm-debug.log*
 .claude
 .history
 .cursor
+.gemini
 
 # OS
 Thumbs.db
