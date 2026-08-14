@@ -158,30 +158,30 @@ export default function Footer() {
                 href={`https://wa.me/${devWhatsApp}?text=Hi%20Anurag,%20I%20saw%20your%20work%20on%20Brothers%20Fitness.`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-12 h-12 bg-surface-card border border-surface-border hover:border-accent hover:bg-accent/10 flex items-center justify-center transition-all duration-300"
+                className="group w-12 h-12 bg-surface-card border border-surface-border hover:border-accent hover:bg-accent/10 flex items-center justify-center transition-all duration-300"
                 title="Connect via WhatsApp"
               >
                 <div className="w-6 h-6 opacity-70 group-hover:opacity-100">
-                  <Mail className="w-full h-full text-hi group-hover:text-accent group-hover:scale-110 transition-all duration-300" />
+                  <Mail className="w-full h-full text-low group-hover:text-accent group-hover:scale-110 transition-all duration-300" />
                 </div>
               </a>
               <a
                 href="https://www.instagram.com/4nur4gmishr4?igsh=MTZkb3N6NDNhc2kwaQ=="
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-12 h-12 bg-surface-card border border-surface-border hover:border-accent hover:bg-accent/10 flex items-center justify-center transition-all duration-300"
+                className="group w-12 h-12 bg-surface-card border border-surface-border hover:border-accent hover:bg-accent/10 flex items-center justify-center transition-all duration-300"
                 title="Follow on Instagram"
               >
                 <div className="w-6 h-6 opacity-70 group-hover:opacity-100">
-                  <Instagram className="w-full h-full text-hi group-hover:text-accent group-hover:scale-110 transition-all duration-300" />
+                  <Instagram className="w-full h-full text-low group-hover:text-accent group-hover:scale-110 transition-all duration-300" />
                 </div>
               </a>
               <a
                 href={`tel:${devPhone}`}
-                className="w-12 h-12 bg-surface-card border border-surface-border hover:border-accent hover:bg-accent/10 flex items-center justify-center transition-all duration-300"
+                className="group w-12 h-12 bg-surface-card border border-surface-border hover:border-accent hover:bg-accent/10 flex items-center justify-center transition-all duration-300"
                 title="Direct Comms"
               >
-                <Phone className="w-5 h-5 text-mid group-hover:text-accent" />
+                <Phone className="w-5 h-5 text-low group-hover:text-accent transition-colors duration-300" />
               </a>
             </div>
           </div>

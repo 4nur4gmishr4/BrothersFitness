@@ -183,7 +183,7 @@ export function AdminLayout({ children }: { children: ReactNode }) {
       }}
     >
       <Navbar unreadLeads={unreadLeads} />
-      <div className="flex min-h-screen surface-canvas text-hi pt-16 sm:pt-20">
+      <div className="flex min-h-screen surface-canvas text-hi">
         <aside
           className="hidden md:flex md:w-64 lg:w-72 flex-col surface-card hairline-r fixed md:sticky top-16 sm:top-20 h-[calc(100vh-4rem)] sm:h-[calc(100vh-5rem)] shrink-0"
           aria-label="Admin navigation"

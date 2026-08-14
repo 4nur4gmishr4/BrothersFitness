@@ -134,7 +134,7 @@ export default function WorkoutLibrary() {
               className={`whitespace-nowrap px-5 py-2.5 rounded-full border transition-all duration-300 font-mono text-[10px] tracking-[0.2em] uppercase ${
                 activeFilter === f 
                   ? "bg-accent border-accent text-white shadow-[0_0_15px_rgba(215,25,33,0.4)]"
-                  : "bg-[#0a0a0a] border-surface-border text-mid hover:text-hi hover:border-hi"
+                  : "bg-surface-canvas border-surface-border text-mid hover:text-hi hover:border-hi"
               }`}
             >
               {f}
@@ -153,7 +153,7 @@ export default function WorkoutLibrary() {
               setSearch(e.target.value);
               setPage(1);
             }}
-            className="w-full bg-[#050505] border border-surface-border text-hi !pl-11 pr-4 py-3 rounded-md focus:outline-none focus:border-accent transition-colors text-sm font-mono placeholder:text-low/50"
+            className="w-full bg-surface-canvas border border-surface-border text-hi !pl-11 pr-4 py-3 rounded-md focus:outline-none focus:border-accent transition-colors text-sm font-mono placeholder:text-low/50"
           />
         </div>
       </div>
@@ -163,10 +163,10 @@ export default function WorkoutLibrary() {
         {paginatedExercises.map((exercise: FreeExercise) => (
           <div
             key={exercise.id}
-            className="surface-card hairline overflow-hidden hover:border-accent transition-colors duration-fast group flex flex-col h-full bg-[#111]"
+            className="surface-card hairline overflow-hidden hover:border-accent transition-colors duration-fast group flex flex-col h-full"
           >
             {/* Image Section */}
-            <div className="aspect-video bg-[#050505] relative overflow-hidden">
+            <div className="aspect-video bg-surface-canvas relative overflow-hidden">
               {exercise.images && exercise.images.length > 0 ? (
                 <Image
                   src={resolveExerciseImage(exercise.images[0])}
@@ -219,7 +219,7 @@ export default function WorkoutLibrary() {
       )}
 
       {/* Pagination controls */}
-      <div className="flex justify-between items-center surface-card hairline p-4 bg-[#111]">
+      <div className="flex justify-between items-center surface-card hairline p-4">
         <button
           onClick={() => setPage((p) => Math.max(1, p - 1))}
           disabled={page === 1}

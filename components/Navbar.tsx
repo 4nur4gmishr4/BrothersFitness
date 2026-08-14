@@ -30,6 +30,17 @@ export default function Navbar({ unreadLeads = 0 }: { unreadLeads?: number } = {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "unset";
+    }
+    return () => {
+      document.body.style.overflow = "unset";
+    };
+  }, [isOpen]);
+
   const isAdminMode = pathname.startsWith("/admin") && pathname !== "/admin/login";
 
   const menuItems = isAdminMode
@@ -40,6 +51,7 @@ export default function Navbar({ unreadLeads = 0 }: { unreadLeads?: number } = {
         { name: "Analytics", id: "/admin/analytics", isRoute: true },
         { name: "Activity", id: "/admin/activity", isRoute: true },
         { name: "Settings", id: "/admin/settings", isRoute: true },
+        { name: "Back to Website", id: "/", isRoute: true },
       ]
     : [
         { name: "Home", id: "/", isRoute: true },
@@ -60,8 +72,8 @@ export default function Navbar({ unreadLeads = 0 }: { unreadLeads?: number } = {
     <>
       {/* Boxy Futuristic Navbar */}
       <nav
-        className={`fixed top-0 left-0 right-0 z-[50] transition-all duration-300 ${
-          isScrolled ? "bg-surface-canvas/90 backdrop-blur-md border-b border-surface-border" : "bg-transparent"
+        className={`sticky top-0 left-0 right-0 z-[50] transition-all duration-300 ${
+          isScrolled || isAdminMode ? "bg-surface-canvas/90 backdrop-blur-md border-b border-surface-border" : "bg-transparent"
         }`}
       >
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
@@ -87,28 +99,16 @@ export default function Navbar({ unreadLeads = 0 }: { unreadLeads?: number } = {
 
             {/* Action Buttons (Always 5 buttons) */}
             <div className="flex items-center gap-2">
-              {/* Theme Toggle Dropdown */}
-              <div className="relative group">
-                <button
-                  className="w-10 h-10 flex items-center justify-center border border-surface-border bg-surface-card hover:border-accent transition-colors duration-200"
-                  aria-label="Toggle theme"
-                >
-                  <div className="w-5 h-5 flex items-center justify-center text-hi group-hover:scale-110 group-hover:text-accent transition-all duration-300">
-                    {!mounted ? <Monitor className="w-full h-full" /> : theme === "system" ? <Monitor className="w-full h-full" /> : theme === "dark" ? <Moon className="w-full h-full" /> : <Sun className="w-full h-full" />}
-                  </div>
-                </button>
-                <div className="absolute top-full right-0 mt-2 w-40 bg-surface-card border border-surface-border opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-[100] flex flex-col shadow-xl">
-                  <button onClick={() => setTheme("system")} className={`px-4 py-3 text-left text-xs uppercase tracking-widest flex items-center gap-3 hover:bg-surface-elevated transition-colors ${theme === "system" ? "text-accent" : "text-hi"}`}>
-                    <Monitor className="w-4 h-4" /> Automatic
-                  </button>
-                  <button onClick={() => setTheme("light")} className={`px-4 py-3 text-left text-xs uppercase tracking-widest flex items-center gap-3 hover:bg-surface-elevated transition-colors border-t border-surface-border ${theme === "light" ? "text-accent" : "text-hi"}`}>
-                    <Sun className="w-4 h-4" /> Light
-                  </button>
-                  <button onClick={() => setTheme("dark")} className={`px-4 py-3 text-left text-xs uppercase tracking-widest flex items-center gap-3 hover:bg-surface-elevated transition-colors border-t border-surface-border ${theme === "dark" ? "text-accent" : "text-hi"}`}>
-                    <Moon className="w-4 h-4" /> Dark
-                  </button>
+              {/* Theme Toggle Button */}
+              <button
+                onClick={() => setTheme(theme === "system" ? "light" : theme === "light" ? "dark" : "system")}
+                className="w-10 h-10 flex items-center justify-center border border-surface-border bg-surface-card hover:border-accent group transition-colors duration-200"
+                aria-label="Toggle theme"
+              >
+                <div className="w-5 h-5 flex items-center justify-center text-hi group-hover:scale-110 group-hover:text-accent transition-all duration-300">
+                  {!mounted ? <Monitor className="w-full h-full" /> : theme === "system" ? <Monitor className="w-full h-full" /> : theme === "dark" ? <Moon className="w-full h-full" /> : <Sun className="w-full h-full" />}
                 </div>
-              </div>
+              </button>
 
               {isAdminMode ? (
                 <button
@@ -135,7 +135,7 @@ export default function Navbar({ unreadLeads = 0 }: { unreadLeads?: number } = {
                     aria-label="Instagram"
                   >
                     <div className="w-5 h-5">
-                      <Instagram className="w-full h-full text-hi group-hover:scale-110 group-hover:text-accent transition-all duration-300" />
+                      <Instagram className="w-full h-full text-low group-hover:scale-110 group-hover:text-accent transition-all duration-300" />
                     </div>
                   </a>
 
@@ -147,7 +147,7 @@ export default function Navbar({ unreadLeads = 0 }: { unreadLeads?: number } = {
                     aria-label="WhatsApp Aman"
                   >
                     <div className="w-5 h-5">
-                      <WhatsAppIcon className="w-full h-full text-hi group-hover:scale-110 group-hover:text-accent transition-all duration-300" />
+                      <WhatsAppIcon className="w-full h-full text-low group-hover:scale-110 group-hover:text-accent transition-all duration-300" />
                     </div>
                   </a>
 
@@ -199,20 +199,24 @@ export default function Navbar({ unreadLeads = 0 }: { unreadLeads?: number } = {
         </div>
       </nav>
 
-      {/* Spacer */}
-      <div className="h-16 sm:h-20" />
-
       {/* Full Screen Menu */}
       {isOpen && (
         <>
           <div
-            onClick={() => setIsOpen(false)}
-            className="fixed inset-0 bg-[#0a0a0a]/95 backdrop-blur-sm z-40 modal-overlay-in"
+            className="fixed inset-0 bg-surface-canvas/95 backdrop-blur-sm z-40 modal-overlay-in"
+            aria-hidden="true"
           />
 
-          <div className="fixed inset-0 z-50 flex flex-col items-center px-4 pt-24 pb-6 pointer-events-none">
-            <div className="w-full max-w-2xl overflow-y-auto scrollbar-hide pointer-events-auto">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div 
+            className="fixed inset-0 z-40 overflow-y-auto overscroll-contain"
+            onClick={() => setIsOpen(false)}
+          >
+            <div className="min-h-full flex flex-col items-center px-4 pt-24 pb-6 pointer-events-auto">
+              <div 
+                className="w-full max-w-2xl"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {menuItems.map((item, i) => {
                   const isActive = pathname === item.id;
                   return (
@@ -226,7 +230,7 @@ export default function Navbar({ unreadLeads = 0 }: { unreadLeads?: number } = {
                         className={`flex items-center justify-between p-6 border transition-all duration-300 ${
                           isActive
                             ? "border-accent bg-accent text-white"
-                            : "border-surface-border bg-[#111] hover:border-accent hover:bg-accent/10"
+                            : "border-surface-border bg-surface-card hover:border-accent hover:bg-surface-elevated"
                         }`}
                       >
                         <span
@@ -252,31 +256,44 @@ export default function Navbar({ unreadLeads = 0 }: { unreadLeads?: number } = {
               <div className="mt-12 pt-8 border-t border-surface-border">
                 {/* Gym Owners */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
-                  <div className="p-4 border border-surface-border bg-surface-card flex flex-col justify-between">
-                    <p className="text-[10px] uppercase tracking-widest text-low mb-2">AMAN (FOUNDER)</p>
+                  <div className="p-4 border border-surface-border bg-surface-card flex flex-col items-center justify-between text-center">
+                    <div className="w-16 h-16 relative rounded-full overflow-hidden border-2 border-surface-border mb-3">
+                      <Image src="/assets/aman.jpeg" alt="Aman" fill className="object-cover" />
+                    </div>
+                    <p className="text-[10px] uppercase tracking-widest text-low mb-3">AMAN (FOUNDER)</p>
                     <div className="flex gap-4">
-                      <a href="tel:+919131179343" className="w-6 h-6 opacity-70 hover:opacity-100 transition-opacity"><Phone className="w-full h-full text-accent" /></a>
-                      <a href="https://wa.me/919131179343" target="_blank" className="w-6 h-6 opacity-70 hover:opacity-100 transition-opacity"><WhatsAppIcon className="w-full h-full text-[#25D366]" /></a>
+                      <a href="tel:+919131179343" className="group w-6 h-6 transition-opacity"><Phone className="w-full h-full text-low group-hover:text-accent transition-colors duration-300" /></a>
+                      <a href="https://wa.me/919131179343" target="_blank" className="group w-6 h-6 transition-opacity"><WhatsAppIcon className="w-full h-full text-low group-hover:text-accent transition-colors duration-300" /></a>
+                      <a href="https://www.instagram.com/aman_shrivastavaaa?igsh=MWJ5MHhodnJrY3BoNA==" target="_blank" className="group w-6 h-6 transition-opacity"><Instagram className="w-full h-full text-low group-hover:text-accent transition-colors duration-300" /></a>
                     </div>
                   </div>
-                  <div className="p-4 border border-surface-border bg-surface-card flex flex-col justify-between">
-                    <p className="text-[10px] uppercase tracking-widest text-low mb-2">PRADEEP (CO-FOUNDER)</p>
+                  <div className="p-4 border border-surface-border bg-surface-card flex flex-col items-center justify-between text-center">
+                    <div className="w-16 h-16 relative rounded-full overflow-hidden border-2 border-surface-border mb-3">
+                      <Image src="/assets/pradeep.jpeg" alt="Pradeep" fill className="object-cover" />
+                    </div>
+                    <p className="text-[10px] uppercase tracking-widest text-low mb-3">PRADEEP (CO-FOUNDER)</p>
                     <div className="flex gap-4">
-                      <a href="tel:+919131272754" className="w-6 h-6 opacity-70 hover:opacity-100 transition-opacity"><Phone className="w-full h-full text-accent" /></a>
-                      <a href="https://wa.me/919131272754" target="_blank" className="w-6 h-6 opacity-70 hover:opacity-100 transition-opacity"><WhatsAppIcon className="w-full h-full text-[#25D366]" /></a>
+                      <a href="tel:+919131272754" className="group w-6 h-6 transition-opacity"><Phone className="w-full h-full text-low group-hover:text-accent transition-colors duration-300" /></a>
+                      <a href="https://wa.me/919131272754" target="_blank" className="group w-6 h-6 transition-opacity"><WhatsAppIcon className="w-full h-full text-low group-hover:text-accent transition-colors duration-300" /></a>
+                      <a href="https://www.instagram.com/brothers_fitness_17" target="_blank" className="group w-6 h-6 transition-opacity"><Instagram className="w-full h-full text-low group-hover:text-accent transition-colors duration-300" /></a>
                     </div>
                   </div>
                 </div>
                 
                 {/* Developer */}
                 <div className="p-4 border border-surface-border bg-surface-soft flex flex-col justify-between items-center text-center">
-                  <p className="text-[10px] uppercase tracking-widest text-low mb-2">DEVELOPER : ANURAG MISHRA</p>
-                  <div className="flex gap-6 mt-2">
-                    <a href="https://github.com/4nur4gmishr4" target="_blank" className="w-8 h-8 opacity-70 hover:opacity-100 hover:scale-110 hover:-translate-y-1 transition-all duration-300 drop-shadow-[0_0_10px_rgba(255,255,255,0.1)] hover:drop-shadow-[0_0_15px_rgba(255,255,255,0.3)]"><Github className="w-full h-full text-hi" /></a>
-                    <a href="https://www.instagram.com/4nur4gmishr4?igsh=MTZkb3N6NDNhc2kwaQ==" target="_blank" className="w-8 h-8 opacity-70 hover:opacity-100 hover:scale-110 hover:-translate-y-1 transition-all duration-300 drop-shadow-[0_0_10px_rgba(255,255,255,0.1)] hover:drop-shadow-[0_0_15px_rgba(255,255,255,0.3)]"><Instagram className="w-full h-full text-hi" /></a>
-                    <a href="https://wa.me/919302786886" target="_blank" className="w-8 h-8 p-1 opacity-70 hover:opacity-100 hover:scale-110 hover:-translate-y-1 transition-all duration-300 drop-shadow-[0_0_10px_rgba(255,255,255,0.1)] hover:drop-shadow-[0_0_15px_rgba(255,255,255,0.3)]"><WhatsAppIcon className="w-full h-full text-[#25D366]" /></a>
+                  <div className="w-16 h-16 relative rounded-full overflow-hidden border-2 border-surface-border mb-3 shadow-[0_0_15px_rgba(215,25,33,0.3)]">
+                    <img src="https://github.com/4nur4gmishr4.png" alt="Anurag Mishra" className="w-full h-full object-cover" />
+                  </div>
+                  <p className="text-[10px] uppercase tracking-widest text-low mb-3">DEVELOPER : ANURAG MISHRA</p>
+                  <div className="flex gap-6 mt-1">
+                    <a href="tel:+919302786886" className="group w-8 h-8 hover:scale-110 hover:-translate-y-1 transition-all duration-300 drop-shadow-[0_0_10px_rgba(255,255,255,0.1)] hover:drop-shadow-[0_0_15px_rgba(255,255,255,0.3)]"><Phone className="w-full h-full text-low group-hover:text-accent transition-colors duration-300" /></a>
+                    <a href="https://github.com/4nur4gmishr4" target="_blank" className="group w-8 h-8 hover:scale-110 hover:-translate-y-1 transition-all duration-300 drop-shadow-[0_0_10px_rgba(255,255,255,0.1)] hover:drop-shadow-[0_0_15px_rgba(255,255,255,0.3)]"><Github className="w-full h-full text-low group-hover:text-accent transition-colors duration-300" /></a>
+                    <a href="https://wa.me/919302786886" target="_blank" className="group w-8 h-8 hover:scale-110 hover:-translate-y-1 transition-all duration-300 drop-shadow-[0_0_10px_rgba(255,255,255,0.1)] hover:drop-shadow-[0_0_15px_rgba(255,255,255,0.3)]"><WhatsAppIcon className="w-full h-full text-low group-hover:text-accent transition-colors duration-300" /></a>
+                    <a href="https://www.instagram.com/4nur4gmishr4?igsh=MTZkb3N6NDNhc2kwaQ==" target="_blank" className="group w-8 h-8 hover:scale-110 hover:-translate-y-1 transition-all duration-300 drop-shadow-[0_0_10px_rgba(255,255,255,0.1)] hover:drop-shadow-[0_0_15px_rgba(255,255,255,0.3)]"><Instagram className="w-full h-full text-low group-hover:text-accent transition-colors duration-300" /></a>
                   </div>
                 </div>
+              </div>
               </div>
             </div>
           </div>
