@@ -4,7 +4,7 @@ import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 
 // Cinematic Easing from the Framer LoadScreen component
-const customEase = [1, 0, 0.56, 1];
+const customEase: [number, number, number, number] = [1, 0, 0.56, 1];
 
 export default function SmartPreloaderWrapper() {
   const [stage, setStage] = useState(0);
