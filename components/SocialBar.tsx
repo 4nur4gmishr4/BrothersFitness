@@ -8,8 +8,7 @@ export default function SocialBar() {
       {/* Instagram Button */}
       <a
         href="https://www.instagram.com/brothers_fitness_17?igsh=MW0xYmV2dHIzOHlneQ=="
-        target="_blank"
-        rel="noopener noreferrer"
+        target="_blank" rel="noopener noreferrer"
         className="group relative surface-elevated hairline p-3.5 hover:border-accent transition-colors duration-fast"
         aria-label="Follow us on Instagram"
       >
@@ -22,8 +21,7 @@ export default function SocialBar() {
       {/* WhatsApp Button */}
       <a
         href="https://chat.whatsapp.com/JuBvYwrjjPELfy7KlIUylI"
-        target="_blank"
-        rel="noopener noreferrer"
+        target="_blank" rel="noopener noreferrer"
         className="group relative surface-elevated hairline p-3.5 hover:border-accent transition-colors duration-fast"
         aria-label="Join our WhatsApp group"
       >
