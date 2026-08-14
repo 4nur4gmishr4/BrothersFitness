@@ -30,17 +30,6 @@ export default function Navbar({ unreadLeads = 0 }: { unreadLeads?: number } = {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "unset";
-    }
-    return () => {
-      document.body.style.overflow = "unset";
-    };
-  }, [isOpen]);
-
   const isAdminMode = pathname.startsWith("/admin") && pathname !== "/admin/login";
 
   const menuItems = isAdminMode
@@ -197,31 +186,16 @@ export default function Navbar({ unreadLeads = 0 }: { unreadLeads?: number } = {
         </div>
       </nav>
 
-      {/* Full Screen Menu */}
-      <div 
-        className={`fixed inset-0 z-40 transition-opacity duration-300 ${
-          isOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
-        }`}
-        role="dialog" 
-        aria-modal="true"
-        aria-hidden={!isOpen}
-      >
-        {/* Background backdrop */}
-        <div
-          className="absolute inset-0 bg-surface-canvas"
-          onClick={() => setIsOpen(false)}
-        />
-
-        {/* Scrollable container */}
+      {/* Full Screen Menu - Built completely from scratch for foolproof native scrolling */}
+      {isOpen && (
         <div 
-          className="absolute inset-0 overflow-y-auto overflow-x-hidden"
-          onClick={() => setIsOpen(false)}
+          className="fixed inset-0 z-40 bg-surface-canvas overflow-y-auto overscroll-none"
+          role="dialog"
+          aria-modal="true"
         >
-          <div className="min-h-full px-4 pt-28 pb-24 flex flex-col items-center">
-            <div 
-              className="w-full max-w-2xl relative flex flex-col"
-              onClick={(e) => e.stopPropagation()}
-            >
+          {/* Scrollable Content Container */}
+          <div className="w-full min-h-screen px-4 pt-28 pb-24 mx-auto flex flex-col items-center">
+            <div className="w-full max-w-2xl relative flex flex-col">
               {/* Menu Items Grid */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {menuItems.map((item, i) => {
@@ -229,13 +203,13 @@ export default function Navbar({ unreadLeads = 0 }: { unreadLeads?: number } = {
                   return (
                     <button
                       key={item.name}
-                      onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleMenuClick(item); }}
+                      onClick={(e) => { e.preventDefault(); handleMenuClick(item); }}
                       className={`group relative flex items-center justify-between p-6 border transition-all duration-300 ${
                         isActive
                           ? "border-accent bg-accent text-white"
                           : "border-surface-border bg-surface-card hover:border-accent hover:bg-surface-elevated"
-                      } ${isOpen ? 'menu-item-in' : 'opacity-0 translate-y-4'}`}
-                      style={{ animationDelay: isOpen ? `${i * 40}ms` : '0ms' }}
+                      } menu-item-in`}
+                      style={{ animationDelay: `${i * 40}ms` }}
                     >
                       <span
                         className={`text-lg font-display tracking-widest uppercase transition-colors duration-fast ${
@@ -257,7 +231,7 @@ export default function Navbar({ unreadLeads = 0 }: { unreadLeads?: number } = {
               </div>
 
               {/* Boxy Footer / Connect Section */}
-              <div className={`mt-12 pt-8 border-t border-surface-border transition-all duration-500 delay-300 ${isOpen ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
+              <div className="mt-12 pt-8 border-t border-surface-border menu-item-in" style={{ animationDelay: '300ms' }}>
                 {/* Gym Owners */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
                   <div className="p-4 border border-surface-border bg-surface-card flex flex-col items-center justify-between text-center">
@@ -301,7 +275,7 @@ export default function Navbar({ unreadLeads = 0 }: { unreadLeads?: number } = {
             </div>
           </div>
         </div>
-      </div>
+      )}
 
       {/* Modals */}
       <ProfileModal isOpen={showProfileModal} onClose={() => setShowProfileModal(false)} />
