@@ -83,7 +83,7 @@ export default function Hero() {
               </div>
 
               <p className="text-base md:text-lg text-mid max-w-2xl leading-relaxed mb-6 md:mb-8">
-                Brothers Fitness isn&apos;t just a gym—it&apos;s a high-performance training ground engineered for absolute results. With elite coaching, state-of-the-art equipment, and a 10/10 community, we transform discipline into unyielding strength.
+                Brothers Fitness is Lakhnadon&apos;s premier strength and conditioning facility. Elite equipment, expert coaching, and a community built on hard work.
               </p>
               
               <div className="flex flex-wrap gap-2 md:gap-3 mb-8 md:mb-12">
@@ -91,7 +91,7 @@ export default function Hero() {
                   {"/// Hammer Strength Equipped"}
                 </span>
                 <span className="px-2 py-1 md:px-3 md:py-1.5 bg-surface-elevated border border-surface-border text-xs md:text-xs font-mono text-low uppercase tracking-wider">
-                  {"/// Biometric Analysis"}
+                  {"/// Strength Tracking"}
                 </span>
                 <span className="px-2 py-1 md:px-3 md:py-1.5 bg-surface-elevated border border-surface-border text-xs md:text-xs font-mono text-low uppercase tracking-wider">
                   {"/// Lakhnadon, MP"}
@@ -105,21 +105,11 @@ export default function Hero() {
                 className="inline-block btn-primary group relative overflow-hidden px-8 py-3 md:py-4 text-sm tracking-widest uppercase font-bold rounded-none flex-shrink-0"
                 style={{ textDecoration: "none" }}
               >
-                <span className="relative z-10">Initialize Training</span>
+                <span className="relative z-10">Join The Gym</span>
                 <span className="absolute inset-0 bg-white/10 translate-x-full transition-transform duration-200 ease-clickhouse group-hover:translate-x-0" aria-hidden="true" />
               </a>
               
-              {/* Optional secondary scanner element for 1000/1000 aesthetic */}
-              <div className="hidden sm:flex flex-col gap-1 w-full max-w-[200px] ml-auto mr-4">
-                <div className="w-full h-1 bg-surface-border overflow-hidden">
-                  <motion.div 
-                    className="h-full bg-accent w-1/3"
-                    animate={{ x: ["0%", "200%", "0%"] }}
-                    transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
-                  />
-                </div>
-                <p className="text-[9px] text-faint font-mono uppercase tracking-widest text-right">System Ready</p>
-              </div>
+
             </div>
           </motion.div>
 
@@ -138,9 +128,6 @@ export default function Hero() {
                 <div>
                   <div className="flex items-center gap-2 mb-1">
                     <h3 className="text-xs tracking-widest uppercase text-low font-mono">Lakhnadon Branch</h3>
-                    <span className="px-1.5 py-0.5 bg-accent/10 border border-accent/20 text-accent font-mono text-[9px] uppercase tracking-wider font-bold">
-                      +14.2% Growth
-                    </span>
                   </div>
                   <div className="flex items-baseline gap-2">
                     <span className="text-4xl font-display font-bold text-hi">{memberCount}</span>

@@ -73,7 +73,7 @@ export default function Navbar({ unreadLeads = 0 }: { unreadLeads?: number } = {
       {/* Boxy Futuristic Navbar */}
       <nav
         className={`sticky top-0 left-0 right-0 z-[50] transition-all duration-300 ${
-          isScrolled || isAdminMode ? "bg-surface-canvas/90 backdrop-blur-md border-b border-surface-border" : "bg-transparent"
+          isScrolled || isAdminMode ? "bg-surface-canvas border-b border-surface-border" : "bg-transparent"
         }`}
       >
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
@@ -201,7 +201,7 @@ export default function Navbar({ unreadLeads = 0 }: { unreadLeads?: number } = {
       {isOpen && (
         <>
           <div
-            className="fixed inset-0 bg-surface-canvas/95 backdrop-blur-sm z-40 modal-overlay-in"
+            className="fixed inset-0 bg-surface-canvas z-40 modal-overlay-in"
             aria-hidden="true"
           />
 
