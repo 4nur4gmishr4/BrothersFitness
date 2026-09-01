@@ -1,4 +1,4 @@
-import AnimatedSvgIcon from "../ui/AnimatedSvgIcon";
+import AnimatedSvgIcon from "@/components/ui/AnimatedSvgIcon";
 
 export default function CalculatorGears({ size = 48 }: { size?: number }) {
   return (

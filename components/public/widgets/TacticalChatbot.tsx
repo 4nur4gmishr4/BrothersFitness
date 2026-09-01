@@ -5,8 +5,8 @@ import { Cpu, X, Dumbbell, Utensils, Zap, Languages } from "lucide-react";
 import { useUserAuth } from "@/lib/user-auth-context";
 import { useModalDismiss } from "@/hooks/useModalDismiss";
 import { MAX_DAILY_CREDITS } from "@/lib/config";
-import TypingDots from "@/components/animations/TypingDots";
-import SendArrow from "@/components/animations/SendArrow";
+import TypingDots from "@/components/ui/animations/TypingDots";
+import SendArrow from "@/components/ui/animations/SendArrow";
 import DecryptedText from "@/components/ui/animations/DecryptedText";
 import dynamic from "next/dynamic";
 

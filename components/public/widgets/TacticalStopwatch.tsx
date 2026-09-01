@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { Timer, Play, Pause, RotateCcw, X, TrendingUp, TrendingDown, Bell } from "lucide-react";
-import TimerTick from "@/components/animations/TimerTick";
+import TimerTick from "@/components/ui/animations/TimerTick";
 
 export default function TacticalStopwatch() {
     const [isOpen, setIsOpen] = useState(false);

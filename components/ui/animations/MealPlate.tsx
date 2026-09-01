@@ -1,4 +1,4 @@
-import AnimatedSvgIcon from "../ui/AnimatedSvgIcon";
+import AnimatedSvgIcon from "@/components/ui/AnimatedSvgIcon";
 
 export default function MealPlate({ active = true, size = 64 }: { active?: boolean; size?: number; }) {
   return (
