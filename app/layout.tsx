@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Inter, Anton, JetBrains_Mono } from "next/font/google";
+import { Inter, Anton } from "next/font/google";
 import "./globals.css";
 import PageWrapper from "@/components/ui/layout/PageWrapper";
 import { GamificationProvider } from "@/components/ui/providers/GamificationContext";
@@ -35,11 +35,6 @@ const anton = Anton({
   weight: "400",
   subsets: ["latin"],
   variable: "--font-display"
-});
-
-const jetBrainsMono = JetBrains_Mono({
-  subsets: ["latin"],
-  variable: "--font-mono"
 });
 
 export const viewport: Viewport = {
@@ -203,7 +198,7 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body className={`${inter.variable} ${anton.variable} ${jetBrainsMono.variable} font-sans surface-canvas text-hi antialiased`}>
+      <body className={`${inter.variable} ${anton.variable} font-sans surface-canvas text-hi antialiased`}>
         <ThemeProvider>
           <PreloaderGate />
           <ReadingProgressBar />

@@ -298,7 +298,7 @@ body {
 }
 
 .label-text {
-  font-family: var(--font-mono), "JetBrains Mono", Consolas, monospace;
+  font-family: var(--font-inter), sans-serif;
   font-size: 0.75rem;
   font-weight: 600;
   text-transform: uppercase;
@@ -336,7 +336,7 @@ body {
 }
 
 .stat-callout__label {
-  font-family: var(--font-mono), "JetBrains Mono", Consolas, monospace;
+  font-family: var(--font-inter), sans-serif;
   font-size: 0.75rem;
   font-weight: 600;
   text-transform: uppercase;
@@ -379,7 +379,7 @@ body {
   padding: 0.5rem 0.875rem;
   background-color: transparent;
   color: rgb(var(--text-mid));
-  font-family: var(--font-mono), "JetBrains Mono", Consolas, monospace;
+  font-family: var(--font-inter), sans-serif;
   font-size: 0.75rem;
   font-weight: 600;
   text-transform: uppercase;
@@ -435,7 +435,7 @@ body {
 
 .code-window-card__body {
   padding: 1.5rem;
-  font-family: var(--font-mono), "JetBrains Mono", Consolas, monospace;
+  font-family: var(--font-inter), sans-serif;
   font-size: 0.8125rem;
   line-height: 1.55;
   color: rgb(var(--text-mid));
@@ -466,7 +466,7 @@ body {
   padding: 0.625rem 1.25rem;
   background-color: #ffffff;
   color: #0a0a0a;
-  font-family: var(--font-mono), "JetBrains Mono", Consolas, monospace;
+  font-family: var(--font-inter), sans-serif;
   font-size: 0.75rem;
   font-weight: 600;
   text-transform: uppercase;
@@ -530,7 +530,7 @@ body {
   padding: 0.25rem 0.75rem;
   background-color: rgb(var(--accent));
   color: #ffffff;
-  font-family: var(--font-mono), "JetBrains Mono", Consolas, monospace;
+  font-family: var(--font-inter), sans-serif;
   font-size: 0.625rem;
   font-weight: 600;
   text-transform: uppercase;
@@ -589,7 +589,7 @@ body {
   padding: 0.625rem 1.25rem;
   background-color: rgb(var(--accent));
   color: #ffffff;
-  font-family: var(--font-mono), "JetBrains Mono", Consolas, monospace;
+  font-family: var(--font-inter), sans-serif;
   font-size: 0.75rem;
   font-weight: 600;
   text-transform: uppercase;
@@ -627,7 +627,7 @@ body {
   padding: 0.625rem 1.25rem;
   background-color: transparent;
   color: rgb(var(--text-hi));
-  font-family: var(--font-mono), "JetBrains Mono", Consolas, monospace;
+  font-family: var(--font-inter), sans-serif;
   font-size: 0.75rem;
   font-weight: 600;
   text-transform: uppercase;
@@ -732,7 +732,7 @@ body {
   background-color: rgb(var(--surface-elevated));
   border: 1px solid rgb(var(--surface-border));
   color: rgb(var(--text-mid));
-  font-family: var(--font-mono), "JetBrains Mono", Consolas, monospace;
+  font-family: var(--font-inter), sans-serif;
   font-size: 0.625rem;
   font-weight: 600;
   text-transform: uppercase;
@@ -772,7 +772,7 @@ body {
   text-align: left;
   padding: 0.75rem 0.5rem;
   color: rgb(var(--text-mid));
-  font-family: var(--font-mono), "JetBrains Mono", Consolas, monospace;
+  font-family: var(--font-inter), sans-serif;
   font-size: 0.6875rem;
   font-weight: 600;
   text-transform: uppercase;
@@ -1581,7 +1581,7 @@ body.mobile-menu-open #tactical-chatbot { display: none !important; }
   padding: 0.625rem 1rem;
   background-color: transparent;
   color: rgb(var(--text-low));
-  font-family: var(--font-mono), "JetBrains Mono", Consolas, monospace;
+  font-family: var(--font-inter), sans-serif;
   font-size: 0.75rem;
   font-weight: 600;
   text-transform: uppercase;
