@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo, useCallback, Suspense } from "react";
+import { useState, useEffect, useMemo, useCallback, useRef, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
   UserPlus,
@@ -38,6 +38,7 @@ import {
   DataTableSkeleton,
   SearchField,
   Skeleton,
+  AdminLoader,
 } from "@/components/admin/AdminUI";
 import { useAllMembers } from "@/hooks/use-admin-stats";
 import { getMemberStatus, formatDate, parseLocalDate } from "@/lib/member-utils";
@@ -47,15 +48,14 @@ import {
   buildWhatsAppUrl,
 } from "@/lib/admin-api";
 import { PLAN_PRICES, getPlanPrice } from "@/lib/config";
+import CountUp from "@/components/ui/text/CountUp";
+import PebbleImageViewer, { PebbleImage } from "@/components/admin/PebbleImageViewer";
 
 const MemberFormModal = dynamic(
   () => import("@/components/admin/MemberFormModal"),
   {
-    loading: () => (
-      <div className="fixed inset-0 bg-black/80 z-[60] flex items-center justify-center">
-        <div className="w-8 h-8 border-2 border-accent border-t-transparent rounded-full animate-spin" />
-      </div>
-    ),
+    loading: () => null,
+    ssr: false,
   }
 );
 
@@ -136,7 +136,7 @@ function AdminMembersPageInner() {
   const searchParams = useSearchParams();
   const { members, loading, error, refresh, setMembers } = useAllMembers();
 
-  const [viewMode, setViewMode] = useState<ViewMode>("table");
+  const [viewMode, setViewMode] = useState<ViewMode>("card");
   const [search, setSearch] = useState("");
   const [filterStatus, setFilterStatus] = useState<FilterStatus>("all");
   const [sortKey, setSortKey] = useState<SortKey>("newest");
@@ -152,6 +152,8 @@ function AdminMembersPageInner() {
   const [isDeleting, setIsDeleting] = useState(false);
   const [filterOpen, setFilterOpen] = useState(false);
   const [sortOpen, setSortOpen] = useState(false);
+  const [viewingImage, setViewingImage] = useState<PebbleImage | null>(null);
+  const handledParamRef = useRef<string | null>(null);
 
   // Read URL params to deep-link: ?new=1, ?edit=id, ?renew=id, ?filter=expiring
   useEffect(() => {
@@ -162,28 +164,28 @@ function AdminMembersPageInner() {
     ) {
       setFilterStatus(f as FilterStatus);
     }
-    if (searchParams.get("new") === "1") {
+    const newParam = searchParams.get("new");
+    const editId = searchParams.get("edit");
+    const renewId = searchParams.get("renew");
+    const paramKey = `${newParam || ""}_${editId || ""}_${renewId || ""}`;
+
+    if (newParam === "1" && handledParamRef.current !== paramKey) {
+      handledParamRef.current = paramKey;
       setEditingMember(null);
       setRenewMode(false);
       setShowForm(true);
     }
-    const editId = searchParams.get("edit");
-    const renewId = searchParams.get("renew");
-    if (editId || renewId) {
+    if ((editId || renewId) && handledParamRef.current !== paramKey) {
       const id = (editId || renewId) as string;
-      // Wait for members to load, then match.
-      const tryMatch = () => {
-        const m = members.find((x) => x.id === id);
-        if (m) {
-          setEditingMember(m);
-          setRenewMode(!!renewId);
-          setShowForm(true);
-        }
-      };
-      if (members.length > 0) tryMatch();
+      const m = members.find((x) => x.id === id);
+      if (m) {
+        handledParamRef.current = paramKey;
+        setEditingMember(m);
+        setRenewMode(!!renewId);
+        setShowForm(true);
+      }
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchParams, members.length]);
+  }, [searchParams, members]);
 
   const counts = useMemo(() => {
     let active = 0,
@@ -440,30 +442,30 @@ function AdminMembersPageInner() {
             <button
               type="button"
               onClick={refresh}
-              className="btn-ghost text-xs"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-surface-border bg-surface-card hover:bg-surface-elevated text-xs font-medium text-mid hover:text-hi transition-colors shadow-sm"
               title="Refresh members list"
               aria-label="Refresh"
             >
-              <RefreshCw className="w-3.5 h-3.5" />
+              <RefreshCw className="w-3.5 h-3.5 text-low" />
               <span className="hidden sm:inline">Refresh</span>
             </button>
             <button
               type="button"
               onClick={handleExport}
-              className="btn-secondary text-xs"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-surface-border bg-surface-card hover:bg-surface-elevated text-xs font-medium text-mid hover:text-hi transition-colors shadow-sm disabled:opacity-50"
               title="Export filtered members as CSV"
               disabled={filtered.length === 0}
             >
-              <FileDown className="w-3.5 h-3.5" />
-              Export CSV
+              <FileDown className="w-3.5 h-3.5 text-low" />
+              <span className="hidden sm:inline">Export CSV</span>
             </button>
             <button
               type="button"
               onClick={openNew}
-              className="btn-primary text-xs"
+              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-accent hover:bg-accent-hover text-white text-xs font-semibold tracking-wide transition-all shadow-md active:scale-95"
             >
               <UserPlus className="w-3.5 h-3.5" />
-              Register Member
+              <span>Register Member</span>
             </button>
           </>
         }
@@ -471,8 +473,8 @@ function AdminMembersPageInner() {
 
       <div className="grid gap-3 sm:gap-4 grid-cols-2 lg:grid-cols-4 mb-6">
         <StatCard
-          label="Total"
-          value={counts.total.toLocaleString()}
+          label="Total Members"
+          value={<CountUp to={counts.total} />}
           sublabel={
             counts.total === 0
               ? "No members yet"
@@ -487,14 +489,14 @@ function AdminMembersPageInner() {
         />
         <StatCard
           label="Active"
-          value={counts.active.toLocaleString()}
+          value={<CountUp to={counts.active} />}
           sublabel={`${expiringSummaryCounts.next30} renew in next 30d`}
           variant="success"
           onClick={() => setFilterStatus("active")}
         />
         <StatCard
           label="Expiring Soon"
-          value={counts.expiring.toLocaleString()}
+          value={<CountUp to={counts.expiring} />}
           sublabel={
             expiringSummaryCounts.todayCount > 0
               ? `${expiringSummaryCounts.todayCount} ending today — urgent`
@@ -504,8 +506,8 @@ function AdminMembersPageInner() {
           onClick={() => setFilterStatus("expiring")}
         />
         <StatCard
-          label="Expired"
-          value={counts.expired.toLocaleString()}
+          label="Expired Plans"
+          value={<CountUp to={counts.expired} />}
           sublabel={`${counts.incomplete} profiles incomplete`}
           variant="danger"
           onClick={() => setFilterStatus("expired")}
@@ -552,33 +554,21 @@ function AdminMembersPageInner() {
         }
       >
         {loading ? (
-          viewMode === "table" ? (
-            <DataTableSkeleton cols={7} rows={8} />
-          ) : (
-            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-              {Array.from({ length: 8 }).map((_, i) => (
-                <div key={i} className="hairline surface-card p-4 space-y-3">
-                  <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 skeleton" />
-                    <div className="flex-1 space-y-2">
-                      <Skeleton className="h-3 w-2/3" />
-                      <Skeleton className="h-2.5 w-1/2" />
-                    </div>
-                  </div>
-                  <Skeleton className="h-10" />
-                </div>
-              ))}
-            </div>
-          )
+          <AdminLoader text="Synchronizing member registry…" />
         ) : error ? (
           <div className="hairline border-status-danger/30 bg-status-danger/5 p-6 text-center">
             <AlertCircle className="w-10 h-10 text-status-danger mx-auto mb-3" />
-            <div className="font-display uppercase text-lg text-status-danger mb-1">
+            <div className="font-semibold text-lg text-status-danger mb-1">
               Failed to load members
             </div>
             <div className="text-sm text-mid mb-4">{error}</div>
-            <button onClick={refresh} className="btn-secondary text-xs">
-              <RefreshCw className="w-3.5 h-3.5" /> Retry
+            <button
+              type="button"
+              onClick={refresh}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-surface-border bg-surface-card hover:bg-surface-elevated text-xs font-medium text-mid hover:text-hi transition-colors shadow-sm"
+            >
+              <RefreshCw className="w-3.5 h-3.5 text-low" />
+              <span>Retry</span>
             </button>
           </div>
         ) : (
@@ -598,13 +588,13 @@ function AdminMembersPageInner() {
                       setFilterOpen((v) => !v);
                       setSortOpen(false);
                     }}
-                    className="btn-secondary text-xs gap-2 relative"
+                    className="inline-flex items-center gap-2 px-3 py-2 rounded-xl border border-surface-border bg-surface-card hover:bg-surface-elevated text-xs font-medium text-mid hover:text-hi transition-colors shadow-sm relative"
                     aria-haspopup="listbox"
                     aria-expanded={filterOpen}
                   >
-                    <Filter className="w-3.5 h-3.5" />
+                    <Filter className="w-3.5 h-3.5 text-low" />
                     <span className="hidden sm:inline">Filter:</span>
-                    <span className="capitalize">{filterStatus}</span>
+                    <span className="capitalize font-semibold text-hi">{filterStatus}</span>
                     {filterStatus !== "all" && (
                       <span className="absolute -top-1 -right-1 w-2 h-2 bg-accent rounded-full" />
                     )}
@@ -619,7 +609,7 @@ function AdminMembersPageInner() {
                       />
                       <div
                         role="listbox"
-                        className="absolute right-0 mt-2 z-40 hairline surface-modal w-56 overflow-hidden shadow-modal"
+                        className="absolute right-0 mt-2 z-40 rounded-2xl border border-surface-border bg-surface-modal w-56 overflow-hidden shadow-2xl"
                       >
                         {(
                           [
@@ -642,14 +632,14 @@ function AdminMembersPageInner() {
                             }}
                             role="option"
                             aria-selected={filterStatus === key}
-                            className={`w-full flex items-center justify-between px-3 py-2.5 text-xs text-left label-text uppercase tracking-wider transition-colors hairline-b last:hairline-b-0 ${
+                            className={`w-full flex items-center justify-between px-3.5 py-2.5 text-xs text-left font-medium transition-colors border-b border-surface-border last:border-b-0 ${
                               filterStatus === key
-                                ? "bg-accent-muted text-hi"
-                                : "hover:bg-surface-elevated text-mid"
+                                ? "bg-accent/10 text-accent font-semibold"
+                                : "hover:bg-surface-elevated text-mid hover:text-hi"
                             }`}
                           >
                             <span>{label}</span>
-                            <span className="font-mono text-xs opacity-70">
+                            <span className="text-xs opacity-70 tabular-nums">
                               {count}
                             </span>
                           </button>
@@ -666,11 +656,11 @@ function AdminMembersPageInner() {
                       setSortOpen((v) => !v);
                       setFilterOpen(false);
                     }}
-                    className="btn-secondary text-xs gap-2"
+                    className="inline-flex items-center gap-2 px-3 py-2 rounded-xl border border-surface-border bg-surface-card hover:bg-surface-elevated text-xs font-medium text-mid hover:text-hi transition-colors shadow-sm"
                     aria-haspopup="listbox"
                     aria-expanded={sortOpen}
                   >
-                    <ArrowUpDown className="w-3.5 h-3.5" />
+                    <ArrowUpDown className="w-3.5 h-3.5 text-low" />
                     <span className="hidden sm:inline">Sort</span>
                     <ChevronDown className="w-3 h-3 opacity-60" />
                   </button>
@@ -683,7 +673,7 @@ function AdminMembersPageInner() {
                       />
                       <div
                         role="listbox"
-                        className="absolute right-0 mt-2 z-40 hairline surface-modal w-64 overflow-hidden shadow-modal"
+                        className="absolute right-0 mt-2 z-40 rounded-2xl border border-surface-border bg-surface-modal w-64 overflow-hidden shadow-2xl"
                       >
                         {(
                           [
@@ -703,15 +693,15 @@ function AdminMembersPageInner() {
                             }}
                             role="option"
                             aria-selected={sortKey === key}
-                            className={`w-full flex items-center justify-between px-3 py-2.5 text-xs text-left label-text uppercase tracking-wider transition-colors hairline-b last:hairline-b-0 ${
+                            className={`w-full flex items-center justify-between px-3.5 py-2.5 text-xs text-left font-medium transition-colors border-b border-surface-border last:border-b-0 ${
                               sortKey === key
-                                ? "bg-accent-muted text-hi"
-                                : "hover:bg-surface-elevated text-mid"
+                                ? "bg-accent/10 text-accent font-semibold"
+                                : "hover:bg-surface-elevated text-mid hover:text-hi"
                             }`}
                           >
                             <span>{label}</span>
                             {sortKey === key && (
-                              <ChevronRight className="w-3 h-3 text-accent" />
+                              <ChevronRight className="w-3.5 h-3.5 text-accent" />
                             )}
                           </button>
                         ))}
@@ -727,38 +717,38 @@ function AdminMembersPageInner() {
                       setFilterStatus("all");
                       setSearch("");
                     }}
-                    className="btn-ghost text-xs text-status-warning hover:text-status-warning"
+                    className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl border border-surface-border bg-surface-card hover:bg-surface-elevated text-xs font-medium text-status-warning hover:text-status-warning transition-colors shadow-sm"
                     title="Clear filters and search"
                   >
                     <X className="w-3.5 h-3.5" />
-                    Clear
+                    <span>Clear</span>
                   </button>
                 ) : null}
               </div>
             </div>
 
             {selectedIds.size > 0 && (
-              <div className="mb-4 hairline bg-accent-muted border-accent/40 px-3 sm:px-4 py-2.5 flex flex-wrap items-center gap-2 sm:gap-3">
-                <span className="label-text uppercase tracking-wider text-xs text-accent shrink-0">
+              <div className="mb-4 rounded-2xl bg-accent/10 border border-accent/30 px-3 sm:px-4 py-2.5 flex flex-wrap items-center gap-2 sm:gap-3 shadow-sm">
+                <span className="text-xs font-semibold text-accent shrink-0 tabular-nums">
                   {selectedIds.size} selected
                 </span>
                 <div className="flex-1 min-w-0" />
                 <button
                   type="button"
                   onClick={bulkWhatsApp}
-                  className="btn-secondary text-xs py-1"
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-accent hover:bg-accent-hover text-white text-xs font-semibold tracking-wide transition-all shadow-sm active:scale-95"
                   title="Send WhatsApp message to selected members"
                 >
                   <Send className="w-3 h-3" />
-                  Bulk WhatsApp
+                  <span>Bulk WhatsApp</span>
                 </button>
                 <button
                   type="button"
                   onClick={clearSelection}
-                  className="btn-ghost text-xs py-1 text-mid hover:text-hi"
+                  className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border border-surface-border bg-surface-card hover:bg-surface-elevated text-xs font-medium text-mid hover:text-hi transition-colors shadow-sm"
                 >
                   <X className="w-3 h-3" />
-                  Deselect
+                  <span>Deselect</span>
                 </button>
               </div>
             )}
@@ -778,9 +768,13 @@ function AdminMembersPageInner() {
                 }
                 action={
                   members.length === 0 ? (
-                    <button type="button" onClick={openNew} className="btn-primary text-xs">
+                    <button
+                      type="button"
+                      onClick={openNew}
+                      className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-accent hover:bg-accent-hover text-white text-xs font-semibold tracking-wide transition-all shadow-md active:scale-95"
+                    >
                       <UserPlus className="w-3.5 h-3.5" />
-                      Register First Member
+                      <span>Register First Member</span>
                     </button>
                   ) : (
                     <button
@@ -789,7 +783,7 @@ function AdminMembersPageInner() {
                         setFilterStatus("all");
                         setSearch("");
                       }}
-                      className="btn-secondary text-xs"
+                      className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl border border-surface-border bg-surface-card hover:bg-surface-elevated text-xs font-medium text-mid hover:text-hi transition-colors shadow-sm"
                     >
                       Reset Filters
                     </button>
@@ -806,6 +800,7 @@ function AdminMembersPageInner() {
                 onRenew={openRenew}
                 onReceipt={setReceiptFor}
                 onDelete={confirmDelete}
+                onViewImage={setViewingImage}
               />
             ) : (
               <MembersCardView
@@ -816,6 +811,7 @@ function AdminMembersPageInner() {
                 onRenew={openRenew}
                 onReceipt={setReceiptFor}
                 onDelete={confirmDelete}
+                onViewImage={setViewingImage}
               />
             )}
           </>
@@ -827,7 +823,12 @@ function AdminMembersPageInner() {
           open={showForm}
           member={editingMember}
           renew={renewMode}
-          onClose={() => setShowForm(false)}
+          onClose={() => {
+            setShowForm(false);
+            if (searchParams.has("new") || searchParams.has("edit") || searchParams.has("renew")) {
+              router.replace("/admin/members", { scroll: false });
+            }
+          }}
           onSaved={onSaved}
         />
       )}
@@ -858,6 +859,10 @@ function AdminMembersPageInner() {
           isDeleting={isDeleting}
         />
       )}
+      <PebbleImageViewer
+        image={viewingImage}
+        onClose={() => setViewingImage(null)}
+      />
     </div>
   );
 }
@@ -889,6 +894,7 @@ function MembersTableView({
   onRenew,
   onReceipt,
   onDelete,
+  onViewImage,
 }: {
   members: GymMember[];
   selectedIds: Set<string>;
@@ -898,6 +904,7 @@ function MembersTableView({
   onRenew: (m: GymMember) => void;
   onReceipt: (m: GymMember) => void;
   onDelete: (m: GymMember) => void;
+  onViewImage?: (img: PebbleImage) => void;
 }) {
   const allChecked =
     members.length > 0 && members.every((m) => selectedIds.has(m.id));
@@ -958,17 +965,31 @@ function MembersTableView({
                 </td>
                 <td className="px-3 py-3 hairline-b align-middle min-w-[200px]">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 hairline surface-modal overflow-hidden shrink-0 relative">
+                    <div
+                      className={`w-10 h-10 rounded-xl border border-surface-border bg-surface-elevated overflow-hidden shrink-0 relative ${
+                        m.photo_url ? "cursor-zoom-in group/avatar hover:ring-2 hover:ring-accent transition-all shadow-sm" : ""
+                      }`}
+                      onClick={() => {
+                        if (m.photo_url && onViewImage) {
+                          onViewImage({
+                            url: m.photo_url,
+                            name: m.full_name,
+                            subtitle: `${m.membership_type || "Member"} · ${m.mobile || ""}`,
+                          });
+                        }
+                      }}
+                      title={m.photo_url ? "Click to view full photo" : undefined}
+                    >
                       {m.photo_url ? (
                         <Image
                           src={m.photo_url}
                           alt=""
                           fill
                           sizes="40px"
-                          className="object-cover"
+                          className="object-cover group-hover/avatar:scale-105 transition-transform duration-200"
                         />
                       ) : (
-                        <div className="w-full h-full flex items-center justify-center text-xs font-mono text-low">
+                        <div className="w-full h-full flex items-center justify-center text-xs font-semibold text-mid">
                           {initials(m.full_name)}
                         </div>
                       )}
@@ -977,11 +998,11 @@ function MembersTableView({
                       <div className="text-sm text-hi truncate font-medium">
                         {m.full_name || <span className="text-faint">—</span>}
                       </div>
-                      <div className="flex items-center gap-2 text-xs text-low flex-wrap">
+                      <div className="flex items-center gap-2 text-xs text-low flex-wrap font-medium">
                         {m.mobile ? (
                           <a
                             href={`tel:${m.mobile}`}
-                            className="hover:text-accent whitespace-nowrap"
+                            className="hover:text-accent whitespace-nowrap tabular-nums"
                             onClick={(e) => e.stopPropagation()}
                           >
                             📞 {m.mobile}
@@ -990,7 +1011,7 @@ function MembersTableView({
                           <span className="text-faint">📞 —</span>
                         )}
                         {hasIncompleteProfile(m) && (
-                          <span className="text-status-warning label-text uppercase tracking-wider text-xs flex items-center gap-0.5">
+                          <span className="text-status-warning uppercase tracking-wider text-[11px] font-semibold flex items-center gap-0.5">
                             <AlertTriangle className="w-2.5 h-2.5" />
                             Incomplete
                           </span>
@@ -1000,34 +1021,34 @@ function MembersTableView({
                   </div>
                 </td>
                 <td className="px-3 py-3 hairline-b align-middle hidden lg:table-cell">
-                  <div className="text-sm text-hi whitespace-nowrap">
+                  <div className="text-sm text-hi whitespace-nowrap font-medium">
                     {m.membership_type || "—"}
                   </div>
-                  <div className="text-xs font-mono text-low">
+                  <div className="text-xs text-low font-medium tabular-nums">
                     ₹{getPlanPrice(m.membership_type).toLocaleString("en-IN")}
                   </div>
                 </td>
-                <td className="px-3 py-3 hairline-b align-middle hidden md:table-cell text-xs text-mid whitespace-nowrap font-mono">
+                <td className="px-3 py-3 hairline-b align-middle hidden md:table-cell text-xs text-mid whitespace-nowrap tabular-nums">
                   {formatDate(m.membership_start)}
                 </td>
                 <td className="px-3 py-3 hairline-b align-middle whitespace-nowrap">
                   <div
-                    className={`text-xs font-mono ${
+                    className={`text-xs tabular-nums ${
                       days === null
                         ? "text-mid"
                         : days < 0
-                        ? "text-status-danger"
+                        ? "text-status-danger font-medium"
                         : days <= 2
-                        ? "text-status-warning font-bold"
+                        ? "text-status-warning font-semibold"
                         : days <= 7
-                        ? "text-status-warning"
-                        : "text-hi"
+                        ? "text-status-warning font-medium"
+                        : "text-hi font-medium"
                     }`}
                   >
                     {formatDate(m.membership_end)}
                   </div>
                   {days !== null && (
-                    <div className="text-xs font-mono text-low mt-0.5">
+                    <div className="text-xs text-low mt-0.5 tabular-nums">
                       {days < 0
                         ? `${Math.abs(days)}d overdue`
                         : days === 0
@@ -1040,7 +1061,7 @@ function MembersTableView({
                   {statusBadgeFor(m.membership_end)}
                 </td>
                 <td className="px-3 py-3 hairline-b align-middle">
-                  <div className="flex items-center justify-end gap-1">
+                  <div className="flex items-center justify-end gap-1.5">
                     <button
                       type="button"
                       onClick={() =>
@@ -1053,7 +1074,7 @@ function MembersTableView({
                           }`
                         )
                       }
-                      className="p-2 text-low hover:text-status-success hover:bg-surface-card transition-colors"
+                      className="p-1.5 rounded-lg bg-surface-card border border-surface-border text-mid hover:bg-emerald-500/15 hover:text-emerald-600 dark:hover:text-emerald-400 hover:border-emerald-500/30 transition-colors shadow-sm"
                       title="Message via WhatsApp"
                       aria-label="WhatsApp"
                     >
@@ -1061,7 +1082,7 @@ function MembersTableView({
                     </button>
                     <a
                       href={`tel:${m.mobile || ""}`}
-                      className="p-2 text-low hover:text-status-info hover:bg-surface-card transition-colors"
+                      className="p-1.5 rounded-lg bg-surface-card border border-surface-border text-mid hover:bg-blue-500/15 hover:text-blue-600 dark:hover:text-blue-400 hover:border-blue-500/30 transition-colors shadow-sm"
                       title="Call member"
                       aria-label="Call"
                     >
@@ -1070,7 +1091,7 @@ function MembersTableView({
                     <button
                       type="button"
                       onClick={() => onReceipt(m)}
-                      className="p-2 text-low hover:text-accent hover:bg-surface-card transition-colors"
+                      className="p-1.5 rounded-lg bg-surface-card border border-surface-border text-mid hover:bg-surface-elevated hover:text-hi transition-colors shadow-sm"
                       title="Generate receipt"
                       aria-label="Receipt"
                     >
@@ -1080,7 +1101,7 @@ function MembersTableView({
                       <button
                         type="button"
                         onClick={() => onRenew(m)}
-                        className="p-2 text-low hover:bg-accent hover:text-white transition-colors"
+                        className="p-1.5 rounded-lg bg-surface-card border border-surface-border text-mid hover:bg-red-500/15 hover:text-red-600 dark:hover:text-red-400 hover:border-red-500/30 transition-colors shadow-sm"
                         title="Renew membership"
                         aria-label="Renew"
                       >
@@ -1090,7 +1111,7 @@ function MembersTableView({
                     <button
                       type="button"
                       onClick={() => onEdit(m)}
-                      className="p-2 text-low hover:text-accent hover:bg-surface-card transition-colors"
+                      className="p-1.5 rounded-lg bg-surface-card border border-surface-border text-mid hover:bg-surface-elevated hover:text-hi transition-colors shadow-sm"
                       title="Edit member"
                       aria-label="Edit"
                     >
@@ -1099,7 +1120,7 @@ function MembersTableView({
                     <button
                       type="button"
                       onClick={() => onDelete(m)}
-                      className="p-2 text-low hover:text-status-danger hover:bg-status-danger/10 transition-colors"
+                      className="p-1.5 rounded-lg bg-surface-card border border-surface-border text-mid hover:bg-red-500/15 hover:text-red-600 dark:hover:text-red-400 hover:border-red-500/30 transition-colors shadow-sm"
                       title="Delete member"
                       aria-label="Delete"
                     >
@@ -1124,6 +1145,7 @@ function MembersCardView({
   onRenew,
   onReceipt,
   onDelete,
+  onViewImage,
 }: {
   members: GymMember[];
   selectedIds: Set<string>;
@@ -1132,116 +1154,142 @@ function MembersCardView({
   onRenew: (m: GymMember) => void;
   onReceipt: (m: GymMember) => void;
   onDelete: (m: GymMember) => void;
+  onViewImage?: (img: PebbleImage) => void;
 }) {
   return (
-    <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
+    <div className="grid gap-3.5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
       {members.map((m) => {
         const checked = selectedIds.has(m.id);
         const days = getDaysRemaining(m.membership_end);
         const status = getMemberStatus(m.membership_end);
+
         return (
           <div
             key={m.id}
-            className={`hairline surface-card transition-colors overflow-hidden flex flex-col ${
-              checked ? "ring-1 ring-accent border-accent/60" : ""
+            className={`rounded-2xl border transition-all duration-200 overflow-hidden flex flex-col bg-surface-card shadow-sm ${
+              checked
+                ? "ring-2 ring-accent border-accent"
+                : "border-surface-border hover:border-zinc-400 dark:hover:border-zinc-700"
             }`}
           >
-            <div className="p-3 flex items-start gap-3">
+            {/* Card Header & Avatar */}
+            <div className="p-3.5 flex items-start gap-3">
               <input
                 type="checkbox"
                 checked={checked}
                 onChange={() => toggleSelect(m.id)}
-                className="mt-1 w-4 h-4 accent-accent shrink-0"
+                className="mt-1 w-4 h-4 accent-accent rounded cursor-pointer shrink-0"
                 aria-label={`Select ${m.full_name || "member"}`}
               />
-              <div className="w-14 h-14 hairline surface-modal overflow-hidden shrink-0 relative">
+
+              <div
+                className={`w-13 h-13 sm:w-14 sm:h-14 rounded-2xl border border-surface-border bg-surface-elevated overflow-hidden shrink-0 relative shadow-inner ${
+                  m.photo_url ? "cursor-zoom-in group/card-avatar hover:ring-2 hover:ring-accent transition-all" : ""
+                }`}
+                onClick={() => {
+                  if (m.photo_url && onViewImage) {
+                    onViewImage({
+                      url: m.photo_url,
+                      name: m.full_name,
+                      subtitle: `${m.membership_type || "Member"} · ${m.mobile || ""}`,
+                    });
+                  }
+                }}
+                title={m.photo_url ? "Click to view full photo" : undefined}
+              >
                 {m.photo_url ? (
                   <Image
                     src={m.photo_url}
                     alt=""
                     fill
                     sizes="56px"
-                    className="object-cover"
+                    className="object-cover group-hover/card-avatar:scale-105 transition-transform duration-200"
                   />
                 ) : (
-                  <div className="w-full h-full flex items-center justify-center text-sm font-mono text-low">
+                  <div className="w-full h-full flex items-center justify-center text-sm font-semibold text-mid">
                     {initials(m.full_name)}
                   </div>
                 )}
               </div>
+
               <div className="flex-1 min-w-0">
                 <div className="flex items-start justify-between gap-1">
                   <div className="min-w-0">
-                    <div className="text-sm text-hi truncate font-medium">
+                    <div className="text-sm font-semibold text-hi truncate leading-snug">
                       {m.full_name || "—"}
                     </div>
                     <a
                       href={`tel:${m.mobile || ""}`}
-                      className="text-xs text-low hover:text-accent"
+                      className="text-xs text-mid hover:text-accent transition-colors truncate block mt-0.5 font-medium"
                     >
                       {m.mobile || "No mobile"}
                     </a>
                   </div>
                   {statusBadgeFor(m.membership_end)}
                 </div>
+
                 {hasIncompleteProfile(m) && (
-                  <div className="mt-1.5 flex items-center gap-1 text-xs text-status-warning label-text uppercase tracking-wider">
+                  <div className="mt-2 inline-flex items-center gap-1 text-[10px] font-medium text-amber-600 dark:text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded-full border border-amber-500/20">
                     <AlertTriangle className="w-2.5 h-2.5" />
-                    {countIncompleteFields(m)} missing field
-                    {countIncompleteFields(m) === 1 ? "" : "s"}
+                    <span>{countIncompleteFields(m)} missing</span>
                   </div>
                 )}
               </div>
             </div>
 
-            <div className="px-3 pb-3 space-y-1.5 hairline-b">
-              <div className="flex justify-between text-xs">
-                <span className="text-faint label-text uppercase tracking-wider text-xs">
-                  Plan
-                </span>
-                <span className="text-hi whitespace-nowrap">
-                  {m.membership_type || "—"} · ₹
-                  {getPlanPrice(m.membership_type).toLocaleString("en-IN")}
-                </span>
-              </div>
-              <div className="flex justify-between text-xs">
-                <span className="text-faint label-text uppercase tracking-wider text-xs">
-                  Valid
-                </span>
-                <span className="text-mid font-mono whitespace-nowrap">
-                  {formatDate(m.membership_start)} →{" "}
-                  {formatDate(m.membership_end)}
-                </span>
-              </div>
-              {days !== null && (
-                <div className="flex justify-between text-xs">
-                  <span className="text-faint label-text uppercase tracking-wider text-xs">
-                    {days < 0 ? "Overdue" : "Remaining"}
+            {/* Plan Details & Validity Pill */}
+            <div className="px-3.5 pb-3 flex-1 flex flex-col justify-end space-y-2">
+              <div className="rounded-xl border border-surface-border bg-surface-elevated/60 p-2.5 space-y-1.5">
+                <div className="flex items-center justify-between text-xs">
+                  <span className="text-faint uppercase tracking-wider text-[10px] font-semibold">
+                    Plan Tier
                   </span>
-                  <span
-                    className={`font-mono font-bold ${
-                      days < 0
-                        ? "text-status-danger"
-                        : days === 0
-                        ? "text-status-danger"
-                        : days <= 2
-                        ? "text-status-warning"
-                        : days <= 7
-                        ? "text-status-warning"
-                        : "text-status-success"
-                    }`}
-                  >
-                    {days < 0
-                      ? `${Math.abs(days)}d past`
-                      : days === 0
-                      ? "TODAY"
-                      : `${days}d`}
+                  <span className="text-hi font-semibold tabular-nums">
+                    {m.membership_type || "—"} · ₹
+                    {getPlanPrice(m.membership_type).toLocaleString("en-IN")}
                   </span>
                 </div>
-              )}
+
+                <div className="flex items-center justify-between text-xs">
+                  <span className="text-faint uppercase tracking-wider text-[10px] font-semibold">
+                    Validity
+                  </span>
+                  <span className="text-mid text-[11px] font-medium tabular-nums">
+                    {formatDate(m.membership_start)} → {formatDate(m.membership_end)}
+                  </span>
+                </div>
+
+                {days !== null && (
+                  <div className="flex items-center justify-between text-xs pt-1 border-t border-surface-border">
+                    <span className="text-faint uppercase tracking-wider text-[10px] font-semibold">
+                      {days < 0 ? "Expired Status" : "Remaining Days"}
+                    </span>
+                    <span
+                      className={`text-[11px] font-semibold tabular-nums px-2 py-0.5 rounded-md ${
+                        days < 0
+                          ? "bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/30"
+                          : days === 0
+                          ? "bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/30"
+                          : days <= 2
+                          ? "bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/30"
+                          : days <= 7
+                          ? "bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/30"
+                          : "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30"
+                      }`}
+                    >
+                      {days < 0
+                        ? `${Math.abs(days)}d OVERDUE`
+                        : days === 0
+                        ? "ENDS TODAY"
+                        : `${days}d left`}
+                    </span>
+                  </div>
+                )}
+              </div>
             </div>
 
-            <div className="p-2 grid grid-cols-6 gap-1">
+            {/* 6-Action Grayish Toolbar */}
+            <div className="p-2.5 grid grid-cols-6 gap-1.5 border-t border-surface-border bg-surface-elevated/30">
               <button
                 type="button"
                 onClick={() =>
@@ -1254,17 +1302,18 @@ function MembersCardView({
                     }`
                   )
                 }
-                className="p-2 text-low hover:text-status-success hover:bg-surface-elevated flex items-center justify-center"
-                title="WhatsApp"
+                className="p-2 rounded-xl bg-surface-card border border-surface-border text-mid hover:bg-emerald-500/15 hover:text-emerald-600 dark:hover:text-emerald-400 hover:border-emerald-500/30 flex items-center justify-center transition-colors shadow-sm"
+                title="Message on WhatsApp"
                 aria-label="WhatsApp"
               >
                 <MessageCircle className="w-3.5 h-3.5" />
               </button>
+
               {m.mobile ? (
                 <a
                   href={`tel:${m.mobile}`}
-                  className="p-2 text-low hover:text-status-info hover:bg-surface-elevated flex items-center justify-center"
-                  title="Call"
+                  className="p-2 rounded-xl bg-surface-card border border-surface-border text-mid hover:bg-blue-500/15 hover:text-blue-600 dark:hover:text-blue-400 hover:border-blue-500/30 flex items-center justify-center transition-colors shadow-sm"
+                  title="Call Phone"
                   aria-label="Call"
                 >
                   <Phone className="w-3.5 h-3.5" />
@@ -1273,45 +1322,49 @@ function MembersCardView({
                 <button
                   type="button"
                   disabled
-                  className="p-2 text-low opacity-30 flex items-center justify-center cursor-not-allowed"
-                  title="No phone number"
+                  className="p-2 rounded-xl bg-surface-card/40 border border-surface-border text-low opacity-40 flex items-center justify-center cursor-not-allowed"
+                  title="No phone"
                   aria-label="No phone"
                 >
                   <Phone className="w-3.5 h-3.5" />
                 </button>
               )}
+
               <button
                 type="button"
                 onClick={() => onReceipt(m)}
-                className="p-2 text-low hover:text-accent hover:bg-surface-elevated flex items-center justify-center"
-                title="Receipt"
+                className="p-2 rounded-xl bg-surface-card border border-surface-border text-mid hover:bg-surface-elevated hover:text-hi flex items-center justify-center transition-colors shadow-sm"
+                title="Print / Export Receipt"
                 aria-label="Receipt"
               >
                 <Receipt className="w-3.5 h-3.5" />
               </button>
+
               <button
                 type="button"
                 onClick={() => onRenew(m)}
-                className="p-2 text-low hover:text-accent hover:bg-surface-elevated flex items-center justify-center"
-                title="Renew"
+                className="p-2 rounded-xl bg-surface-card border border-surface-border text-mid hover:bg-red-500/15 hover:text-red-600 dark:hover:text-red-400 hover:border-red-500/30 flex items-center justify-center transition-colors shadow-sm"
+                title="Renew Plan"
                 aria-label="Renew"
               >
                 <RefreshCw className="w-3.5 h-3.5" />
               </button>
+
               <button
                 type="button"
                 onClick={() => onEdit(m)}
-                className="p-2 text-low hover:text-accent hover:bg-surface-elevated flex items-center justify-center"
-                title="Edit"
+                className="p-2 rounded-xl bg-surface-card border border-surface-border text-mid hover:bg-surface-elevated hover:text-hi flex items-center justify-center transition-colors shadow-sm"
+                title="Edit Details"
                 aria-label="Edit"
               >
                 <Edit2 className="w-3.5 h-3.5" />
               </button>
+
               <button
                 type="button"
                 onClick={() => onDelete(m)}
-                className="p-2 text-low hover:text-status-danger hover:bg-status-danger/10 flex items-center justify-center"
-                title="Delete"
+                className="p-2 rounded-xl bg-surface-card border border-surface-border text-mid hover:bg-red-500/15 hover:text-red-600 dark:hover:text-red-400 hover:border-red-500/30 flex items-center justify-center transition-colors shadow-sm"
+                title="Delete Member"
                 aria-label="Delete"
               >
                 <Trash2 className="w-3.5 h-3.5" />
@@ -1358,7 +1411,7 @@ function DeleteConfirmDialog({
           <div className="flex-1 min-w-0">
             <h2
               id="del-title"
-              className="font-display uppercase tracking-wide text-base text-status-danger"
+              className="font-semibold text-base text-status-danger"
             >
               Permanently Delete Member
             </h2>
@@ -1388,7 +1441,7 @@ function DeleteConfirmDialog({
                   className="object-cover"
                 />
               ) : (
-                <div className="w-full h-full flex items-center justify-center text-xs font-mono text-low">
+                <div className="w-full h-full flex items-center justify-center text-xs font-semibold text-mid">
                   {initials(member.full_name)}
                 </div>
               )}
@@ -1397,8 +1450,8 @@ function DeleteConfirmDialog({
               <div className="text-sm text-hi font-medium truncate">
                 {member.full_name || "Unnamed member"}
               </div>
-              <div className="text-xs text-low font-mono">
-                {member.mobile || "—"} · {member.membership_type || "No plan"}
+              <div className="text-xs text-low font-medium">
+                <span className="tabular-nums">{member.mobile || "—"}</span> · {member.membership_type || "No plan"}
               </div>
             </div>
           </div>
@@ -1407,7 +1460,7 @@ function DeleteConfirmDialog({
           <div>
             <label
               htmlFor="del-confirm"
-              className="block label-text uppercase tracking-wider text-xs text-faint mb-1.5"
+              className="block uppercase tracking-wider text-xs font-semibold text-faint mb-1.5"
             >
               Type <span className="text-status-danger font-bold">DELETE</span>{" "}
               to confirm
@@ -1418,7 +1471,7 @@ function DeleteConfirmDialog({
               autoFocus
               value={confirmText}
               onChange={(e) => onConfirmText(e.target.value)}
-              className="input-field font-mono"
+              className="input-field font-semibold text-status-danger placeholder:text-status-danger/40"
               placeholder="DELETE"
               autoComplete="off"
               disabled={isDeleting}
