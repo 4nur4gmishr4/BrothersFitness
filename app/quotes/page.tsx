@@ -271,8 +271,8 @@ export default function QuotesPage() {
               </div>
 
               <div className="text-left md:text-right border-l-2 md:border-l-0 md:border-r-2 border-surface-border pl-4 md:pl-0 md:pr-4">
-                <p className="text-sm font-medium text-hi">Iron Discipline Mindset</p>
-                <p className="text-xs text-mid">Quotes to fuel your workout and daily grind</p>
+                <p className="text-sm font-medium text-hi">Daily Fitness Motivation</p>
+                <p className="text-xs text-mid">Inspiring thoughts to help you stay strong and focused</p>
               </div>
             </div>
           </div>

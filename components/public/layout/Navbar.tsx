@@ -52,16 +52,19 @@ export default function Navbar() {
     if (isOpen) {
       const scrollBarWidth = window.innerWidth - document.documentElement.clientWidth;
       document.body.style.overflow = "hidden";
+      document.body.classList.add("mobile-menu-open");
       if (scrollBarWidth > 0) {
         document.body.style.paddingRight = `${scrollBarWidth}px`;
       }
     } else {
       document.body.style.overflow = "";
       document.body.style.paddingRight = "";
+      document.body.classList.remove("mobile-menu-open");
     }
     return () => {
       document.body.style.overflow = "";
       document.body.style.paddingRight = "";
+      document.body.classList.remove("mobile-menu-open");
     };
   }, [isOpen]);
 
@@ -72,7 +75,7 @@ export default function Navbar() {
     { name: "Calculators", id: "/calculators", num: "04" },
     { name: "Pricing", id: "/pricing", num: "05" },
     { name: "Quotes", id: "/quotes", num: "06" },
-    { name: "Trophy Room", id: "/trophy-room", num: "07" },
+    { name: "Awards", id: "/trophy-room", num: "07" },
   ];
 
   const handleMenuClick = (id: string) => {
@@ -84,10 +87,10 @@ export default function Navbar() {
     <>
       {/* Editorial Apple-Grade Navigation Header */}
       <header
-        className={`sticky top-0 left-0 right-0 z-[110] select-none transition-colors duration-200 ${
+        className={`fixed top-0 left-0 right-0 z-[110] w-full select-none transition-colors duration-200 ${
           isOpen || isScrolled
             ? "bg-surface-canvas border-b border-surface-border/80 shadow-sm"
-            : "bg-transparent border-b border-transparent"
+            : "bg-surface-canvas/80 backdrop-blur-md border-b border-surface-border/40"
         }`}
       >
         <div className="w-full max-w-[1600px] mx-auto px-4 sm:px-8 md:px-12 lg:px-16">
@@ -221,7 +224,7 @@ export default function Navbar() {
                 {/* Left Column: Big Staggered Links */}
                 <div className="lg:col-span-7 space-y-1">
                   <span className="text-xs uppercase tracking-widest text-accent mb-4 block font-semibold">
-                    NAVIGATION INDEX
+                    ALL PAGES
                   </span>
 
                   <div className="space-y-2">
@@ -264,7 +267,7 @@ export default function Navbar() {
                 {/* Right Column: People & Direct Access Rows in Matching Editorial Style */}
                 <div className="lg:col-span-5 space-y-1 pt-4 lg:pt-0">
                   <span className="text-xs uppercase tracking-widest text-accent mb-4 block font-semibold">
-                    DIRECTORY &amp; DIRECT ACCESS
+                    OUR TEAM &amp; DIRECT CONTACT
                   </span>
 
                   <div className="space-y-2">
@@ -377,7 +380,7 @@ export default function Navbar() {
                             Anurag Mishra
                           </span>
                           <span className="text-xs text-mid truncate block mt-0.5">
-                            Platform Developer &bull; Architect
+                            Website &amp; App Developer
                           </span>
                         </div>
                       </div>

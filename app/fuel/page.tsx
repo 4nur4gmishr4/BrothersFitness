@@ -2,7 +2,7 @@
 
 import { useState, useEffect, Suspense, useCallback, useMemo } from "react";
 import { useSearchParams } from "next/navigation";
-import { Cpu, Calculator } from "lucide-react";
+import { Calculator } from "lucide-react";
 import { toast } from "sonner";
 import Navbar from "@/components/public/layout/Navbar";
 import { useUserAuth } from "@/lib/user-auth-context";
@@ -436,23 +436,23 @@ function FuelSynthesizerContent() {
                                     <div className="surface-canvas hairline p-6 h-full flex flex-col justify-center">
                                         <div className="flex items-center gap-2 mb-4">
                                             <Calculator className="w-5 h-5 text-accent" />
-                                            <h4 className="label-text text-xs uppercase tracking-widest text-hi">Calorie Estimation</h4>
+                                            <h4 className="label-text text-xs uppercase tracking-widest text-hi">How Calories Are Calculated</h4>
                                         </div>
                                         <p className="text-sm text-mid leading-relaxed mb-4">
-                                            Your daily calories are estimated using the Mifflin-St Jeor equation, adjusted for your activity level and weekly weight-change goal.
+                                            Your daily calories are calculated from your height, weight, daily activity, and your target weight goal.
                                         </p>
                                         <ul className="space-y-2 text-xs text-faint">
                                             <li className="flex gap-2">
-                                                <span className="text-accent">/</span>
-                                                Automatic deficit/surplus scaling
+                                                <span className="text-accent">•</span>
+                                                Balanced calories for fat loss or muscle gain
                                             </li>
                                             <li className="flex gap-2">
-                                                <span className="text-accent">/</span>
-                                                Activity multiplier calibration
+                                                <span className="text-accent">•</span>
+                                                Matched to your daily physical activity
                                             </li>
                                             <li className="flex gap-2">
-                                                <span className="text-accent">/</span>
-                                                Real-time goal adjustment
+                                                <span className="text-accent">•</span>
+                                                Local Lakhnadon foods with healthy Indian ingredients
                                             </li>
                                         </ul>
                                     </div>
@@ -464,7 +464,7 @@ function FuelSynthesizerContent() {
                                 <div className="mb-6 p-4 surface-elevated hairline border-accent/30">
                                     <div className="flex items-center gap-2 mb-3">
                                         <Calculator className="w-4 h-4 text-accent" />
-                                        <h4 className="label-text text-xs uppercase tracking-widest text-accent">Your Calculated Profile</h4>
+                                        <h4 className="label-text text-xs uppercase tracking-widest text-accent">Your Daily Plan Summary</h4>
                                     </div>
                                     <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
                                         <div className="surface-canvas hairline p-2 text-center">
@@ -480,8 +480,8 @@ function FuelSynthesizerContent() {
                                             <span className="font-bold text-hi text-xs">{activityLevel.split(" ")[0]}</span>
                                         </div>
                                         <div className="surface-canvas hairline p-2 text-center">
-                                            <span className="block text-xs text-faint uppercase">Mode</span>
-                                            <span className="font-bold text-hi">{mode.toUpperCase()}</span>
+                                            <span className="block text-xs text-faint uppercase">Goal</span>
+                                            <span className="font-bold text-hi">{mode === "cut" ? "Fat Loss" : mode === "bulk" ? "Muscle Gain" : "Maintain"}</span>
                                         </div>
                                     </div>
                                     <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm mt-3">
@@ -509,14 +509,13 @@ function FuelSynthesizerContent() {
                                 <button
                                     onClick={generatePlan}
                                     disabled={!validateInputs().valid || loading || calculatedCalories === null}
-                                    className="w-full bg-accent text-white font-black uppercase text-lg py-4 hover:bg-accent-hover transition-colors duration-fast flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed"
+                                    className="w-full bg-accent text-white font-black uppercase text-lg py-4 hover:bg-accent-hover transition-colors duration-fast flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed rounded-2xl shadow-sm"
                                 >
-                                    <Cpu className="w-6 h-6" />
-                                    Generate Diet Plan
+                                    <span>Create My Meal Plan</span>
                                 </button>
                                 {!validateInputs().valid && !error && (
                                     <p className="label-text text-xs text-status-danger mt-2 uppercase tracking-wider text-center">
-                                        All fields must be filled with valid values
+                                        Please fill in your age, height, and weights above
                                     </p>
                                 )}
                                 {validateInputs().valid && calculatedCalories === null && !loading && (

@@ -55,20 +55,20 @@ export default function WelcomeModal({ isOpen, onClose }: WelcomeModalProps) {
                         <div className="surface-elevated hairline p-4 flex gap-4">
                             <Zap className="w-6 h-6 text-accent shrink-0 mt-1" />
                             <p className="text-sm text-low">
-                                Your <span className="text-hi font-bold">3 daily credits</span> are now available. Use them across both the <span className="text-accent font-bold">AI Chatbot</span> and <span className="text-accent font-bold">Diet Generation</span> services.
+                                You have <span className="text-hi font-bold">3 daily credits</span>. You can use them to create personalized meal plans and chat with our fitness assistant.
                             </p>
                         </div>
 
                         <p className="text-xs text-faint uppercase tracking-wider pt-2 font-medium">
-                            Credits reset daily at 5:30 AM IST
+                            Credits refresh every morning at 5:30 AM
                         </p>
                     </div>
 
                     <button
                         onClick={onClose}
-                        className="btn-primary w-full mt-8 py-4 text-xs"
+                        className="btn-primary w-full mt-8 py-4 text-xs rounded-full"
                     >
-                        Get Started
+                        Continue
                     </button>
                 </div>
 

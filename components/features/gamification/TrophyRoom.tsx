@@ -292,7 +292,7 @@ export default function TrophyRoom(props: { isModal?: boolean; isPage?: boolean;
       <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-10 md:mb-14 gap-6 pb-8 border-b border-surface-border/70">
         <div>
           <span className="text-xs uppercase tracking-widest text-accent mb-2 block font-semibold">
-            ACTIVITY &amp; MEMBER PROGRESSION
+            FITNESS AWARDS &amp; ACHIEVEMENTS
           </span>
           <h1 className="heading-display text-4xl sm:text-6xl md:text-7xl text-hi leading-[0.95] tracking-tight uppercase">
             MEMBER <span className="text-accent">AWARDS</span>
@@ -302,21 +302,21 @@ export default function TrophyRoom(props: { isModal?: boolean; isPage?: boolean;
         {/* Live Discipline Stats Bar */}
         <div className="flex items-center gap-6 sm:gap-10 border-l-2 border-surface-border pl-6">
           <div>
-            <span className="text-[11px] uppercase tracking-wider text-mid block font-semibold">ACTIVE STREAK</span>
+            <span className="text-[11px] uppercase tracking-wider text-mid block font-semibold">ACTIVE DAYS</span>
             <span className="text-2xl sm:text-3xl font-extrabold text-hi tracking-tight tabular-nums">
               {visitStreak} <span className="text-xs font-normal text-mid">Days</span>
             </span>
           </div>
 
           <div>
-            <span className="text-[11px] uppercase tracking-wider text-mid block font-semibold">UNLOCKED</span>
+            <span className="text-[11px] uppercase tracking-wider text-mid block font-semibold">BADGES EARNED</span>
             <span className="text-2xl sm:text-3xl font-extrabold text-accent tracking-tight tabular-nums">
               {unlockedCount}/{FLOWING_MILESTONES.length}
             </span>
           </div>
 
           <div>
-            <span className="text-[11px] uppercase tracking-wider text-mid block font-semibold">COMPLETION</span>
+            <span className="text-[11px] uppercase tracking-wider text-mid block font-semibold">PROGRESS</span>
             <span className="text-2xl sm:text-3xl font-extrabold text-hi tracking-tight tabular-nums">
               {completionPct}%
             </span>

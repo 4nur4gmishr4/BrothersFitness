@@ -20,7 +20,7 @@ export default function Diagnostics() {
         <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-10 md:mb-14 gap-6 pb-8 border-b border-surface-border/70">
           <div>
             <span className="text-xs uppercase tracking-widest text-accent mb-2 block font-semibold">
-              PERFORMANCE METRICS &amp; STATS
+              FITNESS TOOLS &amp; CALCULATORS
             </span>
             <h1 className="heading-display text-4xl sm:text-6xl md:text-7xl text-hi leading-[0.95] tracking-tight uppercase">
               FITNESS <span className="text-accent">CALCULATORS</span>
@@ -28,25 +28,25 @@ export default function Diagnostics() {
           </div>
 
           <div className="text-left md:text-right border-l-2 md:border-l-0 md:border-r-2 border-surface-border pl-4 md:pl-0 md:pr-4">
-            <p className="text-sm font-medium text-hi">Strength &amp; Composition Suite</p>
-            <p className="text-xs text-mid">1RM, TDEE, Calorie Targets &amp; BMI analytics</p>
+            <p className="text-sm font-medium text-hi">Easy Body Calculators</p>
+            <p className="text-xs text-mid">Check your BMI, daily calorie needs &amp; lift strength</p>
           </div>
         </div>
 
         {/* Tabs */}
-        <div className="flex gap-4 mb-12 justify-center">
+        <div className="flex flex-wrap gap-3 mb-12 justify-center">
           {[
-            { id: "bmi", label: "BODY MASS", icon: <Activity className="w-5 h-5" /> },
-            { id: "tdee", label: "CALORIE", icon: <Flame className="w-5 h-5" /> },
-            { id: "1rm", label: "STRENGTH", icon: <Dumbbell className="w-5 h-5" /> },
+            { id: "bmi", label: "BMI", icon: <Activity className="w-4 h-4" /> },
+            { id: "tdee", label: "Daily Calories", icon: <Flame className="w-4 h-4" /> },
+            { id: "1rm", label: "Max Strength", icon: <Dumbbell className="w-4 h-4" /> },
           ].map((tab) => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center gap-2 px-6 py-3 label-text border transition-colors duration-fast ${
+              className={`flex items-center gap-2 px-5 py-2.5 rounded-full text-xs font-semibold border transition-all duration-fast shadow-xs ${
                 activeTab === tab.id
-                  ? "bg-accent text-white border-accent"
-                  : "surface-card hairline text-mid hover:border-accent hover:text-accent"
+                  ? "bg-accent text-white border-accent shadow-sm"
+                  : "surface-card border-surface-border text-mid hover:border-accent hover:text-hi"
               }`}
             >
               {tab.icon} {tab.label}

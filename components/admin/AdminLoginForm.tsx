@@ -44,15 +44,15 @@ export interface AdminLoginFormProps {
 
 export function AdminLoginForm({
   heading = "Admin Access",
-  description = "Enter master passcode to access the Brother's Fitness management console.",
+  description = "Enter your admin password to open the gym management dashboard.",
   logo = {
     url: "/",
     src: "/assets/favicon.png",
     alt: "Brother's Fitness Logo",
     title: "Brother's Fitness",
   },
-  buttonText = "Access Admin Panel",
-  footerNote = "Restricted to authorised gym personnel only",
+  buttonText = "Log In",
+  footerNote = "For gym staff and trainers only",
   backUrl = "/",
   backText = "Back to site",
   className,
