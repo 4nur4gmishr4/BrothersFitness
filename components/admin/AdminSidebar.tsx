@@ -185,9 +185,9 @@ export const AppSidebar = ({ unreadLeads = 0, ...props }: AppSidebarProps) => {
                         isActive={isActive}
                         tooltip={item.label}
                         className={cn(
-                          "transition-colors text-xs font-medium px-3 py-2.5 rounded-xl",
+                          "transition-all text-xs font-medium px-3 py-2.5 rounded-xl relative overflow-hidden group",
                           isActive
-                            ? "bg-accent text-white hover:bg-accent-hover hover:text-white font-semibold shadow-sm border border-accent"
+                            ? "!bg-accent !text-white hover:!bg-accent-hover font-semibold shadow-md shadow-accent/25 border border-accent/60"
                             : "text-mid hover:text-hi hover:bg-surface-elevated"
                         )}
                       >
@@ -210,10 +210,13 @@ export const AppSidebar = ({ unreadLeads = 0, ...props }: AppSidebarProps) => {
                           }}
                           target={item.external ? "_blank" : undefined}
                           rel={item.external ? "noreferrer" : undefined}
-                          className="flex items-center gap-3 w-full"
+                          className="flex items-center gap-3 w-full relative"
                         >
-                          <Icon className={cn("size-4 shrink-0", isActive ? "text-white" : "text-mid")} />
-                          <span className="truncate">{item.label}</span>
+                          {isActive && (
+                            <span className="absolute -left-3 top-0 bottom-0 w-1 bg-white rounded-r-full shadow-sm" />
+                          )}
+                          <Icon className={cn("size-4 shrink-0 transition-transform duration-200", isActive ? "text-white scale-105" : "text-mid group-hover:text-hi")} />
+                          <span className={cn("truncate", isActive ? "text-white font-semibold" : "text-mid group-hover:text-hi")}>{item.label}</span>
                         </Link>
                       </SidebarMenuButton>
 
@@ -221,7 +224,7 @@ export const AppSidebar = ({ unreadLeads = 0, ...props }: AppSidebarProps) => {
                         <SidebarMenuBadge className={cn(
                           "font-semibold text-[10px] px-1.5 py-0.5 rounded-full tabular-nums",
                           isActive
-                            ? "bg-white text-accent"
+                            ? "bg-white text-accent font-bold"
                             : "bg-accent text-white"
                         )}>
                           {badge > 99 ? "99+" : badge}
