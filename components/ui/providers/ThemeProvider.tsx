@@ -8,9 +8,7 @@ interface ThemeContextValue {
     theme: Theme;
     resolvedTheme: "light" | "dark";
     setTheme: (t: Theme) => void;
-    /** False during SSR and the first client render. Gate theme-dependent UI on
-     *  this so the initial state ("system"/"dark", deterministic on both sides)
-     *  never leaks a one-frame wrong-theme icon. */
+    /** False during SSR and the first client render. */
     mounted: boolean;
 }
 
@@ -21,10 +19,28 @@ const ThemeContext = createContext<ThemeContextValue>({
     mounted: false,
 });
 
+function applyThemeToDOM(theme: Theme): "light" | "dark" {
+    if (typeof window === "undefined") return "dark";
+    const root = document.documentElement;
+    const mq = window.matchMedia("(prefers-color-scheme: light)");
+    let resolved: "light" | "dark" = "dark";
+    if (theme === "system") {
+        root.removeAttribute("data-theme");
+        resolved = mq.matches ? "light" : "dark";
+    } else {
+        root.setAttribute("data-theme", theme);
+        resolved = theme;
+    }
+    root.style.colorScheme = resolved;
+    root.classList.toggle("dark", resolved === "dark");
+    root.classList.toggle("light", resolved === "light");
+    try {
+        localStorage.setItem("brofit_theme", theme);
+    } catch {}
+    return resolved;
+}
+
 export function ThemeProvider({ children }: { children: ReactNode }) {
-    // Deterministic initial state ("system"/"dark") keeps server and client
-    // first renders identical — no hydration warning. The pre-paint script in
-    // layout.tsx already applied data-theme, so there is no FOUC to reconcile.
     const [theme, setThemeState] = useState<Theme>("system");
     const [resolvedTheme, setResolvedTheme] = useState<"light" | "dark">("dark");
     const [mounted, setMounted] = useState(false);
@@ -32,38 +48,38 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     // Hydrate from localStorage after mount
     useEffect(() => {
         setMounted(true);
-        const stored = localStorage.getItem("brofit_theme");
-        if (stored === "light" || stored === "dark" || stored === "system") {
-            setThemeState(stored);
-        }
+        try {
+            const stored = localStorage.getItem("brofit_theme");
+            if (stored === "light" || stored === "dark" || stored === "system") {
+                setThemeState(stored as Theme);
+                const resolved = applyThemeToDOM(stored as Theme);
+                setResolvedTheme(resolved);
+            } else {
+                const resolved = applyThemeToDOM("system");
+                setResolvedTheme(resolved);
+            }
+        } catch {}
     }, []);
 
-    // Apply data-theme + resolve + persist
+    // Listen for OS system theme changes when in "system" mode
     useEffect(() => {
-        const root = document.documentElement;
         const mq = window.matchMedia("(prefers-color-scheme: light)");
-
-        const resolve = () => {
+        const handler = () => {
             if (theme === "system") {
-                root.removeAttribute("data-theme");
-                const resolved = mq.matches ? "light" : "dark";
+                const resolved = applyThemeToDOM("system");
                 setResolvedTheme(resolved);
-                root.style.colorScheme = resolved;
-            } else {
-                root.setAttribute("data-theme", theme);
-                setResolvedTheme(theme);
-                root.style.colorScheme = theme;
             }
         };
-
-        resolve();
-        mq.addEventListener("change", resolve);
-        localStorage.setItem("brofit_theme", theme);
-
-        return () => mq.removeEventListener("change", resolve);
+        mq.addEventListener("change", handler);
+        return () => mq.removeEventListener("change", handler);
     }, [theme]);
 
-    const setTheme = useCallback((t: Theme) => setThemeState(t), []);
+    const setTheme = useCallback((t: Theme) => {
+        // Synchronously update DOM attributes and classes before any paint (0ms instant toggle)
+        const resolved = applyThemeToDOM(t);
+        setThemeState(t);
+        setResolvedTheme(resolved);
+    }, []);
 
     return (
         <ThemeContext.Provider value={{ theme, resolvedTheme, setTheme, mounted }}>
@@ -73,3 +89,4 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
 }
 
 export const useTheme = () => useContext(ThemeContext);
+
