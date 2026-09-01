@@ -37,3 +37,4 @@ export default function CountdownTimer({ duration, onComplete }: { duration: num
         </div>
     );
 }
+export { CountdownTimer };

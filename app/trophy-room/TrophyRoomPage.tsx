@@ -3,7 +3,7 @@
 import Navbar from "@/components/public/layout/Navbar";
 import Footer from "@/components/public/layout/Footer";
 import TrophyRoom from "@/components/features/gamification/TrophyRoom";
-import PageWrapper from "@/components/layout/PageWrapper";
+import PageWrapper from "@/components/ui/layout/PageWrapper";
 
 export default function TrophyRoomPage() {
   return (

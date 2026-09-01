@@ -1,10 +1,10 @@
 import type { Metadata, Viewport } from "next";
 import { Inter, Anton, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
-import PageWrapper from "@/components/layout/PageWrapper";
+import PageWrapper from "@/components/ui/layout/PageWrapper";
 import { GamificationProvider } from "@/components/ui/providers/GamificationContext";
-import ReadingProgressBar from "@/components/shared/ReadingProgressBar";
-import PageTransition from "@/components/layout/PageTransition";
+import ReadingProgressBar from "@/components/ui/layout/ReadingProgressBar";
+import PageTransition from "@/components/ui/layout/PageTransition";
 import PwaUpdateToast from "@/components/ui/primitives/PwaUpdateToast";
 import { ThemeProvider } from "@/components/ui/providers/ThemeProvider";
 import ThemedToaster from "@/components/ui/primitives/ThemedToaster";

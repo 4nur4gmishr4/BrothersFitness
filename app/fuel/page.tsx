@@ -8,12 +8,12 @@ import Navbar from "@/components/public/layout/Navbar";
 import { useUserAuth } from "@/lib/user-auth-context";
 import { MAX_DAILY_CREDITS } from "@/lib/config";
 import type { DietPlan } from "@/lib/fuel-types";
-import DietResultView from "@/components/fuel/DietResultView";
-import CountdownTimer from "@/components/fuel/CountdownTimer";
-import LoadingStatus from "@/components/fuel/LoadingStatus";
-import MealPlate from "@/components/animations/MealPlate";
-import BellRing from "@/components/animations/BellRing";
-import PageSpinner from "@/components/animations/PageSpinner";
+import DietResultView from "@/components/features/fuel/DietResultView";
+import CountdownTimer from "@/components/features/fuel/CountdownTimer";
+import LoadingStatus from "@/components/features/fuel/LoadingStatus";
+import MealPlate from "@/components/ui/animations/MealPlate";
+import BellRing from "@/components/ui/animations/BellRing";
+import PageSpinner from "@/components/ui/animations/PageSpinner";
 
 function FuelSynthesizerContent() {
     const router = useRouter();

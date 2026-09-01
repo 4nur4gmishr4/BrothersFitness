@@ -6,7 +6,7 @@ import WorkoutSplits from "@/components/public/sections/WorkoutSplits";
 import Architects from "@/components/public/sections/Architects";
 import ContactForm from "@/components/ui/primitives/ContactForm";
 import Footer from "@/components/public/layout/Footer";
-import PageWrapper from "@/components/layout/PageWrapper";
+import PageWrapper from "@/components/ui/layout/PageWrapper";
 
 export default function Home() {
   return (

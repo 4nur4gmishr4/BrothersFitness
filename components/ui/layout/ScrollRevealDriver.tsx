@@ -11,7 +11,7 @@ import { useEffect } from "react";
  *
  * Mount once (inside PageWrapper); it covers all pages it wraps.
  */
-export default function ScrollReveal() {
+export default function ScrollRevealDriver() {
   useEffect(() => {
     if (typeof window === "undefined") return;
     if (!("IntersectionObserver" in window)) {
@@ -37,8 +37,7 @@ export default function ScrollReveal() {
 
     observeAll();
 
-    // L31: new elements added after mount (e.g. via client transitions) would
-    // never be observed. A MutationObserver keeps the set in sync.
+    // New elements added after mount (e.g. via client transitions) MutationObserver keeps the set in sync.
     const mutationObserver = new MutationObserver((mutations) => {
       for (const m of mutations) {
         for (const node of m.addedNodes) {
@@ -60,3 +59,5 @@ export default function ScrollReveal() {
 
   return null;
 }
+
+export { ScrollRevealDriver };

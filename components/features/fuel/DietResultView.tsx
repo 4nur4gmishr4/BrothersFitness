@@ -5,8 +5,8 @@ import {
     Globe, Utensils, ShoppingCart, IndianRupee, Home, Store, RefreshCw,
 } from "lucide-react";
 import { toast } from "sonner";
-import DietPlanPrint from "@/components/features/fuel/DietPlanPrint";
-import CheckDraw from "@/components/animations/CheckDraw";
+import DietPlanPrint from "./DietPlanPrint";
+import CheckDraw from "@/components/ui/animations/CheckDraw";
 import type { DietPlan } from "@/lib/fuel-types";
 
 type Lang = "en" | "hi";
@@ -353,3 +353,5 @@ export default function DietResultView({
         </>
     );
 }
+
+export { DietResultView };
