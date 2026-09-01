@@ -182,25 +182,17 @@ export default function TacticalChatbot() {
 
   return (
     <>
-      {/* Genuine Pebble-Shaped Chatbot Trigger (Hidden when hamburger nav is open) */}
+      {/* Red Circular Chatbot Button (Hidden when hamburger nav is open) */}
       {!isOpen && !isNavOpen && (
         <button
           id="tactical-chatbot-button"
-          className="fixed bottom-6 right-6 z-[90] px-4 py-2.5 rounded-full bg-black/90 hover:bg-black text-white border border-white/20 shadow-2xl backdrop-blur-md flex items-center gap-2.5 hover:scale-105 active:scale-95 transition-all duration-200 group cursor-pointer"
+          className="fixed bottom-6 right-6 z-[90] w-14 h-14 rounded-full bg-accent hover:bg-accent-hover text-white shadow-2xl shadow-accent/30 flex items-center justify-center hover:scale-105 active:scale-95 transition-all duration-200 cursor-pointer group relative"
           onClick={() => setIsOpen(true)}
           aria-label="Open Brother's Fitness AI Assistant"
+          title="Ask BroFit AI Coach"
         >
-          <div className="w-7 h-7 rounded-full bg-accent flex items-center justify-center text-white shrink-0 relative shadow-xs">
-            <Bot className="w-4 h-4" />
-            <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-emerald-500 border border-black animate-pulse" />
-          </div>
-          <div className="flex flex-col text-left leading-tight pr-1">
-            <span className="text-xs font-bold text-white tracking-tight flex items-center gap-1">
-              BroFit AI
-              <Zap className="w-3 h-3 text-accent" />
-            </span>
-            <span className="text-[10px] text-zinc-400 font-medium">Coach &amp; Diet</span>
-          </div>
+          <Bot className="w-6 h-6 transition-transform group-hover:scale-110" />
+          <span className="absolute top-1 right-1 w-3 h-3 rounded-full bg-emerald-500 border-2 border-accent animate-pulse" />
         </button>
       )}
 

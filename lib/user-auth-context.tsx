@@ -219,7 +219,7 @@ export function UserAuthProvider({ children }: { children: ReactNode }) {
         const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
             if (session?.user && isMounted) {
                 await loadUserFromSession(session);
-            } else if (isMounted) {
+            } else if (event === 'SIGNED_OUT' && isMounted) {
                 setUser(null);
                 setAccessToken(null);
             }
@@ -235,7 +235,7 @@ export function UserAuthProvider({ children }: { children: ReactNode }) {
     const signInWithGoogle = async (): Promise<{ success: boolean; error?: string }> => {
         try {
             const redirectUrl = typeof window !== 'undefined'
-                ? `${window.location.origin}/auth/callback`
+                ? `${window.location.origin}/`
                 : undefined;
 
             const { data, error } = await supabase.auth.signInWithOAuth({
