@@ -17,7 +17,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 
-export interface Login1Props {
+export interface AdminLoginFormProps {
   heading?: string;
   description?: string;
   logo?: {
@@ -41,7 +41,7 @@ export interface Login1Props {
   rateLimitResetIn?: number;
 }
 
-export function Login1({
+export function AdminLoginForm({
   heading = "Admin Access",
   description = "Enter master passcode to access the Brother's Fitness management console.",
   logo = {
@@ -62,7 +62,7 @@ export function Login1({
   error = null,
   hint = null,
   rateLimitResetIn = 0,
-}: Login1Props) {
+}: AdminLoginFormProps) {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [capsLock, setCapsLock] = useState(false);
@@ -274,4 +274,5 @@ export function Login1({
   );
 }
 
-export default Login1;
+export const Login1 = AdminLoginForm;
+export default AdminLoginForm;

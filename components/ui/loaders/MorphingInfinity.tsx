@@ -11,7 +11,7 @@ const infinity =
 const circleB =
   "M 12 16 C 14.21 16 16 14.21 16 12 C 16 9.79 14.21 8 12 8 C 9.79 8 8 9.79 8 12 C 8 14.21 9.79 16 12 16 Z";
 
-function MorphingInfinity(props: React.ComponentProps<"svg">) {
+export function MorphingInfinity(props: React.ComponentProps<"svg">) {
   return (
     <svg
       viewBox="0 0 24 24"
@@ -41,4 +41,4 @@ function MorphingInfinity(props: React.ComponentProps<"svg">) {
   );
 }
 
-export { MorphingInfinity };
+export default MorphingInfinity;

@@ -67,20 +67,14 @@ export const ADMIN_NAV_GROUPS: NavGroup[] = [
     title: "Operations",
     items: [
       {
-        label: "Dashboard",
-        icon: LayoutDashboard,
-        href: "/admin/dashboard",
-      },
-      {
         label: "Members",
         icon: Users,
         href: "/admin/members",
       },
       {
-        label: "Messages",
-        icon: Mail,
-        href: "/admin/leads",
-        badgeKey: "unreadLeads",
+        label: "Dashboard",
+        icon: LayoutDashboard,
+        href: "/admin/dashboard",
       },
       {
         label: "Analytics",
@@ -88,9 +82,10 @@ export const ADMIN_NAV_GROUPS: NavGroup[] = [
         href: "/admin/analytics",
       },
       {
-        label: "Activity Log",
-        icon: Clock,
-        href: "/admin/activity",
+        label: "Messages",
+        icon: Mail,
+        href: "/admin/leads",
+        badgeKey: "unreadLeads",
       },
     ],
   },
@@ -98,15 +93,14 @@ export const ADMIN_NAV_GROUPS: NavGroup[] = [
     title: "System",
     items: [
       {
-        label: "Settings & Backups",
-        icon: Settings,
-        href: "/admin/settings",
+        label: "Audit Logs",
+        icon: Clock,
+        href: "/admin/activity",
       },
       {
-        label: "View Live Site",
-        icon: ExternalLink,
-        href: "/",
-        external: true,
+        label: "Settings",
+        icon: Settings,
+        href: "/admin/settings",
       },
     ],
   },
@@ -116,20 +110,16 @@ const SidebarLogo = () => {
   return (
     <SidebarMenu>
       <SidebarMenuItem>
-        <SidebarMenuButton size="lg" asChild className="hover:bg-surface-elevated data-[state=open]:bg-surface-elevated">
+        <SidebarMenuButton size="lg" asChild className="hover:bg-transparent">
           <Link href="/admin/members" className="flex items-center gap-3">
-            <div className="flex aspect-square size-9 items-center justify-center rounded-xl bg-surface-card border border-surface-border p-1 shadow-sm">
-              <img
-                src="/assets/favicon.png"
-                alt="Brother's Fitness"
-                className="size-6 object-contain"
-              />
+            <div className="flex size-9 items-center justify-center rounded-xl bg-accent text-white shadow-md shadow-accent/20">
+              <Shield className="size-5" />
             </div>
             <div className="flex flex-col gap-0.5 leading-none">
-              <span className="font-semibold text-sm text-hi tracking-tight truncate">
-                Brother&apos;s Fitness
+              <span className="font-bold tracking-tight text-sm text-hi">
+                Brother's Fitness
               </span>
-              <span className="text-[11px] text-faint font-medium">
+              <span className="text-[10px] font-semibold text-accent uppercase tracking-wider">
                 Admin Console
               </span>
             </div>
@@ -268,17 +258,17 @@ export const AppSidebar = ({ unreadLeads = 0, ...props }: AppSidebarProps) => {
   );
 };
 
-export interface Sidebar1Props {
+export interface AdminSidebarProps {
   children?: React.ReactNode;
   unreadLeads?: number;
   className?: string;
 }
 
-export const Sidebar1 = ({
+export const AdminSidebar = ({
   children,
   unreadLeads = 0,
   className,
-}: Sidebar1Props) => {
+}: AdminSidebarProps) => {
   const pathname = usePathname();
   const router = useRouter();
   const { logout } = useAdmin();
@@ -411,5 +401,5 @@ export const Sidebar1 = ({
   );
 };
 
-export default Sidebar1;
-
+export const Sidebar1 = AdminSidebar;
+export default AdminSidebar;
