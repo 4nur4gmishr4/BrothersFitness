@@ -14,14 +14,23 @@ export default function Diagnostics() {
   const [activeTab, setActiveTab] = useState("bmi");
 
   return (
-    <section id="diagnostics" className="surface-canvas py-16 md:py-24">
-      <div className="max-w-4xl mx-auto px-4">
-        <div className="text-center mb-12 md:mb-16" data-reveal>
-          <p className="label-text text-accent mb-3">CALCULATE</p>
-          <h2 className="heading-display text-4xl md:text-6xl mb-4 text-hi">
-            CHECK YOUR <span className="text-accent">STATS</span>
-          </h2>
-          <p className="body-text text-mid">TRACK PROGRESS // STAY ACCOUNTABLE</p>
+    <section id="diagnostics" className="surface-canvas pt-20 sm:pt-24 pb-16 md:py-24">
+      <div className="max-w-[1600px] mx-auto px-4 sm:px-8 md:px-12 lg:px-16">
+        {/* Top Display Header */}
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-10 md:mb-14 gap-6 pb-8 border-b border-surface-border/70">
+          <div>
+            <span className="text-xs font-mono uppercase tracking-widest text-accent mb-2 block font-semibold">
+              PERFORMANCE METRICS &amp; STATS
+            </span>
+            <h1 className="heading-display text-4xl sm:text-6xl md:text-7xl text-hi leading-[0.95] tracking-tight uppercase">
+              FITNESS <span className="text-accent">CALCULATORS</span>
+            </h1>
+          </div>
+
+          <div className="text-left md:text-right border-l-2 md:border-l-0 md:border-r-2 border-surface-border pl-4 md:pl-0 md:pr-4">
+            <p className="text-sm font-medium text-hi">Strength &amp; Composition Suite</p>
+            <p className="text-xs text-mid">1RM, TDEE, Calorie Targets &amp; BMI analytics</p>
+          </div>
         </div>
 
         {/* Tabs */}

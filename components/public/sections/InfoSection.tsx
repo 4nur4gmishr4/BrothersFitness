@@ -1,130 +1,187 @@
 "use client";
 
-import { motion } from "framer-motion";
+import React, { useState, useEffect } from "react";
 
-const schedules = [
+interface ScheduleItem {
+  id: string;
+  name: string;
+  category: string;
+  time: string;
+  isClosed?: boolean;
+  startHour?: number;
+  startMin?: number;
+  endHour?: number;
+  endMin?: number;
+}
+
+const SCHEDULE: ScheduleItem[] = [
   {
-    id: "01",
-    phase: "MORNING CYCLE",
-    time: "06:00 - 10:00",
-    access: "MIXED ACCESS",
-    status: "ACTIVE",
-    highlight: false,
+    id: "morning",
+    name: "Morning Batch",
+    category: "Open for all members",
+    time: "6:00 AM – 10:00 AM",
+    startHour: 6,
+    startMin: 0,
+    endHour: 10,
+    endMin: 0,
   },
   {
-    id: "02",
-    phase: "WOMEN ONLY",
-    time: "16:30 - 18:30",
-    access: "RESTRICTED ACCESS",
-    status: "SECURE",
-    highlight: true,
+    id: "women",
+    name: "Women's Batch",
+    category: "Exclusive female training",
+    time: "4:30 PM – 6:30 PM",
+    startHour: 16,
+    startMin: 30,
+    endHour: 18,
+    endMin: 30,
   },
   {
-    id: "03",
-    phase: "EVENING CYCLE",
-    time: "18:30 - 22:00",
-    access: "MIXED ACCESS",
-    status: "ACTIVE",
-    highlight: false,
+    id: "evening",
+    name: "Evening Batch",
+    category: "Open for all members",
+    time: "6:30 PM – 10:00 PM",
+    startHour: 18,
+    startMin: 30,
+    endHour: 22,
+    endMin: 0,
   },
   {
-    id: "04",
-    phase: "SUNDAY",
-    time: "00:00 - 00:00",
-    access: "NO ACCESS",
-    status: "OFFLINE",
-    highlight: false,
-    closed: true,
-  }
+    id: "sunday",
+    name: "Sunday",
+    category: "Weekly maintenance",
+    time: "Closed",
+    isClosed: true,
+  },
 ];
 
 export default function InfoSection() {
-  return (
-    <section id="timings" className="surface-canvas py-16 md:py-24 border-b border-surface-border relative overflow-hidden">
-      <div className="max-w-[1600px] mx-auto px-4 md:px-6 relative z-10">
-        
-        <div className="flex flex-col lg:flex-row gap-8 lg:gap-12 items-start">
-          
-          {/* Header Panel */}
-          <div 
-            data-reveal
-            className="w-full lg:w-[40%] flex flex-col gap-6 sticky top-24"
-          >
-            <div className="inline-flex items-center gap-3">
-              <div className="px-2 py-1 bg-accent/10 border border-accent/20 text-xs font-mono tracking-widest text-accent uppercase">
-                STATUS: OPERATIONAL
-              </div>
-            </div>
-            
-            <h2 className="heading-display text-4xl md:text-5xl lg:text-6xl text-hi leading-[0.9] uppercase">
-              OPERATIONAL<br/><span className="text-accent">PARAMETERS</span>
-            </h2>
-            
-            <p className="text-mid md:text-base font-mono text-xs leading-relaxed uppercase tracking-wide opacity-80 border-l border-surface-border pl-4">
-              Access to the facility is strictly governed by the schedule below. Unauthorized access outside designated cycles is prohibited. All timings in IST.
-            </p>
+  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
+  const [isGymOpen, setIsGymOpen] = useState<boolean>(false);
 
-            {/* Decorative Barcode */}
-            <div className="mt-8 flex items-end gap-1 h-12 opacity-30">
-               {[1,3,1,1,4,1,2,5,1,1,3,2,1,1,6,1,2,1,4].map((w, i) => (
-                 <div key={i} className="bg-hi h-full" style={{ width: `${w * 2}px` }} />
-               ))}
-            </div>
+  useEffect(() => {
+    const now = new Date();
+    const day = now.getDay(); // 0 is Sunday
+    const currentMinutes = now.getHours() * 60 + now.getMinutes();
+
+    if (day === 0) {
+      setIsGymOpen(false);
+      return;
+    }
+
+    let foundActive = false;
+    for (const item of SCHEDULE) {
+      if (item.startHour !== undefined && item.endHour !== undefined) {
+        const start = item.startHour * 60 + (item.startMin || 0);
+        const end = item.endHour * 60 + (item.endMin || 0);
+        if (currentMinutes >= start && currentMinutes < end) {
+          setIsGymOpen(true);
+          foundActive = true;
+          break;
+        }
+      }
+    }
+
+    if (!foundActive) {
+      setIsGymOpen(false);
+    }
+  }, []);
+
+  return (
+    <section id="timings" className="w-full h-full flex flex-col justify-start select-none">
+      <div className="w-full">
+        
+        {/* Apple iOS Header */}
+        <div className="flex items-center justify-between mb-3 px-1">
+          <div>
+            <h2 className="text-xl font-bold tracking-tight text-hi">
+              Hours
+            </h2>
+            <p className="text-xs text-mid mt-0.5">
+              Brother&apos;s Fitness, Lakhnadon
+            </p>
           </div>
 
-          {/* Data Table */}
-          <div className="w-full lg:w-[60%] flex flex-col border border-surface-border bg-surface-card rounded-none p-1 shrink-0">
-            {/* Table Header */}
-            <div className="hidden md:grid grid-cols-12 gap-4 px-6 py-4 bg-surface-elevated border-b border-surface-border">
-              <div className="col-span-2 text-xs font-mono text-mid uppercase tracking-[0.2em]">ID</div>
-              <div className="col-span-4 text-xs font-mono text-mid uppercase tracking-[0.2em]">PHASE</div>
-              <div className="col-span-3 text-xs font-mono text-mid uppercase tracking-[0.2em]">TIMEFRAME</div>
-              <div className="col-span-3 text-xs font-mono text-mid uppercase tracking-[0.2em]">CLEARANCE</div>
-            </div>
-
-            {/* Table Rows */}
-            <div className="flex flex-col">
-              {schedules.map((row, idx) => (
-                <div 
-                  key={row.id}
-                  data-reveal
-                  style={{ "--reveal-delay": `${idx * 100}ms` } as React.CSSProperties}
-                  className={`grid grid-cols-1 md:grid-cols-12 gap-4 md:gap-4 px-6 py-5 border-b border-surface-border/50 last:border-0 items-center transition-colors duration-300 ${row.highlight ? 'bg-accent/5 hover:bg-accent/10' : 'hover:bg-surface-elevated'}`}
-                >
-                  <div className="md:col-span-2 flex items-center justify-between md:block">
-                    <span className="md:hidden text-xs font-mono text-mid uppercase tracking-[0.2em]">ID</span>
-                    <span className="text-xs font-mono text-low">[{row.id}]</span>
-                  </div>
-                  
-                  <div className="md:col-span-4 flex flex-col gap-1">
-                    <span className="md:hidden text-xs font-mono text-mid uppercase tracking-[0.2em] mb-1">PHASE</span>
-                    <span className={`font-display text-xl uppercase tracking-wide ${row.closed ? 'text-status-danger' : 'text-hi'}`}>
-                      {row.phase}
-                    </span>
-                    <span className="md:hidden text-xs font-mono text-mid uppercase">{row.time}</span>
-                  </div>
-                  
-                  <div className="hidden md:block md:col-span-3">
-                    <span className="font-mono text-sm tracking-wider text-hi bg-surface-canvas border border-surface-border/50 px-2 py-1">
-                      {row.time}
-                    </span>
-                  </div>
-                  
-                  <div className="md:col-span-3 flex flex-col gap-1 items-start">
-                    <span className="md:hidden text-xs font-mono text-mid uppercase tracking-[0.2em] mb-1">CLEARANCE</span>
-                    <div className="flex items-center gap-2">
-                      <div className={`w-1.5 h-1.5 rounded-full ${row.highlight ? 'bg-status-warning' : row.closed ? 'bg-status-danger' : 'bg-status-success'}`} />
-                      <span className={`text-xs font-mono uppercase tracking-widest ${row.highlight ? 'text-status-warning' : row.closed ? 'text-status-danger' : 'text-mid'}`}>
-                        {row.access}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-            
+          <div className="text-right">
+            <span
+              className={`text-xs font-semibold ${
+                isGymOpen ? "text-[#34C759]" : "text-mid"
+              }`}
+            >
+              {isGymOpen ? "Open" : "Closed"}
+            </span>
           </div>
         </div>
+
+        {/* Exact Apple iOS Inset Grouped TableView */}
+        <div
+          onMouseLeave={() => setHoveredIndex(null)}
+          className="w-full bg-surface-card border border-surface-border rounded-2xl overflow-hidden shadow-sm transition-all duration-200"
+        >
+          {SCHEDULE.map((item, index) => {
+            const isHovered = hoveredIndex === index;
+            const isDividerHidden =
+              hoveredIndex !== null &&
+              (hoveredIndex === index || hoveredIndex === index + 1);
+
+            return (
+              <React.Fragment key={item.id}>
+                <div
+                  onMouseEnter={() => setHoveredIndex(index)}
+                  className={`group w-full px-4 sm:px-5 py-3.5 flex items-center justify-between text-sm transition-colors duration-150 cursor-pointer select-none ${
+                    isHovered ? "bg-surface-elevated" : ""
+                  }`}
+                >
+                  {/* Left: Batch Title & Audience */}
+                  <div className="flex flex-col min-w-0 pr-2">
+                    <span
+                      className={`text-xs font-semibold transition-colors duration-150 ${
+                        isHovered ? "text-hi" : "text-hi/90"
+                      }`}
+                    >
+                      {item.name}
+                    </span>
+                    <span className="text-[11px] text-mid truncate mt-0.5">
+                      {item.category}
+                    </span>
+                  </div>
+
+                  {/* Right: Clean Time Text */}
+                  <div className="flex-shrink-0">
+                    <span
+                      className={`text-xs font-medium transition-colors duration-150 ${
+                        item.isClosed
+                          ? "text-low"
+                          : isHovered
+                          ? "text-hi"
+                          : "text-mid"
+                      }`}
+                    >
+                      {item.time}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Inset Hairline Divider with Hover Disappear */}
+                {index < SCHEDULE.length - 1 && (
+                  <div
+                    className={`h-[1px] ml-4 sm:ml-5 transition-opacity duration-150 ${
+                      isDividerHidden
+                        ? "opacity-0"
+                        : "opacity-100 bg-surface-border/60"
+                    }`}
+                  />
+                )}
+              </React.Fragment>
+            );
+          })}
+        </div>
+
+        {/* Apple iOS Inset Footer */}
+        <div className="flex items-center justify-between mt-2.5 px-2 text-[11px] text-mid">
+          <span>Monday – Saturday</span>
+          <span>6:00 AM – 10:00 PM</span>
+        </div>
+
       </div>
     </section>
   );

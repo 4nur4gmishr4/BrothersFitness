@@ -1,7 +1,18 @@
 "use client";
 
-import Image from "next/image";
-import { motion } from "framer-motion";
+import TiltedCard from "@/components/ui/animations/TiltedCard";
+
+const PhoneIcon = ({ className }: { className?: string }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
+  </svg>
+);
+
+const InstagramIcon = ({ className }: { className?: string }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" className={className} viewBox="0 0 24 24" fill="currentColor">
+    <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.668.014-4.948.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zm0 10.162a3.999 3.999 0 110-7.998 3.999 3.999 0 010 7.998zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/>
+  </svg>
+);
 
 const WhatsAppIcon = ({ className }: { className?: string }) => (
   <svg xmlns="http://www.w3.org/2000/svg" className={className} viewBox="0 0 24 24" fill="currentColor">
@@ -9,30 +20,22 @@ const WhatsAppIcon = ({ className }: { className?: string }) => (
   </svg>
 );
 
-const InstagramIcon = ({ className }: { className?: string }) => (
-  <svg xmlns="http://www.w3.org/2000/svg" className={className} viewBox="0 0 24 24" fill="currentColor">
-    <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/>
-  </svg>
-);
-
-const personnel = [
+const coaches = [
   {
-    id: "OP-001",
-    name: "AMAN",
-    rank: "HEAD COACH // FOUNDER",
-    clearance: "LEVEL 5",
-    spec: "STRENGTH & CONDITIONING",
+    name: "Aman Shrivastava",
+    role: "Founder & Head Coach",
+    specialization: "Strength & Conditioning",
     src: "/assets/aman.jpeg",
-    instagram: "https://www.instagram.com/aman_shrivastavaaa?igsh=MWJ5MHhodnJrY3BoNA==",
+    phone: "+919131179343",
+    instagram: "https://www.instagram.com/aman_shrivastavaaa72",
     whatsapp: "919131179343",
   },
   {
-    id: "OP-002",
-    name: "PRADEEP",
-    rank: "SENIOR TRAINER",
-    clearance: "LEVEL 4",
-    spec: "FUNCTIONAL & HIIT",
+    name: "Pradeep Shrivastava",
+    role: "Co-Founder & Senior Trainer",
+    specialization: "Functional Fitness & HIIT",
     src: "/assets/pradeep.jpeg",
+    phone: "+919131272754",
     instagram: "https://www.instagram.com/brothers_fitness_17",
     whatsapp: "919131272754",
   },
@@ -40,97 +43,124 @@ const personnel = [
 
 export default function Architects() {
   return (
-    <section id="architects" className="surface-canvas py-16 md:py-24 border-b border-surface-border relative">
-      <div className="max-w-[1400px] mx-auto px-4 md:px-6 relative z-10">
+    <section id="architects" className="w-full h-full select-none">
+      <div className="w-full">
         
-        {/* Header */}
+        {/* Apple-style Clean Header */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-12 md:mb-16 gap-6">
           <div>
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-1.5 h-1.5 bg-accent" />
-              <p className="font-mono text-xs tracking-[0.3em] text-accent uppercase font-bold">AUTHORIZED PERSONNEL</p>
-            </div>
-            <h2 className="heading-display text-4xl md:text-5xl lg:text-6xl text-hi leading-[0.9] uppercase">
-              PERSONNEL <span className="text-accent">DIRECTORY</span>
+            <p className="text-xs font-semibold tracking-widest text-accent uppercase mb-2">
+              MEET THE COACHES
+            </p>
+            <h2 className="heading-display text-4xl md:text-5xl lg:text-6xl text-hi leading-[0.95] tracking-tight uppercase">
+              COACHES & <span className="text-accent">LEADERSHIP</span>
             </h2>
           </div>
           
-          <div className="flex flex-col items-start md:items-end gap-2 border-l-2 md:border-l-0 md:border-r-2 border-accent pl-4 md:pl-0 md:pr-4">
-            <p className="font-mono text-xs tracking-widest text-mid uppercase">Total Active Officers: 02</p>
-            <p className="font-mono text-xs tracking-widest text-faint uppercase">All personnel cleared for combat.</p>
+          <div className="text-left md:text-right border-l-2 md:border-l-0 md:border-r-2 border-surface-border pl-4 md:pl-0 md:pr-4">
+            <p className="text-sm font-medium text-hi">Expert Personal Coaching</p>
+            <p className="text-xs text-mid">Guiding your strength, nutrition, and transformation</p>
           </div>
         </div>
 
-        {/* Grid Layout (Replaced 3D Carousel) */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
-          {personnel.map((p, idx) => (
+        {/* Directory Grid with Symmetric Matching Width & Length */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12 max-w-5xl mx-auto">
+          {coaches.map((c, idx) => (
             <div 
-              key={p.id}
+              key={c.name}
               data-reveal
-              style={{ "--reveal-delay": `${idx * 100}ms` } as React.CSSProperties}
-              className="flex flex-col lg:flex-row border border-surface-border bg-surface-card rounded-none group hover:border-accent transition-colors duration-300"
+              style={{ "--reveal-delay": `${idx * 150}ms` } as React.CSSProperties}
+              className="w-full max-w-[460px] mx-auto flex flex-col gap-5"
             >
-              {/* Photo Section */}
-              <div className="relative w-full lg:w-[45%] aspect-square lg:aspect-auto lg:h-[400px] bg-surface-elevated border-b lg:border-b-0 lg:border-r border-surface-border overflow-hidden">
-                <Image
-                  src={p.src}
-                  alt={`Officer ${p.name}`}
-                  fill
-                  className="object-cover grayscale group-hover:grayscale-0 transition-all duration-500 scale-100 group-hover:scale-105"
-                  sizes="(max-width: 1024px) 100vw, 50vw"
+              {/* 1. Pure Clean Image 3D Tilted Card */}
+              <div className="w-full">
+                <TiltedCard
+                  imageSrc={c.src}
+                  altText={`${c.name} - ${c.role}`}
+                  showTooltip={false}
+                  showMobileWarning={false}
+                  displayOverlayContent={false}
+                  aspectSquare={true}
+                  rotateAmplitude={10}
+                  scaleOnHover={1.03}
+                  className="w-full"
                 />
-                
-                {/* HUD Elements */}
-                <div className="absolute top-4 left-4 bg-surface-canvas border border-surface-border/50 px-2 py-1">
-                  <span className="font-mono text-[9px] tracking-widest text-accent uppercase">{p.id}</span>
-                </div>
-                
-                <div className="absolute bottom-4 right-4 flex gap-1">
-                  {[...Array(5)].map((_, i) => (
-                    <div key={i} className={`w-1 h-3 ${i < parseInt(p.clearance.split(' ')[1]) ? 'bg-accent' : 'bg-surface-border/50'}`} />
-                  ))}
-                </div>
               </div>
 
-              {/* Data Section */}
-              <div className="w-full lg:w-[55%] flex flex-col justify-between p-6 md:p-8">
-                <div>
-                  <h3 className="heading-display text-3xl md:text-4xl text-hi mb-1 tracking-wider uppercase group-hover:text-accent transition-colors">
-                    {p.name}
-                  </h3>
-                  <div className="inline-flex px-2 py-1 bg-surface-elevated border border-surface-border mb-6">
-                    <span className="font-mono text-xs tracking-widest text-mid uppercase">{p.rank}</span>
-                  </div>
-
-                  <div className="space-y-4">
-                    <div className="flex flex-col gap-1">
-                      <span className="font-mono text-[9px] tracking-[0.2em] text-low uppercase">SPECIALIZATION</span>
-                      <span className="font-mono text-sm tracking-wide text-hi uppercase">{p.spec}</span>
-                    </div>
+              {/* 2. Apple-Style Clean Symmetrical Divider Info Card */}
+              <div className="w-full">
+                <TiltedCard
+                  aspectSquare={false}
+                  rotateAmplitude={8}
+                  scaleOnHover={1.02}
+                  className="w-full"
+                >
+                  <div className="w-full p-6 sm:p-7 flex flex-col bg-surface-card/80 backdrop-blur-xl rounded-2xl border border-surface-border transition-all duration-200 hover:border-surface-border/90 hover:bg-surface-card/95 shadow-sm">
                     
-                    <div className="flex flex-col gap-1">
-                      <span className="font-mono text-[9px] tracking-[0.2em] text-low uppercase">CLEARANCE LEVEL</span>
-                      <span className="font-mono text-sm tracking-wide text-hi uppercase">{p.clearance}</span>
+                    {/* Header Row: Name & Title (Equal Height with Apple Row Hover) */}
+                    <div className="min-h-[58px] flex flex-col justify-center -mx-2 px-2 py-1 rounded-xl transition-colors duration-150 hover:bg-surface-elevated/40">
+                      <h3 className="text-2xl sm:text-3xl font-bold text-hi tracking-tight leading-tight">
+                        {c.name}
+                      </h3>
+                      <p className="text-sm font-medium text-accent mt-1">
+                        {c.role}
+                      </p>
                     </div>
-                  </div>
-                </div>
 
-                <div className="mt-8 pt-6 border-t border-surface-border flex items-center justify-between">
-                  <span className="font-mono text-xs tracking-widest text-low uppercase">INITIATE COMMS:</span>
-                  
-                  <div className="flex items-center gap-2">
-                    {p.instagram && (
-                      <a href={p.instagram} target="_blank" rel="noopener noreferrer" className="p-3 border border-surface-border bg-surface-elevated hover:border-accent hover:text-accent transition-colors duration-300 text-mid">
-                        <InstagramIcon className="w-4 h-4" />
+                    {/* Apple Hairline Divider 1 (Exact Full Width) */}
+                    <div className="w-full border-t border-surface-border/70 my-4" />
+
+                    {/* Spec Row: Focus / Specialization (Equal Height with Apple Row Hover) */}
+                    <div className="w-full flex justify-between items-center text-sm py-1.5 -mx-2 px-2 rounded-xl transition-colors duration-150 hover:bg-surface-elevated/40">
+                      <span className="text-xs text-mid font-medium">Focus Area</span>
+                      <span className="text-xs sm:text-sm font-semibold text-hi text-right">
+                        {c.specialization}
+                      </span>
+                    </div>
+
+                    {/* Apple Hairline Divider 2 (Exact Full Width) */}
+                    <div className="w-full border-t border-surface-border/70 my-4" />
+
+                    {/* Connect Actions Row: Monochrome Exact Shape Logos with iOS Tactile Hover/Active States */}
+                    <div className="w-full flex items-center justify-end gap-2.5">
+                      {/* Call Button */}
+                      <a
+                        href={`tel:${c.phone}`}
+                        aria-label={`Call ${c.name}`}
+                        className="w-10 h-10 flex items-center justify-center rounded-xl bg-surface-elevated border border-surface-border hover:border-accent hover:bg-surface-soft hover:text-accent active:scale-95 transition-all duration-150 text-mid group shadow-sm"
+                      >
+                        <PhoneIcon className="w-4 h-4 group-hover:scale-110 transition-transform duration-150" />
                       </a>
-                    )}
-                    {p.whatsapp && (
-                      <a href={`https://wa.me/${p.whatsapp}?text=Hi%20${p.name},%20I'm%20interested%20in%20joining%20Brother's%20Fitness!`} target="_blank" rel="noopener noreferrer" className="p-3 border border-surface-border bg-surface-elevated hover:border-accent hover:text-accent transition-colors duration-300 text-mid">
-                        <WhatsAppIcon className="w-4 h-4" />
-                      </a>
-                    )}
+
+                      {/* Instagram Button */}
+                      {c.instagram && (
+                        <a
+                          href={c.instagram}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          aria-label={`${c.name} on Instagram`}
+                          className="w-10 h-10 flex items-center justify-center rounded-xl bg-surface-elevated border border-surface-border hover:border-accent hover:bg-surface-soft hover:text-accent active:scale-95 transition-all duration-150 text-mid group shadow-sm"
+                        >
+                          <InstagramIcon className="w-4 h-4 group-hover:scale-110 transition-transform duration-150" />
+                        </a>
+                      )}
+
+                      {/* WhatsApp Button */}
+                      {c.whatsapp && (
+                        <a
+                          href={`https://wa.me/${c.whatsapp}?text=Hi%20${encodeURIComponent(c.name)},%20I'm%20interested%20in%20joining%20Brother's%20Fitness!`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          aria-label={`${c.name} on WhatsApp`}
+                          className="w-10 h-10 flex items-center justify-center rounded-xl bg-surface-elevated border border-surface-border hover:border-accent hover:bg-surface-soft hover:text-accent active:scale-95 transition-all duration-150 text-mid group shadow-sm"
+                        >
+                          <WhatsAppIcon className="w-4 h-4 group-hover:scale-110 transition-transform duration-150" />
+                        </a>
+                      )}
+                    </div>
+
                   </div>
-                </div>
+                </TiltedCard>
               </div>
 
             </div>

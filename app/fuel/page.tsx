@@ -274,29 +274,31 @@ function FuelSynthesizerContent() {
     return (
         <div className="min-h-screen bg-surface-canvas text-hi font-sans relative">
             <Navbar />
-            <div className="p-4 md:p-8 pt-4">
-                {/* Header */}
-                <div className="max-w-4xl mx-auto flex justify-between items-center mb-12 hairline-b pb-6">
-                    <div className="flex items-center gap-4">
-                        <button
-                            onClick={() => router.back()}
-                            className="flex items-center gap-2 text-low hover:text-accent transition-colors duration-fast"
-                        >
-                            <ArrowLeft className="w-5 h-5" />
-                            <span className="font-mono text-xs uppercase tracking-widest hidden sm:inline">Back</span>
-                        </button>
+            <div className="pt-20 sm:pt-24 pb-12 px-4 sm:px-8 md:px-12 lg:px-16 max-w-[1600px] mx-auto">
+                {/* Top Display Header */}
+                <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-10 md:mb-14 gap-6 pb-8 border-b border-surface-border/70">
+                    <div>
+                        <span className="text-xs font-mono uppercase tracking-widest text-accent mb-2 block font-semibold">
+                            NUTRITION &amp; MACRO STRATEGY
+                        </span>
+                        <h1 className="heading-display text-4xl sm:text-6xl md:text-7xl text-hi leading-[0.95] tracking-tight uppercase">
+                            DIET <span className="text-accent">PLANNER</span>
+                        </h1>
+                    </div>
+
+                    <div className="flex items-center gap-6">
                         {isLoggedIn && user && (
-                            <div className="flex items-center gap-1.5 surface-card hairline px-3 py-1.5">
-                                <Cpu className="w-3 h-3 text-accent" />
-                                <span className={`text-xs font-bold ${user.daily_credits > 0 ? "text-hi" : "text-status-danger"}`}>
+                            <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-surface-card border border-surface-border shadow-sm">
+                                <Cpu className="w-3.5 h-3.5 text-accent" />
+                                <span className={`text-xs font-mono font-bold ${user.daily_credits > 0 ? "text-hi" : "text-status-danger"}`}>
                                     {user.daily_credits}/{MAX_DAILY_CREDITS} CREDITS
                                 </span>
                             </div>
                         )}
-                    </div>
-                    <div className="text-right">
-                        <h1 className="heading-display text-2xl text-hi uppercase tracking-tight">Fuel / Diet Generator</h1>
-                        <p className="label-text text-xs text-faint uppercase tracking-widest">Your Details</p>
+                        <div className="text-left md:text-right border-l-2 md:border-l-0 md:border-r-2 border-surface-border pl-4 md:pl-0 md:pr-4">
+                            <p className="text-sm font-medium text-hi">Personalized Fuel Protocol</p>
+                            <p className="text-xs text-mid">AI macro synthesis &amp; targeted meal plans</p>
+                        </div>
                     </div>
                 </div>
 

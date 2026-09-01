@@ -196,8 +196,7 @@ export default function RootLayout({
                 }
               ],
               "sameAs": [
-                "https://www.instagram.com/brothersfitnesslakhnadon/",
-                "https://www.facebook.com/brothersfitness"
+                "https://www.instagram.com/brothers_fitness_17"
               ],
               "priceRange": "₹₹"
             })
