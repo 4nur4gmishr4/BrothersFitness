@@ -10,20 +10,16 @@ import {
 } from "lucide-react";
 import { useGamification } from "@/components/ui/providers/GamificationContext";
 
-// --- UNIQUE ANIMATED SVG EMBLEMS (0 EMOJIS, 0 GENERIC LOGOS) ---
+// --- APPLE FITNESS STYLE ANIMATED VECTOR BADGES ---
 
-// 1. Shield Star (Initiation)
-const AnimatedShieldStar = ({ unlocked }: { unlocked: boolean }) => (
+const ShieldBadge = ({ unlocked }: { unlocked: boolean }) => (
   <svg viewBox="0 0 48 48" className="w-10 h-10" fill="none">
     <motion.path
-      d="M24 4L38 10V22C38 31.5 32 39.5 24 44C16 39.5 10 31.5 10 22V10L24 4Z"
+      d="M24 4L38 10V22C38 31.5 32 39.5 24 44C16 39.5 10 22V10L24 4Z"
       stroke="currentColor"
       strokeWidth="2.5"
       strokeLinecap="round"
       strokeLinejoin="round"
-      initial={{ pathLength: 0 }}
-      animate={{ pathLength: 1 }}
-      transition={{ duration: 1.2, ease: "easeOut" }}
       className={unlocked ? "text-accent" : "text-mid/40"}
     />
     <motion.circle
@@ -31,15 +27,14 @@ const AnimatedShieldStar = ({ unlocked }: { unlocked: boolean }) => (
       cy="23"
       r="4.5"
       fill="currentColor"
-      animate={unlocked ? { scale: [1, 1.25, 1], opacity: [0.7, 1, 0.7] } : {}}
-      transition={{ repeat: Infinity, duration: 2.2, ease: "easeInOut" }}
+      animate={unlocked ? { scale: [1, 1.2, 1], opacity: [0.8, 1, 0.8] } : {}}
+      transition={{ repeat: Infinity, duration: 2.5, ease: "easeInOut" }}
       className={unlocked ? "text-accent" : "text-mid/30"}
     />
   </svg>
 );
 
-// 2. Flame Aura (Consistency Streak)
-const AnimatedFlameAura = ({ unlocked }: { unlocked: boolean }) => (
+const StreakBadge = ({ unlocked }: { unlocked: boolean }) => (
   <svg viewBox="0 0 48 48" className="w-10 h-10" fill="none">
     <motion.path
       d="M24 6C24 6 15 16 15 27C15 32.5 19 37 24 37C29 37 33 32.5 33 27C33 21 28 17 28 17C28 17 29 23 26 25C23 27 21 24 21 22C21 16 24 6 24 6Z"
@@ -48,25 +43,12 @@ const AnimatedFlameAura = ({ unlocked }: { unlocked: boolean }) => (
       strokeLinecap="round"
       strokeLinejoin="round"
       fill={unlocked ? "rgba(215, 25, 33, 0.15)" : "transparent"}
-      animate={
-        unlocked
-          ? {
-              d: [
-                "M24 6C24 6 15 16 15 27C15 32.5 19 37 24 37C29 37 33 32.5 33 27C33 21 28 17 28 17C28 17 29 23 26 25C23 27 21 24 21 22C21 16 24 6 24 6Z",
-                "M24 4C24 4 14 15 14 26C14 32.5 18.5 38 24 38C29.5 38 34 32.5 34 26C34 19 28 16 28 16C28 16 30 22 27 25C24 28 20 24 20 21C20 14 24 4 24 4Z",
-                "M24 6C24 6 15 16 15 27C15 32.5 19 37 24 37C29 37 33 32.5 33 27C33 21 28 17 28 17C28 17 29 23 26 25C23 27 21 24 21 22C21 16 24 6 24 6Z",
-              ],
-            }
-          : {}
-      }
-      transition={{ repeat: Infinity, duration: 2.8, ease: "easeInOut" }}
       className={unlocked ? "text-accent" : "text-mid/40"}
     />
   </svg>
 );
 
-// 3. Precision Concentric Barbell (Iron Discipline)
-const AnimatedIronBarbell = ({ unlocked }: { unlocked: boolean }) => (
+const DumbbellBadge = ({ unlocked }: { unlocked: boolean }) => (
   <svg viewBox="0 0 48 48" className="w-10 h-10" fill="none">
     <line
       x1="8"
@@ -78,7 +60,7 @@ const AnimatedIronBarbell = ({ unlocked }: { unlocked: boolean }) => (
       strokeLinecap="round"
       className={unlocked ? "text-hi" : "text-mid/40"}
     />
-    <motion.rect
+    <rect
       x="12"
       y="14"
       width="6"
@@ -89,7 +71,7 @@ const AnimatedIronBarbell = ({ unlocked }: { unlocked: boolean }) => (
       fill={unlocked ? "rgba(255,255,255,0.08)" : "transparent"}
       className={unlocked ? "text-accent" : "text-mid/40"}
     />
-    <motion.rect
+    <rect
       x="30"
       y="14"
       width="6"
@@ -100,35 +82,21 @@ const AnimatedIronBarbell = ({ unlocked }: { unlocked: boolean }) => (
       fill={unlocked ? "rgba(255,255,255,0.08)" : "transparent"}
       className={unlocked ? "text-accent" : "text-mid/40"}
     />
-    <motion.circle
-      cx="24"
-      cy="24"
-      r="9"
-      stroke="currentColor"
-      strokeWidth="1.5"
-      strokeDasharray="4 4"
-      animate={unlocked ? { rotate: 360 } : {}}
-      transition={{ repeat: Infinity, duration: 8, ease: "linear" }}
-      className={unlocked ? "text-accent" : "text-mid/20"}
-    />
   </svg>
 );
 
-// 4. Metabolic Atom Orbit (Macro Protocol)
-const AnimatedMetabolicOrbit = ({ unlocked }: { unlocked: boolean }) => (
+const NutritionBadge = ({ unlocked }: { unlocked: boolean }) => (
   <svg viewBox="0 0 48 48" className="w-10 h-10" fill="none">
-    <motion.ellipse
+    <ellipse
       cx="24"
       cy="24"
       rx="16"
       ry="6"
       stroke="currentColor"
       strokeWidth="1.5"
-      animate={unlocked ? { rotate: [0, 180, 360] } : {}}
-      transition={{ repeat: Infinity, duration: 6, ease: "linear" }}
       className={unlocked ? "text-accent" : "text-mid/30"}
     />
-    <motion.ellipse
+    <ellipse
       cx="24"
       cy="24"
       rx="16"
@@ -136,8 +104,6 @@ const AnimatedMetabolicOrbit = ({ unlocked }: { unlocked: boolean }) => (
       transform="rotate(60 24 24)"
       stroke="currentColor"
       strokeWidth="1.5"
-      animate={unlocked ? { rotate: [60, 240, 420] } : {}}
-      transition={{ repeat: Infinity, duration: 6, ease: "linear" }}
       className={unlocked ? "text-accent/80" : "text-mid/30"}
     />
     <circle
@@ -150,8 +116,7 @@ const AnimatedMetabolicOrbit = ({ unlocked }: { unlocked: boolean }) => (
   </svg>
 );
 
-// 5. Precision Caliper Gauge (Analytical Edge)
-const AnimatedPrecisionGauge = ({ unlocked }: { unlocked: boolean }) => (
+const MetricsBadge = ({ unlocked }: { unlocked: boolean }) => (
   <svg viewBox="0 0 48 48" className="w-10 h-10" fill="none">
     <path
       d="M10 32C10 24.268 16.268 18 24 18C31.732 18 38 24.268 38 32"
@@ -160,7 +125,7 @@ const AnimatedPrecisionGauge = ({ unlocked }: { unlocked: boolean }) => (
       strokeLinecap="round"
       className={unlocked ? "text-hi" : "text-mid/40"}
     />
-    <motion.line
+    <line
       x1="24"
       y1="32"
       x2="32"
@@ -168,9 +133,6 @@ const AnimatedPrecisionGauge = ({ unlocked }: { unlocked: boolean }) => (
       stroke="currentColor"
       strokeWidth="2.5"
       strokeLinecap="round"
-      animate={unlocked ? { rotate: [-20, 25, -20] } : {}}
-      transition={{ repeat: Infinity, duration: 3, ease: "easeInOut" }}
-      style={{ originX: "24px", originY: "32px" }}
       className={unlocked ? "text-accent" : "text-mid/40"}
     />
     <circle
@@ -183,10 +145,9 @@ const AnimatedPrecisionGauge = ({ unlocked }: { unlocked: boolean }) => (
   </svg>
 );
 
-// 6. Architectural Crown Diamond (Brotherhood Legend)
-const AnimatedCrownDiamond = ({ unlocked }: { unlocked: boolean }) => (
+const LegendBadge = ({ unlocked }: { unlocked: boolean }) => (
   <svg viewBox="0 0 48 48" className="w-10 h-10" fill="none">
-    <motion.path
+    <path
       d="M10 18L16 34H32L38 18L29 24L24 12L19 24L10 18Z"
       stroke="currentColor"
       strokeWidth="2"
@@ -195,9 +156,9 @@ const AnimatedCrownDiamond = ({ unlocked }: { unlocked: boolean }) => (
       fill={unlocked ? "rgba(215, 25, 33, 0.12)" : "transparent"}
       className={unlocked ? "text-accent" : "text-mid/40"}
     />
-    <motion.circle cx="24" cy="12" r="2" fill="currentColor" className={unlocked ? "text-hi" : "text-mid/30"} />
-    <motion.circle cx="10" cy="18" r="2" fill="currentColor" className={unlocked ? "text-hi" : "text-mid/30"} />
-    <motion.circle cx="38" cy="18" r="2" fill="currentColor" className={unlocked ? "text-hi" : "text-mid/30"} />
+    <circle cx="24" cy="12" r="2" fill="currentColor" className={unlocked ? "text-hi" : "text-mid/30"} />
+    <circle cx="10" cy="18" r="2" fill="currentColor" className={unlocked ? "text-hi" : "text-mid/30"} />
+    <circle cx="38" cy="18" r="2" fill="currentColor" className={unlocked ? "text-hi" : "text-mid/30"} />
   </svg>
 );
 
@@ -208,7 +169,6 @@ interface MilestoneItem {
   title: string;
   subtitle: string;
   requirement: string;
-  xp: number;
   actionLabel: string;
   actionHref: string;
   component: React.ComponentType<{ unlocked: boolean }>;
@@ -219,73 +179,67 @@ const FLOWING_MILESTONES: MilestoneItem[] = [
     id: "stage-01",
     key: "ROOKIE_RECRUIT",
     stage: "01",
-    title: "INITIATION",
+    title: "MEMBER ONBOARDING",
     subtitle: "Welcome to Brother's Fitness platform",
     requirement: "First portal activation & registration",
-    xp: 50,
     actionLabel: "View Facilities",
     actionHref: "/#facilities",
-    component: AnimatedShieldStar,
+    component: ShieldBadge,
   },
   {
     id: "stage-02",
     key: "IRON_ADDICT",
     stage: "02",
     title: "CONSISTENCY STREAK",
-    subtitle: "7-Day consecutive daily discipline",
+    subtitle: "7-Day consecutive daily workout habit",
     requirement: "Visit platform 7 consecutive days",
-    xp: 150,
     actionLabel: "Daily Motivation",
     actionHref: "/quotes",
-    component: AnimatedFlameAura,
+    component: StreakBadge,
   },
   {
     id: "stage-03",
     key: "IRON_HABIT",
     stage: "03",
-    title: "IRON DISCIPLINE",
-    subtitle: "Establish core resistance training habit",
-    requirement: "Complete first training split routine",
-    xp: 200,
+    title: "WORKOUT PRACTITIONER",
+    subtitle: "Establish structured training splits",
+    requirement: "Complete first training routine",
     actionLabel: "Workout Splits",
     actionHref: "/workouts",
-    component: AnimatedIronBarbell,
+    component: DumbbellBadge,
   },
   {
     id: "stage-04",
     key: "DIET_TACTICIAN",
     stage: "04",
-    title: "MACRO PROTOCOL",
-    subtitle: "Calculate personalized fuel & protein targets",
-    requirement: "Generate customized nutrition strategy",
-    xp: 150,
+    title: "NUTRITION PROTOCOL",
+    subtitle: "Personalized calorie and macro targets",
+    requirement: "Generate customized meal plan",
     actionLabel: "Diet Planner",
     actionHref: "/fuel",
-    component: AnimatedMetabolicOrbit,
+    component: NutritionBadge,
   },
   {
     id: "stage-05",
     key: "CALCULATOR_ELITE",
     stage: "05",
-    title: "ANALYTICAL EDGE",
-    subtitle: "Master 1RM strength & body composition metrics",
+    title: "FITNESS METRICS",
+    subtitle: "Calculate 1RM strength and body composition",
     requirement: "Execute fitness calculation suite",
-    xp: 150,
     actionLabel: "Open Calculators",
     actionHref: "/calculators",
-    component: AnimatedPrecisionGauge,
+    component: MetricsBadge,
   },
   {
     id: "stage-06",
     key: "GRAND_MASTER",
     stage: "06",
-    title: "BROTHERHOOD LEGEND",
-    subtitle: "Complete all prerequisite disciplines",
-    requirement: "Unlock 100% of platform achievements",
-    xp: 500,
+    title: "CONSISTENCY CHAMPION",
+    subtitle: "Master all platform training disciplines",
+    requirement: "Unlock all member milestones",
     actionLabel: "Membership Passes",
     actionHref: "/pricing",
-    component: AnimatedCrownDiamond,
+    component: LegendBadge,
   },
 ];
 
@@ -295,10 +249,9 @@ export default function TrophyRoom(props: { isModal?: boolean; isPage?: boolean;
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // Smooth spring mouse tracking for floating preview card (FlowingMenu)
   const mouseX = useMotionValue(0);
   const mouseY = useMotionValue(0);
-  const springConfig = { damping: 20, stiffness: 200, mass: 0.5 };
+  const springConfig = { damping: 22, stiffness: 220, mass: 0.5 };
   const smoothX = useSpring(mouseX, springConfig);
   const smoothY = useSpring(mouseY, springConfig);
 
@@ -323,11 +276,7 @@ export default function TrophyRoom(props: { isModal?: boolean; isPage?: boolean;
     return FLOWING_MILESTONES.filter((m) => isMilestoneUnlocked(m.key)).length;
   }, [isMilestoneUnlocked]);
 
-  const totalXP = useMemo(() => {
-    return FLOWING_MILESTONES.reduce((acc, m) => {
-      return isMilestoneUnlocked(m.key) ? acc + m.xp : acc;
-    }, 0);
-  }, [isMilestoneUnlocked]);
+  const completionPct = Math.round((unlockedCount / FLOWING_MILESTONES.length) * 100);
 
   const activeMilestone = hoveredIndex !== null ? FLOWING_MILESTONES[hoveredIndex] : null;
   const isHoveredUnlocked = activeMilestone ? isMilestoneUnlocked(activeMilestone.key) : false;
@@ -343,43 +292,42 @@ export default function TrophyRoom(props: { isModal?: boolean; isPage?: boolean;
       <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-10 md:mb-14 gap-6 pb-8 border-b border-surface-border/70">
         <div>
           <span className="text-xs uppercase tracking-widest text-accent mb-2 block font-semibold">
-            ATHLETE PROGRESSION &amp; ACHIEVEMENTS
+            ACTIVITY &amp; MEMBER PROGRESSION
           </span>
           <h1 className="heading-display text-4xl sm:text-6xl md:text-7xl text-hi leading-[0.95] tracking-tight uppercase">
-            TROPHY <span className="text-accent">ROOM</span>
+            MEMBER <span className="text-accent">AWARDS</span>
           </h1>
         </div>
 
         {/* Live Discipline Stats Bar */}
         <div className="flex items-center gap-6 sm:gap-10 border-l-2 border-surface-border pl-6">
           <div>
-            <span className="text-[11px] uppercase tracking-wider text-mid block font-semibold">STREAK</span>
+            <span className="text-[11px] uppercase tracking-wider text-mid block font-semibold">ACTIVE STREAK</span>
             <span className="text-2xl sm:text-3xl font-extrabold text-hi tracking-tight tabular-nums">
               {visitStreak} <span className="text-xs font-normal text-mid">Days</span>
             </span>
           </div>
 
           <div>
-            <span className="text-[11px] uppercase tracking-wider text-mid block font-semibold">EXPERIENCE</span>
+            <span className="text-[11px] uppercase tracking-wider text-mid block font-semibold">UNLOCKED</span>
             <span className="text-2xl sm:text-3xl font-extrabold text-accent tracking-tight tabular-nums">
-              {totalXP} <span className="text-xs font-normal text-mid">XP</span>
+              {unlockedCount}/{FLOWING_MILESTONES.length}
             </span>
           </div>
 
           <div>
-            <span className="text-[11px] uppercase tracking-wider text-mid block font-semibold">STATUS</span>
+            <span className="text-[11px] uppercase tracking-wider text-mid block font-semibold">COMPLETION</span>
             <span className="text-2xl sm:text-3xl font-extrabold text-hi tracking-tight tabular-nums">
-              {unlockedCount}/{FLOWING_MILESTONES.length}
+              {completionPct}%
             </span>
           </div>
         </div>
       </div>
 
-      {/* React Bits FlowingMenu Editorial Rows with Balanced Typography */}
+      {/* Clean iOS Activity List Rows */}
       <div className="space-y-1 relative">
         {FLOWING_MILESTONES.map((item, index) => {
           const isUnlocked = isMilestoneUnlocked(item.key);
-
           const isHovered = hoveredIndex === index;
 
           return (
@@ -413,18 +361,14 @@ export default function TrophyRoom(props: { isModal?: boolean; isPage?: boolean;
                 </div>
               </div>
 
-              {/* Row Right: XP Badge & Status Pill & Action Arrow */}
+              {/* Row Right: Status Pill & Action Arrow */}
               <div className="flex items-center gap-3 sm:gap-6 flex-shrink-0">
-                <span className="hidden sm:inline-block text-xs font-semibold px-3 py-1 rounded-full bg-surface-soft border border-surface-border text-mid">
-                  +{item.xp} XP
-                </span>
-
                 {isUnlocked ? (
-                  <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold bg-[#34C759]/10 text-[#34C759] border border-[#34C759]/20 shadow-sm">
+                  <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold bg-[#34C759]/10 text-[#34C759] border border-[#34C759]/20 shadow-xs">
                     <Check className="w-3.5 h-3.5" /> Unlocked
                   </span>
                 ) : (
-                  <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold bg-surface-soft text-low border border-surface-border shadow-sm">
+                  <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold bg-surface-soft text-low border border-surface-border shadow-xs">
                     <Lock className="w-3.5 h-3.5" /> Locked
                   </span>
                 )}
@@ -444,27 +388,27 @@ export default function TrophyRoom(props: { isModal?: boolean; isPage?: boolean;
         })}
       </div>
 
-      {/* Floating Animated Emblem Card (React Bits FlowingMenu Preview) */}
+      {/* Floating Animated Emblem Preview (iOS Frosted Glass) */}
       <motion.div
         style={{
           left: smoothX,
           top: smoothY,
         }}
-        className={`pointer-events-none fixed z-50 hidden lg:flex flex-col items-center p-6 rounded-3xl bg-surface-canvas/95 backdrop-blur-xl border border-surface-border/80 shadow-2xl w-80 -translate-x-1/2 -translate-y-1/2 transition-opacity duration-200 ${
+        className={`pointer-events-none fixed z-50 hidden lg:flex flex-col items-center p-6 rounded-3xl bg-surface-canvas/90 backdrop-blur-2xl border border-surface-border shadow-2xl w-80 -translate-x-1/2 -translate-y-1/2 transition-opacity duration-200 ${
           hoveredIndex !== null ? "opacity-100 scale-100" : "opacity-0 scale-95"
         }`}
       >
         {activeMilestone && (
           <div className="w-full space-y-4 text-center">
             {/* Animated Vector Emblem */}
-            <div className="w-20 h-20 mx-auto rounded-2xl bg-surface-soft/80 border border-surface-border flex items-center justify-center shadow-inner">
+            <div className="w-20 h-20 mx-auto rounded-2xl bg-surface-soft border border-surface-border flex items-center justify-center shadow-xs">
               <activeMilestone.component unlocked={isHoveredUnlocked} />
             </div>
 
-            {/* Stage Title & XP */}
+            {/* Stage Title */}
             <div>
               <span className="text-[11px] uppercase tracking-widest text-accent block font-semibold">
-                STAGE {activeMilestone.stage} &bull; +{activeMilestone.xp} XP
+                MILESTONE {activeMilestone.stage}
               </span>
               <span className="text-xl font-bold tracking-tight text-hi uppercase block mt-0.5">
                 {activeMilestone.title}
@@ -472,27 +416,15 @@ export default function TrophyRoom(props: { isModal?: boolean; isPage?: boolean;
             </div>
 
             {/* Requirement */}
-            <div className="p-3 rounded-xl bg-surface-card/80 border border-surface-border text-xs text-mid text-left">
-              <span className="font-semibold text-hi block mb-0.5">Requirement:</span>
-              {activeMilestone.requirement}
-            </div>
-
-            {/* Status Pill */}
-            <div className="pt-1">
-              {isHoveredUnlocked ? (
-                <span className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-semibold bg-[#34C759]/10 text-[#34C759] border border-[#34C759]/30">
-                  <Check className="w-3.5 h-3.5" /> Milestone Achieved
-                </span>
-              ) : (
-                <span className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-semibold bg-surface-soft text-low border border-surface-border">
-                  <Lock className="w-3.5 h-3.5" /> Stage Incomplete
-                </span>
-              )}
+            <div className="p-3 rounded-2xl bg-surface-card border border-surface-border text-xs text-mid text-left shadow-xs">
+              <span className="block text-[10px] uppercase font-semibold text-low mb-1">
+                Requirement
+              </span>
+              <span className="text-hi font-medium">{activeMilestone.requirement}</span>
             </div>
           </div>
         )}
       </motion.div>
-
     </div>
   );
 }

@@ -38,7 +38,6 @@ export default function TiltedCard({
   imageWidth = "100%",
   scaleOnHover = 1.04,
   rotateAmplitude = 12,
-  showMobileWarning = false,
   showTooltip = false,
   overlayContent = null,
   displayOverlayContent = false,
@@ -107,12 +106,6 @@ export default function TiltedCard({
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
-      {showMobileWarning && (
-        <div className="absolute top-4 text-center text-sm block sm:hidden text-muted-foreground z-10">
-          This effect is not optimized for mobile. Check on desktop.
-        </div>
-      )}
-
       <motion.div
         className={`relative w-full ${
           aspectSquare ? "aspect-square" : "h-auto"
@@ -148,7 +141,7 @@ export default function TiltedCard({
 
       {showTooltip && captionText && (
         <motion.figcaption
-          className="pointer-events-none absolute left-0 top-0 rounded-md bg-accent text-white px-2.5 py-1 text-xs font-semibold tracking-wider uppercase opacity-0 z-[3] hidden sm:block shadow-lg"
+          className="pointer-events-none absolute left-0 top-0 rounded-full bg-accent text-white px-3 py-1 text-xs font-semibold uppercase tracking-wider opacity-0 z-[3] hidden sm:block shadow-md"
           style={{
             x,
             y,

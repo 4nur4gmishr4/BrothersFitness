@@ -83,7 +83,7 @@ function BMICalculator() {
 
   return (
     <div className="surface-card hairline p-8 space-y-6">
-      <h3 className="heading-display text-2xl text-hi">BMI // INDEX SCANNER</h3>
+      <h3 className="heading-display text-2xl text-hi">BODY MASS INDEX (BMI)</h3>
 
       <InputGroup label="Height (cm)" value={height} onChange={setHeight} placeholder="170" />
       <InputGroup label="Weight (kg)" value={weight} onChange={setWeight} placeholder="70" />
@@ -92,10 +92,10 @@ function BMICalculator() {
         {isComputing ? (
           <span className="inline-flex items-center justify-center gap-3">
             <CalculatorGears size={20} />
-            <span>Computing...</span>
+            <span>Calculating...</span>
           </span>
         ) : (
-          "Run_Calculation"
+          "Calculate BMI"
         )}
       </button>
 
@@ -202,10 +202,10 @@ function TDEECalculator() {
         {isComputing ? (
           <span className="inline-flex items-center justify-center gap-3">
             <CalculatorGears size={20} />
-            <span>Computing...</span>
+            <span>Calculating...</span>
           </span>
         ) : (
-          "Run_Calculation"
+          "Calculate TDEE"
         )}
       </button>
 
@@ -272,7 +272,7 @@ function OneRepMaxCalculator() {
 
   return (
     <div className="surface-card hairline p-8 space-y-6">
-      <h3 className="heading-display text-2xl text-hi">STRENGTH // 1RM ESTIMATOR</h3>
+      <h3 className="heading-display text-2xl text-hi">ONE-REP MAX (1RM) ESTIMATOR</h3>
 
       <InputGroup label="Weight Lifted (kg)" value={lift} onChange={setLift} placeholder="100" />
 
@@ -286,17 +286,17 @@ function OneRepMaxCalculator() {
             <RepProgressRing reps={reps} target={20} />
           </div>
         </div>
-        <p className="text-xs text-faint uppercase tracking-wider font-medium">Reps drive the Epley estimate</p>
+        <p className="text-xs text-faint uppercase tracking-wider font-medium">Reps drive the strength estimate</p>
       </div>
 
       <button onClick={calculate} disabled={isComputing} className="btn-primary w-full">
         {isComputing ? (
           <span className="inline-flex items-center justify-center gap-3">
             <CalculatorGears size={20} />
-            <span>Computing...</span>
+            <span>Calculating...</span>
           </span>
         ) : (
-          "Run_Calculation"
+          "Calculate 1RM"
         )}
       </button>
 

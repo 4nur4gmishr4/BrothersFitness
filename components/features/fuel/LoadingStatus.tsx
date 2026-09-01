@@ -3,28 +3,28 @@
 import { useEffect, useState } from "react";
 
 const MESSAGES = [
-    "CALCULATING DAILY MACROS...",
-    "ANALYZING MARKET PRICES (INR)...",
-    "TRANSLATING TO HINDI...",
-    "CATEGORIZING HOME ESSENTIALS...",
-    "GENERATING YOUR PLAN..."
+  "Calculating daily energy targets & macros...",
+  "Estimating local Lakhnadon food options & pricing...",
+  "Formatting bilingual Hindi and English instructions...",
+  "Balancing micronutrients and protein sources...",
+  "Finalizing your personalized nutrition protocol...",
 ];
 
-/** Rotates through synthesis progress messages every 3 seconds. */
 export default function LoadingStatus() {
-    const [index, setIndex] = useState(0);
+  const [index, setIndex] = useState(0);
 
-    useEffect(() => {
-        const interval = setInterval(() => {
-            setIndex((prev) => (prev + 1) % MESSAGES.length);
-        }, 3000);
-        return () => clearInterval(interval);
-    }, []);
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setIndex((prev) => (prev + 1) % MESSAGES.length);
+    }, 2800);
+    return () => clearInterval(interval);
+  }, []);
 
-    return (
-        <p className="text-xs text-status-success uppercase tracking-wider min-h-[1.5em] font-semibold">
-            {MESSAGES[index]}
-        </p>
-    );
+  return (
+    <p className="text-xs text-mid min-h-[1.5em] font-medium transition-opacity animate-fade-in">
+      {MESSAGES[index]}
+    </p>
+  );
 }
+
 export { LoadingStatus };

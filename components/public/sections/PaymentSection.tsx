@@ -130,7 +130,7 @@ export default function PaymentSection() {
               MEMBERSHIP PASSES &amp; ADMISSION
             </span>
             <h1 className="heading-display text-4xl sm:text-6xl md:text-7xl text-hi leading-[0.95] tracking-tight uppercase">
-              JOIN THE <span className="text-accent">BROTHERHOOD</span>
+              SELECT YOUR <span className="text-accent">MEMBERSHIP</span>
             </h1>
           </div>
 
