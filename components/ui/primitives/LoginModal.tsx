@@ -30,18 +30,16 @@ export default function LoginModal({ isOpen, onClose, onSuccess }: LoginModalPro
         setError("");
         try {
             const result = await signInWithGoogle();
-            if (result.success) {
-                onSuccess?.();
-                onClose();
-            } else {
+            if (!result.success) {
                 setError(result.error || "Sign-in failed. Please try again.");
+                setLoading(false);
             }
+            // On success, browser will redirect to Google OAuth
         } catch {
             setError("An unexpected error occurred. Please try again.");
-        } finally {
             setLoading(false);
         }
-    }, [signInWithGoogle, onSuccess, onClose]);
+    }, [signInWithGoogle]);
 
     const [isReady, setIsReady] = useState(false);
     useEffect(() => {

@@ -65,6 +65,7 @@ export function UserAuthProvider({ children }: { children: ReactNode }) {
 
     /**
      * Load the user's `users` row and populate local state with Google metadata fallbacks.
+     * Guaranteed to ALWAYS populate the user even if DB row is delayed or RLS is strict.
      */
     const loadUserFromSession = useCallback(async (session: {
         user: { id: string; email?: string | null; user_metadata?: Record<string, unknown> };
@@ -85,27 +86,37 @@ export function UserAuthProvider({ children }: { children: ReactNode }) {
             session.user.email?.split('@')[0] ||
             'Member';
 
-        let { data: row } = await supabase
-            .from('users')
-            .select('*')
-            .eq('id', authId)
-            .single();
-
-        // First sign-in: create the row. RLS INSERT policy requires id == auth.uid().
-        if (!row) {
-            const { data: inserted } = await supabase
+        let row: Record<string, unknown> | null = null;
+        try {
+            const { data } = await supabase
                 .from('users')
-                .insert({
-                    id: authId,
-                    email: session.user.email || null,
-                    full_name: metadataName,
-                    photo_url: metadataPhoto,
-                    daily_credits: MAX_DAILY_CREDITS,
-                    last_credit_reset: istToday(),
-                })
                 .select('*')
+                .eq('id', authId)
                 .single();
-            row = inserted;
+            row = data as Record<string, unknown> | null;
+        } catch {
+            // non-blocking
+        }
+
+        // First sign-in: attempt to create the row in the background.
+        if (!row) {
+            try {
+                const { data: inserted } = await supabase
+                    .from('users')
+                    .insert({
+                        id: authId,
+                        email: session.user.email || null,
+                        full_name: metadataName,
+                        photo_url: metadataPhoto,
+                        daily_credits: MAX_DAILY_CREDITS,
+                        last_credit_reset: istToday(),
+                    })
+                    .select('*')
+                    .single();
+                if (inserted) row = inserted as Record<string, unknown>;
+            } catch {
+                // non-blocking
+            }
         } else if (!row.photo_url && metadataPhoto) {
             // Update row with Google OAuth picture if row didn't have one
             try {
@@ -118,7 +129,7 @@ export function UserAuthProvider({ children }: { children: ReactNode }) {
             }
         }
 
-        const effectivePhoto = row?.photo_url || metadataPhoto;
+        const effectivePhoto = (row?.photo_url as string) || metadataPhoto;
         const today = istToday();
 
         // Load cached local preferences if available
@@ -132,29 +143,59 @@ export function UserAuthProvider({ children }: { children: ReactNode }) {
             // ignore
         }
 
+        const rowId = (row?.id as string) || authId;
+        const rowEmail = (row?.email as string) || session.user.email || null;
+        const rowFullName = (row?.full_name as string) || (localPrefs.full_name as string) || metadataName;
+        const rowPhone = (row?.phone as string) || (metadata.phone as string) || (localPrefs.phone as string) || null;
+        const rowDob = (row?.date_of_birth as string) || (metadata.date_of_birth as string) || (localPrefs.date_of_birth as string) || null;
+        const rowHeight = typeof row?.height_cm === 'number' ? row.height_cm : (typeof metadata.height_cm === 'number' ? metadata.height_cm : (typeof localPrefs.height_cm === 'number' ? localPrefs.height_cm : null));
+        const rowWeight = typeof row?.weight_kg === 'number' ? row.weight_kg : (typeof metadata.weight_kg === 'number' ? metadata.weight_kg : (typeof localPrefs.weight_kg === 'number' ? localPrefs.weight_kg : null));
+        const rowGender = (row?.gender as string) || (metadata.gender as string) || (localPrefs.gender as string) || "Male";
+        const rowCredits = typeof row?.daily_credits === 'number' ? row.daily_credits : MAX_DAILY_CREDITS;
+        const rowReset = (row?.last_credit_reset as string) || today;
+
+        // Set state unconditionally
         setUser({
-            id: row?.id || authId,
-            email: row?.email || session.user.email || null,
-            full_name: row?.full_name || (localPrefs.full_name as string) || metadataName,
+            id: rowId,
+            email: rowEmail,
+            full_name: rowFullName,
             photo_url: effectivePhoto,
-            phone: row?.phone || (metadata.phone as string) || (localPrefs.phone as string) || null,
-            date_of_birth: row?.date_of_birth || (metadata.date_of_birth as string) || (localPrefs.date_of_birth as string) || null,
-            height_cm: row?.height_cm ?? (metadata.height_cm as number) ?? (localPrefs.height_cm as number) ?? null,
-            weight_kg: row?.weight_kg ?? (metadata.weight_kg as number) ?? (localPrefs.weight_kg as number) ?? null,
-            gender: row?.gender || (metadata.gender as string) || (localPrefs.gender as string) || "Male",
+            phone: rowPhone,
+            date_of_birth: rowDob,
+            height_cm: rowHeight,
+            weight_kg: rowWeight,
+            gender: rowGender,
             fitness_goal: (metadata.fitness_goal as string) || (localPrefs.fitness_goal as string) || "Muscle Gain",
             diet_preference: (metadata.diet_preference as string) || (localPrefs.diet_preference as string) || "Vegetarian",
-            daily_credits: row?.last_credit_reset === today ? row.daily_credits : MAX_DAILY_CREDITS,
+            daily_credits: rowReset === today ? rowCredits : MAX_DAILY_CREDITS,
             last_credit_reset: today,
         });
     }, []);
 
-    // Listen to Supabase auth state
+    // Listen to Supabase auth state & handle OAuth code callbacks
     useEffect(() => {
         let isMounted = true;
 
         const initAuth = async () => {
             try {
+                // Check if current URL contains an OAuth code
+                if (typeof window !== 'undefined') {
+                    const urlParams = new URLSearchParams(window.location.search);
+                    const code = urlParams.get('code');
+                    if (code) {
+                        try {
+                            const { data: exchangeData } = await supabase.auth.exchangeCodeForSession(code);
+                            if (exchangeData?.session && isMounted) {
+                                await loadUserFromSession(exchangeData.session);
+                                const cleanUrl = window.location.pathname;
+                                window.history.replaceState({}, document.title, cleanUrl);
+                            }
+                        } catch (err) {
+                            console.warn("Client exchange code note:", err);
+                        }
+                    }
+                }
+
                 const { data: { session } } = await supabase.auth.getSession();
                 if (session?.user && isMounted) {
                     await loadUserFromSession(session);
@@ -186,17 +227,21 @@ export function UserAuthProvider({ children }: { children: ReactNode }) {
 
     const signInWithGoogle = async (): Promise<{ success: boolean; error?: string }> => {
         try {
-            const toastId = toast.loading("Redirecting to Google...", { duration: 5000 });
-            const redirectUrl = typeof window !== 'undefined' ? `${window.location.origin}/` : undefined;
+            const redirectUrl = typeof window !== 'undefined'
+                ? `${window.location.origin}/auth/callback`
+                : undefined;
             const { error } = await supabase.auth.signInWithOAuth({
                 provider: 'google',
                 options: {
-                    redirectTo: redirectUrl
+                    redirectTo: redirectUrl,
+                    queryParams: {
+                        access_type: 'offline',
+                        prompt: 'select_account',
+                    }
                 }
             });
 
             if (error) {
-                toast.dismiss(toastId);
                 toast.error(`Login Error: ${error.message}`);
                 return { success: false, error: error.message };
             }
