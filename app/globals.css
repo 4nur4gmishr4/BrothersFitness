@@ -825,7 +825,12 @@ body {
 
 .scrollbar-hide {
   -ms-overflow-style: none;
-  scrollbar-width: none;
+}
+
+@supports (scrollbar-width: none) {
+  .scrollbar-hide {
+    scrollbar-width: none;
+  }
 }
 
 .scrollbar-hide::-webkit-scrollbar {
@@ -915,7 +920,12 @@ body {
 
 html, body, * {
   -ms-overflow-style: none;
-  scrollbar-width: none;
+}
+
+@supports (scrollbar-width: none) {
+  html, body, * {
+    scrollbar-width: none;
+  }
 }
 
 /* ============================================================
