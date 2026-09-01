@@ -22,7 +22,7 @@ export default function LoadingStatus() {
     }, []);
 
     return (
-        <p className="font-mono text-xs text-status-success uppercase tracking-widest min-h-[1.5em]">
+        <p className="text-xs text-status-success uppercase tracking-wider min-h-[1.5em] font-semibold">
             {MESSAGES[index]}
         </p>
     );

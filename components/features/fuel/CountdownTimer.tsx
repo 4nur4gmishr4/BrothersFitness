@@ -32,7 +32,7 @@ export default function CountdownTimer({ duration, onComplete }: { duration: num
     };
 
     return (
-        <div className="font-mono text-4xl font-black text-accent tabular-nums tracking-widest">
+        <div className="text-4xl font-black text-accent tabular-nums tracking-widest">
             {formatTime(timeLeft)}
         </div>
     );

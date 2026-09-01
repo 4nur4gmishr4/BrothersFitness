@@ -220,7 +220,7 @@ export default function Navbar() {
                 
                 {/* Left Column: Big Staggered Links */}
                 <div className="lg:col-span-7 space-y-1">
-                  <span className="text-xs font-mono uppercase tracking-widest text-accent mb-4 block font-semibold">
+                  <span className="text-xs uppercase tracking-widest text-accent mb-4 block font-semibold">
                     NAVIGATION INDEX
                   </span>
 
@@ -234,7 +234,7 @@ export default function Navbar() {
                           className="group w-full py-3 sm:py-4 flex items-center justify-between border-b border-surface-border/60 text-left transition-colors cursor-pointer"
                         >
                           <div className="flex items-center gap-4 sm:gap-6">
-                            <span className="text-xs font-mono text-mid group-hover:text-accent transition-colors">
+                            <span className="text-xs text-mid group-hover:text-accent transition-colors font-medium">
                               {item.num}
                             </span>
                             <span
@@ -263,7 +263,7 @@ export default function Navbar() {
 
                 {/* Right Column: People & Direct Access Rows in Matching Editorial Style */}
                 <div className="lg:col-span-5 space-y-1 pt-4 lg:pt-0">
-                  <span className="text-xs font-mono uppercase tracking-widest text-accent mb-4 block font-semibold">
+                  <span className="text-xs uppercase tracking-widest text-accent mb-4 block font-semibold">
                     DIRECTORY &amp; DIRECT ACCESS
                   </span>
 
@@ -271,7 +271,7 @@ export default function Navbar() {
                     {/* 01 Aman Shrivastava */}
                     <div className="group w-full py-3.5 sm:py-4 flex items-center justify-between border-b border-surface-border/60 text-left transition-colors">
                       <div className="flex items-center gap-4 sm:gap-6 min-w-0 pr-2">
-                        <span className="text-xs font-mono text-mid group-hover:text-accent transition-colors flex-shrink-0">
+                        <span className="text-xs text-mid group-hover:text-accent transition-colors flex-shrink-0 font-medium">
                           01
                         </span>
                         <div className="truncate">
@@ -320,7 +320,7 @@ export default function Navbar() {
                     {/* 02 Pradeep Shrivastava */}
                     <div className="group w-full py-3.5 sm:py-4 flex items-center justify-between border-b border-surface-border/60 text-left transition-colors">
                       <div className="flex items-center gap-4 sm:gap-6 min-w-0 pr-2">
-                        <span className="text-xs font-mono text-mid group-hover:text-accent transition-colors flex-shrink-0">
+                        <span className="text-xs text-mid group-hover:text-accent transition-colors flex-shrink-0 font-medium">
                           02
                         </span>
                         <div className="truncate">
@@ -369,7 +369,7 @@ export default function Navbar() {
                     {/* 03 Anurag Mishra */}
                     <div className="group w-full py-3.5 sm:py-4 flex items-center justify-between border-b border-surface-border/60 text-left transition-colors">
                       <div className="flex items-center gap-4 sm:gap-6 min-w-0 pr-2">
-                        <span className="text-xs font-mono text-mid group-hover:text-accent transition-colors flex-shrink-0">
+                        <span className="text-xs text-mid group-hover:text-accent transition-colors flex-shrink-0 font-medium">
                           03
                         </span>
                         <div className="truncate">

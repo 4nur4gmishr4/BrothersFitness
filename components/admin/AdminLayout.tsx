@@ -53,7 +53,7 @@ export function AdminLayout({ children }: { children: ReactNode }) {
     return (
       <div className="min-h-screen bg-surface-canvas flex flex-col items-center justify-center gap-4">
         <MorphingInfinity className="w-12 h-12 text-accent" />
-        <div className="text-faint font-mono uppercase tracking-widest font-semibold text-xs animate-pulse">
+        <div className="text-faint uppercase tracking-wider font-semibold text-xs animate-pulse">
           Authenticating Console…
         </div>
       </div>

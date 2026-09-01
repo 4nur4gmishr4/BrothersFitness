@@ -181,7 +181,7 @@ export function AdminLoginForm({
                         ? "capslock-hint"
                         : undefined
                     }
-                    className="pl-10 pr-11 font-mono text-sm bg-surface-soft/90 focus:border-accent"
+                    className="pl-10 pr-11 text-sm bg-surface-soft/90 focus:border-accent"
                     required
                   />
                   <button
@@ -201,7 +201,7 @@ export function AdminLoginForm({
                 {capsLock && !error && (
                   <p
                     id="capslock-hint"
-                    className="mt-2 text-xs font-mono uppercase tracking-widest text-status-warning"
+                    className="mt-2 text-xs uppercase tracking-wider text-status-warning font-medium"
                   >
                     ⚠ Caps Lock is on
                   </p>
@@ -217,12 +217,12 @@ export function AdminLoginForm({
                 >
                   <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5 text-status-danger" />
                   <div className="flex-1 text-xs text-status-danger">
-                    <div className="font-bold uppercase tracking-widest font-mono mb-0.5">
+                    <div className="font-bold uppercase tracking-wider mb-0.5">
                       {isBlocked ? "Login temporarily blocked" : "Access denied"}
                     </div>
                     <div>{error}</div>
                     {isBlocked && rateLimitResetIn > 0 && (
-                      <div className="mt-1 font-mono text-status-warning">
+                      <div className="mt-1 text-status-warning font-medium">
                         Try again in {formatResetTime(rateLimitResetIn)}.
                       </div>
                     )}
@@ -233,7 +233,7 @@ export function AdminLoginForm({
               <Button
                 type="submit"
                 disabled={inputDisabled || !password.trim()}
-                className="w-full h-11 uppercase font-bold tracking-widest relative overflow-hidden group shadow-lg shadow-accent/15"
+                className="w-full h-11 uppercase font-bold tracking-wider relative overflow-hidden group shadow-lg shadow-accent/15"
               >
                 {isLoading ? (
                   <>
@@ -262,7 +262,7 @@ export function AdminLoginForm({
 
           {/* Footer Warning & Badges */}
           <div className="mt-6 flex flex-col items-center gap-2">
-            <p className="text-center text-xs font-mono uppercase tracking-widest text-faint">
+            <p className="text-center text-xs uppercase tracking-wider text-faint font-medium">
               {footerNote}
             </p>
           </div>
@@ -270,7 +270,7 @@ export function AdminLoginForm({
       </main>
 
       {/* Footer Bottom Strip */}
-      <footer className="px-5 py-4 border-t border-surface-border text-center text-xs text-faint font-mono">
+      <footer className="px-5 py-4 border-t border-surface-border text-center text-xs text-faint font-medium">
         Brother&apos;s Fitness System ERP &bull; Lakhnadon, MP
       </footer>
     </div>

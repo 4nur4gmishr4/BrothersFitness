@@ -126,7 +126,7 @@ export default function PaymentSection() {
         {/* Top Display Header */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-10 md:mb-14 gap-6 pb-8 border-b border-surface-border/70">
           <div>
-            <span className="text-xs font-mono uppercase tracking-widest text-accent mb-2 block font-semibold">
+            <span className="text-xs uppercase tracking-widest text-accent mb-2 block font-semibold">
               MEMBERSHIP PASSES &amp; ADMISSION
             </span>
             <h1 className="heading-display text-4xl sm:text-6xl md:text-7xl text-hi leading-[0.95] tracking-tight uppercase">
@@ -167,7 +167,7 @@ export default function PaymentSection() {
                   </div>
                 )}
                 <div className="text-center">
-                  <h3 className="text-xs font-mono uppercase tracking-widest text-mid mb-4">
+                  <h3 className="text-xs uppercase tracking-widest text-mid mb-4 font-semibold">
                     {plan.label} PASS
                   </h3>
                   <p className="text-5xl sm:text-6xl font-extrabold text-hi group-hover:text-accent transition-colors duration-150">
@@ -369,7 +369,7 @@ export default function PaymentSection() {
               {/* UPI ID Fallback */}
               <div className="bg-surface-soft border border-surface-border rounded-xl p-3.5 mb-6 text-center">
                 <p className="text-xs text-mid mb-1">Or direct UPI ID transfer:</p>
-                <p className="font-mono text-sm font-bold text-accent select-all">{UPI_ID}</p>
+                <p className="text-sm font-bold text-accent select-all tracking-wider">{UPI_ID}</p>
               </div>
 
               {/* Instructions */}

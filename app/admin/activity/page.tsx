@@ -310,7 +310,7 @@ export default function AdminActivityPage() {
                             <div className="text-[11px] uppercase tracking-wider font-semibold text-faint mb-1">
                               Action Metadata Payload
                             </div>
-                            <pre className="text-xs font-mono bg-surface-soft border border-surface-border rounded-xl p-3 text-hi overflow-x-auto">
+                            <pre className="text-xs bg-surface-soft border border-surface-border rounded-xl p-3 text-hi overflow-x-auto font-sans leading-relaxed">
                               {JSON.stringify(log.details, null, 2)}
                             </pre>
                           </div>

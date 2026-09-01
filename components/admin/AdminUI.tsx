@@ -388,7 +388,7 @@ export function AdminLoader({
   return (
     <div className={`flex flex-col items-center justify-center py-20 px-4 text-center gap-3.5 ${className}`}>
       <MorphingInfinity className="w-10 h-10 text-accent" />
-      <span className="text-xs font-mono uppercase tracking-widest font-semibold text-faint animate-pulse">
+      <span className="text-xs uppercase tracking-wider font-semibold text-faint animate-pulse">
         {text}
       </span>
     </div>

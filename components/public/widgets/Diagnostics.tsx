@@ -19,7 +19,7 @@ export default function Diagnostics() {
         {/* Top Display Header */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-10 md:mb-14 gap-6 pb-8 border-b border-surface-border/70">
           <div>
-            <span className="text-xs font-mono uppercase tracking-widest text-accent mb-2 block font-semibold">
+            <span className="text-xs uppercase tracking-widest text-accent mb-2 block font-semibold">
               PERFORMANCE METRICS &amp; STATS
             </span>
             <h1 className="heading-display text-4xl sm:text-6xl md:text-7xl text-hi leading-[0.95] tracking-tight uppercase">
@@ -286,7 +286,7 @@ function OneRepMaxCalculator() {
             <RepProgressRing reps={reps} target={20} />
           </div>
         </div>
-        <p className="text-xs text-faint font-mono uppercase tracking-widest">Reps drive the Epley estimate</p>
+        <p className="text-xs text-faint uppercase tracking-wider font-medium">Reps drive the Epley estimate</p>
       </div>
 
       <button onClick={calculate} disabled={isComputing} className="btn-primary w-full">

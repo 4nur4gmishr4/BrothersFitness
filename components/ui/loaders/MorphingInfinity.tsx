@@ -30,7 +30,7 @@ export function MorphingInfinity(props: React.ComponentProps<"svg">) {
         }}
         transition={{
           d: {
-            duration: 5,
+            duration: 1,
             ease: "easeInOut",
             repeat: Infinity,
             times: [0, 0.25, 0.5, 0.75, 1.0],

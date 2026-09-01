@@ -136,14 +136,14 @@ export default function TacticalStopwatch() {
 
                     {/* Timer Display */}
                     <div className="text-center mb-6">
-                        <p className={`text-6xl font-black font-mono tabular-nums ${time === 0 && mode === "countdown" ? "text-faint" : "text-accent"}`}>
+                        <p className={`text-6xl font-black tabular-nums ${time === 0 && mode === "countdown" ? "text-faint" : "text-accent"}`}>
                             <TimerTick seconds={time} active={isRunning} format={formatTime} />
                         </p>
                         <div className="flex items-center justify-center gap-2 mt-2">
                             {time === 0 && mode === "countdown" && !isRunning && (
                                 <Bell className="w-3 h-3 text-low" />
                             )}
-                            <p className="text-xs text-faint uppercase tracking-widest">
+                            <p className="text-xs text-faint uppercase tracking-widest font-medium">
                                 {getStatusText()}
                             </p>
                         </div>
@@ -181,7 +181,7 @@ export default function TacticalStopwatch() {
                                     <button
                                         key={sec}
                                         onClick={() => handlePresetClick(sec)}
-                                        className={`px-3 py-2 border text-xs font-mono transition-colors duration-fast ${time === sec && mode === "countdown"
+                                        className={`px-3 py-2 border text-xs font-semibold tabular-nums transition-colors duration-fast ${time === sec && mode === "countdown"
                                             ? "bg-accent text-white border-accent"
                                             : "surface-card hairline text-low hover:border-accent hover:text-hi"
                                             }`}

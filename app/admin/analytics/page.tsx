@@ -371,7 +371,7 @@ export default function AdminAnalyticsPage() {
               <div className="relative w-full">
                 {/* Y-Axis Reference Guidelines */}
                 <div className="absolute inset-x-0 top-0 bottom-8 flex flex-col justify-between pointer-events-none opacity-20 z-0">
-                  <div className="border-b border-dashed border-current w-full flex items-center justify-between text-[10px] tabular-nums font-mono text-faint">
+                  <div className="border-b border-dashed border-current w-full flex items-center justify-between text-[10px] tabular-nums font-medium text-faint">
                     <span>₹{maxMonthAmount.toLocaleString("en-IN")}</span>
                     <span>{maxMonthCount} joinings</span>
                   </div>

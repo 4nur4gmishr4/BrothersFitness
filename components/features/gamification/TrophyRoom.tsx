@@ -342,7 +342,7 @@ export default function TrophyRoom(props: { isModal?: boolean; isPage?: boolean;
       {/* Top Display Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-10 md:mb-14 gap-6 pb-8 border-b border-surface-border/70">
         <div>
-          <span className="text-xs font-mono uppercase tracking-widest text-accent mb-2 block font-semibold">
+          <span className="text-xs uppercase tracking-widest text-accent mb-2 block font-semibold">
             ATHLETE PROGRESSION &amp; ACHIEVEMENTS
           </span>
           <h1 className="heading-display text-4xl sm:text-6xl md:text-7xl text-hi leading-[0.95] tracking-tight uppercase">
@@ -353,22 +353,22 @@ export default function TrophyRoom(props: { isModal?: boolean; isPage?: boolean;
         {/* Live Discipline Stats Bar */}
         <div className="flex items-center gap-6 sm:gap-10 border-l-2 border-surface-border pl-6">
           <div>
-            <span className="text-[11px] font-mono uppercase tracking-wider text-mid block">STREAK</span>
-            <span className="text-2xl sm:text-3xl font-extrabold text-hi tracking-tight">
+            <span className="text-[11px] uppercase tracking-wider text-mid block font-semibold">STREAK</span>
+            <span className="text-2xl sm:text-3xl font-extrabold text-hi tracking-tight tabular-nums">
               {visitStreak} <span className="text-xs font-normal text-mid">Days</span>
             </span>
           </div>
 
           <div>
-            <span className="text-[11px] font-mono uppercase tracking-wider text-mid block">EXPERIENCE</span>
-            <span className="text-2xl sm:text-3xl font-extrabold text-accent tracking-tight">
+            <span className="text-[11px] uppercase tracking-wider text-mid block font-semibold">EXPERIENCE</span>
+            <span className="text-2xl sm:text-3xl font-extrabold text-accent tracking-tight tabular-nums">
               {totalXP} <span className="text-xs font-normal text-mid">XP</span>
             </span>
           </div>
 
           <div>
-            <span className="text-[11px] font-mono uppercase tracking-wider text-mid block">STATUS</span>
-            <span className="text-2xl sm:text-3xl font-extrabold text-hi tracking-tight">
+            <span className="text-[11px] uppercase tracking-wider text-mid block font-semibold">STATUS</span>
+            <span className="text-2xl sm:text-3xl font-extrabold text-hi tracking-tight tabular-nums">
               {unlockedCount}/{FLOWING_MILESTONES.length}
             </span>
           </div>
@@ -390,7 +390,7 @@ export default function TrophyRoom(props: { isModal?: boolean; isPage?: boolean;
             >
               {/* Row Left: Stage Number + Refined Editorial Title */}
               <div className="flex items-center gap-4 sm:gap-6 md:gap-8 min-w-0 pr-4">
-                <span className="text-xs sm:text-sm font-mono text-mid group-hover:text-accent transition-colors flex-shrink-0">
+                <span className="text-xs sm:text-sm text-mid group-hover:text-accent transition-colors flex-shrink-0 font-medium">
                   {item.stage}
                 </span>
 
@@ -415,7 +415,7 @@ export default function TrophyRoom(props: { isModal?: boolean; isPage?: boolean;
 
               {/* Row Right: XP Badge & Status Pill & Action Arrow */}
               <div className="flex items-center gap-3 sm:gap-6 flex-shrink-0">
-                <span className="hidden sm:inline-block text-xs font-mono font-semibold px-3 py-1 rounded-full bg-surface-soft border border-surface-border text-mid">
+                <span className="hidden sm:inline-block text-xs font-semibold px-3 py-1 rounded-full bg-surface-soft border border-surface-border text-mid">
                   +{item.xp} XP
                 </span>
 
@@ -463,7 +463,7 @@ export default function TrophyRoom(props: { isModal?: boolean; isPage?: boolean;
 
             {/* Stage Title & XP */}
             <div>
-              <span className="text-[11px] font-mono uppercase tracking-widest text-accent block font-semibold">
+              <span className="text-[11px] uppercase tracking-widest text-accent block font-semibold">
                 STAGE {activeMilestone.stage} &bull; +{activeMilestone.xp} XP
               </span>
               <span className="text-xl font-bold tracking-tight text-hi uppercase block mt-0.5">

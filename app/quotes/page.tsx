@@ -242,7 +242,7 @@ export default function QuotesPage() {
         <div className="pt-20 sm:pt-24 pb-8 px-4 sm:px-8 md:px-12 lg:px-16 max-w-[1600px] mx-auto w-full">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-8 gap-6 pb-8 border-b border-surface-border/70">
             <div>
-              <span className="text-xs font-mono uppercase tracking-widest text-accent mb-2 block font-semibold">
+              <span className="text-xs uppercase tracking-widest text-accent mb-2 block font-semibold">
                 DAILY MOTIVATION &amp; MINDSET
               </span>
               <h1 className="heading-display text-4xl sm:text-6xl md:text-7xl text-hi leading-[0.95] tracking-tight uppercase">

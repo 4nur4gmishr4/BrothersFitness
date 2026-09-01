@@ -59,7 +59,7 @@ export default function RepProgressRing({
           }}
         />
       </svg>
-      <span className="absolute font-mono text-xs font-bold text-hi">
+      <span className="absolute text-xs font-bold text-hi tabular-nums">
         {reps}/{target}
       </span>
     </div>
