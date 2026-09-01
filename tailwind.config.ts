@@ -58,13 +58,12 @@ const config: Config = {
   				'sans-serif'
   			],
   			mono: [
-  				'var(--font-mono)',
-  				'JetBrains Mono',
-  				'Fira Code',
-  				'Consolas',
-  				'Monaco',
-  				'Courier New',
-  				'monospace'
+  				'var(--font-inter)',
+  				'-apple-system',
+  				'BlinkMacSystemFont',
+  				'Segoe UI',
+  				'Roboto',
+  				'sans-serif'
   			]
   		},
   		fontSize: {
