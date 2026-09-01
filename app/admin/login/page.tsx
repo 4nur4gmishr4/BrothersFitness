@@ -3,7 +3,7 @@
 import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAdmin } from "@/lib/auth-context";
-import { Login1 } from "@/components/login1";
+import { AdminLoginForm } from "@/components/admin/AdminLoginForm";
 
 function AdminLoginContent() {
   const router = useRouter();
@@ -95,7 +95,7 @@ function AdminLoginContent() {
   };
 
   return (
-    <Login1
+    <AdminLoginForm
       heading="Admin Access"
       description="Enter master passcode to access the Brother's Fitness management console."
       logo={{

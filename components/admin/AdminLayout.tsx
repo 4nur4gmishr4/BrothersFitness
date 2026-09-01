@@ -3,7 +3,7 @@
 import { useState, useEffect, ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import { useAdmin } from "@/lib/auth-context";
-import { Sidebar1 } from "@/components/sidebar1";
+import { AdminSidebar } from "@/components/admin/AdminSidebar";
 import { useSidebar } from "@/components/ui/sidebar";
 
 export { useSidebar };
@@ -57,7 +57,7 @@ export function AdminLayout({ children }: { children: ReactNode }) {
     );
   }
 
-  return <Sidebar1 unreadLeads={unreadLeads}>{children}</Sidebar1>;
+  return <AdminSidebar unreadLeads={unreadLeads}>{children}</AdminSidebar>;
 }
 
 export default AdminLayout;
