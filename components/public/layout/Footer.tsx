@@ -93,7 +93,7 @@ const defaultProps: FooterProps = {
     title: "Brother's Fitness",
   },
   description:
-    "Tactical gym workouts, AI nutrition protocols, and fitness tools for Brother's Fitness Lakhnadon.",
+    "Premium workout training, personalized nutrition plans, and fitness diagnostics for Brother's Fitness Lakhnadon.",
   sections: defaultBroFitSections,
   copyright: `© ${new Date().getFullYear()} BROTHER'S FITNESS • ALL RIGHTS RESERVED`,
 };
@@ -129,7 +129,7 @@ export const Footer = (props: Partial<FooterProps>) => {
                     BROTHER&apos;S <span className="text-accent">FITNESS</span>
                   </span>
                   <span className="text-[10px] uppercase tracking-widest text-faint mt-0.5 font-medium">
-                    Lakhnadon &bull; Tactical Fitness
+                    Lakhnadon &bull; Strength &amp; Conditioning
                   </span>
                 </div>
               </Link>

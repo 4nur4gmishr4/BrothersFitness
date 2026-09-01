@@ -278,10 +278,10 @@ function FuelSynthesizerContent() {
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-10 md:mb-14 gap-6 pb-8 border-b border-surface-border/70">
                     <div>
                         <span className="text-xs uppercase tracking-widest text-accent mb-2 block font-semibold">
-                            AI MACRONUTRIENT &amp; DIET ENGINE
+                            PERSONALIZED NUTRITION &amp; MEAL PLANNER
                         </span>
                         <h1 className="heading-display text-4xl sm:text-6xl md:text-7xl text-hi leading-[0.95] tracking-tight uppercase">
-                            TACTICAL <span className="text-accent">FUEL</span>
+                            DIET &amp; <span className="text-accent">NUTRITION</span>
                         </h1>
                         {user && (
                             <div className="mt-3 flex items-center gap-2">
@@ -295,8 +295,8 @@ function FuelSynthesizerContent() {
 
                     <div className="flex items-center gap-6">
                         <div className="text-left md:text-right border-l-2 md:border-l-0 md:border-r-2 border-surface-border pl-4 md:pl-0 md:pr-4">
-                            <p className="text-sm font-medium text-hi">Personalized Fuel Protocol</p>
-                            <p className="text-xs text-mid">AI macro synthesis &amp; targeted meal plans</p>
+                            <p className="text-sm font-medium text-hi">Targeted Meal Plans</p>
+                            <p className="text-xs text-mid">Calorie targets, macro breakdown &amp; grocery lists</p>
                         </div>
                     </div>
                 </div>

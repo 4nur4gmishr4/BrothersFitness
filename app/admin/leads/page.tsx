@@ -488,7 +488,7 @@ export default function AdminMessagesPage() {
                     </div>
                   </div>
 
-                  {/* Bottom Quick Reply / Command Prompts */}
+                  {/* Bottom Quick Reply Actions */}
                   <div className="max-w-2xl mx-auto w-full space-y-3">
                     <div className="flex flex-wrap gap-2 justify-center">
                       <button
@@ -499,9 +499,9 @@ export default function AdminMessagesPage() {
                             `Hi ${selected.name}, thank you for reaching out to Brother's Fitness Lakhnadon! When would you like to visit the gym for a tour? 🏋️`
                           )
                         }
-                        className="text-xs font-medium px-3.5 py-1.5 rounded-full bg-white dark:bg-[#17212b] hover:bg-[#f1f3f4] dark:hover:bg-[#242f3d] border border-[#dfe1e5] dark:border-[#232e3c] text-[#222222] dark:text-[#e4ecf2] transition-colors shadow-xs"
+                        className="text-xs font-medium px-4 py-1.5 rounded-full bg-white dark:bg-[#17212b] hover:bg-[#f1f3f4] dark:hover:bg-[#242f3d] border border-[#dfe1e5] dark:border-[#232e3c] text-[#222222] dark:text-[#e4ecf2] transition-colors shadow-xs flex items-center gap-1.5"
                       >
-                        /offer_gym_tour
+                        <span>Schedule Gym Tour</span>
                       </button>
                       <button
                         type="button"
@@ -511,9 +511,9 @@ export default function AdminMessagesPage() {
                             `Hey ${selected.name}! We saw your inquiry about gym memberships. Our plans start from ₹600/month. Would you like our full fee structure? 💪`
                           )
                         }
-                        className="text-xs font-medium px-3.5 py-1.5 rounded-full bg-white dark:bg-[#17212b] hover:bg-[#f1f3f4] dark:hover:bg-[#242f3d] border border-[#dfe1e5] dark:border-[#232e3c] text-[#222222] dark:text-[#e4ecf2] transition-colors shadow-xs"
+                        className="text-xs font-medium px-4 py-1.5 rounded-full bg-white dark:bg-[#17212b] hover:bg-[#f1f3f4] dark:hover:bg-[#242f3d] border border-[#dfe1e5] dark:border-[#232e3c] text-[#222222] dark:text-[#e4ecf2] transition-colors shadow-xs flex items-center gap-1.5"
                       >
-                        /send_fee_structure
+                        <span>Share Fee Structure</span>
                       </button>
                     </div>
 
