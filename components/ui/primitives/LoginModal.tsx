@@ -109,7 +109,7 @@ export default function LoginModal({ isOpen, onClose, onSuccess }: LoginModalPro
                         <button
                             onClick={handleGoogleSignIn}
                             disabled={loading}
-                            className="w-full flex items-center justify-center gap-3 px-6 py-3 bg-white text-gray-900 font-bold text-sm hover:bg-gray-100 transition-all shadow-lg active:scale-95 disabled:opacity-50 cursor-pointer"
+                            className="w-full flex items-center justify-center gap-3 px-6 py-3.5 rounded-full bg-white hover:bg-zinc-100 dark:bg-zinc-900 dark:hover:bg-zinc-800 text-zinc-900 dark:text-white border border-zinc-200 dark:border-zinc-700/80 font-semibold text-sm transition-all shadow-md hover:shadow-lg active:scale-95 disabled:opacity-50 cursor-pointer"
                         >
                             {loading ? (
                                 <>
