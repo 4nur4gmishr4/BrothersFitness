@@ -828,6 +828,12 @@ body {
   scrollbar-width: none;
 }
 
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
 /* ============================================================
    Shield Security Animations & Keyframes
    ============================================================ */
@@ -904,8 +910,11 @@ body {
 }
 
 /* Global scrollbar hide — scroll still works, track is invisible */
-::-webkit-scrollbar {
+::-webkit-scrollbar,
+*::-webkit-scrollbar {
   display: none;
+  width: 0;
+  height: 0;
 }
 
 * {
