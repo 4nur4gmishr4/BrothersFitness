@@ -1,22 +1,22 @@
 import { NextResponse } from 'next/server';
-import { getSupabase } from '@/lib/supabase';
 
 export const dynamic = 'force-dynamic';
 
 export async function GET(request: Request) {
   const requestUrl = new URL(request.url);
   const code = requestUrl.searchParams.get('code');
-  const next = requestUrl.searchParams.get('next') || '/';
+  const error = requestUrl.searchParams.get('error');
+  const errorDescription = requestUrl.searchParams.get('error_description');
 
-  if (code) {
-    const supabase = getSupabase();
-    try {
-      await supabase.auth.exchangeCodeForSession(code);
-    } catch (err) {
-      console.error('Auth callback exchange error:', err);
-    }
+  if (error) {
+    const errorParam = encodeURIComponent(errorDescription || error);
+    return NextResponse.redirect(new URL(`/?auth_error=${errorParam}`, requestUrl.origin));
   }
 
-  // Redirect back to requested page or home
-  return NextResponse.redirect(new URL(next, requestUrl.origin));
+  if (code) {
+    // Forward the authorization code to client app for local PKCE session completion
+    return NextResponse.redirect(new URL(`/?code=${encodeURIComponent(code)}`, requestUrl.origin));
+  }
+
+  return NextResponse.redirect(new URL('/', requestUrl.origin));
 }
