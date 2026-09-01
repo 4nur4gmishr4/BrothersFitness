@@ -151,33 +151,44 @@ export default function Navbar() {
               </a>
 
                   {/* Option 4: User Auth / Profile */}
-                  <button
-                    onClick={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      if (isLoggedIn) {
-                        setShowProfileModal(true);
-                      } else {
-                        setShowLoginModal(true);
-                      }
-                    }}
-                    className="w-10 h-10 rounded-full flex items-center justify-center bg-surface-card border border-surface-border hover:bg-surface-elevated active:scale-90 transition-all duration-150 shadow-sm overflow-hidden"
-                    aria-label="Profile"
-                  >
-                    {isLoading ? (
-                      <div className="w-3.5 h-3.5 rounded-full skeleton" />
-                    ) : isLoggedIn && user?.photo_url ? (
-                      <Image
-                        src={user.photo_url}
-                        alt="Profile"
-                        width={28}
-                        height={28}
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <UserIcon className="w-4 h-4 text-hi" />
+                  <div className="relative">
+                    <button
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        if (isLoggedIn) {
+                          setShowProfileModal(true);
+                        } else {
+                          setShowLoginModal(true);
+                        }
+                      }}
+                      className="w-10 h-10 rounded-full flex items-center justify-center bg-surface-card border border-surface-border hover:bg-surface-elevated active:scale-90 transition-all duration-150 shadow-sm overflow-hidden relative cursor-pointer"
+                      aria-label="Profile"
+                      title={isLoggedIn ? `Logged in as ${user?.full_name || user?.email}` : "Sign In with Google"}
+                    >
+                      {isLoading ? (
+                        <div className="w-4 h-4 rounded-full skeleton" />
+                      ) : isLoggedIn && user?.photo_url ? (
+                        <Image
+                          src={user.photo_url}
+                          alt={user.full_name || "Profile Photo"}
+                          fill
+                          sizes="40px"
+                          className="object-cover"
+                          unoptimized
+                        />
+                      ) : isLoggedIn ? (
+                        <div className="w-full h-full rounded-full bg-accent text-white flex items-center justify-center font-bold text-xs uppercase">
+                          {user?.full_name ? user.full_name.charAt(0) : "U"}
+                        </div>
+                      ) : (
+                        <UserIcon className="w-4 h-4 text-hi" />
+                      )}
+                    </button>
+                    {isLoggedIn && (
+                      <span className="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-emerald-500 border-2 border-surface-canvas pointer-events-none shadow-xs" />
                     )}
-                  </button>
+                  </div>
 
               {/* Option 5: Menu Toggle */}
               <button
@@ -222,8 +233,70 @@ export default function Navbar() {
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-16 items-start">
                 
                 {/* Left Column: Big Staggered Links */}
-                <div className="lg:col-span-7 space-y-1">
-                  <span className="text-xs uppercase tracking-widest text-accent mb-4 block font-semibold">
+                <div className="lg:col-span-7 space-y-4">
+                  {/* Mobile Quick Profile / Sign-in Card */}
+                  {isLoggedIn && user ? (
+                    <div
+                      onClick={() => {
+                        setIsOpen(false);
+                        setShowProfileModal(true);
+                      }}
+                      className="p-3.5 sm:p-4 rounded-2xl bg-surface-card border border-surface-border flex items-center justify-between gap-3 hover:border-accent transition-all cursor-pointer shadow-xs group"
+                    >
+                      <div className="flex items-center gap-3 min-w-0">
+                        <div className="relative w-11 h-11 rounded-full overflow-hidden bg-black border border-white/10 shrink-0">
+                          {user.photo_url ? (
+                            <Image
+                              src={user.photo_url}
+                              alt={user.full_name || "Profile Photo"}
+                              fill
+                              sizes="44px"
+                              className="object-cover"
+                              unoptimized
+                            />
+                          ) : (
+                            <div className="w-full h-full bg-accent text-white flex items-center justify-center font-bold text-sm">
+                              {user.full_name?.charAt(0).toUpperCase() || "U"}
+                            </div>
+                          )}
+                        </div>
+                        <div className="min-w-0">
+                          <p className="font-bold text-sm text-hi truncate group-hover:text-accent transition-colors">
+                            {user.full_name || "Valued Member"}
+                          </p>
+                          <p className="text-xs text-mid truncate">
+                            {user.email} &bull; <span className="text-accent font-semibold">{user.daily_credits} Credits</span>
+                          </p>
+                        </div>
+                      </div>
+                      <span className="text-[11px] font-semibold text-accent bg-accent/10 border border-accent/20 px-2.5 py-1 rounded-full shrink-0">
+                        Edit Profile
+                      </span>
+                    </div>
+                  ) : (
+                    <div
+                      onClick={() => {
+                        setIsOpen(false);
+                        setShowLoginModal(true);
+                      }}
+                      className="p-3.5 sm:p-4 rounded-2xl bg-surface-card border border-surface-border flex items-center justify-between gap-3 hover:border-accent transition-all cursor-pointer shadow-xs"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-full bg-accent/10 flex items-center justify-center text-accent shrink-0">
+                          <UserIcon className="w-5 h-5" />
+                        </div>
+                        <div>
+                          <p className="font-bold text-sm text-hi">Member Sign In</p>
+                          <p className="text-xs text-mid">Sign in with Google for AI credits</p>
+                        </div>
+                      </div>
+                      <span className="text-xs font-bold text-white bg-accent px-3 py-1.5 rounded-full shrink-0">
+                        Sign In
+                      </span>
+                    </div>
+                  )}
+
+                  <span className="text-xs uppercase tracking-widest text-accent block font-semibold pt-2">
                     ALL PAGES
                   </span>
 
