@@ -20,6 +20,7 @@ import {
   User as UserIcon,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { Portal } from "@/components/ui/Portal";
 
 const WhatsAppIcon = ({ className }: { className?: string }) => (
   <svg xmlns="http://www.w3.org/2000/svg" className={className} viewBox="0 0 24 24" fill="currentColor">
@@ -89,7 +90,7 @@ export default function Navbar() {
     <>
       {/* Editorial Apple-Grade Navigation Header */}
       <header
-        className={`sticky top-0 z-[110] w-full select-none transition-colors duration-200 ${
+        className={`sticky top-0 z-[130] w-full select-none transition-colors duration-200 ${
           isOpen || isScrolled
             ? "bg-surface-canvas/95 backdrop-blur-md border-b border-surface-border/80 shadow-xs"
             : "bg-surface-canvas/80 backdrop-blur-md border-b border-surface-border/40"
@@ -135,19 +136,21 @@ export default function Navbar() {
                 href="https://www.instagram.com/brothers_fitness_17"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-10 h-10 rounded-full flex items-center justify-center bg-surface-card border border-surface-border text-mid hover:text-[#E1306C] hover:border-[#E1306C]/40 hover:bg-[#E1306C]/10 active:scale-90 transition-all duration-150 shadow-sm"
-                aria-label="Instagram"
+                className="w-10 h-10 rounded-full flex items-center justify-center bg-surface-card border border-surface-border text-hi hover:text-[#E1306C] hover:border-[#E1306C]/40 hover:bg-[#E1306C]/10 active:scale-90 transition-all duration-150 shadow-sm"
+                aria-label="Brother's Fitness Instagram"
+                title="Follow us on Instagram"
               >
                 <Instagram className="w-4 h-4 transition-colors" />
               </a>
 
-              {/* Option 3: WhatsApp Coach */}
+              {/* Option 3: WhatsApp Inquiry */}
               <a
                 href="https://wa.me/919131179343"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-10 h-10 rounded-full flex items-center justify-center bg-surface-card border border-surface-border text-mid hover:text-[#25D366] hover:border-[#25D366]/40 hover:bg-[#25D366]/10 active:scale-90 transition-all duration-150 shadow-sm"
-                aria-label="WhatsApp Coach"
+                className="w-10 h-10 rounded-full flex items-center justify-center bg-surface-card border border-surface-border text-hi hover:text-[#25D366] hover:border-[#25D366]/40 hover:bg-[#25D366]/10 active:scale-90 transition-all duration-150 shadow-sm"
+                aria-label="Chat on WhatsApp"
+                title="Chat on WhatsApp"
               >
                 <WhatsAppIcon className="w-4 h-4 transition-colors" />
               </a>
@@ -217,18 +220,19 @@ export default function Navbar() {
         </div>
       </header>
 
-      {/* Solid Opaque Full-Screen Navigation Menu */}
+      {/* Solid Opaque Full-Screen Navigation Menu mounted to Body via Portal */}
       <AnimatePresence>
         {isOpen && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.15 }}
-            className="fixed inset-0 z-[100] bg-surface-canvas pt-16 sm:pt-20 overflow-y-auto overscroll-contain w-full h-[100dvh]"
-            role="dialog"
-            aria-modal="true"
-          >
+          <Portal>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.15 }}
+              className="fixed inset-0 z-[120] bg-surface-canvas pt-16 sm:pt-20 overflow-y-auto overscroll-contain w-full h-[100dvh]"
+              role="dialog"
+              aria-modal="true"
+            >
             {/* Staggered Navigation Body */}
             <div className="w-full max-w-[1600px] mx-auto px-4 sm:px-8 md:px-12 lg:px-16 py-8 sm:py-12 md:py-16">
               
@@ -552,6 +556,7 @@ export default function Navbar() {
             </div>
 
           </motion.div>
+          </Portal>
         )}
       </AnimatePresence>
 
