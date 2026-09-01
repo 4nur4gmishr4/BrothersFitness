@@ -11,15 +11,12 @@ import {
   Info,
   RefreshCw,
   IndianRupee,
-  Clock,
   ExternalLink,
 } from "lucide-react";
 import { toast } from "sonner";
 import {
   PageHeader,
   SectionCard,
-  StatCard,
-  EmptyState,
 } from "@/components/admin/AdminUI";
 import { adminFetch } from "@/lib/admin-api";
 import {
@@ -66,7 +63,7 @@ export default function AdminSettingsPage() {
       });
       setBackupState("done");
       toast.success(`Backup downloaded — ${data.total_members} members`);
-    } catch (e) {
+    } catch {
       setBackupState("error");
       toast.error("Backup failed — see console for details");
     }

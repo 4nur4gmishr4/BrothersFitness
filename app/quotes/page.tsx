@@ -1,8 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Flame, Brain, Target, Laugh, ArrowLeft, LayoutGrid, List, Heart, Shuffle } from "lucide-react";
-import Link from "next/link";
+import { Flame, Brain, Target, Laugh, LayoutGrid, List, Heart, Shuffle } from "lucide-react";
 import Navbar from "@/components/public/layout/Navbar";
 import Footer from "@/components/public/layout/Footer";
 

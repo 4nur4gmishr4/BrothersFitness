@@ -5,7 +5,6 @@ import {
   IndianRupee,
   TrendingUp,
   Users,
-  CheckCircle2,
   AlertTriangle,
   AlertCircle,
   PieChart,

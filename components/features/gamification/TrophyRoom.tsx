@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useRef, useMemo } from "react";
+import React, { useState, useRef, useMemo, useCallback } from "react";
 import Link from "next/link";
 import { motion, useSpring, useMotionValue } from "framer-motion";
 import {
@@ -289,7 +289,8 @@ const FLOWING_MILESTONES: MilestoneItem[] = [
   },
 ];
 
-export default function TrophyRoom({ isPage = false }: { isModal?: boolean; isPage?: boolean; onClose?: () => void } = {}) {
+export default function TrophyRoom(props: { isModal?: boolean; isPage?: boolean; onClose?: () => void } = {}) {
+  void props;
   const { medals, visitStreak } = useGamification();
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -308,40 +309,28 @@ export default function TrophyRoom({ isPage = false }: { isModal?: boolean; isPa
     mouseY.set(e.clientY - rect.top);
   };
 
-  const unlockedCount = useMemo(() => {
-    return FLOWING_MILESTONES.filter((m) => {
-      if (m.key === "ROOKIE_RECRUIT") return medals.includes("ROOKIE_RECRUIT" as any);
-      if (m.key === "IRON_ADDICT") return medals.includes("IRON_ADDICT" as any) || visitStreak >= 7;
-      if (m.key === "DIET_TACTICIAN") return medals.includes("DIET_TACTICIAN" as any);
-      if (m.key === "CALCULATOR_ELITE") return medals.includes("CALCULATOR_ELITE" as any);
-      if (m.key === "IRON_HABIT") return medals.length >= 2;
-      if (m.key === "GRAND_MASTER") return medals.length >= 4;
-      return false;
-    }).length;
+  const isMilestoneUnlocked = useCallback((key: string): boolean => {
+    if (key === "ROOKIE_RECRUIT") return medals.includes("ROOKIE_RECRUIT");
+    if (key === "IRON_ADDICT") return medals.includes("IRON_ADDICT") || visitStreak >= 7;
+    if (key === "DIET_TACTICIAN") return medals.includes("DIET_TACTICIAN");
+    if (key === "CALCULATOR_ELITE") return medals.includes("CALCULATOR_ELITE");
+    if (key === "IRON_HABIT") return medals.length >= 2;
+    if (key === "GRAND_MASTER") return medals.length >= 4;
+    return false;
   }, [medals, visitStreak]);
+
+  const unlockedCount = useMemo(() => {
+    return FLOWING_MILESTONES.filter((m) => isMilestoneUnlocked(m.key)).length;
+  }, [isMilestoneUnlocked]);
 
   const totalXP = useMemo(() => {
     return FLOWING_MILESTONES.reduce((acc, m) => {
-      const isUnlocked =
-        (m.key === "ROOKIE_RECRUIT" && medals.includes("ROOKIE_RECRUIT" as any)) ||
-        (m.key === "IRON_ADDICT" && (medals.includes("IRON_ADDICT" as any) || visitStreak >= 7)) ||
-        (m.key === "DIET_TACTICIAN" && medals.includes("DIET_TACTICIAN" as any)) ||
-        (m.key === "CALCULATOR_ELITE" && medals.includes("CALCULATOR_ELITE" as any)) ||
-        (m.key === "IRON_HABIT" && medals.length >= 2) ||
-        (m.key === "GRAND_MASTER" && medals.length >= 4);
-      return isUnlocked ? acc + m.xp : acc;
+      return isMilestoneUnlocked(m.key) ? acc + m.xp : acc;
     }, 0);
-  }, [medals, visitStreak]);
+  }, [isMilestoneUnlocked]);
 
   const activeMilestone = hoveredIndex !== null ? FLOWING_MILESTONES[hoveredIndex] : null;
-  const isHoveredUnlocked = activeMilestone
-    ? (activeMilestone.key === "ROOKIE_RECRUIT" && medals.includes("ROOKIE_RECRUIT" as any)) ||
-      (activeMilestone.key === "IRON_ADDICT" && (medals.includes("IRON_ADDICT" as any) || visitStreak >= 7)) ||
-      (activeMilestone.key === "DIET_TACTICIAN" && medals.includes("DIET_TACTICIAN" as any)) ||
-      (activeMilestone.key === "CALCULATOR_ELITE" && medals.includes("CALCULATOR_ELITE" as any)) ||
-      (activeMilestone.key === "IRON_HABIT" && medals.length >= 2) ||
-      (activeMilestone.key === "GRAND_MASTER" && medals.length >= 4)
-    : false;
+  const isHoveredUnlocked = activeMilestone ? isMilestoneUnlocked(activeMilestone.key) : false;
 
   return (
     <div
@@ -389,13 +378,7 @@ export default function TrophyRoom({ isPage = false }: { isModal?: boolean; isPa
       {/* React Bits FlowingMenu Editorial Rows with Balanced Typography */}
       <div className="space-y-1 relative">
         {FLOWING_MILESTONES.map((item, index) => {
-          const isUnlocked =
-            (item.key === "ROOKIE_RECRUIT" && medals.includes("ROOKIE_RECRUIT" as any)) ||
-            (item.key === "IRON_ADDICT" && (medals.includes("IRON_ADDICT" as any) || visitStreak >= 7)) ||
-            (item.key === "DIET_TACTICIAN" && medals.includes("DIET_TACTICIAN" as any)) ||
-            (item.key === "CALCULATOR_ELITE" && medals.includes("CALCULATOR_ELITE" as any)) ||
-            (item.key === "IRON_HABIT" && medals.length >= 2) ||
-            (item.key === "GRAND_MASTER" && medals.length >= 4);
+          const isUnlocked = isMilestoneUnlocked(item.key);
 
           const isHovered = hoveredIndex === index;
 
