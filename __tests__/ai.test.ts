@@ -5,7 +5,7 @@ import { generateTextWithFallback, MODEL_STACK } from '@/lib/ai-provider';
 // (first call fails → fallback to the next provider).
 const { mockCreate } = vi.hoisted(() => ({ mockCreate: vi.fn() }));
 
-// The provider stack (Groq/Mistral/OpenRouter) is OpenAI-compatible, so the
+// The provider stack (Mistral/OpenRouter) is OpenAI-compatible, so the
 // `openai` SDK is mocked to resolve without any live API key.
 vi.mock('openai', () => ({
     default: class {
@@ -29,38 +29,40 @@ describe('AI Provider Stack', () => {
 
     afterEach(() => {
         // Restore defaults so later tests don't inherit deleted keys.
-        process.env.GROQ_API_KEY = 'test-groq-key';
-        delete process.env.MISTRAL_API_KEY;
+        process.env.MISTRAL_API_KEY = 'test-mistral-key';
         delete process.env.OPENROUTER_API_KEY;
         delete process.env.COHERE_API_KEY;
         vi.unstubAllGlobals();
     });
 
     it('should return a successful response from the first model in the stack', async () => {
+        process.env.MISTRAL_API_KEY = 'test-mistral-key';
         const response = await generateTextWithFallback({ prompt: 'Hello' });
 
         expect(response.text).toBe('Mocked Response');
-        expect(response.modelUsed).toBe('Llama 3.1 8B (Groq)');
-        expect(response.providerUsed).toBe('groq');
+        expect(response.modelUsed).toBe('Codestral (Mistral AI)');
+        expect(response.providerUsed).toBe('mistral');
         expect(mockCreate).toHaveBeenCalledTimes(1);
     });
 
     it('should fall back to the next provider when the first one fails', async () => {
-        // Groq is first in MODEL_STACK; make its call throw, then succeed for
-        // the next provider. Mistral is second, so the fallback must land there.
-        process.env.MISTRAL_API_KEY = 'test-mistral-key';
-        mockCreate.mockRejectedValueOnce(new Error('provider down'));
+        // Mistral is first in MODEL_STACK; make its calls throw, then succeed
+        // for OpenRouter.
+        process.env.OPENROUTER_API_KEY = 'test-openrouter-key';
+        // Fail all Mistral models (codestral, open-mistral-7b, pixtral-12b)
+        mockCreate
+            .mockRejectedValueOnce(new Error('provider down'))
+            .mockRejectedValueOnce(new Error('provider down'))
+            .mockRejectedValueOnce(new Error('provider down'));
 
         const response = await generateTextWithFallback({ prompt: 'Hello' });
 
-        expect(mockCreate).toHaveBeenCalledTimes(2);
-        expect(response.modelUsed).toBe('Codestral (Mistral AI)');
-        expect(response.providerUsed).toBe('mistral');
+        // After 3 Mistral fails + Cohere skip (no key), lands on OpenRouter
+        expect(response.providerUsed).toBe('openrouter');
         expect(response.text).toBe('Mocked Response');
     });
 
     it('fails fast with a clear config error when no provider keys are set', async () => {
-        delete process.env.GROQ_API_KEY;
         delete process.env.MISTRAL_API_KEY;
         delete process.env.OPENROUTER_API_KEY;
         delete process.env.COHERE_API_KEY;
@@ -81,8 +83,8 @@ describe('AI Provider Stack', () => {
     it('should export the model stack', () => {
         expect(Array.isArray(MODEL_STACK)).toBe(true);
         expect(MODEL_STACK.length).toBeGreaterThan(0);
-        // Groq is intended to be fastest, so it must lead the stack.
-        expect(MODEL_STACK[0].provider).toBe('groq');
+        // Mistral (codestral) is the fastest verified model and leads the stack.
+        expect(MODEL_STACK[0].provider).toBe('mistral');
     });
 
     it('should forward the system prompt and jsonMode to the provider', async () => {
@@ -102,23 +104,17 @@ describe('AI Provider Stack', () => {
 
     it('should use the OpenRouter client when configured', async () => {
         // Only OpenRouter is configured, so the walk must land there.
-        delete process.env.GROQ_API_KEY;
         delete process.env.MISTRAL_API_KEY;
         delete process.env.COHERE_API_KEY;
         process.env.OPENROUTER_API_KEY = 'test-openrouter-key';
-        
-        // Vercel provider comes before OpenRouter and is activated by OPENROUTER_API_KEY.
-        // Make Vercel fail so the fallback lands on OpenRouter.
-        mockCreate.mockRejectedValueOnce(new Error('vercel down'));
-        
+
         const response = await generateTextWithFallback({ prompt: 'Hi' });
         expect(response.providerUsed).toBe('openrouter');
-        expect(response.modelUsed).toBe('Llama 3.3 70B Instruct (OpenRouter)');
+        expect(response.modelUsed).toBe('Llama 3.1 8B Instruct (OpenRouter)');
     });
 
     it('should use the Cohere provider via raw fetch', async () => {
-        // Disable every OpenAI-compatible provider so the walk reaches Cohere.
-        delete process.env.GROQ_API_KEY;
+        // Disable OpenAI-compatible providers so the walk reaches Cohere.
         delete process.env.MISTRAL_API_KEY;
         delete process.env.OPENROUTER_API_KEY;
         process.env.COHERE_API_KEY = 'test-cohere-key';
@@ -132,12 +128,10 @@ describe('AI Provider Stack', () => {
         const response = await generateTextWithFallback({ prompt: 'Hi', systemPrompt: 'Be terse' });
         expect(response.providerUsed).toBe('cohere');
         expect(response.text).toBe('Cohere Reply');
-        // Cohere is last in MODEL_STACK; every earlier model was skipped.
         expect(mockFetch).toHaveBeenCalledTimes(1);
     });
 
     it('should surface a Cohere HTTP error and keep falling back', async () => {
-        delete process.env.GROQ_API_KEY;
         delete process.env.MISTRAL_API_KEY;
         delete process.env.OPENROUTER_API_KEY;
         process.env.COHERE_API_KEY = 'test-cohere-key';

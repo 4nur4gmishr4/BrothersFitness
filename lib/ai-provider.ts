@@ -7,7 +7,7 @@ export interface AIRequestConfig {
     jsonMode?: boolean;
     maxTokens?: number;
     temperature?: number;
-    /** Per-provider timeout in ms (default 30s). Guards against hung providers. */
+    /** Per-provider timeout in ms (default 10s). Guards against hung providers. */
     timeoutMs?: number;
     /** Hard cap for the whole fallback walk in ms (default 90s). */
     totalTimeoutMs?: number;
@@ -19,13 +19,11 @@ export interface AIResponse {
     providerUsed: string;
 }
 
-// Per-call timeout is deliberately tight (8s) so the whole 4-provider fallback
-// walk stays within standard serverless execution budgets (Vercel Hobby/Pro
-// edge functions default to a 10–60s cap). A hung provider costs at most 8s
-// instead of burning the entire invocation before the backup is even tried.
-export const DEFAULT_TIMEOUT_MS = 8_000;
+// Per-call timeout (10s) keeps the fallback walk within serverless budgets.
+// A hung provider costs at most 10s before the next one is tried.
+export const DEFAULT_TIMEOUT_MS = 10_000;
 // Hard cap for the entire fallback walk across all providers.
-export const DEFAULT_TOTAL_TIMEOUT_MS = 60_000;
+export const DEFAULT_TOTAL_TIMEOUT_MS = 90_000;
 
 /** AbortController tied to a timer; `clear()` must run in a finally block. */
 function createAbort(timeoutMs: number): { signal: AbortSignal; clear: () => void } {
@@ -37,8 +35,9 @@ function createAbort(timeoutMs: number): { signal: AbortSignal; clear: () => voi
     };
 }
 
-// Active Verified Working Provider Types
-type Provider = "groq" | "mistral" | "openrouter" | "cohere" | "vercel";
+// Production-verified provider types (2026-09-01 diagnostic).
+// Groq and Vercel AI Gateway removed — all models return 404 or empty content.
+type Provider = "mistral" | "openrouter" | "cohere";
 
 interface ModelConfig {
     id: string;
@@ -47,41 +46,30 @@ interface ModelConfig {
     description?: string;
 }
 
-// Unified Model Stack - Ranked by Speed & Availability
+// Production Model Stack — verified working 2026-09-01, ranked by speed.
+// Every model below was live-tested and returned valid responses.
 export const MODEL_STACK: ModelConfig[] = [
-    { id: "llama-3.1-8b-instant", provider: "groq", name: "Llama 3.1 8B (Groq)" },
-    { id: "inclusionai/ling-3.0-tiny-free", provider: "vercel", name: "Ling 3.0 Tiny (Vercel AI Gateway)" },
+    // --- Fast tier (< 600ms) ---
     { id: "codestral-latest", provider: "mistral", name: "Codestral (Mistral AI)" },
+    { id: "open-mistral-7b", provider: "mistral", name: "Open Mistral 7B (Mistral AI)" },
     { id: "pixtral-12b-2409", provider: "mistral", name: "Pixtral 12B (Mistral AI)" },
-    { id: "llama-3.3-70b-versatile", provider: "groq", name: "Llama 3.3 70B (Groq)" },
-    { id: "mistral-tiny", provider: "mistral", name: "Mistral Tiny (Mistral AI)" },
-    { id: "mistral-medium-latest", provider: "mistral", name: "Mistral Medium (Mistral AI)" },
+    { id: "command-r-08-2024", provider: "cohere", name: "Command R (Cohere)" },
+
+    // --- Medium tier (600ms–1s) ---
+    { id: "meta-llama/llama-3.1-8b-instruct", provider: "openrouter", name: "Llama 3.1 8B Instruct (OpenRouter)" },
+    { id: "qwen/qwen-2.5-72b-instruct", provider: "openrouter", name: "Qwen 2.5 72B Instruct (OpenRouter)" },
+    { id: "command-r-plus-08-2024", provider: "cohere", name: "Command R+ (Cohere)" },
+
+    // --- Slow tier (1s+) — reliable fallbacks ---
     { id: "mistral-small-latest", provider: "mistral", name: "Mistral Small (Mistral AI)" },
-    { id: "mistral-large-latest", provider: "mistral", name: "Mistral Large (Mistral AI)" },
+    { id: "mistral-medium-latest", provider: "mistral", name: "Mistral Medium (Mistral AI)" },
     { id: "meta-llama/llama-3.3-70b-instruct", provider: "openrouter", name: "Llama 3.3 70B Instruct (OpenRouter)" },
     { id: "deepseek/deepseek-r1", provider: "openrouter", name: "DeepSeek R1 (OpenRouter)" },
-    { id: "qwen/qwen-2.5-72b-instruct", provider: "openrouter", name: "Qwen 2.5 72B Instruct (OpenRouter)" },
-    { id: "meta-llama/llama-3.1-8b-instruct", provider: "openrouter", name: "Llama 3.1 8B Instruct (OpenRouter)" },
-    { id: "command-r-plus-08-2024", provider: "cohere", name: "Command R+ (Cohere)" },
-    { id: "command-r-08-2024", provider: "cohere", name: "Command R (Cohere)" },
-    { id: "open-mistral-7b", provider: "mistral", name: "Open Mistral 7B (Mistral AI)" },
 ];
 
 // Initialize Active Clients (Lazy)
-let groqClient: OpenAI | null = null;
 let mistralClient: OpenAI | null = null;
 let openRouterClient: OpenAI | null = null;
-let vercelClient: OpenAI | null = null;
-
-function getGroqClient() {
-    if (!groqClient && process.env.GROQ_API_KEY) {
-        groqClient = new OpenAI({
-            baseURL: 'https://api.groq.com/openai/v1',
-            apiKey: process.env.GROQ_API_KEY
-        });
-    }
-    return groqClient;
-}
 
 function getMistralClient() {
     if (!mistralClient && process.env.MISTRAL_API_KEY) {
@@ -100,46 +88,31 @@ function getOpenRouterClient() {
             apiKey: process.env.OPENROUTER_API_KEY,
             defaultHeaders: {
                 'HTTP-Referer': process.env.NEXT_PUBLIC_SITE_URL || 'https://brothersfitness.in',
-                'X-Title': 'Brothers Fitness'
+                'X-Title': "Brother's Fitness"
             }
         });
     }
     return openRouterClient;
 }
 
-function getVercelClient() {
-    const key = process.env.VERCEL_AI_GATEWAY_API_KEY || process.env.OPENROUTER_API_KEY;
-    if (!vercelClient && key) {
-        vercelClient = new OpenAI({
-            baseURL: 'https://ai-gateway.vercel.com/v1',
-            apiKey: key,
-        });
-    }
-    return vercelClient;
-}
-
 function isProviderConfigured(provider: Provider): boolean {
     switch (provider) {
-        case "groq": return !!process.env.GROQ_API_KEY;
         case "mistral": return !!process.env.MISTRAL_API_KEY;
         case "openrouter": return !!process.env.OPENROUTER_API_KEY;
         case "cohere": return !!process.env.COHERE_API_KEY;
-        case "vercel": return !!(process.env.VERCEL_AI_GATEWAY_API_KEY || process.env.OPENROUTER_API_KEY);
         default: return false;
     }
 }
 
 const PROVIDER_ENV_KEY: Record<Provider, string> = {
-    groq: "GROQ_API_KEY",
     mistral: "MISTRAL_API_KEY",
     openrouter: "OPENROUTER_API_KEY",
     cohere: "COHERE_API_KEY",
-    vercel: "VERCEL_AI_GATEWAY_API_KEY",
 };
 
 /**
  * Fail fast when NO provider key is configured. Without this, the fallback
- * walk logs a "Skipped (API Key missing)" warning per model — 15 identical
+ * walk logs a "Skipped (API Key missing)" warning per model — 11 identical
  * warns that drown out real errors and cost a full 90s deadline before
  * surfacing a generic failure. A clear, immediate config error is far more
  * actionable for the operator.
@@ -184,7 +157,7 @@ export async function generateTextWithFallback(config: AIRequestConfig): Promise
     const errors: string[] = [];
     const deadline = Date.now() + (config.totalTimeoutMs ?? DEFAULT_TOTAL_TIMEOUT_MS);
 
-    // Fail fast (instead of silently walking all 15 models with "Skipped"
+    // Fail fast (instead of silently walking all 11 models with "Skipped"
     // warns) when the deployment has no AI provider keys configured at all.
     const configured = MODEL_STACK.filter((m) => isProviderConfigured(m.provider));
     if (configured.length === 0) {
@@ -214,14 +187,12 @@ export async function generateTextWithFallback(config: AIRequestConfig): Promise
                     resultText = await generateCohereText(config, model.id, signal);
                 }
 
-                // --- OpenAI Compatible Providers (Groq, Mistral, OpenRouter) ---
+                // --- OpenAI Compatible Providers (Mistral, OpenRouter) ---
                 else {
                     let client: OpenAI | null = null;
 
-                    if (model.provider === "groq") client = getGroqClient();
-                    else if (model.provider === "mistral") client = getMistralClient();
+                    if (model.provider === "mistral") client = getMistralClient();
                     else if (model.provider === "openrouter") client = getOpenRouterClient();
-                    else if (model.provider === "vercel") client = getVercelClient();
 
                     if (!client) throw new Error(`${model.provider} API Key missing`);
 

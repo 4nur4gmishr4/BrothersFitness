@@ -157,7 +157,7 @@ export async function POST(req: Request) {
             `📅 Start: ${data.membership_start}\n` +
             `📅 End: ${data.membership_end}\n\n` +
             `Let's crush those goals together! 🔥\n\n` +
-            `- Team Brothers Fitness`
+            `- Team Brother's Fitness`
         );
         // L47: avoid `91` + `91xxx` = `9191xxx` — use the same country-code
         // dedup pattern applied in LeadsInbox (M29).
