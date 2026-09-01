@@ -1,8 +1,9 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Flame, Brain, Target, Laugh, ArrowLeft, LayoutGrid, List, Heart, Sparkles } from "lucide-react";
+import { Flame, Brain, Target, Laugh, ArrowLeft, LayoutGrid, List, Heart, Shuffle } from "lucide-react";
 import Link from "next/link";
+import Navbar from "@/components/public/layout/Navbar";
 import Footer from "@/components/public/layout/Footer";
 
 const quotes = {
@@ -227,6 +228,7 @@ export default function QuotesPage() {
 
   return (
     <div className="min-h-screen surface-canvas text-hi relative overflow-hidden">
+      <Navbar />
       {/* Static grid pattern */}
       <div
         className="absolute inset-0 opacity-[0.03] pointer-events-none"
@@ -237,39 +239,44 @@ export default function QuotesPage() {
       />
 
       <div className="relative z-10 min-h-screen flex flex-col">
-        {/* Header */}
-        <header className="p-6 md:p-8">
-          <div className="max-w-7xl mx-auto flex items-center justify-between">
-            <Link href="/" className="flex items-center gap-2 text-hi hover:text-accent transition-colors duration-fast group">
-              <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
-              <span className="label-text">Back to Gym</span>
-            </Link>
+        {/* Top Display Header */}
+        <div className="pt-20 sm:pt-24 pb-8 px-4 sm:px-8 md:px-12 lg:px-16 max-w-[1600px] mx-auto w-full">
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-8 gap-6 pb-8 border-b border-surface-border/70">
+            <div>
+              <span className="text-xs font-mono uppercase tracking-widest text-accent mb-2 block font-semibold">
+                DAILY MOTIVATION &amp; MINDSET
+              </span>
+              <h1 className="heading-display text-4xl sm:text-6xl md:text-7xl text-hi leading-[0.95] tracking-tight uppercase">
+                GYM <span className="text-accent">QUOTES</span>
+              </h1>
+            </div>
 
-            <div className="flex gap-3">
-              <button
-                onClick={() => setDisplayMode(displayMode === "single" ? "grid" : "single")}
-                className="p-3 surface-card hairline text-mid hover:border-accent hover:text-accent transition-colors duration-fast"
-                aria-label="Toggle display mode"
-              >
-                {displayMode === "single" ? <LayoutGrid className="w-5 h-5" /> : <List className="w-5 h-5" />}
-              </button>
-              <button
-                onClick={randomQuote}
-                className="p-3 surface-card hairline text-mid hover:border-accent hover:text-accent transition-colors duration-fast"
-                aria-label="Random quote"
-              >
-                <Sparkles className="w-5 h-5" />
-              </button>
+            <div className="flex items-center gap-4">
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setDisplayMode(displayMode === "single" ? "grid" : "single")}
+                  className="w-10 h-10 rounded-full flex items-center justify-center bg-surface-card border border-surface-border text-mid hover:text-hi hover:border-accent active:scale-90 transition-all shadow-sm"
+                  aria-label="Toggle display mode"
+                  title="Toggle Grid / Single View"
+                >
+                  {displayMode === "single" ? <LayoutGrid className="w-4 h-4" /> : <List className="w-4 h-4" />}
+                </button>
+                <button
+                  onClick={randomQuote}
+                  className="w-10 h-10 rounded-full flex items-center justify-center bg-surface-card border border-surface-border text-accent hover:bg-surface-elevated active:scale-90 transition-all shadow-sm"
+                  aria-label="Random quote"
+                  title="Generate Random Quote"
+                >
+                  <Shuffle className="w-4 h-4" />
+                </button>
+              </div>
+
+              <div className="text-left md:text-right border-l-2 md:border-l-0 md:border-r-2 border-surface-border pl-4 md:pl-0 md:pr-4">
+                <p className="text-sm font-medium text-hi">Iron Discipline Mindset</p>
+                <p className="text-xs text-mid">Quotes to fuel your workout and daily grind</p>
+              </div>
             </div>
           </div>
-        </header>
-
-        {/* Title */}
-        <div className="text-center py-8">
-          <h1 className="heading-display text-5xl md:text-7xl mb-4 text-hi">
-            DAILY <span className="text-accent">FUEL</span>
-          </h1>
-          <p className="label-text text-mid">QUOTES TO START YOUR DAY</p>
         </div>
 
         {/* Category Tabs */}

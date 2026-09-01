@@ -89,7 +89,7 @@ export default function LoginModal({ isOpen, onClose, onSuccess }: LoginModalPro
                     <div className="w-20 h-20 rounded-full bg-accent flex items-center justify-center">
                         <Image
                             src="/assets/favicon.png"
-                            alt="BroFit"
+                            alt="Brother's Fitness"
                             width={48}
                             height={48}
                             className="object-contain"
@@ -97,7 +97,7 @@ export default function LoginModal({ isOpen, onClose, onSuccess }: LoginModalPro
                     </div>
 
                     <div>
-                        <h2 className="text-2xl font-black text-hi mb-2">Welcome to BroFit</h2>
+                        <h2 className="text-2xl font-black text-hi mb-2">Welcome to Brother&apos;s Fitness</h2>
                         <p className="text-mid text-sm">
                             Sign in to access AI features and track your fitness journey
                         </p>
