@@ -236,18 +236,16 @@ export async function POST(req: Request) {
 
         log.error("Fatal API Error in Generate Diet", { error: errorMessage, stack: errorStack });
 
-        // Provide more helpful error message to the user
-        let userMessage = "Generation failed: ";
+        // Provide safe, helpful error message to the user (no raw internal error leakage)
+        let userMessage = "Could not create your meal plan. Please try again.";
         if (errorMessage.includes('API key') || errorMessage.includes('authentication') || errorMessage.includes('401')) {
-            userMessage = "Access denied: API key or authentication expired.";
+            userMessage = "Access denied: Service authentication issue. Please try again shortly.";
         } else if (errorMessage.includes('quota') || errorMessage.includes('rate') || errorMessage.includes('429')) {
-            userMessage = "Daily AI quota reached. Try again tomorrow.";
+            userMessage = "Daily AI limit reached. Please try again tomorrow.";
         } else if (errorMessage.includes('timeout') || errorMessage.includes('aborted') || errorMessage.includes('ECONNREFUSED')) {
             userMessage = "Network timeout — please try again.";
         } else if (errorMessage.includes('JSON')) {
             userMessage = "The AI returned an invalid response. Please try again.";
-        } else {
-            userMessage += errorMessage;
         }
 
         return withRequestId(

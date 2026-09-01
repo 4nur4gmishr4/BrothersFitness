@@ -1,40 +1,46 @@
 "use client";
 
-import { motion } from "motion/react";
+import { motion } from "framer-motion";
 
-const circleA =
-  "M 12 8 C 14.21 8 16 9.79 16 12 C 16 14.21 14.21 16 12 16 C 9.79 16 8 14.21 8 12 C 8 9.79 9.79 8 12 8 Z";
-
-const infinity =
+const INFINITY_PATH =
   "M 12 12 C 14 8.5 19 8.5 19 12 C 19 15.5 14 15.5 12 12 C 10 8.5 5 8.5 5 12 C 5 15.5 10 15.5 12 12 Z";
 
-const circleB =
-  "M 12 16 C 14.21 16 16 14.21 16 12 C 16 9.79 14.21 8 12 8 C 9.79 8 8 9.79 8 12 C 8 14.21 9.79 16 12 16 Z";
-
-export function MorphingInfinity(props: React.ComponentProps<"svg">) {
+export function MorphingInfinity({
+  className = "w-8 h-8 text-accent",
+  ...props
+}: React.ComponentProps<"svg">) {
   return (
     <svg
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
-      strokeWidth={1.5}
+      strokeWidth={2}
       strokeLinecap="round"
       strokeLinejoin="round"
       role="status"
       aria-label="Loading"
+      className={className}
       {...props}
     >
+      {/* Background track */}
+      <path
+        d={INFINITY_PATH}
+        stroke="currentColor"
+        strokeOpacity={0.18}
+        strokeWidth={2}
+      />
+      {/* Animated trace */}
       <motion.path
+        d={INFINITY_PATH}
+        initial={{ pathLength: 0.15, pathOffset: 0 }}
         animate={{
-          d: [circleA, infinity, circleB, infinity, circleA],
+          pathLength: [0.15, 0.65, 0.15],
+          pathOffset: [0, 1],
         }}
         transition={{
-          d: {
-            duration: 1,
-            ease: "easeInOut",
-            repeat: Infinity,
-            times: [0, 0.25, 0.5, 0.75, 1.0],
-          },
+          duration: 1.2,
+          ease: "easeInOut",
+          repeat: Infinity,
         }}
       />
     </svg>
