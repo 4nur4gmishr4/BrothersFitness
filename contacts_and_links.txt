@@ -1,0 +1,44 @@
+GYM OWNERS
+Aman Shrivastava 
+Pradeep Shrivastava 
+
+Developer/Support
+Anurag Mishra
+
+CONTACTS & LINKS SUMMARY
+
+=== WhatsApp Contacts ===
+Aman: https://wa.me/919131179343
+Pradeep: https://wa.me/919131272754
+Support: https://wa.me/919302786886
+Dev (Anurag): https://wa.me/919302786886 (WhatsApp Group: https://chat.whatsapp.com/JuBvYwrjjPELfy7KlIUylI)
+
+=== Phone Numbers ===
+Aman: tel:+919131179343
+Pradeep: tel:+919131272754
+Support/Dev: tel:+919302786886
+
+=== Emails ===
+Brothers Fitness: mailto:brothersfitnesszone@gmail.com
+Dev (Anurag): mailto:anurag.mishra.core@gmail.com
+
+=== Social Media ===
+Instagram (Aman): https://www.instagram.com/aman_shrivastavaaa72
+Instagram (Pradeep): https://www.instagram.com/brothers_fitness_17
+Instagram (Brothers Fitness): https://www.instagram.com/brothers_fitness_17
+Instagram (Brothers Fitness Alt): https://www.instagram.com/brothers_fitness_17
+Instagram (Anurag): https://www.instagram.com/4nur4gmishr4
+Github (Anurag): https://github.com/4nur4gmishr4
+
+=== Websites & Addresses ===
+Website: https://brothersfitness.in
+Google Maps: https://www.google.com/maps?q=22.59907,79.61161
+
+=== API & Integrations ===
+Groq API: https://api.groq.com/openai/v1
+Mistral API: https://api.mistral.ai/v1
+OpenRouter API: https://openrouter.ai/api/v1
+Cohere API: https://api.cohere.com/v1/chat
+Vercel AI Gateway: https://ai-gateway.vercel.com/v1
+API Ninjas: https://api.api-ninjas.com/v1/exercises
+Free Exercise DB: https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/dist/exercises.json
