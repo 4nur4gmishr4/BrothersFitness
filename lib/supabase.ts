@@ -7,17 +7,31 @@ let supabaseClient: SupabaseClient | null = null;
 
 export const getSupabase = (): SupabaseClient => {
     if (!supabaseClient) {
-        supabaseClient = createClient(supabaseUrl, supabaseAnonKey);
+        const url = process.env.NEXT_PUBLIC_SUPABASE_URL || supabaseUrl;
+        const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || supabaseAnonKey;
+        supabaseClient = createClient(url || 'https://placeholder.supabase.co', key || 'placeholder', {
+            auth: {
+                persistSession: true,
+                autoRefreshToken: true,
+                detectSessionInUrl: true,
+                flowType: 'pkce',
+            },
+        });
     }
     return supabaseClient;
 };
 
 /**
- * Supabase client proxy reading directly from process.env
+ * Supabase client proxy reading directly from process.env with correct method binding
  */
 export const supabase: SupabaseClient = new Proxy({} as SupabaseClient, {
     get(_, prop) {
-        return (getSupabase() as unknown as Record<string | symbol, unknown>)[prop];
+        const client = getSupabase();
+        const value = (client as unknown as Record<string | symbol, unknown>)[prop];
+        if (typeof value === 'function') {
+            return value.bind(client);
+        }
+        return value;
     },
 });
 
