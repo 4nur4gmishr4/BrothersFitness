@@ -106,7 +106,7 @@ export default function WorkoutLibrary() {
 
   if (isLoading && !allExercises) {
     return (
-      <div className="flex items-center justify-center py-20 text-accent font-mono text-xs tracking-widest animate-pulse">
+      <div className="flex items-center justify-center py-20 text-accent text-xs tracking-wider animate-pulse font-semibold">
         LOADING WORKOUT DATABASE...
       </div>
     );
@@ -114,7 +114,7 @@ export default function WorkoutLibrary() {
 
   if (error) {
     return (
-      <div className="text-center p-10 surface-card hairline border-status-danger text-status-danger font-mono text-xs">
+      <div className="text-center p-10 surface-card hairline border-status-danger text-status-danger text-xs font-semibold">
         FAILED TO LOAD EXERCISES. RETRY REQUIRED.
       </div>
     );
@@ -131,7 +131,7 @@ export default function WorkoutLibrary() {
             <button
               key={f}
               onClick={() => { setActiveFilter(f); setPage(1); }}
-              className={`whitespace-nowrap px-5 py-2.5 rounded-full border transition-all duration-300 font-mono text-xs tracking-[0.2em] uppercase ${
+              className={`whitespace-nowrap px-5 py-2.5 rounded-full border transition-all duration-300 text-xs font-semibold uppercase tracking-wider ${
                 activeFilter === f 
                   ? "bg-accent border-accent text-white "
                   : "bg-surface-canvas border-surface-border text-mid hover:text-hi hover:border-hi"
@@ -153,7 +153,7 @@ export default function WorkoutLibrary() {
               setSearch(e.target.value);
               setPage(1);
             }}
-            className="w-full bg-surface-canvas border border-surface-border text-hi !pl-11 pr-4 py-3 rounded-md focus:outline-none focus:border-accent transition-colors text-sm font-mono placeholder:text-low/50"
+            className="w-full bg-surface-canvas border border-surface-border text-hi !pl-11 pr-4 py-3 rounded-md focus:outline-none focus:border-accent transition-colors text-sm placeholder:text-low/50 font-medium"
           />
         </div>
       </div>
@@ -182,7 +182,7 @@ export default function WorkoutLibrary() {
               )}
 
               <div className="absolute top-2 right-2 surface-modal hairline px-2 py-1 z-10 bg-surface-canvas">
-                <span className="text-[9px] font-mono tracking-widest text-accent uppercase">
+                <span className="text-[9px] font-semibold tracking-wider text-accent uppercase">
                   {exercise.category || "STRENGTH"}
                 </span>
               </div>
@@ -199,12 +199,12 @@ export default function WorkoutLibrary() {
 
               <div className="mt-auto pt-4 hairline-t flex flex-wrap gap-2">
                 {exercise.primaryMuscles.map((m: string) => (
-                  <span key={m} className="px-2 py-1 bg-accent/10 border border-accent/20 text-[9px] font-mono tracking-widest text-accent uppercase rounded-sm">
+                  <span key={m} className="px-2 py-1 bg-accent/10 border border-accent/20 text-[9px] font-semibold tracking-wider text-accent uppercase rounded-sm">
                     {m}
                   </span>
                 ))}
                 {exercise.equipment && (
-                  <span className="px-2 py-1 bg-surface-border/30 border border-surface-border text-[9px] font-mono tracking-widest text-mid uppercase rounded-sm">
+                  <span className="px-2 py-1 bg-surface-border/30 border border-surface-border text-[9px] font-semibold tracking-wider text-mid uppercase rounded-sm">
                     {exercise.equipment}
                   </span>
                 )}
@@ -215,7 +215,7 @@ export default function WorkoutLibrary() {
       </div>
 
       {filteredExercises.length === 0 && (
-        <div className="text-center py-20 text-xs font-mono tracking-widest text-faint uppercase">NO MATCHING EXERCISES FOUND.</div>
+        <div className="text-center py-20 text-xs tracking-wider text-faint uppercase font-semibold">NO MATCHING EXERCISES FOUND.</div>
       )}
 
       {/* Pagination controls */}
@@ -228,7 +228,7 @@ export default function WorkoutLibrary() {
           <ChevronLeft className="w-4 h-4 mr-1" /> PREV
         </button>
 
-        <span className="text-xs font-mono tracking-[0.2em] text-accent uppercase">
+        <span className="text-xs font-bold tracking-wider text-accent uppercase tabular-nums">
           PAGE {page} <span className="text-faint">/ {maxPage}</span>
         </span>
 

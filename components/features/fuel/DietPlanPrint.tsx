@@ -38,7 +38,7 @@ const DietPlanPrint = forwardRef<HTMLDivElement, DietPlanPrintProps>(({ data, la
     const supplyDays = data.shopping_list.duration_days || 7;
 
     return (
-        <div ref={ref} className="bg-white text-black p-8 max-w-[800px] mx-auto font-mono text-sm leading-relaxed hidden-print-view">
+        <div ref={ref} className="bg-white text-black p-8 max-w-[800px] mx-auto text-sm leading-relaxed hidden-print-view font-sans">
             {/* Header */}
             <div className="border-b-4 border-black pb-4 mb-8 flex justify-between items-end">
                 <div>

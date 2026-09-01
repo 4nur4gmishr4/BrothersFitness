@@ -277,23 +277,23 @@ function FuelSynthesizerContent() {
                 {/* Top Display Header */}
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-10 md:mb-14 gap-6 pb-8 border-b border-surface-border/70">
                     <div>
-                        <span className="text-xs font-mono uppercase tracking-widest text-accent mb-2 block font-semibold">
-                            NUTRITION &amp; MACRO STRATEGY
+                        <span className="text-xs uppercase tracking-widest text-accent mb-2 block font-semibold">
+                            AI MACRONUTRIENT &amp; DIET ENGINE
                         </span>
                         <h1 className="heading-display text-4xl sm:text-6xl md:text-7xl text-hi leading-[0.95] tracking-tight uppercase">
-                            DIET <span className="text-accent">PLANNER</span>
+                            TACTICAL <span className="text-accent">FUEL</span>
                         </h1>
-                    </div>
-
-                    <div className="flex items-center gap-6">
-                        {isLoggedIn && user && (
-                            <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-surface-card border border-surface-border shadow-sm">
-                                <Cpu className="w-3.5 h-3.5 text-accent" />
-                                <span className={`text-xs font-mono font-bold ${user.daily_credits > 0 ? "text-hi" : "text-status-danger"}`}>
+                        {user && (
+                            <div className="mt-3 flex items-center gap-2">
+                                <span className="text-xs text-mid font-medium">Daily AI Generation Credits:</span>
+                                <span className={`text-xs font-bold tabular-nums ${user.daily_credits > 0 ? "text-hi" : "text-status-danger"}`}>
                                     {user.daily_credits}/{MAX_DAILY_CREDITS} CREDITS
                                 </span>
                             </div>
                         )}
+                    </div>
+
+                    <div className="flex items-center gap-6">
                         <div className="text-left md:text-right border-l-2 md:border-l-0 md:border-r-2 border-surface-border pl-4 md:pl-0 md:pr-4">
                             <p className="text-sm font-medium text-hi">Personalized Fuel Protocol</p>
                             <p className="text-xs text-mid">AI macro synthesis &amp; targeted meal plans</p>
@@ -536,7 +536,7 @@ function FuelSynthesizerContent() {
                                 <p className="font-black text-xl uppercase animate-pulse">Generating your plan...</p>
                                 <CountdownTimer duration={60} />
                                 <LoadingStatus />
-                                <p className="text-xs text-faint font-mono mt-4 hairline p-2 inline-block">
+                                <p className="text-xs text-faint mt-4 hairline p-2 inline-block">
                                     NOTE: Building your bilingual meal plan and pricing.<br />
                                     Estimated time: under a minute.
                                 </p>

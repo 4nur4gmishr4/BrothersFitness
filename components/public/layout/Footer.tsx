@@ -128,13 +128,13 @@ export const Footer = (props: Partial<FooterProps>) => {
                   <span className="font-display text-xl uppercase tracking-wider text-hi">
                     BROTHER&apos;S <span className="text-accent">FITNESS</span>
                   </span>
-                  <span className="font-mono text-[10px] uppercase tracking-widest text-faint mt-0.5">
+                  <span className="text-[10px] uppercase tracking-widest text-faint mt-0.5 font-medium">
                     Lakhnadon &bull; Tactical Fitness
                   </span>
                 </div>
               </Link>
 
-              <p className="mt-4 text-xs font-mono leading-relaxed text-mid max-w-sm">
+              <p className="mt-4 text-xs leading-relaxed text-mid max-w-sm">
                 {description}
               </p>
             </div>
@@ -142,7 +142,7 @@ export const Footer = (props: Partial<FooterProps>) => {
             <div className="mt-6 flex items-center gap-3">
               <Link
                 href="/pricing"
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-md text-xs font-mono uppercase tracking-wider font-bold bg-accent text-white hover:bg-accent-hover active:scale-95 transition-all shadow-md"
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-md text-xs uppercase tracking-wider font-bold bg-accent text-white hover:bg-accent-hover active:scale-95 transition-all shadow-md"
               >
                 <Dumbbell className="w-3.5 h-3.5" />
                 <span>Join The Gym</span>
@@ -173,11 +173,11 @@ export const Footer = (props: Partial<FooterProps>) => {
           {/* Nav Columns (4 unique columns, 2x2 on mobile, 1 col each on desktop) */}
           {(sections ?? []).map((section, idx) => (
             <div key={idx} className="flex flex-col">
-              <h3 className="mb-4 text-xs font-mono font-bold uppercase tracking-widest text-hi flex items-center gap-2">
+              <h3 className="mb-4 text-xs font-bold uppercase tracking-widest text-hi flex items-center gap-2">
                 <span className="w-1.5 h-1.5 rounded-full bg-accent" />
                 {section.title}
               </h3>
-              <ul className="space-y-3 font-mono text-xs text-mid">
+              <ul className="space-y-3 text-xs text-mid">
                 {section.links.map((link, linkIdx) => {
                   const Icon = link.icon;
                   const isExternal = link.external || link.href.startsWith("http") || link.href.startsWith("tel:") || link.href.startsWith("mailto:");
@@ -214,7 +214,7 @@ export const Footer = (props: Partial<FooterProps>) => {
         </div>
 
         {/* Bottom Sub-strip */}
-        <div className="mt-12 pt-6 border-t border-surface-border flex flex-col sm:flex-row items-center justify-between gap-4 font-mono text-xs text-mid">
+        <div className="mt-12 pt-6 border-t border-surface-border flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-mid">
           <p className="flex items-center gap-2">
             <span>{copyright}</span>
           </p>

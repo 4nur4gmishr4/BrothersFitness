@@ -189,7 +189,7 @@ export default function DietResultView({
                                     {timelineUnit === "years" && ((data.transformation_timeline.total_weeks || 0) / 52).toFixed(1)}
                                     <span className="text-lg text-faint ml-2">{timelineUnit}</span>
                                 </p>
-                                <p className="text-xs text-status-success font-mono uppercase mt-1">
+                                <p className="text-xs text-status-success uppercase mt-1 font-semibold">
                                     {data.transformation_timeline.weekly_change} / week
                                 </p>
                             </div>
@@ -213,7 +213,7 @@ export default function DietResultView({
                                 <div className="flex justify-between items-start mb-2">
                                     <div className="flex items-center gap-3">
                                         {meal.timing && (
-                                            <span className="font-mono font-bold text-sm text-status-warning bg-status-warning/10 border border-status-warning/30 px-2 py-1">
+                                            <span className="font-semibold text-sm text-status-warning bg-status-warning/10 border border-status-warning/30 px-2 py-1 rounded-sm">
                                                 {meal.timing}
                                             </span>
                                         )}
@@ -246,7 +246,7 @@ export default function DietResultView({
                                 )}
 
                                 {/* Macros */}
-                                <div className="flex flex-wrap gap-2 text-xs font-mono uppercase tracking-widest text-faint">
+                                <div className="flex flex-wrap gap-2 text-xs uppercase tracking-wider text-faint font-semibold">
                                     <span className="surface-canvas hairline px-2 py-1">P: {meal.protein}g</span>
                                     <span className="surface-canvas hairline px-2 py-1">C: {meal.carbs}g</span>
                                     <span className="surface-canvas hairline px-2 py-1">F: {meal.fats}g</span>
