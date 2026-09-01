@@ -42,6 +42,16 @@ export default function Navbar() {
   const pathname = usePathname();
   const router = useRouter();
 
+  // Reset scroll to top on page load and refresh
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      if ("scrollRestoration" in window.history) {
+        window.history.scrollRestoration = "manual";
+      }
+      window.scrollTo(0, 0);
+    }
+  }, []);
+
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 15);
     window.addEventListener("scroll", handleScroll, { passive: true });
@@ -82,8 +92,11 @@ export default function Navbar() {
   ];
 
   const handleMenuClick = (id: string) => {
-    router.push(id);
     setIsOpen(false);
+    router.push(id);
+    if (typeof window !== "undefined") {
+      window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+    }
   };
 
   return (
@@ -229,12 +242,123 @@ export default function Navbar() {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.15 }}
-              className="fixed inset-0 z-[120] bg-surface-canvas pt-16 sm:pt-20 overflow-y-auto overscroll-contain w-full h-[100dvh]"
+              className="fixed inset-0 z-[150] bg-surface-canvas overflow-y-auto overscroll-contain w-full h-[100dvh] flex flex-col"
               role="dialog"
               aria-modal="true"
             >
-            {/* Staggered Navigation Body */}
-            <div className="w-full max-w-[1600px] mx-auto px-4 sm:px-8 md:px-12 lg:px-16 py-8 sm:py-12 md:py-16">
+              {/* Top Header Bar INSIDE the Fullscreen Menu Overlay */}
+              <div className="sticky top-0 z-30 w-full bg-surface-canvas/95 backdrop-blur-md border-b border-surface-border/80 shadow-xs shrink-0 select-none">
+                <div className="w-full max-w-[1600px] mx-auto px-4 sm:px-8 md:px-12 lg:px-16">
+                  <div className="flex items-center justify-between h-16 sm:h-20">
+                    
+                    {/* Left: Brand Wordmark */}
+                    <div
+                      onClick={() => {
+                        setIsOpen(false);
+                        router.push("/");
+                        window.scrollTo({ top: 0, behavior: "smooth" });
+                      }}
+                      className="flex items-center gap-2 group text-left cursor-pointer focus:outline-none"
+                    >
+                      <div className="text-base sm:text-xl font-bold tracking-tight text-hi group-hover:text-accent transition-colors duration-150">
+                        BROTHER&apos;S <span className="text-accent">FITNESS</span>
+                      </div>
+                    </div>
+
+                    {/* Right: Actions and Close (X) */}
+                    <div className="flex items-center gap-2 sm:gap-2.5">
+                      {/* Theme Switcher */}
+                      <button
+                        onClick={() => setTheme(theme === "system" ? "light" : theme === "light" ? "dark" : "system")}
+                        className="w-10 h-10 rounded-full flex items-center justify-center bg-surface-card border border-surface-border hover:bg-surface-elevated active:scale-90 transition-all duration-150 shadow-sm cursor-pointer"
+                        aria-label="Toggle theme"
+                      >
+                        <div className="w-4 h-4 text-hi">
+                          {!mounted ? (
+                            <Monitor className="w-full h-full" />
+                          ) : theme === "system" ? (
+                            <Monitor className="w-full h-full" />
+                          ) : theme === "dark" ? (
+                            <Moon className="w-full h-full" />
+                          ) : (
+                            <Sun className="w-full h-full" />
+                          )}
+                        </div>
+                      </button>
+
+                      {/* Instagram */}
+                      <a
+                        href="https://www.instagram.com/brothers_fitness_17"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="w-10 h-10 rounded-full flex items-center justify-center bg-surface-card border border-surface-border text-hi hover:text-[#E1306C] hover:border-[#E1306C]/40 hover:bg-[#E1306C]/10 active:scale-90 transition-all duration-150 shadow-sm"
+                        aria-label="Instagram"
+                      >
+                        <Instagram className="w-4 h-4" />
+                      </a>
+
+                      {/* WhatsApp */}
+                      <a
+                        href="https://wa.me/919131179343"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="w-10 h-10 rounded-full flex items-center justify-center bg-surface-card border border-surface-border text-hi hover:text-[#25D366] hover:border-[#25D366]/40 hover:bg-[#25D366]/10 active:scale-90 transition-all duration-150 shadow-sm"
+                        aria-label="WhatsApp"
+                      >
+                        <WhatsAppIcon className="w-4 h-4" />
+                      </a>
+
+                      {/* Profile */}
+                      <div className="relative">
+                        <button
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            setIsOpen(false);
+                            if (isLoggedIn) {
+                              setShowProfileModal(true);
+                            } else {
+                              setShowLoginModal(true);
+                            }
+                          }}
+                          className="w-10 h-10 rounded-full flex items-center justify-center bg-surface-card border border-surface-border hover:bg-surface-elevated active:scale-90 transition-all duration-150 shadow-sm overflow-hidden relative cursor-pointer"
+                          aria-label="Profile"
+                        >
+                          {isLoggedIn && user?.photo_url ? (
+                            <Image
+                              src={user.photo_url}
+                              alt={user.full_name || "Profile Photo"}
+                              fill
+                              sizes="40px"
+                              className="object-cover"
+                              unoptimized
+                            />
+                          ) : isLoggedIn ? (
+                            <div className="w-full h-full rounded-full bg-accent text-white flex items-center justify-center font-bold text-xs uppercase">
+                              {user?.full_name ? user.full_name.charAt(0) : "U"}
+                            </div>
+                          ) : (
+                            <UserIcon className="w-4 h-4 text-hi" />
+                          )}
+                        </button>
+                      </div>
+
+                      {/* Close Menu (X) Button */}
+                      <button
+                        onClick={() => setIsOpen(false)}
+                        className="w-10 h-10 rounded-full flex items-center justify-center bg-accent text-white active:scale-90 transition-all duration-150 shadow-sm cursor-pointer"
+                        aria-label="Close menu"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Staggered Navigation Body */}
+              <div className="flex-1 w-full max-w-[1600px] mx-auto px-4 sm:px-8 md:px-12 lg:px-16 py-6 sm:py-10 md:py-14">
               
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-16 items-start">
                 

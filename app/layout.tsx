@@ -17,6 +17,8 @@ import { SpeedInsights } from "@vercel/speed-insights/next";
 // flash of the wrong theme. Mirrors ThemeProvider's resolve logic.
 const themeScript = `(function(){try{var s=localStorage.getItem("brofit_theme");var t=(s==="light"||s==="dark"||s==="system")?s:"system";var r=t==="light"?"light":t==="dark"?"dark":(window.matchMedia("(prefers-color-scheme: light)").matches?"light":"dark");var el=document.documentElement;if(t==="system"){el.removeAttribute("data-theme");}else{el.setAttribute("data-theme",t);}el.style.colorScheme=r;}catch(e){}})();`;
 
+const scrollResetScript = `(function(){try{if("scrollRestoration" in history){history.scrollRestoration="manual";}window.scrollTo(0,0);}catch(e){}})();`;
+
 // Dev-only: next-pwa skips registration in development, but a service worker
 // registered on localhost by an earlier `npm run start` survives and keeps
 // intercepting requests — returning dev chunks as text/plain 404s. Unregister
@@ -150,6 +152,7 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
+        <script dangerouslySetInnerHTML={{ __html: scrollResetScript }} />
         {process.env.NODE_ENV === "development" && (
           <script dangerouslySetInnerHTML={{ __html: devSwCleanupScript }} />
         )}
