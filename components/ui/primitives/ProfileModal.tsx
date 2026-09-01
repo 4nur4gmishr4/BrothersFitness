@@ -148,7 +148,7 @@ export default function ProfileModal({ isOpen, onClose }: ProfileModalProps) {
                     <div className="flex items-center gap-3">
                         <User className="w-5 h-5 text-white" />
                         <span className="font-black uppercase tracking-widest text-sm text-white">
-                            Customize Profile
+                            Member Profile
                         </span>
                     </div>
                     <button
@@ -190,7 +190,7 @@ export default function ProfileModal({ isOpen, onClose }: ProfileModalProps) {
                     {/* Credits Display */}
                     <div className="surface-elevated hairline p-4">
                         <div className="flex justify-between items-center">
-                            <span className="text-low text-sm font-medium">Daily AI Credits</span>
+                            <span className="text-low text-sm font-medium">Daily Meal Plan Credits</span>
                             <span className="text-2xl font-black text-accent">{remainingCredits}/{MAX_DAILY_CREDITS}</span>
                         </div>
                         <div className="w-full surface-canvas h-1.5 mt-2 overflow-hidden">

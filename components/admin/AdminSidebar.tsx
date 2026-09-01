@@ -64,7 +64,7 @@ export type NavGroup = {
 
 export const ADMIN_NAV_GROUPS: NavGroup[] = [
   {
-    title: "Operations",
+    title: "Management",
     items: [
       {
         label: "Members",
@@ -90,10 +90,10 @@ export const ADMIN_NAV_GROUPS: NavGroup[] = [
     ],
   },
   {
-    title: "System",
+    title: "System & Logs",
     items: [
       {
-        label: "Audit Logs",
+        label: "Activity Logs",
         icon: Clock,
         href: "/admin/activity",
       },

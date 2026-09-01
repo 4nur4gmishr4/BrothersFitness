@@ -99,7 +99,7 @@ export default function LoginModal({ isOpen, onClose, onSuccess }: LoginModalPro
                     <div>
                         <h2 className="text-2xl font-black text-hi mb-2">Welcome to Brother&apos;s Fitness</h2>
                         <p className="text-mid text-sm">
-                            Sign in to access AI features and track your fitness journey
+                            Sign in with Google to create meal plans and track your workouts.
                         </p>
                     </div>
 
@@ -113,12 +113,12 @@ export default function LoginModal({ isOpen, onClose, onSuccess }: LoginModalPro
                     <button
                         onClick={handleGoogleSignIn}
                         disabled={loading}
-                        className="w-full flex items-center justify-center gap-3 bg-white text-black font-bold py-3 px-6 hover:bg-surface-card transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="w-full flex items-center justify-center gap-3 bg-white text-black font-bold py-3 px-6 hover:bg-surface-card transition-colors disabled:opacity-50 disabled:cursor-not-allowed rounded-full shadow-sm"
                     >
                         {loading ? (
                             <div className="flex items-center gap-2">
                                 <Loader2 className="w-5 h-5 animate-spin" />
-                                <span>Fetching Profile...</span>
+                                <span>Signing in...</span>
                             </div>
                         ) : (
                             <>
@@ -146,7 +146,7 @@ export default function LoginModal({ isOpen, onClose, onSuccess }: LoginModalPro
                     </button>
 
                     <p className="text-faint text-xs">
-                        By signing in, you agree to our Terms of Service
+                        Safe and secure 1-tap sign in
                     </p>
                 </div>
             </div>

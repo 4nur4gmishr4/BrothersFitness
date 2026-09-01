@@ -52,16 +52,16 @@ const defaultBroFitSections: FooterSection[] = [
     title: "Training",
     links: [
       { name: "Workouts", href: "/workouts", icon: Dumbbell },
-      { name: "Diet Generator", href: "/fuel", icon: Flame },
+      { name: "Meal Planner", href: "/fuel", icon: Flame },
       { name: "Calculators", href: "/calculators", icon: Calculator },
     ],
   },
   {
     title: "Community",
     links: [
-      { name: "Trophy Room", href: "/trophy-room", icon: Trophy },
+      { name: "Awards", href: "/trophy-room", icon: Trophy },
       { name: "Quotes", href: "/quotes", icon: Quote },
-      { name: "Pricing Plans", href: "/pricing", icon: CreditCard },
+      { name: "Membership Plans", href: "/pricing", icon: CreditCard },
     ],
   },
   {
@@ -70,17 +70,17 @@ const defaultBroFitSections: FooterSection[] = [
       { name: "Lakhnadon, MP", href: "https://maps.google.com/?q=Brothers+Fitness+Lakhnadon", external: true, icon: MapPin },
       { name: "Aman: 91311 79343", href: "tel:+919131179343", external: true, icon: Phone },
       { name: "Pradeep: 91312 72754", href: "tel:+919131272754", external: true, icon: Phone },
-      { name: "6 AM – 10 PM", href: "#", icon: Clock },
+      { name: "Mon-Sat: 6 AM – 10 PM", href: "#", icon: Clock },
     ],
   },
   {
-    title: "Connect & Dev",
+    title: "Get In Touch",
     links: [
-      { name: "Email Gym", href: "mailto:brothersfitnesszone@gmail.com", external: true, icon: Mail },
+      { name: "Email Us", href: "mailto:brothersfitnesszone@gmail.com", external: true, icon: Mail },
       { name: "Gym Instagram", href: "https://www.instagram.com/brothers_fitness_17", external: true, icon: FaInstagram },
       { name: "Coach WhatsApp", href: "https://wa.me/919131179343", external: true, icon: FaWhatsapp },
-      { name: "Dev: Anurag Mishra", href: "https://wa.me/919302786886?text=Hi%20Anurag", external: true, icon: Code2 },
-      { name: "Dev Email", href: "mailto:anurag.mishra.core@gmail.com", external: true, icon: Mail },
+      { name: "Developer: Anurag Mishra", href: "https://wa.me/919302786886?text=Hi%20Anurag", external: true, icon: Code2 },
+      { name: "Developer Email", href: "mailto:anurag.mishra.core@gmail.com", external: true, icon: Mail },
     ],
   },
 ];
@@ -93,7 +93,7 @@ const defaultProps: FooterProps = {
     title: "Brother's Fitness",
   },
   description:
-    "Premium workout training, personalized nutrition plans, and fitness diagnostics for Brother's Fitness Lakhnadon.",
+    "Modern gym workouts, personalized meal plans, and easy fitness tools for Brother's Fitness in Lakhnadon.",
   sections: defaultBroFitSections,
   copyright: `© ${new Date().getFullYear()} BROTHER'S FITNESS • ALL RIGHTS RESERVED`,
 };
@@ -129,7 +129,7 @@ export const Footer = (props: Partial<FooterProps>) => {
                     BROTHER&apos;S <span className="text-accent">FITNESS</span>
                   </span>
                   <span className="text-[10px] uppercase tracking-widest text-faint mt-0.5 font-medium">
-                    Lakhnadon &bull; Strength &amp; Conditioning
+                    Lakhnadon &bull; Gym &amp; Fitness
                   </span>
                 </div>
               </Link>

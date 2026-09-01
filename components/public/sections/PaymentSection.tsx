@@ -127,7 +127,7 @@ export default function PaymentSection() {
         <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-10 md:mb-14 gap-6 pb-8 border-b border-surface-border/70">
           <div>
             <span className="text-xs uppercase tracking-widest text-accent mb-2 block font-semibold">
-              MEMBERSHIP PASSES &amp; ADMISSION
+              GYM MEMBERSHIP &amp; FEES
             </span>
             <h1 className="heading-display text-4xl sm:text-6xl md:text-7xl text-hi leading-[0.95] tracking-tight uppercase">
               SELECT YOUR <span className="text-accent">MEMBERSHIP</span>
@@ -135,12 +135,12 @@ export default function PaymentSection() {
           </div>
 
           <div className="text-left md:text-right border-l-2 md:border-l-0 md:border-r-2 border-surface-border pl-4 md:pl-0 md:pr-4">
-            <p className="text-sm font-medium text-hi">Zero Admission Fee &bull; Direct UPI</p>
+            <p className="text-sm font-medium text-hi">No Admission Fees &bull; Easy UPI Payment</p>
             <p className="text-xs text-mid">
-              {step === "plan" && "Select your monthly or quarterly membership pass"}
-              {step === "details" && "Fill in your athlete registration details"}
-              {step === "paymentChoice" && "Choose UPI app or QR code payment"}
-              {step === "qrCode" && "Scan dynamic QR code to complete transfer"}
+              {step === "plan" && "Choose your 1-month or 3-month gym plan"}
+              {step === "details" && "Enter your name and mobile number"}
+              {step === "paymentChoice" && "Pay with Google Pay, PhonePe, Paytm or QR code"}
+              {step === "qrCode" && "Scan the QR code to complete your payment"}
             </p>
           </div>
         </div>
