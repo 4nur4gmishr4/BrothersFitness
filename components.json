@@ -19,6 +19,8 @@
     "hooks": "@/hooks"
   },
   "registries": {
-    "@aceternity": "https://ui.aceternity.com/registry/{name}.json"
+    "@aceternity": "https://ui.aceternity.com/registry/{name}.json",
+    "@shadcnblocks": "https://shadcnblocks.com/r/{name}.json",
+    "@loading-ui": "https://loading-ui.com/r/{name}.json"
   }
 }
