@@ -45,19 +45,19 @@ const MESSAGE_TEMPLATES = {
     icon: Gift,
     label: "Happy Birthday 🎂",
     message:
-      "Happy Birthday from Brother's Fitness! 🎉\n\nWishing you a power-packed year ahead. Keep crushing those goals! 💪\n\n- Team Brothers Fitness",
+      "Happy Birthday from Brother's Fitness! 🎉\n\nWishing you a power-packed year ahead. Keep crushing those goals! 💪\n\n- Team Brother's Fitness",
   },
   newBatch: {
     icon: Users,
     label: "New Batch Alert 🏋️",
     message:
-      "New training batch starting soon at Brother's Fitness!\n\nEarly morning & evening slots available.\n📍 Limited spots — register now!\n\n- Team Brothers Fitness",
+      "New training batch starting soon at Brother's Fitness!\n\nEarly morning & evening slots available.\n📍 Limited spots — register now!\n\n- Team Brother's Fitness",
   },
   expiry: {
     icon: AlertTriangle,
     label: "Expiry Reminder ⚠️",
     message:
-      "Hi from Brother's Fitness!\n\nYour subscription is expiring soon. Renew now to keep training without interruption.\n\n💪 Stay strong, stay fit!\n\n- Team Brothers Fitness",
+      "Hi from Brother's Fitness!\n\nYour subscription is expiring soon. Renew now to keep training without interruption.\n\n💪 Stay strong, stay fit!\n\n- Team Brother's Fitness",
   },
 };
 
@@ -272,7 +272,7 @@ export default function BulkMessageModal({
 
         {/* Filter tabs */}
         <div className="mt-4 mb-3 shrink-0">
-          <div className="label-text uppercase tracking-wider text-xs text-faint mb-2">
+          <div className="text-xs uppercase tracking-wider font-semibold text-faint mb-2">
             Target group
           </div>
           <div className="flex flex-wrap gap-1.5">
@@ -283,9 +283,9 @@ export default function BulkMessageModal({
                   key={f}
                   type="button"
                   onClick={() => setFilter(f)}
-                  className={`px-2.5 py-1.5 text-xs font-mono uppercase transition-colors hairline ${
+                  className={`px-3 py-1.5 text-xs font-medium rounded-xl transition-colors hairline ${
                     filter === f
-                      ? "bg-accent text-white border-accent"
+                      ? "bg-accent text-white border-accent font-semibold"
                       : "surface-modal text-low hover:border-accent hover:text-hi"
                   }`}
                 >
@@ -297,9 +297,9 @@ export default function BulkMessageModal({
         </div>
 
         {/* Member list */}
-        <div className="surface-card hairline p-3 sm:p-4 my-2 flex-1 min-h-0 flex flex-col">
+        <div className="surface-card hairline p-3 sm:p-4 my-2 flex-1 min-h-0 flex flex-col rounded-2xl">
           <div className="flex justify-between items-center mb-3 shrink-0">
-            <span className="text-sm font-mono text-low">
+            <span className="text-xs text-mid font-medium">
               {filteredMembers.length} member
               {filteredMembers.length === 1 ? "" : "s"} ·{" "}
               {phoneNumbers.length} with phone
@@ -308,7 +308,7 @@ export default function BulkMessageModal({
               <button
                 type="button"
                 onClick={copyNumbers}
-                className="flex items-center gap-1.5 px-3 py-1.5 surface-modal hairline text-xs text-mid hover:border-accent hover:text-hi transition-colors"
+                className="flex items-center gap-1.5 px-3 py-1.5 surface-modal hairline text-xs font-medium text-mid hover:border-accent hover:text-hi transition-colors rounded-lg"
               >
                 {copied ? (
                   <Check className="w-3 h-3 text-status-success" />
@@ -321,7 +321,7 @@ export default function BulkMessageModal({
                 <button
                   type="button"
                   onClick={openAllUrls}
-                  className="flex items-center gap-1.5 px-3 py-1.5 surface-modal hairline text-xs text-status-success hover:border-status-success/40 transition-colors"
+                  className="flex items-center gap-1.5 px-3 py-1.5 surface-modal hairline text-xs font-medium text-status-success hover:border-status-success/40 transition-colors rounded-lg"
                   title={`Open ${filteredMembers.length} WhatsApp tabs`}
                 >
                   <MessageCircle className="w-3 h-3" />
@@ -344,10 +344,10 @@ export default function BulkMessageModal({
                     className="flex items-center justify-between text-sm py-1.5 hairline-b last:hairline-b-0"
                   >
                     <div className="min-w-0 flex-1">
-                      <div className="text-hi truncate text-sm">
+                      <div className="text-hi truncate text-sm font-medium">
                         {m.full_name || "Unnamed"}
                       </div>
-                      <div className="text-xs text-faint font-mono truncate">
+                      <div className="text-xs text-low truncate font-medium tabular-nums">
                         {m.mobile || "— no phone"}
                       </div>
                     </div>
@@ -355,7 +355,7 @@ export default function BulkMessageModal({
                       type="button"
                       onClick={() => sendOne(m.mobile || "")}
                       disabled={!m.mobile}
-                      className="ml-2 p-1.5 text-low hover:text-status-success hover:bg-surface-elevated transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                      className="ml-2 p-1.5 text-low hover:text-status-success hover:bg-surface-elevated transition-colors disabled:opacity-30 disabled:cursor-not-allowed rounded-lg"
                       title={m.mobile ? `Send to ${m.full_name || "member"}` : "No phone number"}
                       aria-label={`Send to ${m.full_name || "member"}`}
                     >

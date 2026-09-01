@@ -172,7 +172,7 @@ export default function TacticalChatbot() {
                     id="tactical-chatbot-button"
                     className="fixed bottom-6 right-6 z-[105] w-14 h-14 bg-accent text-white border border-accent-hover flex items-center justify-center cursor-pointer hover:bg-accent-hover transition-colors duration-fast"
                     onClick={() => setIsOpen(true)}
-                    aria-label="Open BroFit AI chat"
+                    aria-label="Open Brother's Fitness AI chat"
                 >
                     <Cpu className="w-6 h-6" />
                 </button>
@@ -188,7 +188,7 @@ export default function TacticalChatbot() {
 
                     <div
                         {...modalProps}
-                        aria-label="BroFit AI chat"
+                        aria-label="Brother's Fitness AI chat"
                         className="relative w-full max-w-[420px] h-full max-h-[85vh] sm:max-h-[650px] surface-modal hairline overflow-hidden flex flex-col modal-panel-in"
                     >
                         {/* Header */}
@@ -198,7 +198,7 @@ export default function TacticalChatbot() {
                                     <Cpu className="w-5 h-5 text-accent" />
                                 </div>
                                 <span className="heading-section text-sm text-hi uppercase tracking-widest">
-                                    <DecryptedText text="BROFIT AI" speed={40} />
+                                    <DecryptedText text="BROTHER'S FITNESS AI" speed={40} />
                                 </span>
                                 {isLoggedIn ? (
                                     <span className="label-text text-xs surface-canvas hairline px-2 py-0.5 text-hi font-bold">
@@ -319,7 +319,7 @@ export default function TacticalChatbot() {
                                     <input
                                         value={input}
                                         onChange={(e) => setInput(e.target.value)}
-                                        placeholder={language === "hi" ? "Poochhein..." : "Ask BroFit..."}
+                                        placeholder={language === "hi" ? "Poochhein..." : "Ask Brother's Fitness..."}
                                         className="input-field flex-1"
                                         disabled={isLoggedIn && remainingCredits <= 0}
                                     />

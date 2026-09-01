@@ -5,9 +5,9 @@ import { generateTextWithFallback, type AIRequestConfig } from "@/lib/ai-provide
 import { verifyUserToken, getUserCreditState, spendUserCredit } from "@/lib/credit-service";
 import { getRequestId, withRequestId } from "@/lib/request-id";
 
-// L38: allow up to 60s for AI generation — the default Vercel budget (10s)
-// is easily exceeded by multi-provider fallback + JSON parsing.
-export const maxDuration = 60;
+// Allow up to 120s for AI generation — multi-provider fallback + JSON retry
+// needs headroom beyond the default Vercel budget (10s).
+export const maxDuration = 120;
 
 /** Strip ```json / ``` code fences the model sometimes wraps JSON in. */
 function stripJsonFences(text: string): string {
@@ -83,7 +83,7 @@ export async function POST(req: Request) {
         const calorieAdjustment = Math.round(rateNum * 1100);
 
         const prompt = `
-      You are an expert fitness nutritionist for 'Brothers Fitness', optimizing for an **Indian User**.
+      You are an expert fitness nutritionist for "Brother's Fitness", optimizing for an **Indian User**.
 
       **User Biometrics**
       - Gender: ${gender}
@@ -194,11 +194,15 @@ export async function POST(req: Request) {
     `;
 
         // 3. Generate + parse the JSON (with a single retry on malformed output).
+        // Diet plans are large JSON payloads (~2000 tokens) so we need longer
+        // timeouts than the default chat config.
         const json = await requestDietJson({
             prompt,
             systemPrompt: "You are a JSON-only API. You must return valid JSON matching the user's schema. Do not include markdown formatting.",
             jsonMode: true,
             temperature: 0.2, // Lower temperature for consistent JSON
+            timeoutMs: 25_000,      // 25s per provider (diet JSON is large)
+            totalTimeoutMs: 120_000, // 2 min total for retries across providers
         }, prompt, log);
 
         // 4. Validate the structure; do NOT pass structurally invalid AI output

@@ -43,13 +43,13 @@ export default function WelcomeModal({ isOpen, onClose }: WelcomeModalProps) {
                             <ShieldCheck className="w-6 h-6 text-accent" />
                         </div>
                         <h2 className="text-xl heading-display text-hi">
-                            Welcome to BroFit
+                            Welcome to Brother&apos;s Fitness
                         </h2>
                     </div>
 
                     <div className="space-y-4">
                         <p className="text-mid leading-relaxed font-medium">
-                            Welcome back to <span className="text-hi font-bold">BroFit</span>.
+                            Welcome back to <span className="text-hi font-bold">Brother&apos;s Fitness</span>.
                         </p>
 
                         <div className="surface-elevated hairline p-4 flex gap-4">

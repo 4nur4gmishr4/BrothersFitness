@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import { CreditCard, User, Users, Phone, QrCode, Smartphone, MessageCircle, ExternalLink, CheckCircle } from "lucide-react";
@@ -12,7 +12,7 @@ export default function PaymentSection() {
   const [formData, setFormData] = useState({ name: "", gender: "", mobile: "" });
 
   // History depth the section mounted at. Every forward step calls pushState, so
-  // once the flow finishes we can collapse those entries with history.go(-N) â€”
+  // once the flow finishes we can collapse those entries with history.go(-N) —
   // otherwise the browser back button later re-enters the wizard from a stale
   // paymentStep on an unrelated page (H7 fix).
   const baseIndexRef = useRef<number>(0);
@@ -20,11 +20,11 @@ export default function PaymentSection() {
 
   const AMAN_WHATSAPP = "919131179343";
   const UPI_ID = "annushrivastava112@okicici";
-  const PAYEE_NAME = "Aman Brothers Fitness";
+  const PAYEE_NAME = "Aman Brother's Fitness";
 
   const plans = [
     { id: "monthly", price: 700, duration: "1 Month", label: "MONTHLY" },
-    { id: "quarterly", price: 1800, duration: "3 Months", label: "QUARTERLY", save: "Save â‚¹300" },
+    { id: "quarterly", price: 1800, duration: "3 Months", label: "QUARTERLY", save: "Save ₹300" },
   ];
 
   const selectedPlanData = plans.find(p => p.id === selectedPlan);
@@ -61,42 +61,38 @@ export default function PaymentSection() {
 
   const handleDetailsSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (formData.name && formData.gender && formData.mobile.length === 10) {
-      navigateToStep("paymentChoice");
+    if (!formData.name || !formData.gender || !formData.mobile) {
+      return;
     }
-  };
-
-  // Generate UPI deep link that opens UPI apps with pre-filled payment details
-  const openUPIApp = () => {
-    if (!selectedPlanData) return;
-
-    const upiUrl = `upi://pay?pa=${encodeURIComponent(UPI_ID)}&pn=${encodeURIComponent(PAYEE_NAME)}&am=${selectedPlanData.price}&cu=INR&tn=${encodeURIComponent(`Brothers Fitness ${selectedPlanData.label} Membership - ${formData.name}`)}`;
-
-    window.location.href = upiUrl;
+    if (formData.mobile.length !== 10) {
+      return;
+    }
+    navigateToStep("paymentChoice");
   };
 
   const generateWhatsAppMessage = (includePaymentConfirm: boolean = false) => {
-    const plan = selectedPlanData;
-    if (!plan) return "";
-
-    const baseMessage = `ðŸ‹ï¸ Brothers Fitness - New Membership
-
-Name: ${formData.name}
-Gender: ${formData.gender}
-Mobile: ${formData.mobile}
-Plan: ${plan.label} (${plan.duration})
-Amount: â‚¹${plan.price}`;
-
+    let message = `*NEW MEMBERSHIP REGISTRATION*\n\n`;
+    message += `*Plan:* ${selectedPlanData?.label} (₹${selectedPlanData?.price} / ${selectedPlanData?.duration})\n`;
+    message += `*Name:* ${formData.name}\n`;
+    message += `*Gender:* ${formData.gender}\n`;
+    message += `*Mobile:* ${formData.mobile}\n`;
+    
     if (includePaymentConfirm) {
-      return `${baseMessage}
-
-Status: âœ… Payment Completed
-Screenshot: Attached
-
-Please activate my membership. Thank you!`;
+      message += `\n*Status:* Payment Completed via UPI\n`;
+      message += `*Note:* Screenshot attached for verification`;
     }
+    
+    return message;
+  };
 
-    return baseMessage;
+  const openUPIApp = () => {
+    if (!selectedPlanData) return;
+    
+    // Construct UPI payment URL with standard parameters
+    const upiUrl = `upi://pay?pa=${encodeURIComponent(UPI_ID)}&pn=${encodeURIComponent(PAYEE_NAME)}&am=${selectedPlanData.price}&cu=INR&tn=${encodeURIComponent(`Brother's Fitness ${selectedPlanData.label} - ${formData.name}`)}`;
+    
+    // Open UPI app directly
+    window.location.href = upiUrl;
   };
 
   const openWhatsApp = (includePaymentConfirm: boolean = false) => {
@@ -108,7 +104,7 @@ Please activate my membership. Thank you!`;
   const resetFlow = () => {
     // Collapse every payment entry we pushed since mount, so the browser back
     // button can't re-enter the wizard from a later page. history.go(-N) fires
-    // popstate for each popped entry â€” suppress those with the reset flag and
+    // popstate for each popped entry — suppress those with the reset flag and
     // clear it on the next tick once the stack has settled.
     const backCount = window.history.length - baseIndexRef.current;
     if (backCount > 0) {
@@ -124,32 +120,29 @@ Please activate my membership. Thank you!`;
   };
 
   return (
-    <section id="payment" className="surface-canvas text-hi py-16 md:py-24 relative overflow-hidden">
-      {/* Subtle grid pattern - static */}
-      <div
-        className="absolute inset-0 opacity-[0.03] pointer-events-none"
-        style={{
-          
-          backgroundSize: "80px 80px",
-        }}
-      />
-
-      <div className="relative z-10 container mx-auto px-4 sm:px-6 lg:px-8 max-w-6xl">
-        {/* Header */}
-        <div className="text-center mb-12 md:mb-16">
-          <div className="inline-flex items-center gap-2 badge badge--accent mb-6">
-            <CreditCard className="w-4 h-4" />
-            Secure Payment
+    <section id="payment" className="surface-canvas text-hi py-12 md:py-20 relative overflow-hidden select-none">
+      <div className="relative z-10 max-w-[1600px] mx-auto px-4 sm:px-8 md:px-12 lg:px-16">
+        
+        {/* Top Display Header */}
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-10 md:mb-14 gap-6 pb-8 border-b border-surface-border/70">
+          <div>
+            <span className="text-xs font-mono uppercase tracking-widest text-accent mb-2 block font-semibold">
+              MEMBERSHIP PASSES &amp; ADMISSION
+            </span>
+            <h1 className="heading-display text-4xl sm:text-6xl md:text-7xl text-hi leading-[0.95] tracking-tight uppercase">
+              JOIN THE <span className="text-accent">BROTHERHOOD</span>
+            </h1>
           </div>
-          <h2 className="heading-display text-4xl sm:text-5xl lg:text-6xl text-hi mb-4">
-            JOIN THE <span className="text-accent">BROTHERHOOD</span>
-          </h2>
-          <p className="label-text text-mid">
-            {step === "plan" && "Select Your Plan"}
-            {step === "details" && "Your Membership Details"}
-            {step === "paymentChoice" && "Choose Payment Method"}
-            {step === "qrCode" && "Scan QR Code"}
-          </p>
+
+          <div className="text-left md:text-right border-l-2 md:border-l-0 md:border-r-2 border-surface-border pl-4 md:pl-0 md:pr-4">
+            <p className="text-sm font-medium text-hi">Zero Admission Fee &bull; Direct UPI</p>
+            <p className="text-xs text-mid">
+              {step === "plan" && "Select your monthly or quarterly membership pass"}
+              {step === "details" && "Fill in your athlete registration details"}
+              {step === "paymentChoice" && "Choose UPI app or QR code payment"}
+              {step === "qrCode" && "Scan dynamic QR code to complete transfer"}
+            </p>
+          </div>
         </div>
 
         {/* STEP 1: Plan Selection */}
@@ -162,21 +155,27 @@ Please activate my membership. Thank you!`;
                   setSelectedPlan(plan.id as "monthly" | "quarterly");
                   navigateToStep("details");
                 }}
-                className={`relative p-8 cursor-pointer transition-colors duration-fast group ${
-                  plan.save ? "featured-tier" : "surface-card hairline hover:border-accent"
+                className={`relative p-8 rounded-2xl cursor-pointer transition-all duration-200 group bg-surface-card border ${
+                  plan.save
+                    ? "border-accent/80 shadow-sm"
+                    : "border-surface-border hover:border-surface-border/90 hover:bg-surface-elevated"
                 }`}
               >
                 {plan.save && (
-                  <div className="featured-tier__badge">{plan.save}</div>
+                  <div className="absolute top-4 right-4 px-3 py-1 bg-accent text-white text-xs font-bold rounded-full shadow-sm">
+                    {plan.save}
+                  </div>
                 )}
                 <div className="text-center">
-                  <h3 className="label-text text-mid mb-4">{plan.label}</h3>
-                  <p className="stat-callout__value text-hi group-hover:text-accent transition-colors duration-fast">
-                    â‚¹{plan.price}
+                  <h3 className="text-xs font-mono uppercase tracking-widest text-mid mb-4">
+                    {plan.label} PASS
+                  </h3>
+                  <p className="text-5xl sm:text-6xl font-extrabold text-hi group-hover:text-accent transition-colors duration-150">
+                    ₹{plan.price}
                   </p>
-                  <p className="label-text text-faint mt-3">{plan.duration}</p>
-                  <p className="label-text text-accent mt-6 opacity-0 group-hover:opacity-100 transition-opacity duration-fast">
-                    Click to Select â†’
+                  <p className="text-xs text-mid mt-3">{plan.duration} • Zero Admission Fee</p>
+                  <p className="text-xs font-semibold text-accent mt-6 group-hover:translate-x-1 transition-transform duration-150 inline-flex items-center gap-1">
+                    Select Plan →
                   </p>
                 </div>
               </div>
@@ -187,38 +186,38 @@ Please activate my membership. Thank you!`;
         {/* STEP 2: Membership Details Form */}
         {step === "details" && (
           <div className="max-w-2xl mx-auto">
-            <div className="surface-card hairline p-8">
+            <div className="bg-surface-card border border-surface-border rounded-2xl p-6 sm:p-8 shadow-sm">
               {/* Selected Plan Summary */}
-              <div className="surface-elevated hairline border-accent p-4 mb-6 text-center">
-                <p className="label-text text-low mb-1">Selected Plan</p>
-                <p className="heading-section text-2xl font-bold text-accent">
-                  {selectedPlanData?.label} - â‚¹{selectedPlanData?.price}
+              <div className="bg-surface-elevated border border-accent/60 rounded-xl p-4 mb-6 text-center">
+                <p className="text-xs text-mid mb-1">Selected Pass</p>
+                <p className="text-2xl font-bold text-accent">
+                  {selectedPlanData?.label} — ₹{selectedPlanData?.price}
                 </p>
-                <p className="label-text text-faint mt-1">{selectedPlanData?.duration}</p>
+                <p className="text-xs text-mid mt-1">{selectedPlanData?.duration}</p>
               </div>
 
-              <h3 className="heading-section text-2xl text-hi mb-6 text-center">
-                Membership Details
+              <h3 className="text-xl font-bold text-hi mb-6 text-center">
+                Member Information
               </h3>
 
-              <form onSubmit={handleDetailsSubmit} className="space-y-6">
+              <form onSubmit={handleDetailsSubmit} className="space-y-5">
                 <div>
-                  <label className="label-text text-mid flex items-center gap-2 mb-2">
-                    <User className="w-4 h-4" /> Full Name
+                  <label className="text-xs font-medium text-mid flex items-center gap-2 mb-2">
+                    <User className="w-4 h-4 text-accent" /> Full Name
                   </label>
                   <input
                     type="text"
                     required
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    className="input-field"
-                    placeholder="Enter your name"
+                    className="w-full px-4 py-3 bg-surface-soft border border-surface-border rounded-xl text-hi text-sm focus:outline-none focus:border-accent transition-colors"
+                    placeholder="Enter your full name"
                   />
                 </div>
 
                 <div>
-                  <label className="label-text text-mid flex items-center gap-2 mb-2">
-                    <Users className="w-4 h-4" /> Gender
+                  <label className="text-xs font-medium text-mid flex items-center gap-2 mb-2">
+                    <Users className="w-4 h-4 text-accent" /> Gender Batch
                   </label>
                   <div className="grid grid-cols-3 gap-3">
                     {["Male", "Female", "Other"].map((gender) => (
@@ -226,10 +225,10 @@ Please activate my membership. Thank you!`;
                         key={gender}
                         type="button"
                         onClick={() => setFormData({ ...formData, gender })}
-                        className={`py-3 label-text transition-colors duration-fast ${
+                        className={`py-3 rounded-xl text-xs font-semibold transition-all duration-150 ${
                           formData.gender === gender
-                            ? "bg-accent text-white border border-accent"
-                            : "surface-card hairline text-mid hover:border-accent"
+                            ? "bg-accent text-white shadow-sm"
+                            : "bg-surface-soft border border-surface-border text-mid hover:text-hi hover:bg-surface-elevated"
                         }`}
                       >
                         {gender}
@@ -239,8 +238,8 @@ Please activate my membership. Thank you!`;
                 </div>
 
                 <div>
-                  <label className="label-text text-mid flex items-center gap-2 mb-2">
-                    <Phone className="w-4 h-4" /> Mobile Number
+                  <label className="text-xs font-medium text-mid flex items-center gap-2 mb-2">
+                    <Phone className="w-4 h-4 text-accent" /> Mobile Number
                   </label>
                   <input
                     type="tel"
@@ -249,27 +248,27 @@ Please activate my membership. Thank you!`;
                     maxLength={10}
                     value={formData.mobile}
                     onChange={(e) => setFormData({ ...formData, mobile: e.target.value.replace(/\D/g, "") })}
-                    className="input-field"
-                    placeholder="10-digit mobile number"
+                    className="w-full px-4 py-3 bg-surface-soft border border-surface-border rounded-xl text-hi text-sm focus:outline-none focus:border-accent transition-colors"
+                    placeholder="10-digit phone number"
                   />
                 </div>
 
-                <div className="flex gap-3">
+                <div className="flex gap-3 pt-2">
                   <button
                     type="button"
                     onClick={goBack}
-                    className="btn-secondary flex-1"
+                    className="flex-1 py-3 px-4 rounded-xl text-xs font-semibold bg-surface-soft border border-surface-border text-mid hover:text-hi hover:bg-surface-elevated active:scale-95 transition-all"
                     aria-label="Go back to plan selection"
                   >
-                    â† Back
+                    ← Back
                   </button>
                   <button
                     type="submit"
                     disabled={!formData.name || !formData.gender || formData.mobile.length !== 10}
-                    className="btn-primary flex-1"
+                    className="flex-1 py-3 px-4 rounded-xl text-xs font-semibold bg-accent text-white hover:brightness-110 active:scale-95 transition-all disabled:opacity-50 disabled:pointer-events-none"
                     aria-label="Proceed to payment options"
                   >
-                    Go to Payments â†’
+                    Continue to Payment →
                   </button>
                 </div>
               </form>
@@ -279,72 +278,66 @@ Please activate my membership. Thank you!`;
 
         {/* STEP 3: Payment Method Choice */}
         {step === "paymentChoice" && (
-          <div className="max-w-4xl mx-auto">
+          <div className="max-w-4xl mx-auto space-y-6">
             <div className="grid md:grid-cols-2 gap-6">
               {/* UPI App */}
               <div
                 onClick={openUPIApp}
-                className="surface-card hairline hover:border-accent p-8 cursor-pointer transition-colors duration-fast group"
+                className="bg-surface-card border border-surface-border hover:border-accent rounded-2xl p-8 cursor-pointer transition-all duration-150 group shadow-sm text-center"
               >
-                <div className="text-center">
-                  <div className="w-20 h-20 mx-auto mb-6 surface-elevated hairline flex items-center justify-center group-hover:border-accent transition-colors duration-fast">
-                    <Smartphone className="w-10 h-10 text-accent" />
-                  </div>
-                  <h3 className="heading-section text-2xl text-hi mb-3">Pay via UPI App</h3>
-                  <p className="body-text text-sm text-mid mb-4">
-                    Opens your UPI app (GPay, PhonePe, Paytm, etc.) with payment details pre-filled
-                  </p>
-                  <p className="label-text text-accent opacity-0 group-hover:opacity-100 transition-opacity duration-fast">
-                    Opens UPI App â†’
-                  </p>
+                <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-surface-soft border border-surface-border flex items-center justify-center group-hover:border-accent transition-colors">
+                  <Smartphone className="w-8 h-8 text-accent" />
                 </div>
+                <h3 className="text-xl font-bold text-hi mb-2">Pay via UPI App</h3>
+                <p className="text-xs text-mid mb-4">
+                  Opens Google Pay, PhonePe, Paytm, or BHIM with ₹{selectedPlanData?.price} pre-filled
+                </p>
+                <span className="text-xs font-semibold text-accent group-hover:translate-x-1 transition-transform inline-flex items-center gap-1">
+                  Open UPI App →
+                </span>
               </div>
 
               {/* QR Code */}
               <div
                 onClick={() => navigateToStep("qrCode")}
-                className="surface-card hairline hover:border-accent p-8 cursor-pointer transition-colors duration-fast group"
+                className="bg-surface-card border border-surface-border hover:border-accent rounded-2xl p-8 cursor-pointer transition-all duration-150 group shadow-sm text-center"
               >
-                <div className="text-center">
-                  <div className="w-20 h-20 mx-auto mb-6 surface-elevated hairline flex items-center justify-center group-hover:border-accent transition-colors duration-fast">
-                    <QrCode className="w-10 h-10 text-accent" />
-                  </div>
-                  <h3 className="heading-section text-2xl text-hi mb-3">Pay via QR Code</h3>
-                  <p className="body-text text-sm text-mid mb-4">
-                    Scan QR code to make payment instantly
-                  </p>
-                  <p className="label-text text-accent opacity-0 group-hover:opacity-100 transition-opacity duration-fast">
-                    Click to Continue â†’
-                  </p>
+                <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-surface-soft border border-surface-border flex items-center justify-center group-hover:border-accent transition-colors">
+                  <QrCode className="w-8 h-8 text-accent" />
                 </div>
-              </div>
-            </div>
-
-            {/* WhatsApp Section - After Payment */}
-            <div className="mt-8 surface-card hairline p-6">
-              <div className="text-center">
-                <p className="label-text text-mid mb-4">
-                  After completing payment, send your screenshot via WhatsApp:
+                <h3 className="text-xl font-bold text-hi mb-2">Pay via QR Code</h3>
+                <p className="text-xs text-mid mb-4">
+                  Display high-resolution scanner code to pay with any UPI scanner
                 </p>
-                <button
-                  onClick={() => openWhatsApp(true)}
-                  className="btn-primary"
-                  aria-label="Send payment screenshot via WhatsApp"
-                >
-                  <MessageCircle className="w-5 h-5" />
-                  Send Payment Screenshot
-                  <ExternalLink className="w-4 h-4" />
-                </button>
+                <span className="text-xs font-semibold text-accent group-hover:translate-x-1 transition-transform inline-flex items-center gap-1">
+                  Show QR Scanner →
+                </span>
               </div>
             </div>
 
-            <div className="text-center mt-6">
+            {/* WhatsApp Confirmation */}
+            <div className="bg-surface-card border border-surface-border rounded-2xl p-6 text-center shadow-sm">
+              <p className="text-xs text-mid mb-3">
+                Completed payment? Send confirmation receipt directly to Coach Aman:
+              </p>
+              <button
+                onClick={() => openWhatsApp(true)}
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-xs font-bold bg-[#25D366] text-white hover:brightness-110 active:scale-95 transition-all shadow-sm"
+                aria-label="Send payment screenshot via WhatsApp"
+              >
+                <MessageCircle className="w-4 h-4" />
+                Send Receipt via WhatsApp
+                <ExternalLink className="w-3.5 h-3.5" />
+              </button>
+            </div>
+
+            <div className="text-center">
               <button
                 onClick={goBack}
-                className="label-text text-mid hover:text-hi transition-colors duration-fast"
+                className="text-xs text-mid hover:text-hi transition-colors"
                 aria-label="Go back to membership details"
               >
-                â† Back to Details
+                ← Back to Details
               </button>
             </div>
           </div>
@@ -353,20 +346,17 @@ Please activate my membership. Thank you!`;
         {/* STEP 4: QR Code Payment */}
         {step === "qrCode" && (
           <div className="max-w-2xl mx-auto">
-            <div className="surface-card hairline p-8">
+            <div className="bg-surface-card border border-surface-border rounded-2xl p-6 sm:p-8 shadow-sm">
               <div className="text-center mb-6">
-                <div className="w-20 h-20 mx-auto mb-4 surface-elevated hairline flex items-center justify-center">
-                  <QrCode className="w-10 h-10 text-accent" />
-                </div>
-                <h3 className="heading-display text-3xl text-hi mb-2">
-                  Scan &amp; Pay â‚¹{selectedPlanData?.price}
+                <h3 className="text-2xl font-bold text-hi mb-1">
+                  Scan &amp; Pay ₹{selectedPlanData?.price}
                 </h3>
-                <p className="label-text text-mid">{selectedPlanData?.duration}</p>
+                <p className="text-xs text-mid">{selectedPlanData?.duration} Membership Pass</p>
               </div>
 
               {/* QR Code */}
               <div className="flex justify-center mb-6">
-                <div className="relative w-72 h-72 border-4 border-accent overflow-hidden bg-white p-4">
+                <div className="relative w-64 h-64 border-2 border-accent rounded-2xl overflow-hidden bg-white p-3 shadow-md">
                   <Image
                     src="/assets/QRCode.jpeg"
                     alt="Payment QR Code"
@@ -377,57 +367,46 @@ Please activate my membership. Thank you!`;
               </div>
 
               {/* UPI ID Fallback */}
-              <div className="surface-elevated hairline p-4 mb-6 text-center">
-                <p className="label-text text-mid mb-2">Or use UPI ID</p>
-                <p className="font-mono text-lg text-hi break-all">{UPI_ID}</p>
+              <div className="bg-surface-soft border border-surface-border rounded-xl p-3.5 mb-6 text-center">
+                <p className="text-xs text-mid mb-1">Or direct UPI ID transfer:</p>
+                <p className="font-mono text-sm font-bold text-accent select-all">{UPI_ID}</p>
               </div>
 
               {/* Instructions */}
-              <div className="surface-elevated hairline border-accent p-6 mb-6">
-                <p className="label-text text-accent mb-4 flex items-center gap-2">
-                  <CheckCircle className="w-4 h-4" /> Payment Steps
+              <div className="bg-surface-soft border border-surface-border rounded-xl p-4 mb-6">
+                <p className="text-xs font-semibold text-hi mb-3 flex items-center gap-2">
+                  <CheckCircle className="w-4 h-4 text-accent" /> Steps to Activate:
                 </p>
-                <ol className="body-text text-sm text-mid space-y-3 list-decimal list-inside">
-                  <li>Open any UPI app on your phone</li>
-                  <li>Scan the QR code above</li>
-                  <li>Pay <span className="text-accent font-semibold">â‚¹{selectedPlanData?.price}</span></li>
-                  <li>Take a <span className="text-accent font-semibold">screenshot</span> of the transaction</li>
-                  <li>Click below to send confirmation via WhatsApp</li>
+                <ol className="text-xs text-mid space-y-2 list-decimal list-inside">
+                  <li>Scan QR code with GPay, PhonePe, or Paytm</li>
+                  <li>Transfer exact amount: <span className="text-hi font-bold">₹{selectedPlanData?.price}</span></li>
+                  <li>Take screenshot of successful transaction</li>
+                  <li>Click below to send receipt to Coach Aman on WhatsApp</li>
                 </ol>
-              </div>
-
-              {/* User Details */}
-              <div className="surface-elevated hairline p-4 mb-6">
-                <p className="label-text text-mid mb-3">Your Details:</p>
-                <div className="space-y-2 body-text text-sm text-mid">
-                  <p><span className="text-low">Name:</span> <span className="text-hi font-semibold">{formData.name}</span></p>
-                  <p><span className="text-low">Gender:</span> <span className="text-hi font-semibold">{formData.gender}</span></p>
-                  <p><span className="text-low">Mobile:</span> <span className="text-hi font-semibold">{formData.mobile}</span></p>
-                </div>
               </div>
 
               {/* WhatsApp Button */}
               <button
                 onClick={() => openWhatsApp(true)}
-                className="btn-primary w-full mb-4"
+                className="w-full py-3.5 px-4 rounded-xl text-xs font-bold bg-[#25D366] text-white hover:brightness-110 active:scale-95 transition-all flex items-center justify-center gap-2 mb-4 shadow-sm"
                 aria-label="Send payment confirmation via WhatsApp"
               >
-                <MessageCircle className="w-5 h-5" />
-                Send Payment Screenshot via WhatsApp
-                <ExternalLink className="w-4 h-4" />
+                <MessageCircle className="w-4 h-4" />
+                Send Receipt via WhatsApp
+                <ExternalLink className="w-3.5 h-3.5" />
               </button>
 
               <div className="flex gap-3">
                 <button
                   onClick={goBack}
-                  className="btn-secondary flex-1"
+                  className="flex-1 py-2.5 px-4 rounded-xl text-xs font-semibold bg-surface-soft border border-surface-border text-mid hover:text-hi hover:bg-surface-elevated active:scale-95 transition-all"
                   aria-label="Change payment method"
                 >
-                  â† Change Method
+                  ← Change Method
                 </button>
                 <button
                   onClick={resetFlow}
-                  className="btn-secondary flex-1"
+                  className="flex-1 py-2.5 px-4 rounded-xl text-xs font-semibold bg-surface-soft border border-surface-border text-mid hover:text-hi hover:bg-surface-elevated active:scale-95 transition-all"
                   aria-label="Start payment process over"
                 >
                   Start Over
@@ -440,4 +419,3 @@ Please activate my membership. Thank you!`;
     </section>
   );
 }
-
