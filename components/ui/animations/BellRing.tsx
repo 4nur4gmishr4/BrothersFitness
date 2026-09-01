@@ -1,4 +1,4 @@
-import AnimatedSvgIcon from "../ui/AnimatedSvgIcon";
+import AnimatedSvgIcon from "@/components/ui/AnimatedSvgIcon";
 
 export default function BellRing({ className = "w-5 h-5 text-accent" }: { className?: string }) {
   return (

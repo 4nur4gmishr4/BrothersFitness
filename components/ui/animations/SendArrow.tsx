@@ -1,4 +1,4 @@
-import AnimatedSvgIcon from "../ui/AnimatedSvgIcon";
+import AnimatedSvgIcon from "@/components/ui/AnimatedSvgIcon";
 
 export default function SendArrow({ sending = false, className = "w-5 h-5" }: { sending?: boolean; className?: string; }) {
   return (

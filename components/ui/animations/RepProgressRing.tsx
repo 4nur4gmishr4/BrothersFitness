@@ -1,7 +1,7 @@
 /** req #11 — rep_ring: circular rep progress. Smooth dash-offset
  *  transition driven by reps/target. */
 
-import AnimatedSvgIcon from "../ui/AnimatedSvgIcon";
+import AnimatedSvgIcon from "@/components/ui/AnimatedSvgIcon";
 
 export default function RepProgressRing({
   reps,

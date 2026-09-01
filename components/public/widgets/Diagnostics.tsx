@@ -3,10 +3,10 @@
 import { useState, useRef } from "react";
 import { Activity, Flame, Dumbbell } from "lucide-react";
 import dynamic from "next/dynamic";
-import CalculatorGears from "@/components/animations/CalculatorGears";
-import ResultReveal from "@/components/animations/ResultReveal";
-import SliderThumb from "@/components/animations/SliderThumb";
-import RepProgressRing from "@/components/animations/RepProgressRing";
+import CalculatorGears from "@/components/ui/animations/CalculatorGears";
+import ResultReveal from "@/components/ui/animations/ResultReveal";
+import SliderThumb from "@/components/ui/animations/SliderThumb";
+import RepProgressRing from "@/components/ui/animations/RepProgressRing";
 
 const ShareMissionReport = dynamic(() => import("@/components/features/gamification/ShareMissionReport"), { ssr: false });
 
