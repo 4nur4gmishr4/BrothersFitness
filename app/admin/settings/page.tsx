@@ -103,13 +103,13 @@ export default function AdminSettingsPage() {
             <table className="min-w-full w-full border-collapse">
               <thead>
                 <tr className="surface-elevated text-left">
-                  <th className="px-4 sm:px-5 py-2.5 hairline-b label-text uppercase tracking-widest text-xs text-faint">
+                  <th className="px-4 sm:px-5 py-2.5 hairline-b uppercase tracking-wider text-xs font-semibold text-faint">
                     Plan display name
                   </th>
-                  <th className="px-4 sm:px-5 py-2.5 hairline-b label-text uppercase tracking-widest text-xs text-faint">
+                  <th className="px-4 sm:px-5 py-2.5 hairline-b uppercase tracking-wider text-xs font-semibold text-faint">
                     Stored value (membership_type)
                   </th>
-                  <th className="px-4 sm:px-5 py-2.5 hairline-b label-text uppercase tracking-widest text-xs text-faint text-right">
+                  <th className="px-4 sm:px-5 py-2.5 hairline-b uppercase tracking-wider text-xs font-semibold text-faint text-right">
                     Price
                   </th>
                 </tr>
@@ -117,13 +117,13 @@ export default function AdminSettingsPage() {
               <tbody>
                 {MEMBERSHIP_PLAN_DETAILS.map((p) => (
                   <tr key={p.value} className="hairline-b last:hairline-b-0 hover:bg-surface-elevated transition-colors">
-                    <td className="px-4 sm:px-5 py-3 text-sm text-hi">
+                    <td className="px-4 sm:px-5 py-3 text-sm text-hi font-medium">
                       {p.label}
                     </td>
-                    <td className="px-4 sm:px-5 py-3 text-xs font-mono text-mid">
+                    <td className="px-4 sm:px-5 py-3 text-xs text-mid font-medium">
                       {p.value}
                     </td>
-                    <td className="px-4 sm:px-5 py-3 text-sm font-mono text-hi text-right">
+                    <td className="px-4 sm:px-5 py-3 text-sm font-semibold text-hi text-right tabular-nums">
                       ₹{(PLAN_PRICES as Record<string, number>)[p.value]?.toLocaleString("en-IN") ?? "—"}
                     </td>
                   </tr>
@@ -147,17 +147,17 @@ export default function AdminSettingsPage() {
               type="button"
               onClick={runBackup}
               disabled={backupState === "running"}
-              className="btn-primary text-xs"
+              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-accent hover:bg-accent-hover text-white text-xs font-semibold tracking-wide transition-all shadow-md active:scale-95 disabled:opacity-50"
             >
               {backupState === "running" ? (
                 <>
                   <RefreshCw className="w-3.5 h-3.5 animate-spin" />
-                  Running…
+                  <span>Running…</span>
                 </>
               ) : (
                 <>
                   <Download className="w-3.5 h-3.5" />
-                  Download Backup
+                  <span>Download Backup</span>
                 </>
               )}
             </button>
@@ -176,12 +176,12 @@ export default function AdminSettingsPage() {
               <div className="hairline border-status-success/30 bg-status-success/5 p-3 flex items-start gap-2.5 text-xs text-status-success">
                 <CheckCircle2 className="w-4 h-4 shrink-0 mt-0.5" />
                 <div className="flex-1 min-w-0">
-                  <div className="font-bold uppercase tracking-widest font-mono mb-0.5">
+                  <div className="font-semibold uppercase tracking-wider text-xs mb-0.5">
                     Backup complete
                   </div>
                   <div>
                     {backupResult.total} members exported to{" "}
-                    <span className="font-mono">{backupResult.filename}</span>
+                    <span className="font-medium text-hi">{backupResult.filename}</span>
                   </div>
                   {backupResult.storageUrl && (
                     <a
@@ -201,7 +201,7 @@ export default function AdminSettingsPage() {
               <div className="hairline border-status-danger/30 bg-status-danger/5 p-3 flex items-start gap-2.5 text-xs text-status-danger">
                 <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
                 <div>
-                  <div className="font-bold uppercase tracking-widest font-mono mb-0.5">
+                  <div className="font-semibold uppercase tracking-wider text-xs mb-0.5">
                     Backup failed
                   </div>
                   Check the browser console for details. Verify the API route is
@@ -212,24 +212,24 @@ export default function AdminSettingsPage() {
 
             <div className="grid gap-3 sm:grid-cols-3 text-xs text-mid">
               <div className="hairline surface-elevated p-3">
-                <div className="label-text uppercase tracking-widest text-xs text-faint mb-1">
+                <div className="uppercase tracking-wider text-xs font-semibold text-faint mb-1">
                   Format
                 </div>
-                <div className="font-mono text-hi">JSON</div>
+                <div className="text-hi font-medium">JSON</div>
                 <div className="text-xs text-faint mt-0.5">Full member schema</div>
               </div>
               <div className="hairline surface-elevated p-3">
-                <div className="label-text uppercase tracking-widest text-xs text-faint mb-1">
+                <div className="uppercase tracking-wider text-xs font-semibold text-faint mb-1">
                   Storage target
                 </div>
-                <div className="font-mono text-hi">supabase/backups</div>
+                <div className="text-hi font-medium">supabase/backups</div>
                 <div className="text-xs text-faint mt-0.5">Falls back to browser download</div>
               </div>
               <div className="hairline surface-elevated p-3">
-                <div className="label-text uppercase tracking-widest text-xs text-faint mb-1">
+                <div className="uppercase tracking-wider text-xs font-semibold text-faint mb-1">
                   Audit log
                 </div>
-                <div className="font-mono text-hi">BACKUP event</div>
+                <div className="text-hi font-medium">BACKUP event</div>
                 <div className="text-xs text-faint mt-0.5">Logged in Activity Log</div>
               </div>
             </div>
@@ -310,10 +310,10 @@ export default function AdminSettingsPage() {
 function InfoRow({ label, value }: { label: string; value: string }) {
   return (
     <div className="hairline surface-elevated p-3">
-      <div className="label-text uppercase tracking-widest text-xs text-faint mb-1">
+      <div className="uppercase tracking-wider text-xs font-semibold text-faint mb-1">
         {label}
       </div>
-      <div className="text-sm text-hi font-mono">{value}</div>
+      <div className="text-sm text-hi font-medium tabular-nums">{value}</div>
     </div>
   );
 }
