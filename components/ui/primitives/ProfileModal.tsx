@@ -13,7 +13,7 @@ import {
     Phone,
     Target,
     Utensils,
-    Sparkles,
+    Zap,
     ShieldCheck
 } from "lucide-react";
 import { MAX_DAILY_CREDITS } from "@/lib/config";
@@ -227,7 +227,7 @@ export default function ProfileModal({ isOpen, onClose }: ProfileModalProps) {
                         <div className="surface-card hairline p-4 rounded-2xl space-y-2">
                             <div className="flex justify-between items-center">
                                 <div className="flex items-center gap-1.5 text-xs font-semibold text-hi">
-                                    <Sparkles className="w-3.5 h-3.5 text-accent" />
+                                    <Zap className="w-3.5 h-3.5 text-accent" />
                                     <span>Daily AI Synthesizer Credits</span>
                                 </div>
                                 <span className="text-sm font-black text-accent tabular-nums">

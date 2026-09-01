@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Clock, ArrowUpRight, Sparkles, RefreshCw } from "lucide-react";
+import { Clock, ArrowUpRight, Dumbbell, RefreshCw } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 
@@ -134,7 +134,7 @@ export default function Hero() {
               <div className="flex items-center justify-between gap-2 pb-2.5 border-b border-surface-border/50">
                 <div className="flex items-center gap-2">
                   <div className="w-5 h-5 rounded-full bg-accent/10 border border-accent/20 flex items-center justify-center text-accent">
-                    <Sparkles className="w-3 h-3" />
+                    <Dumbbell className="w-3 h-3" />
                   </div>
                   <span className="text-[10px] sm:text-[11px] font-bold tracking-widest text-accent uppercase">
                     {currentInsight.tag}

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { Sparkles, X, Dumbbell, Utensils, Zap, Send, RotateCcw, Bot } from "lucide-react";
+import { X, Dumbbell, Utensils, Zap, Send, RotateCcw, Bot } from "lucide-react";
 import { useUserAuth } from "@/lib/user-auth-context";
 import { useModalDismiss } from "@/hooks/useModalDismiss";
 import { MAX_DAILY_CREDITS } from "@/lib/config";
@@ -197,7 +197,7 @@ export default function TacticalChatbot() {
           <div className="flex flex-col text-left leading-tight pr-1">
             <span className="text-xs font-bold text-white tracking-tight flex items-center gap-1">
               BroFit AI
-              <Sparkles className="w-3 h-3 text-accent" />
+              <Zap className="w-3 h-3 text-accent" />
             </span>
             <span className="text-[10px] text-zinc-400 font-medium">Coach &amp; Diet</span>
           </div>
@@ -223,7 +223,7 @@ export default function TacticalChatbot() {
               <div className="p-4 bg-surface-card border-b border-surface-border flex justify-between items-center shrink-0">
                 <div className="flex items-center gap-3">
                   <div className="w-8 h-8 rounded-full bg-accent/10 flex items-center justify-center text-accent">
-                    <Sparkles className="w-4 h-4" />
+                    <Bot className="w-4 h-4" />
                   </div>
                   <div>
                     <h3 className="text-sm font-semibold text-hi">Fitness AI Assistant</h3>
@@ -294,7 +294,7 @@ export default function TacticalChatbot() {
                   <div className="space-y-4">
                     <div className="flex items-start gap-2.5">
                       <div className="w-7 h-7 rounded-full bg-accent/10 flex items-center justify-center text-accent shrink-0">
-                        <Sparkles className="w-3.5 h-3.5" />
+                        <Bot className="w-3.5 h-3.5" />
                       </div>
                       <div className="bg-surface-card border border-surface-border rounded-2xl rounded-tl-xs p-3.5 text-xs text-hi leading-relaxed shadow-xs space-y-2">
                         <p className="font-semibold text-hi">
