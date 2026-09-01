@@ -19,6 +19,7 @@ import { toast } from "sonner";
 import { AdminLoader } from "@/components/admin/AdminUI";
 import { adminFetch, openWhatsApp } from "@/lib/admin-api";
 import { formatDate } from "@/lib/member-utils";
+import { cn } from "@/lib/utils";
 
 interface MessageInquiry {
   id: string;
@@ -53,13 +54,12 @@ function initials(name: string): string {
 }
 
 const AVATAR_COLORS = [
-  "from-[#e17076] to-[#d65057]",
-  "from-[#faa774] to-[#f48a52]",
-  "from-[#a695e7] to-[#7f6fd3]",
-  "from-[#7bc862] to-[#5ba742]",
-  "from-[#6ec9cb] to-[#45a4a7]",
-  "from-[#65aadd] to-[#4082b7]",
-  "from-[#ee7aae] to-[#d44e88]",
+  "from-red-500 to-rose-600",
+  "from-orange-500 to-amber-600",
+  "from-indigo-500 to-purple-600",
+  "from-emerald-500 to-teal-600",
+  "from-cyan-500 to-blue-600",
+  "from-pink-500 to-rose-600",
 ];
 
 function getAvatarGradient(name: string): string {
@@ -100,56 +100,59 @@ export default function AdminMessagesPage() {
   }, []);
 
   const fetchMessages = useCallback(async () => {
+    setError(null);
     try {
-      setLoading(true);
-      setError(null);
-      const res = await adminFetch(`/api/admin/leads?t=${Date.now()}`, { cache: "no-store" });
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const data = await res.json();
-      const list: MessageInquiry[] = (data.leads || []).slice().sort(
-        (a: MessageInquiry, b: MessageInquiry) =>
-          new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-      );
-      setMessages(list);
-      if (list.length > 0 && !selectedId) {
-        setSelectedId(list[0].id);
+      const res = await adminFetch("/api/admin/leads");
+      if (!res.ok) {
+        if (res.status === 401) {
+          setError("Session expired. Please log in again.");
+          return;
+        }
+        throw new Error(`HTTP ${res.status}`);
       }
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "Failed to load messages");
+      const data = await res.json();
+      const raw = (data.leads || []) as MessageInquiry[];
+      const sorted = [...raw].sort(
+        (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+      );
+      setMessages(sorted);
+      const read = loadRead();
+      setReadIds(read);
+
+      // Auto select first message if none selected
+      if (!selectedId && sorted.length > 0) {
+        setSelectedId(sorted[0].id);
+        if (!read.has(sorted[0].id)) {
+          const next = new Set(read).add(sorted[0].id);
+          setReadIds(next);
+          saveRead(next);
+        }
+      }
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Failed to load messages");
     } finally {
       setLoading(false);
     }
-  }, [selectedId]);
+  }, [loadRead, saveRead, selectedId]);
 
   useEffect(() => {
-    setReadIds(loadRead());
     fetchMessages();
-    const iv = setInterval(() => {
-      if (document.visibilityState === "visible") fetchMessages();
-    }, 30000);
-    return () => clearInterval(iv);
-  }, [fetchMessages, loadRead]);
-
-  const markRead = (id: string) => {
-    setReadIds((prev) => {
-      if (prev.has(id)) return prev;
-      const next = new Set(prev);
-      next.add(id);
-      saveRead(next);
-      return next;
-    });
-  };
-
-  const markAllRead = () => {
-    const allIds = new Set(messages.map((l) => l.id));
-    setReadIds(allIds);
-    saveRead(allIds);
-    toast.success("Marked all messages as read");
-  };
+  }, [fetchMessages]);
 
   const onSelect = (id: string) => {
     setSelectedId(id);
-    markRead(id);
+    if (!readIds.has(id)) {
+      const next = new Set(readIds).add(id);
+      setReadIds(next);
+      saveRead(next);
+    }
+  };
+
+  const markAllRead = () => {
+    const next = new Set<string>(messages.map((l) => l.id));
+    setReadIds(next);
+    saveRead(next);
+    toast.success("All messages marked as read");
   };
 
   const handleDelete = async (id: string) => {
@@ -157,7 +160,8 @@ export default function AdminMessagesPage() {
       const res = await adminFetch(`/api/admin/leads?id=${encodeURIComponent(id)}`, {
         method: "DELETE",
       });
-      if (!res.ok) throw new Error("HTTP error");
+      if (!res.ok) throw new Error("Delete failed");
+
       setMessages((prev) => {
         const next = prev.filter((l) => l.id !== id);
         if (selectedId === id) {
@@ -165,16 +169,17 @@ export default function AdminMessagesPage() {
         }
         return next;
       });
-      setReadIds((prev) => {
-        const next = new Set(prev);
-        next.delete(id);
-        saveRead(next);
-        return next;
-      });
-      setDeletingId(null);
-      toast.success("Message conversation deleted");
+
+      const nextRead = new Set(readIds);
+      nextRead.delete(id);
+      setReadIds(nextRead);
+      saveRead(nextRead);
+
+      toast.success("Message inquiry deleted");
     } catch {
       toast.error("Failed to delete message");
+    } finally {
+      setDeletingId(null);
     }
   };
 
@@ -201,21 +206,21 @@ export default function AdminMessagesPage() {
   const selected = selectedId ? messages.find((l) => l.id === selectedId) || null : null;
 
   return (
-    <div className="w-full h-[calc(100vh-3.5rem)] flex flex-col bg-[#eef2f5] dark:bg-[#0e1621] overflow-hidden transition-colors">
+    <div className="w-full h-[calc(100vh-3.5rem)] flex flex-col bg-surface-canvas text-hi overflow-hidden transition-colors">
       {loading ? (
         <div className="flex-1 flex items-center justify-center">
           <AdminLoader text="Loading messages…" />
         </div>
       ) : error ? (
         <div className="flex-1 flex items-center justify-center p-6 text-center">
-          <div className="max-w-md p-6 rounded-2xl bg-white dark:bg-[#17212b] border border-zinc-200 dark:border-[#232e3c] space-y-4 shadow-lg">
-            <AlertCircle className="w-10 h-10 text-red-500 mx-auto" />
-            <div className="text-zinc-900 dark:text-white font-semibold">Failed to load messages</div>
-            <div className="text-xs text-zinc-500 dark:text-[#708499]">{error}</div>
+          <div className="max-w-md p-6 rounded-2xl bg-surface-card border border-surface-border space-y-4 shadow-lg">
+            <AlertCircle className="w-10 h-10 text-status-danger mx-auto" />
+            <div className="text-hi font-semibold">Failed to load messages</div>
+            <div className="text-xs text-low">{error}</div>
             <button
               type="button"
               onClick={fetchMessages}
-              className="px-4 py-2 rounded-xl bg-[#2481cc] hover:bg-[#2074b8] text-white text-xs font-semibold transition-colors shadow-sm"
+              className="px-4 py-2 rounded-xl bg-accent hover:bg-accent-hover text-white text-xs font-semibold transition-colors shadow-sm"
             >
               Retry Connection
             </button>
@@ -226,24 +231,24 @@ export default function AdminMessagesPage() {
         <div className="flex-1 grid grid-cols-1 md:grid-cols-12 overflow-hidden h-full">
           
           {/* Left Column: Chats & Inquiries Stream */}
-          <div className="md:col-span-5 lg:col-span-4 bg-white dark:bg-[#17212b] border-r border-zinc-200 dark:border-[#0e1621] flex flex-col h-full overflow-hidden shadow-sm">
+          <div className="md:col-span-5 lg:col-span-4 bg-surface-card border-r border-surface-border flex flex-col h-full overflow-hidden shadow-xs">
             
             {/* Search & Top Controls */}
-            <div className="p-3 bg-white dark:bg-[#17212b] border-b border-zinc-200 dark:border-[#0e1621] flex items-center gap-2">
+            <div className="p-3 bg-surface-card border-b border-surface-border flex items-center gap-2">
               <div className="relative flex-1">
-                <Search className="w-4 h-4 text-zinc-400 dark:text-[#708499] absolute left-3 top-1/2 -translate-y-1/2" />
+                <Search className="w-4 h-4 text-low absolute left-3 top-1/2 -translate-y-1/2" />
                 <input
                   type="text"
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   placeholder="Search messages, phone, email…"
-                  className="w-full bg-zinc-100 dark:bg-[#242f3d] border border-transparent focus:border-[#2481cc] text-xs text-zinc-900 dark:text-white rounded-2xl pl-9 pr-7 py-2 placeholder:text-zinc-400 dark:placeholder:text-[#708499] focus:outline-none transition-colors"
+                  className="w-full bg-surface-soft border border-surface-border focus:border-accent text-xs text-hi rounded-xl pl-9 pr-7 py-2 placeholder:text-low focus:outline-none transition-colors font-medium"
                 />
                 {search && (
                   <button
                     type="button"
                     onClick={() => setSearch("")}
-                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-zinc-400 dark:text-[#708499] hover:text-zinc-900 dark:hover:text-white"
+                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-low hover:text-hi"
                   >
                     <X className="w-3.5 h-3.5" />
                   </button>
@@ -253,8 +258,9 @@ export default function AdminMessagesPage() {
               <button
                 type="button"
                 onClick={fetchMessages}
-                className="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-[#242f3d] text-zinc-500 dark:text-[#708499] hover:text-zinc-900 dark:hover:text-white transition-colors"
+                className="p-2 rounded-xl hover:bg-surface-elevated text-low hover:text-hi transition-colors border border-transparent hover:border-surface-border"
                 title="Refresh messages"
+                aria-label="Refresh messages"
               >
                 <RefreshCw className="w-4 h-4" />
               </button>
@@ -263,8 +269,9 @@ export default function AdminMessagesPage() {
                 <button
                   type="button"
                   onClick={markAllRead}
-                  className="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-[#242f3d] text-[#2481cc] transition-colors"
+                  className="p-2 rounded-xl hover:bg-surface-elevated text-accent transition-colors border border-transparent hover:border-surface-border"
                   title="Mark all as read"
+                  aria-label="Mark all as read"
                 >
                   <CheckCircle2 className="w-4 h-4" />
                 </button>
@@ -272,9 +279,9 @@ export default function AdminMessagesPage() {
             </div>
 
             {/* Message Conversation Rows */}
-            <div className="flex-1 overflow-y-auto divide-y divide-zinc-100 dark:divide-[#0e1621]">
+            <div className="flex-1 overflow-y-auto divide-y divide-surface-border/50">
               {filtered.length === 0 ? (
-                <div className="p-8 text-center text-zinc-400 dark:text-[#708499] text-xs">
+                <div className="p-8 text-center text-low text-xs">
                   No conversations found.
                 </div>
               ) : (
@@ -288,15 +295,16 @@ export default function AdminMessagesPage() {
                       key={item.id}
                       type="button"
                       onClick={() => onSelect(item.id)}
-                      className={`w-full text-left px-3.5 py-3 flex items-center gap-3 transition-colors ${
+                      className={cn(
+                        "w-full text-left px-3.5 py-3 flex items-center gap-3 transition-colors relative",
                         isSelected
-                          ? "bg-[#3390ec] text-white dark:bg-[#2b5278] dark:text-white shadow-sm"
-                          : "hover:bg-zinc-50 dark:hover:bg-[#202b36] text-zinc-900 dark:text-[#e4ecf2]"
-                      }`}
+                          ? "bg-accent/15 border-l-4 border-accent text-hi"
+                          : "hover:bg-surface-elevated text-hi border-l-4 border-transparent"
+                      )}
                     >
                       {/* Avatar */}
                       <div
-                        className={`w-12 h-12 rounded-full bg-gradient-to-br ${gradient} flex items-center justify-center text-sm font-bold text-white shrink-0 shadow-sm`}
+                        className={`w-11 h-11 rounded-xl bg-gradient-to-br ${gradient} flex items-center justify-center text-xs font-bold text-white shrink-0 shadow-sm`}
                       >
                         {initials(item.name)}
                       </div>
@@ -305,37 +313,26 @@ export default function AdminMessagesPage() {
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center justify-between gap-1 mb-1">
                           <span
-                            className={`text-sm font-semibold truncate ${
-                              isSelected ? "text-white" : "text-zinc-900 dark:text-[#f5f5f5]"
-                            }`}
+                            className={cn(
+                              "text-sm font-semibold truncate",
+                              isSelected ? "text-hi font-bold" : "text-hi"
+                            )}
                           >
                             {item.name}
                           </span>
-                          <span
-                            className={`text-xs tabular-nums font-medium shrink-0 ${
-                              isSelected
-                                ? "text-blue-100 dark:text-[#b2c8de]"
-                                : "text-zinc-500 dark:text-[#708499]"
-                            }`}
-                          >
+                          <span className="text-[11px] tabular-nums text-low shrink-0">
                             {formatTime(item.created_at)}
                           </span>
                         </div>
 
                         <div className="flex items-center justify-between gap-2">
-                          <p
-                            className={`text-xs truncate ${
-                              isSelected
-                                ? "text-blue-50 dark:text-[#c2d7eb]"
-                                : "text-zinc-500 dark:text-[#7f91a4]"
-                            }`}
-                          >
+                          <p className="text-xs truncate text-mid">
                             {item.message || "Contact Form Inquiry"}
                           </p>
 
                           {/* Unread Badge Pill */}
                           {isUnread && (
-                            <span className="w-5 h-5 rounded-full bg-[#2481cc] text-white text-[11px] font-bold flex items-center justify-center shrink-0 shadow-sm">
+                            <span className="w-5 h-5 rounded-full bg-accent text-white text-[10px] font-bold flex items-center justify-center shrink-0 shadow-sm">
                               1
                             </span>
                           )}
@@ -349,31 +346,31 @@ export default function AdminMessagesPage() {
           </div>
 
           {/* Right Column: Full-Height Chat Canvas */}
-          <div className="md:col-span-7 lg:col-span-8 flex flex-col h-full bg-[#eef2f5] dark:bg-[#0e1621] relative overflow-hidden">
+          <div className="md:col-span-7 lg:col-span-8 flex flex-col h-full bg-surface-canvas relative overflow-hidden">
             {selected ? (
               <>
                 {/* Header Bar */}
-                <div className="px-5 py-3 bg-white dark:bg-[#17212b] border-b border-zinc-200 dark:border-[#0e1621] flex items-center justify-between gap-4 shrink-0 shadow-sm">
+                <div className="px-5 py-3 bg-surface-card border-b border-surface-border flex items-center justify-between gap-4 shrink-0 shadow-xs">
                   <div className="flex items-center gap-3 min-w-0">
                     <div
-                      className={`w-10 h-10 rounded-full bg-gradient-to-br ${getAvatarGradient(
+                      className={`w-10 h-10 rounded-xl bg-gradient-to-br ${getAvatarGradient(
                         selected.name
                       )} flex items-center justify-center text-xs font-bold text-white shrink-0 shadow-sm`}
                     >
                       {initials(selected.name)}
                     </div>
                     <div className="min-w-0">
-                      <div className="text-sm font-semibold text-zinc-900 dark:text-white truncate flex items-center gap-2">
+                      <div className="text-sm font-semibold text-hi truncate flex items-center gap-2">
                         <span>{selected.name}</span>
                       </div>
-                      <div className="text-xs text-zinc-500 dark:text-[#708499] truncate font-medium">
-                        <span className="tabular-nums">{selected.phone}</span> · {selected.email}
+                      <div className="text-xs text-low truncate font-medium">
+                        <span className="tabular-nums font-mono">{selected.phone}</span> · {selected.email}
                       </div>
                     </div>
                   </div>
 
                   {/* Header Action Buttons */}
-                  <div className="flex items-center gap-1.5 shrink-0">
+                  <div className="flex items-center gap-2 shrink-0">
                     <button
                       type="button"
                       onClick={() =>
@@ -382,7 +379,7 @@ export default function AdminMessagesPage() {
                           `Hi ${selected.name}, this is Team Brother's Fitness Lakhnadon! We received your message: "${selected.message}". How can we help you crush your fitness goals? 💪`
                         )
                       }
-                      className="px-3 py-1.5 rounded-xl bg-[#2481cc] hover:bg-[#2074b8] text-white text-xs font-semibold transition-colors shadow-sm flex items-center gap-1.5 active:scale-95"
+                      className="px-3 py-1.5 rounded-xl bg-[#25D366] hover:bg-[#20bd5a] text-white text-xs font-semibold transition-colors shadow-sm flex items-center gap-1.5 active:scale-95"
                     >
                       <MessageCircle className="w-3.5 h-3.5" />
                       <span>WhatsApp</span>
@@ -390,7 +387,7 @@ export default function AdminMessagesPage() {
 
                     <a
                       href={`tel:${selected.phone}`}
-                      className="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-[#242f3d] text-zinc-500 dark:text-[#708499] hover:text-zinc-900 dark:hover:text-white transition-colors"
+                      className="p-2 rounded-xl hover:bg-surface-elevated text-low hover:text-hi transition-colors border border-surface-border"
                       title="Call customer"
                     >
                       <Phone className="w-4 h-4" />
@@ -399,7 +396,7 @@ export default function AdminMessagesPage() {
                     <button
                       type="button"
                       onClick={() => setDeletingId(selected.id)}
-                      className="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-[#242f3d] text-zinc-500 dark:text-[#708499] hover:text-red-500 transition-colors"
+                      className="p-2 rounded-xl hover:bg-status-danger/10 text-low hover:text-status-danger transition-colors border border-surface-border"
                       title="Delete conversation"
                     >
                       <Trash2 className="w-4 h-4" />
@@ -414,7 +411,7 @@ export default function AdminMessagesPage() {
                     
                     {/* Date Centered Bubble */}
                     <div className="flex justify-center">
-                      <span className="text-xs font-medium text-zinc-600 dark:text-[#708499] bg-white/80 dark:bg-[#17212b]/80 border border-zinc-200 dark:border-[#232e3c] px-3 py-1 rounded-full shadow-sm tabular-nums">
+                      <span className="text-xs font-medium text-low bg-surface-card border border-surface-border px-3 py-1 rounded-full shadow-xs tabular-nums">
                         {new Date(selected.created_at).toLocaleString("en-IN", {
                           dateStyle: "medium",
                           timeStyle: "short",
@@ -425,51 +422,51 @@ export default function AdminMessagesPage() {
                     {/* Incoming Message Bubble */}
                     <div className="flex items-end gap-2.5 max-w-[85%]">
                       <div
-                        className={`w-7 h-7 rounded-full bg-gradient-to-br ${getAvatarGradient(
+                        className={`w-7 h-7 rounded-lg bg-gradient-to-br ${getAvatarGradient(
                           selected.name
-                        )} flex items-center justify-center text-[10px] font-bold text-white shrink-0 mb-1 shadow-sm`}
+                        )} flex items-center justify-center text-[10px] font-bold text-white shrink-0 mb-1 shadow-xs`}
                       >
                         {initials(selected.name)}
                       </div>
 
-                      <div className="relative bg-white dark:bg-[#182533] border border-zinc-200 dark:border-[#232e3c] text-zinc-900 dark:text-[#f5f5f5] rounded-2xl rounded-bl-sm p-3.5 shadow-md space-y-1.5">
-                        <div className="text-xs font-semibold text-[#2481cc] dark:text-[#5288c1]">
+                      <div className="relative bg-surface-card border border-surface-border text-hi rounded-2xl rounded-bl-sm p-4 shadow-sm space-y-2">
+                        <div className="text-xs font-semibold text-accent">
                           {selected.name}
                         </div>
-                        <div className="text-sm leading-relaxed whitespace-pre-wrap">
+                        <div className="text-sm leading-relaxed whitespace-pre-wrap text-hi">
                           {selected.message}
                         </div>
                         
                         {/* Timestamp & Double Checkmarks */}
-                        <div className="flex items-center justify-end gap-1 text-[11px] text-zinc-400 dark:text-[#708499] font-medium pt-1 tabular-nums">
+                        <div className="flex items-center justify-end gap-1 text-[11px] text-low font-medium pt-1 tabular-nums">
                           <span>
                             {new Date(selected.created_at).toLocaleTimeString([], {
                               hour: "2-digit",
                               minute: "2-digit",
                             })}
                           </span>
-                          <CheckCheck className="w-3.5 h-3.5 text-[#2481cc] dark:text-[#5288c1]" />
+                          <CheckCheck className="w-3.5 h-3.5 text-accent" />
                         </div>
                       </div>
                     </div>
 
                     {/* Information Card */}
-                    <div className="mt-8 rounded-2xl bg-white dark:bg-[#17212b] border border-zinc-200 dark:border-[#232e3c] p-4 space-y-3 shadow-sm">
-                      <div className="text-xs text-[#2481cc] dark:text-[#5288c1] uppercase tracking-wider font-semibold">
+                    <div className="mt-8 rounded-2xl bg-surface-card border border-surface-border p-4 space-y-3 shadow-xs">
+                      <div className="text-xs text-accent uppercase tracking-wider font-semibold font-mono">
                         Inquiry Information
                       </div>
                       <div className="grid grid-cols-2 gap-3 text-xs">
                         <div>
-                          <span className="text-zinc-400 dark:text-[#708499] block text-[10px] font-semibold uppercase tracking-wider">FULL NAME</span>
-                          <span className="text-zinc-900 dark:text-white font-medium">{selected.name}</span>
+                          <span className="text-low block text-[10px] font-semibold uppercase tracking-wider font-mono">FULL NAME</span>
+                          <span className="text-hi font-medium">{selected.name}</span>
                         </div>
                         <div>
-                          <span className="text-zinc-400 dark:text-[#708499] block text-[10px] font-semibold uppercase tracking-wider">MOBILE NUMBER</span>
-                          <span className="text-[#2481cc] dark:text-[#5288c1] font-semibold tabular-nums">{selected.phone}</span>
+                          <span className="text-low block text-[10px] font-semibold uppercase tracking-wider font-mono">MOBILE NUMBER</span>
+                          <span className="text-accent font-semibold font-mono tabular-nums">{selected.phone}</span>
                         </div>
                         <div className="col-span-2">
-                          <span className="text-zinc-400 dark:text-[#708499] block text-[10px] font-semibold uppercase tracking-wider">EMAIL ADDRESS</span>
-                          <span className="text-zinc-700 dark:text-[#e4ecf2] font-medium">{selected.email}</span>
+                          <span className="text-low block text-[10px] font-semibold uppercase tracking-wider font-mono">EMAIL ADDRESS</span>
+                          <span className="text-mid font-medium">{selected.email}</span>
                         </div>
                       </div>
                     </div>
@@ -486,7 +483,7 @@ export default function AdminMessagesPage() {
                             `Hi ${selected.name}, thank you for reaching out to Brother's Fitness Lakhnadon! When would you like to visit the gym for a tour? 🏋️`
                           )
                         }
-                        className="text-xs font-medium px-3.5 py-1.5 rounded-full bg-white dark:bg-[#17212b] hover:bg-zinc-100 dark:hover:bg-[#242f3d] border border-zinc-200 dark:border-[#232e3c] text-zinc-700 dark:text-[#e4ecf2] transition-colors shadow-sm"
+                        className="text-xs font-medium px-3.5 py-1.5 rounded-full bg-surface-card hover:bg-surface-elevated border border-surface-border text-mid hover:text-hi transition-colors shadow-xs"
                       >
                         /offer_gym_tour
                       </button>
@@ -498,17 +495,17 @@ export default function AdminMessagesPage() {
                             `Hey ${selected.name}! We saw your inquiry about gym memberships. Our plans start from ₹600/month. Would you like our full fee structure? 💪`
                           )
                         }
-                        className="text-xs font-medium px-3.5 py-1.5 rounded-full bg-white dark:bg-[#17212b] hover:bg-zinc-100 dark:hover:bg-[#242f3d] border border-zinc-200 dark:border-[#232e3c] text-zinc-700 dark:text-[#e4ecf2] transition-colors shadow-sm"
+                        className="text-xs font-medium px-3.5 py-1.5 rounded-full bg-surface-card hover:bg-surface-elevated border border-surface-border text-mid hover:text-hi transition-colors shadow-xs"
                       >
                         /send_fee_structure
                       </button>
                     </div>
 
                     {/* Input Composer Bar */}
-                    <div className="flex items-center gap-2 bg-white dark:bg-[#17212b] border border-zinc-200 dark:border-[#232e3c] rounded-2xl px-3 py-2 shadow-sm">
+                    <div className="flex items-center gap-2 bg-surface-card border border-surface-border focus-within:border-accent rounded-2xl px-3 py-2 shadow-xs transition-colors">
                       <button
                         type="button"
-                        className="p-1.5 text-zinc-400 dark:text-[#708499] hover:text-zinc-900 dark:hover:text-white transition-colors"
+                        className="p-1.5 text-low hover:text-hi transition-colors"
                         title="Attach file"
                       >
                         <Paperclip className="w-5 h-5" />
@@ -519,7 +516,7 @@ export default function AdminMessagesPage() {
                         value={replyText}
                         onChange={(e) => setReplyText(e.target.value)}
                         placeholder="Write a message for WhatsApp…"
-                        className="flex-1 bg-transparent text-sm text-zinc-900 dark:text-white placeholder:text-zinc-400 dark:placeholder:text-[#708499] focus:outline-none font-medium"
+                        className="flex-1 bg-transparent text-sm text-hi placeholder:text-low focus:outline-none font-medium"
                         onKeyDown={(e) => {
                           if (e.key === "Enter" && replyText.trim()) {
                             openWhatsApp(selected.phone, replyText);
@@ -541,7 +538,7 @@ export default function AdminMessagesPage() {
                             );
                           }
                         }}
-                        className="w-8 h-8 rounded-full bg-[#2481cc] hover:bg-[#2074b8] text-white flex items-center justify-center shrink-0 transition-transform active:scale-95 shadow-md"
+                        className="w-8 h-8 rounded-xl bg-accent hover:bg-accent-hover text-white flex items-center justify-center shrink-0 transition-transform active:scale-95 shadow-sm"
                         title="Send via WhatsApp"
                       >
                         <Send className="w-4 h-4 ml-0.5" />
@@ -552,12 +549,12 @@ export default function AdminMessagesPage() {
                 </div>
               </>
             ) : (
-              <div className="flex-1 flex flex-col items-center justify-center p-8 text-center text-zinc-400 dark:text-[#708499] space-y-3">
-                <div className="w-16 h-16 rounded-full bg-white dark:bg-[#17212b] border border-zinc-200 dark:border-[#232e3c] flex items-center justify-center text-[#2481cc] shadow-sm">
+              <div className="flex-1 flex flex-col items-center justify-center p-8 text-center text-low space-y-3">
+                <div className="w-16 h-16 rounded-2xl bg-surface-card border border-surface-border flex items-center justify-center text-accent shadow-xs">
                   <Inbox className="w-8 h-8" />
                 </div>
-                <div className="font-semibold text-lg text-zinc-900 dark:text-white">Select a Message</div>
-                <p className="text-xs max-w-xs text-zinc-500 dark:text-[#708499] leading-relaxed">
+                <div className="font-semibold text-lg text-hi">Select a Message</div>
+                <p className="text-xs max-w-xs text-low leading-relaxed">
                   Choose an inquiry from the left panel to inspect message payload and reply instantly.
                 </p>
               </div>
@@ -569,23 +566,23 @@ export default function AdminMessagesPage() {
       {/* Delete Confirmation Modal */}
       {deletingId && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="w-full max-w-sm rounded-2xl border border-zinc-200 dark:border-[#232e3c] bg-white dark:bg-[#17212b] p-5 space-y-4 shadow-2xl">
-            <h3 className="font-semibold text-lg text-zinc-900 dark:text-white">Delete Conversation?</h3>
-            <p className="text-xs text-zinc-500 dark:text-[#708499] leading-relaxed">
+          <div className="w-full max-w-sm rounded-2xl border border-surface-border bg-surface-modal p-5 space-y-4 shadow-2xl">
+            <h3 className="font-semibold text-lg text-hi">Delete Conversation?</h3>
+            <p className="text-xs text-low leading-relaxed">
               Are you sure you want to permanently delete this message inquiry?
             </p>
             <div className="flex items-center justify-end gap-2 pt-2">
               <button
                 type="button"
                 onClick={() => setDeletingId(null)}
-                className="px-3.5 py-1.5 rounded-xl border border-zinc-200 dark:border-[#232e3c] bg-zinc-100 dark:bg-[#242f3d] text-xs font-medium text-zinc-700 dark:text-white hover:bg-zinc-200 dark:hover:bg-[#2e3b4c] transition-colors"
+                className="px-3.5 py-1.5 rounded-xl border border-surface-border bg-surface-card text-xs font-medium text-mid hover:text-hi hover:bg-surface-elevated transition-colors"
               >
                 Cancel
               </button>
               <button
                 type="button"
                 onClick={() => handleDelete(deletingId)}
-                className="px-3.5 py-1.5 rounded-xl bg-red-600 hover:bg-red-500 text-white text-xs font-semibold transition-colors shadow-sm"
+                className="px-3.5 py-1.5 rounded-xl bg-status-danger hover:bg-red-600 text-white text-xs font-semibold transition-colors shadow-sm"
               >
                 Confirm Delete
               </button>

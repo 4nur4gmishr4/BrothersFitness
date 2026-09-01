@@ -3,6 +3,7 @@
 import React, { ReactNode } from "react";
 import { LucideIcon } from "lucide-react";
 import SpotlightCard from "@/components/ui/animations/SpotlightCard";
+import MorphingInfinity from "@/components/ui/loaders/MorphingInfinity";
 
 type Variant =
   | "neutral"
@@ -385,8 +386,9 @@ export function AdminLoader({
   className?: string;
 }) {
   return (
-    <div className={`flex items-center justify-center py-20 px-4 text-center ${className}`}>
-      <span className="text-xs uppercase tracking-wider font-semibold text-faint">
+    <div className={`flex flex-col items-center justify-center py-20 px-4 text-center gap-3.5 ${className}`}>
+      <MorphingInfinity className="w-10 h-10 text-accent" />
+      <span className="text-xs font-mono uppercase tracking-widest font-semibold text-faint animate-pulse">
         {text}
       </span>
     </div>

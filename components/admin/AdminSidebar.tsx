@@ -201,6 +201,13 @@ export const AppSidebar = ({ unreadLeads = 0, ...props }: AppSidebarProps) => {
                               } catch {}
                             }
                           }}
+                          onPointerDown={() => {
+                            if (!item.external) {
+                              try {
+                                router.prefetch(item.href);
+                              } catch {}
+                            }
+                          }}
                           onTouchStart={() => {
                             if (!item.external) {
                               try {

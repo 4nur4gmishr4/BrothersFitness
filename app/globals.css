@@ -1653,18 +1653,6 @@ body.mobile-menu-open #tactical-chatbot { display: none !important; }
   transition-timing-function: var(--ease-clickhouse);
 }
 
-/* ---- Global Theme Transition ---- */
-.theme-transition,
-.theme-transition *,
-.theme-transition *::before,
-.theme-transition *::after {
-  transition: background-color 300ms cubic-bezier(0.2, 0, 0, 1),
-              border-color 300ms cubic-bezier(0.2, 0, 0, 1),
-              color 300ms cubic-bezier(0.2, 0, 0, 1),
-              fill 300ms cubic-bezier(0.2, 0, 0, 1),
-              stroke 300ms cubic-bezier(0.2, 0, 0, 1) !important;
-}
-
 @keyframes star-movement-bottom {
   0% { transform: translate(0%, 0%); opacity: 1; }
   100% { transform: translate(-100%, 0%); opacity: 0; }

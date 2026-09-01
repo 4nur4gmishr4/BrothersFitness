@@ -6,6 +6,8 @@ import { useAdmin } from "@/lib/auth-context";
 import { AdminSidebar } from "@/components/admin/AdminSidebar";
 import { useSidebar } from "@/components/ui/sidebar";
 
+import MorphingInfinity from "@/components/ui/loaders/MorphingInfinity";
+
 export { useSidebar };
 
 export function AdminLayout({ children }: { children: ReactNode }) {
@@ -49,9 +51,10 @@ export function AdminLayout({ children }: { children: ReactNode }) {
 
   if (isLoading || !isAdmin) {
     return (
-      <div className="min-h-screen bg-surface-canvas flex items-center justify-center">
-        <div className="text-mid font-medium text-xs">
-          Loading Admin…
+      <div className="min-h-screen bg-surface-canvas flex flex-col items-center justify-center gap-4">
+        <MorphingInfinity className="w-12 h-12 text-accent" />
+        <div className="text-faint font-mono uppercase tracking-widest font-semibold text-xs animate-pulse">
+          Authenticating Console…
         </div>
       </div>
     );
