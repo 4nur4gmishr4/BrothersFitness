@@ -37,6 +37,7 @@ import {
   AdminLoader,
 } from "@/components/admin/AdminUI";
 import { useAllMembers } from "@/hooks/use-admin-stats";
+import { useModalDismiss } from "@/hooks/useModalDismiss";
 import { getMemberStatus, formatDate, parseLocalDate } from "@/lib/member-utils";
 import {
   adminFetch,
@@ -45,6 +46,7 @@ import {
 import { getPlanPrice } from "@/lib/config";
 import CountUp from "@/components/ui/text/CountUp";
 import PebbleImageViewer, { PebbleImage } from "@/components/admin/PebbleImageViewer";
+import { Portal } from "@/components/ui/Portal";
 
 const MemberFormModal = dynamic(
   () => import("@/components/admin/MemberFormModal"),
@@ -990,9 +992,14 @@ function MembersTableView({
                       )}
                     </div>
                     <div className="min-w-0">
-                      <div className="text-sm text-hi truncate font-medium">
+                      <button
+                        type="button"
+                        onClick={() => onEdit(m)}
+                        className="text-sm text-hi truncate font-semibold hover:text-accent text-left transition-colors cursor-pointer block max-w-full"
+                        title="Click to edit member"
+                      >
                         {m.full_name || <span className="text-faint">—</span>}
-                      </div>
+                      </button>
                       <div className="flex items-center gap-2 text-xs text-low flex-wrap font-medium">
                         {m.mobile ? (
                           <a
@@ -1178,7 +1185,7 @@ function MembersCardView({
               />
 
               <div
-                className={`w-13 h-13 sm:w-14 sm:h-14 rounded-2xl border border-surface-border bg-surface-elevated overflow-hidden shrink-0 relative shadow-inner ${
+                className={`w-14 h-14 rounded-2xl border border-surface-border bg-surface-elevated overflow-hidden shrink-0 relative shadow-inner ${
                   m.photo_url ? "cursor-zoom-in group/card-avatar hover:ring-2 hover:ring-accent transition-all" : ""
                 }`}
                 onClick={() => {
@@ -1210,9 +1217,14 @@ function MembersCardView({
               <div className="flex-1 min-w-0">
                 <div className="flex items-start justify-between gap-1">
                   <div className="min-w-0">
-                    <div className="text-sm font-semibold text-hi truncate leading-snug">
+                    <button
+                      type="button"
+                      onClick={() => onEdit(m)}
+                      className="text-sm font-semibold text-hi truncate leading-snug hover:text-accent text-left transition-colors cursor-pointer block max-w-full"
+                      title="Click to edit member"
+                    >
                       {m.full_name || "—"}
-                    </div>
+                    </button>
                     <a
                       href={`tel:${m.mobile || ""}`}
                       className="text-xs text-mid hover:text-accent transition-colors truncate block mt-0.5 font-medium"
@@ -1387,121 +1399,126 @@ function DeleteConfirmDialog({
   onConfirm: () => void;
   isDeleting: boolean;
 }) {
+  const modalProps = useModalDismiss(onCancel);
+
   return (
-    <div
-      className="fixed inset-0 bg-black/80 z-[70] flex items-center justify-center p-4"
-      onClick={onCancel}
-    >
+    <Portal>
       <div
-        className="surface-modal hairline w-full max-w-md"
-        onClick={(e) => e.stopPropagation()}
-        role="alertdialog"
-        aria-labelledby="del-title"
-        aria-describedby="del-desc"
+        className="fixed inset-0 h-[100dvh] w-screen bg-black/80 z-[200] flex items-center justify-center p-3 sm:p-4 backdrop-blur-sm overflow-y-auto overscroll-contain modal-overlay-in"
+        onClick={onCancel}
       >
-        <div className="hairline-b p-4 flex items-start gap-3 bg-status-danger/5">
-          <div className="w-10 h-10 hairline bg-status-danger/10 border-status-danger/30 flex items-center justify-center shrink-0 text-status-danger">
-            <AlertTriangle className="w-5 h-5" />
-          </div>
-          <div className="flex-1 min-w-0">
-            <h2
-              id="del-title"
-              className="font-semibold text-base text-status-danger"
-            >
-              Permanently Delete Member
-            </h2>
-            <p id="del-desc" className="mt-1 text-xs text-low">
-              This action cannot be undone. The member&apos;s row in the database and
-              all associated data will be removed.
-            </p>
-          </div>
-          <button
-            type="button"
-            onClick={onCancel}
-            className="p-1.5 text-low hover:text-hi hover:bg-surface-elevated"
-            aria-label="Close"
-          >
-            <X className="w-4 h-4" />
-          </button>
-        </div>
-        <div className="p-4 hairline-b surface-card">
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 hairline surface-modal overflow-hidden shrink-0 relative">
-              {member.photo_url ? (
-                <Image
-                  src={member.photo_url}
-                  alt=""
-                  fill
-                  sizes="48px"
-                  className="object-cover"
-                />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center text-xs font-semibold text-mid">
-                  {initials(member.full_name)}
-                </div>
-              )}
+        <div
+          {...modalProps}
+          className="surface-modal hairline w-full max-w-md my-auto rounded-3xl overflow-hidden shadow-2xl modal-panel-in relative"
+          onClick={(e) => e.stopPropagation()}
+          role="alertdialog"
+          aria-labelledby="del-title"
+          aria-describedby="del-desc"
+        >
+          <div className="hairline-b p-4 flex items-start gap-3 bg-status-danger/5">
+            <div className="w-10 h-10 hairline bg-status-danger/10 border-status-danger/30 flex items-center justify-center shrink-0 text-status-danger">
+              <AlertTriangle className="w-5 h-5" />
             </div>
-            <div className="min-w-0 flex-1">
-              <div className="text-sm text-hi font-medium truncate">
-                {member.full_name || "Unnamed member"}
-              </div>
-              <div className="text-xs text-low font-medium">
-                <span className="tabular-nums">{member.mobile || "—"}</span> · {member.membership_type || "No plan"}
-              </div>
+            <div className="flex-1 min-w-0">
+              <h2
+                id="del-title"
+                className="font-semibold text-base text-status-danger"
+              >
+                Permanently Delete Member
+              </h2>
+              <p id="del-desc" className="mt-1 text-xs text-low">
+                This action cannot be undone. The member&apos;s row in the database and
+                all associated data will be removed.
+              </p>
             </div>
-          </div>
-        </div>
-        <div className="p-4 space-y-3">
-          <div>
-            <label
-              htmlFor="del-confirm"
-              className="block uppercase tracking-wider text-xs font-semibold text-faint mb-1.5"
-            >
-              Type <span className="text-status-danger font-bold">DELETE</span>{" "}
-              to confirm
-            </label>
-            <input
-              id="del-confirm"
-              type="text"
-              autoFocus
-              value={confirmText}
-              onChange={(e) => onConfirmText(e.target.value)}
-              className="input-field font-semibold text-status-danger placeholder:text-status-danger/40"
-              placeholder="DELETE"
-              autoComplete="off"
-              disabled={isDeleting}
-            />
-          </div>
-          <div className="flex gap-3">
             <button
               type="button"
               onClick={onCancel}
-              className="btn-secondary flex-1 text-xs"
-              disabled={isDeleting}
+              className="p-1.5 text-low hover:text-hi hover:bg-surface-elevated"
+              aria-label="Close"
             >
-              Cancel
+              <X className="w-4 h-4" />
             </button>
-            <button
-              type="button"
-              onClick={onConfirm}
-              className="btn-primary flex-1 text-xs bg-status-danger hover:bg-status-danger border-status-danger"
-              disabled={isDeleting || confirmText.trim() !== "DELETE"}
-            >
-              {isDeleting ? (
-                <>
-                  <span className="w-4 h-4 border-2 border-surface-border border-t-transparent rounded-full animate-spin" />
-                  Deleting…
-                </>
-              ) : (
-                <>
-                  <Trash2 className="w-3.5 h-3.5" />
-                  Delete Member
-                </>
-              )}
-            </button>
+          </div>
+          <div className="p-4 hairline-b surface-card">
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 hairline surface-modal overflow-hidden shrink-0 relative">
+                {member.photo_url ? (
+                  <Image
+                    src={member.photo_url}
+                    alt=""
+                    fill
+                    sizes="48px"
+                    className="object-cover"
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center text-xs font-semibold text-mid">
+                    {initials(member.full_name)}
+                  </div>
+                )}
+              </div>
+              <div className="min-w-0 flex-1">
+                <div className="text-sm text-hi font-medium truncate">
+                  {member.full_name || "Unnamed member"}
+                </div>
+                <div className="text-xs text-low font-medium">
+                  <span className="tabular-nums">{member.mobile || "—"}</span> · {member.membership_type || "No plan"}
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="p-4 space-y-3">
+            <div>
+              <label
+                htmlFor="del-confirm"
+                className="block uppercase tracking-wider text-xs font-semibold text-faint mb-1.5"
+              >
+                Type <span className="text-status-danger font-bold">DELETE</span>{" "}
+                to confirm
+              </label>
+              <input
+                id="del-confirm"
+                type="text"
+                autoFocus
+                value={confirmText}
+                onChange={(e) => onConfirmText(e.target.value)}
+                className="input-field font-semibold text-status-danger placeholder:text-status-danger/40"
+                placeholder="DELETE"
+                autoComplete="off"
+                disabled={isDeleting}
+              />
+            </div>
+            <div className="flex gap-3">
+              <button
+                type="button"
+                onClick={onCancel}
+                className="btn-secondary flex-1 text-xs"
+                disabled={isDeleting}
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={onConfirm}
+                className="btn-primary flex-1 text-xs bg-status-danger hover:bg-status-danger border-status-danger"
+                disabled={isDeleting || confirmText.trim() !== "DELETE"}
+              >
+                {isDeleting ? (
+                  <>
+                    <span className="w-4 h-4 border-2 border-surface-border border-t-transparent rounded-full animate-spin" />
+                    Deleting…
+                  </>
+                ) : (
+                  <>
+                    <Trash2 className="w-3.5 h-3.5" />
+                    Delete Member
+                  </>
+                )}
+              </button>
+            </div>
           </div>
         </div>
       </div>
-    </div>
+    </Portal>
   );
 }

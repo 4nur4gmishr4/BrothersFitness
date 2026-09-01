@@ -110,7 +110,7 @@ export function AdminLoginForm({
           <div className="flex flex-col items-center text-center mb-6">
             <Link
               href={logo.url || "/"}
-              className="relative group mb-4 p-2 rounded-2xl bg-surface-card border border-surface-border shadow-lg transition-transform hover:scale-105 duration-fast"
+              className="relative group mb-4 p-2.5 rounded-2xl bg-black border border-white/10 shadow-xl transition-transform hover:scale-105 duration-fast"
             >
               <Image
                 src={logo.src || "/assets/favicon.png"}
