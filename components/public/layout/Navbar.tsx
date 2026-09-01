@@ -61,10 +61,12 @@ export default function Navbar() {
       document.body.style.paddingRight = "";
       document.body.classList.remove("mobile-menu-open");
     }
+    window.dispatchEvent(new CustomEvent("brofit-nav-toggle", { detail: { isOpen } }));
     return () => {
       document.body.style.overflow = "";
       document.body.style.paddingRight = "";
       document.body.classList.remove("mobile-menu-open");
+      window.dispatchEvent(new CustomEvent("brofit-nav-toggle", { detail: { isOpen: false } }));
     };
   }, [isOpen]);
 

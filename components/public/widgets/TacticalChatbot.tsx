@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { Sparkles, X, Dumbbell, Utensils, Zap, Send, RotateCcw } from "lucide-react";
+import { Sparkles, X, Dumbbell, Utensils, Zap, Send, RotateCcw, Bot } from "lucide-react";
 import { useUserAuth } from "@/lib/user-auth-context";
 import { useModalDismiss } from "@/hooks/useModalDismiss";
 import { MAX_DAILY_CREDITS } from "@/lib/config";
@@ -33,6 +33,7 @@ export default function TacticalChatbot() {
     useUserAuth();
 
   const [isOpen, setIsOpen] = useState(false);
+  const [isNavOpen, setIsNavOpen] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
@@ -41,6 +42,16 @@ export default function TacticalChatbot() {
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const modalProps = useModalDismiss(() => setIsOpen(false));
+
+  useEffect(() => {
+    const handleNavToggle = (e: Event) => {
+      const customEvent = e as CustomEvent<{ isOpen: boolean }>;
+      setIsNavOpen(customEvent.detail?.isOpen ?? false);
+    };
+
+    window.addEventListener("brofit-nav-toggle", handleNavToggle);
+    return () => window.removeEventListener("brofit-nav-toggle", handleNavToggle);
+  }, []);
 
   useEffect(() => {
     const saved = localStorage.getItem("brofit_chat_lang");
@@ -99,33 +110,45 @@ export default function TacticalChatbot() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${accessToken ?? ""}`,
+          ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
         },
         body: JSON.stringify({
           message: text,
-          context: {
-            source: "floating_chat",
-            language: language || "en",
-            gym_name: "Brother's Fitness",
-          },
+          language,
         }),
       });
+
       const data = await res.json();
 
       if (!res.ok) {
-        setMessages((prev) => [
-          ...prev,
-          {
-            role: "model",
-            text:
-              data.error ||
-              (language === "hi"
-                ? "Connection mein samasya aayi. Kripya dobara prayas karein."
-                : "Unable to complete request. Please try again."),
-            isError: true,
-            retryText: text,
-          },
-        ]);
+        if (res.status === 401) {
+          setShowLoginModal(true);
+          setMessages((prev) => [
+            ...prev,
+            {
+              role: "model",
+              text:
+                language === "hi"
+                  ? "Kripya chat karne ke liye pehle login karein."
+                  : "Please sign in to continue chatting with AI.",
+              isError: true,
+            },
+          ]);
+        } else {
+          setMessages((prev) => [
+            ...prev,
+            {
+              role: "model",
+              text:
+                data.error ||
+                (language === "hi"
+                  ? "Maaf kijiye, koi error aa gaya."
+                  : "Sorry, I encountered an error. Please try again."),
+              isError: true,
+              retryText: text,
+            },
+          ]);
+        }
       } else {
         setMessages((prev) => [
           ...prev,
@@ -159,15 +182,25 @@ export default function TacticalChatbot() {
 
   return (
     <>
-      {/* iOS Assistant Floating Pill / Circle */}
-      {!isOpen && (
+      {/* Genuine Pebble-Shaped Chatbot Trigger (Hidden when hamburger nav is open) */}
+      {!isOpen && !isNavOpen && (
         <button
           id="tactical-chatbot-button"
-          className="fixed bottom-6 right-6 z-[105] w-14 h-14 rounded-full bg-accent text-white flex items-center justify-center shadow-xl shadow-accent/25 hover:scale-105 active:scale-95 transition-all duration-200"
+          className="fixed bottom-6 right-6 z-[90] px-4 py-2.5 rounded-full bg-black/90 hover:bg-black text-white border border-white/20 shadow-2xl backdrop-blur-md flex items-center gap-2.5 hover:scale-105 active:scale-95 transition-all duration-200 group cursor-pointer"
           onClick={() => setIsOpen(true)}
           aria-label="Open Brother's Fitness AI Assistant"
         >
-          <Sparkles className="w-6 h-6" />
+          <div className="w-7 h-7 rounded-full bg-accent flex items-center justify-center text-white shrink-0 relative shadow-xs">
+            <Bot className="w-4 h-4" />
+            <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-emerald-500 border border-black animate-pulse" />
+          </div>
+          <div className="flex flex-col text-left leading-tight pr-1">
+            <span className="text-xs font-bold text-white tracking-tight flex items-center gap-1">
+              BroFit AI
+              <Sparkles className="w-3 h-3 text-accent" />
+            </span>
+            <span className="text-[10px] text-zinc-400 font-medium">Coach &amp; Diet</span>
+          </div>
         </button>
       )}
 
@@ -201,14 +234,14 @@ export default function TacticalChatbot() {
                   </div>
                 </div>
 
-                {/* Header Right: Language Switcher & Close */}
                 <div className="flex items-center gap-2">
-                  <div className="flex p-0.5 bg-surface-soft rounded-lg border border-surface-border text-xs">
+                  {/* Language Toggle */}
+                  <div className="flex bg-surface-elevated rounded-full p-0.5 border border-surface-border">
                     <button
                       onClick={() => handleLanguageChange("en")}
-                      className={`px-2 py-0.5 rounded-md font-semibold transition-all ${
+                      className={`px-2 py-0.5 rounded-full text-[10px] font-semibold transition-all ${
                         language === "en"
-                          ? "bg-surface-card text-hi shadow-xs"
+                          ? "bg-accent text-white shadow-xs"
                           : "text-mid hover:text-hi"
                       }`}
                     >
@@ -216,9 +249,9 @@ export default function TacticalChatbot() {
                     </button>
                     <button
                       onClick={() => handleLanguageChange("hi")}
-                      className={`px-2 py-0.5 rounded-md font-semibold transition-all ${
+                      className={`px-2 py-0.5 rounded-full text-[10px] font-semibold transition-all ${
                         language === "hi"
-                          ? "bg-surface-card text-hi shadow-xs"
+                          ? "bg-accent text-white shadow-xs"
                           : "text-mid hover:text-hi"
                       }`}
                     >
@@ -228,71 +261,90 @@ export default function TacticalChatbot() {
 
                   <button
                     onClick={() => setIsOpen(false)}
-                    className="p-1 rounded-full text-mid hover:text-hi hover:bg-surface-soft transition-colors"
-                    aria-label="Close chat"
+                    className="p-1 rounded-full text-mid hover:text-hi hover:bg-surface-elevated transition-colors"
+                    aria-label="Close"
                   >
                     <X className="w-4 h-4" />
                   </button>
                 </div>
               </div>
 
-              {/* Messages Content */}
-              <div
-                ref={scrollRef}
-                className="flex-1 overflow-y-auto p-4 space-y-4 text-sm"
-              >
-                {/* Empty State / Welcome */}
-                {messages.length === 0 && (
-                  <div className="text-center py-6 space-y-4">
-                    <div className="w-12 h-12 rounded-full bg-accent/10 flex items-center justify-center text-accent mx-auto">
-                      <Sparkles className="w-6 h-6" />
+              {/* Chat Messages */}
+              <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 space-y-4">
+                {/* Daily Credits Tracker Badge */}
+                {isLoggedIn && (
+                  <div className="p-2.5 rounded-2xl bg-surface-card border border-surface-border text-center space-y-1.5">
+                    <div className="flex justify-between items-center text-[11px]">
+                      <span className="text-mid font-medium">Daily AI Credits</span>
+                      <span className="font-bold text-accent">
+                        {remainingCredits} / {MAX_DAILY_CREDITS}
+                      </span>
                     </div>
-                    <div className="space-y-1">
-                      <p className="font-semibold text-hi text-sm">
-                        {language === "hi"
-                          ? "Namaste! Main aapka Fitness AI Coach hoon."
-                          : "Hello! I'm your Fitness AI Coach."}
-                      </p>
-                      <p className="text-xs text-mid max-w-[280px] mx-auto">
-                        {language === "hi"
-                          ? "Workout routines, vegetarian diet, fat loss ya muscle gain ke baare mein kuch bhi poochein."
-                          : "Ask me anything about workout plans, meal suggestions, or gym guidance."}
-                      </p>
-                    </div>
-
-                    {/* Suggestions Chips */}
-                    <div className="flex flex-col gap-2 pt-2 text-left">
-                      {SUGGESTIONS[language].map((sug, idx) => {
-                        const Icon = sug.icon;
-                        return (
-                          <button
-                            key={idx}
-                            onClick={() => handleSend(sug.text)}
-                            className="flex items-center gap-2 p-2.5 rounded-xl bg-surface-card border border-surface-border text-xs text-mid hover:text-hi hover:border-accent transition-all text-left group"
-                          >
-                            <Icon className="w-4 h-4 text-accent shrink-0 group-hover:scale-110 transition-transform" />
-                            <span className="truncate">{sug.text}</span>
-                          </button>
-                        );
-                      })}
+                    <div className="w-full bg-surface-elevated rounded-full h-1.5 overflow-hidden">
+                      <div
+                        className="h-full bg-accent transition-all duration-300"
+                        style={{ width: `${(remainingCredits / MAX_DAILY_CREDITS) * 100}%` }}
+                      />
                     </div>
                   </div>
                 )}
 
-                {/* Message Stream */}
-                {messages.map((msg, i) => (
+                {/* Initial Welcome Bubble if no messages */}
+                {messages.length === 0 && (
+                  <div className="space-y-4">
+                    <div className="flex items-start gap-2.5">
+                      <div className="w-7 h-7 rounded-full bg-accent/10 flex items-center justify-center text-accent shrink-0">
+                        <Sparkles className="w-3.5 h-3.5" />
+                      </div>
+                      <div className="bg-surface-card border border-surface-border rounded-2xl rounded-tl-xs p-3.5 text-xs text-hi leading-relaxed shadow-xs space-y-2">
+                        <p className="font-semibold text-hi">
+                          {language === "hi"
+                            ? "Namaste! Main Brother's Fitness ka AI Coach hoon."
+                            : "Hello! I am Brother's Fitness AI Coach."}
+                        </p>
+                        <p className="text-mid">
+                          {language === "hi"
+                            ? "Aap mujhse workout splits, fat loss, muscle building ya diet se jude sawal pooch sakte hain."
+                            : "Ask me anything about workout routines, nutrition, gym batch timings, or strength goals."}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Suggestions */}
+                    <div className="space-y-2 pt-2">
+                      <p className="text-[11px] font-semibold text-mid uppercase tracking-wider pl-1">
+                        {language === "hi" ? "Kuch sujhav:" : "Suggested topics:"}
+                      </p>
+                      <div className="space-y-1.5">
+                        {SUGGESTIONS[language].map((s, idx) => (
+                          <button
+                            key={idx}
+                            onClick={() => handleSend(s.text)}
+                            className="w-full p-2.5 rounded-xl bg-surface-card hover:bg-surface-elevated border border-surface-border text-left text-xs text-hi flex items-center gap-2 transition-colors cursor-pointer group"
+                          >
+                            <s.icon className="w-3.5 h-3.5 text-accent shrink-0 group-hover:scale-110 transition-transform" />
+                            <span className="truncate">{s.text}</span>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Message List */}
+                {messages.map((msg, idx) => (
                   <div
-                    key={i}
+                    key={idx}
                     className={`flex flex-col ${
                       msg.role === "user" ? "items-end" : "items-start"
                     }`}
                   >
                     <div
-                      className={`max-w-[85%] rounded-2xl px-4 py-2.5 text-xs sm:text-sm leading-relaxed ${
+                      className={`max-w-[85%] rounded-2xl px-4 py-2.5 text-xs leading-relaxed ${
                         msg.role === "user"
-                          ? "bg-accent text-white rounded-br-xs"
+                          ? "bg-accent text-white rounded-br-xs shadow-xs"
                           : msg.isError
-                          ? "bg-status-danger/10 border border-status-danger/30 text-status-danger rounded-bl-xs"
+                          ? "bg-status-danger/10 text-status-danger border border-status-danger/30 rounded-bl-xs"
                           : "bg-surface-card border border-surface-border text-hi rounded-bl-xs shadow-xs"
                       }`}
                     >
