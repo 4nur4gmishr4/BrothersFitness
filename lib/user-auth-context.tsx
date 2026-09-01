@@ -178,18 +178,25 @@ export function UserAuthProvider({ children }: { children: ReactNode }) {
 
         const initAuth = async () => {
             try {
-                // Check if current URL contains an OAuth code
+                // Check if current URL contains an OAuth code or auth error
                 if (typeof window !== 'undefined') {
                     const urlParams = new URLSearchParams(window.location.search);
                     const code = urlParams.get('code');
-                    if (code) {
+                    const authError = urlParams.get('auth_error');
+
+                    if (authError) {
+                        toast.error(`Auth Error: ${authError}`);
+                        const cleanUrl = window.location.pathname;
+                        window.history.replaceState({}, document.title, cleanUrl);
+                    } else if (code) {
                         try {
-                            const { data: exchangeData } = await supabase.auth.exchangeCodeForSession(code);
-                            if (exchangeData?.session && isMounted) {
+                            const { data: exchangeData, error: exchangeErr } = await supabase.auth.exchangeCodeForSession(code);
+                            if (!exchangeErr && exchangeData?.session && isMounted) {
                                 await loadUserFromSession(exchangeData.session);
-                                const cleanUrl = window.location.pathname;
-                                window.history.replaceState({}, document.title, cleanUrl);
+                                toast.success("Signed in with Google successfully!");
                             }
+                            const cleanUrl = window.location.pathname;
+                            window.history.replaceState({}, document.title, cleanUrl);
                         } catch (err) {
                             console.warn("Client exchange code note:", err);
                         }
@@ -230,7 +237,8 @@ export function UserAuthProvider({ children }: { children: ReactNode }) {
             const redirectUrl = typeof window !== 'undefined'
                 ? `${window.location.origin}/auth/callback`
                 : undefined;
-            const { error } = await supabase.auth.signInWithOAuth({
+
+            const { data, error } = await supabase.auth.signInWithOAuth({
                 provider: 'google',
                 options: {
                     redirectTo: redirectUrl,
@@ -244,6 +252,11 @@ export function UserAuthProvider({ children }: { children: ReactNode }) {
             if (error) {
                 toast.error(`Login Error: ${error.message}`);
                 return { success: false, error: error.message };
+            }
+
+            // Explicitly navigate the browser to the returned Google OAuth URL
+            if (data?.url && typeof window !== 'undefined') {
+                window.location.href = data.url;
             }
 
             return { success: true };
