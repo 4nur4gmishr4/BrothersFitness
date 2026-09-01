@@ -21,7 +21,7 @@ const SheetOverlay = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <SheetPrimitive.Overlay
     className={cn(
-      "fixed inset-0 z-50 bg-black/80 backdrop-blur-sm transition-opacity duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] data-[state=closed]:opacity-0 data-[state=open]:opacity-100",
+      "fixed inset-0 z-50 bg-black/80 backdrop-blur-sm data-[state=open]:animate-sheet-fade-in data-[state=closed]:animate-sheet-fade-out",
       className
     )}
     {...props}
@@ -31,16 +31,16 @@ const SheetOverlay = React.forwardRef<
 SheetOverlay.displayName = SheetPrimitive.Overlay.displayName
 
 const sheetVariants = cva(
-  "fixed z-50 gap-4 bg-surface-canvas border-surface-border text-hi p-6 shadow-2xl transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] will-change-transform",
+  "fixed z-50 gap-4 bg-surface-canvas border-surface-border text-hi p-6 shadow-2xl will-change-transform",
   {
     variants: {
       side: {
-        top: "inset-x-0 top-0 border-b data-[state=closed]:-translate-y-full data-[state=open]:translate-y-0",
+        top: "inset-x-0 top-0 border-b data-[state=open]:animate-sheet-slide-in-top data-[state=closed]:animate-sheet-slide-out-top",
         bottom:
-          "inset-x-0 bottom-0 border-t data-[state=closed]:translate-y-full data-[state=open]:translate-y-0",
-        left: "inset-y-0 left-0 h-full w-3/4 border-r data-[state=closed]:-translate-x-full data-[state=open]:translate-x-0 sm:max-w-sm",
+          "inset-x-0 bottom-0 border-t data-[state=open]:animate-sheet-slide-in-bottom data-[state=closed]:animate-sheet-slide-out-bottom",
+        left: "inset-y-0 left-0 h-full w-3/4 border-r data-[state=open]:animate-sheet-slide-in-left data-[state=closed]:animate-sheet-slide-out-left sm:max-w-sm",
         right:
-          "inset-y-0 right-0 h-full w-3/4 border-l data-[state=closed]:translate-x-full data-[state=open]:translate-x-0 sm:max-w-sm",
+          "inset-y-0 right-0 h-full w-3/4 border-l data-[state=open]:animate-sheet-slide-in-right data-[state=closed]:animate-sheet-slide-out-right sm:max-w-sm",
       },
     },
     defaultVariants: {
