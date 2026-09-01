@@ -16,6 +16,7 @@ import { useModalDismiss } from "@/hooks/useModalDismiss";
 import { openWhatsApp, buildWhatsAppUrl } from "@/lib/admin-api";
 import type { GymMember } from "@/lib/supabase";
 import { getMemberStatus, parseLocalDate } from "@/lib/member-utils";
+import { Portal } from "@/components/ui/Portal";
 
 interface BulkMessageModalProps {
   open: boolean;
@@ -211,14 +212,15 @@ export default function BulkMessageModal({
   ];
 
   return (
-    <div
-      className="fixed inset-0 bg-black/80 z-[60] flex items-start sm:items-center justify-center overflow-y-auto modal-overlay-in p-4"
-      onClick={onClose}
-    >
+    <Portal>
+      <div
+        className="fixed inset-0 h-[100dvh] w-screen bg-black/80 z-[200] flex items-center justify-center overflow-y-auto overscroll-contain backdrop-blur-sm modal-overlay-in p-3 sm:p-4"
+        onClick={onClose}
+      >
       <div
         {...modalProps}
         aria-label="Bulk WhatsApp message"
-        className="surface-modal hairline p-4 sm:p-6 w-full sm:max-w-2xl min-h-screen sm:min-h-0 sm:max-h-[92vh] overflow-y-auto sm:my-4 modal-panel-in flex flex-col"
+        className="surface-modal hairline p-4 sm:p-6 w-full max-w-2xl my-auto max-h-[90dvh] overflow-y-auto modal-panel-in flex flex-col rounded-3xl shadow-2xl relative"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
@@ -393,5 +395,6 @@ export default function BulkMessageModal({
         </div>
       </div>
     </div>
+  </Portal>
   );
 }

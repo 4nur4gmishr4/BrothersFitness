@@ -20,6 +20,7 @@ import { AdminLoader } from "@/components/admin/AdminUI";
 import { adminFetch, openWhatsApp } from "@/lib/admin-api";
 import { formatDate } from "@/lib/member-utils";
 import { cn } from "@/lib/utils";
+import { Portal } from "@/components/ui/Portal";
 
 interface MessageInquiry {
   id: string;
@@ -581,30 +582,32 @@ export default function AdminMessagesPage() {
 
       {/* Delete Confirmation Modal */}
       {deletingId && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="w-full max-w-sm rounded-2xl border border-[#dfe1e5] dark:border-[#232e3c] bg-white dark:bg-[#17212b] p-5 space-y-4 shadow-2xl">
-            <h3 className="font-semibold text-lg text-[#000000] dark:text-white">Delete Conversation?</h3>
-            <p className="text-xs text-[#707579] dark:text-[#708499] leading-relaxed">
-              Are you sure you want to permanently delete this message inquiry?
-            </p>
-            <div className="flex items-center justify-end gap-2 pt-2">
-              <button
-                type="button"
-                onClick={() => setDeletingId(null)}
-                className="px-3.5 py-1.5 rounded-xl border border-[#dfe1e5] dark:border-[#232e3c] bg-[#f1f3f4] dark:bg-[#242f3d] text-xs font-medium text-[#000000] dark:text-white hover:bg-zinc-200 dark:hover:bg-[#2e3b4c] transition-colors"
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                onClick={() => handleDelete(deletingId)}
-                className="px-3.5 py-1.5 rounded-xl bg-red-600 hover:bg-red-500 text-white text-xs font-semibold transition-colors shadow-sm"
-              >
-                Confirm Delete
-              </button>
+        <Portal>
+          <div className="fixed inset-0 h-[100dvh] w-screen z-[200] bg-black/80 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 overflow-y-auto overscroll-contain modal-overlay-in">
+            <div className="w-full max-w-sm my-auto rounded-3xl border border-[#dfe1e5] dark:border-[#232e3c] bg-white dark:bg-[#17212b] p-5 sm:p-6 space-y-4 shadow-2xl modal-panel-in relative">
+              <h3 className="font-semibold text-lg text-[#000000] dark:text-white">Delete Conversation?</h3>
+              <p className="text-xs text-[#707579] dark:text-[#708499] leading-relaxed">
+                Are you sure you want to permanently delete this message inquiry?
+              </p>
+              <div className="flex items-center justify-end gap-2 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setDeletingId(null)}
+                  className="px-3.5 py-1.5 rounded-xl border border-[#dfe1e5] dark:border-[#232e3c] bg-[#f1f3f4] dark:bg-[#242f3d] text-xs font-medium text-[#000000] dark:text-white hover:bg-zinc-200 dark:hover:bg-[#2e3b4c] transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleDelete(deletingId)}
+                  className="px-3.5 py-1.5 rounded-xl bg-red-600 hover:bg-red-500 text-white text-xs font-semibold transition-colors shadow-sm"
+                >
+                  Confirm Delete
+                </button>
+              </div>
             </div>
           </div>
-        </div>
+        </Portal>
       )}
     </div>
   );

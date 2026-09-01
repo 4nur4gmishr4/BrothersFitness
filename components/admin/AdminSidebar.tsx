@@ -2,6 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import {
   BarChart3,
@@ -13,7 +14,6 @@ import {
   Monitor,
   Moon,
   Settings,
-  Shield,
   Sun,
   Users,
 } from "lucide-react";
@@ -102,6 +102,12 @@ export const ADMIN_NAV_GROUPS: NavGroup[] = [
         icon: Settings,
         href: "/admin/settings",
       },
+      {
+        label: "Live Site",
+        icon: ExternalLink,
+        href: "/",
+        external: true,
+      },
     ],
   },
 ];
@@ -112,8 +118,14 @@ const SidebarLogo = () => {
       <SidebarMenuItem>
         <SidebarMenuButton size="lg" asChild className="hover:bg-transparent">
           <Link href="/admin/members" className="flex items-center gap-3">
-            <div className="flex size-9 items-center justify-center rounded-xl bg-accent text-white shadow-md shadow-accent/20">
-              <Shield className="size-5" />
+            <div className="flex size-9 items-center justify-center rounded-xl bg-black border border-white/10 overflow-hidden shadow-md p-1.5 shrink-0">
+              <Image
+                src="/assets/favicon.png"
+                alt="Brother's Fitness"
+                width={24}
+                height={24}
+                className="object-contain"
+              />
             </div>
             <div className="flex flex-col gap-0.5 leading-none">
               <span className="font-bold tracking-tight text-sm text-hi">
@@ -310,7 +322,13 @@ export const AdminSidebar = ({
               <BreadcrumbList>
                 <BreadcrumbItem className="hidden sm:block">
                   <BreadcrumbLink href="/admin/members" className="flex items-center gap-1.5 text-mid hover:text-hi font-medium text-xs">
-                    <Shield className="size-3.5 text-accent" />
+                    <Image
+                      src="/assets/favicon.png"
+                      alt="Brother's Fitness"
+                      width={15}
+                      height={15}
+                      className="object-contain"
+                    />
                     <span>Admin</span>
                   </BreadcrumbLink>
                 </BreadcrumbItem>

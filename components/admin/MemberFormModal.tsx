@@ -19,6 +19,7 @@ import { todayIST, parseLocalDate } from "@/lib/member-utils";
 import type { GymMember } from "@/lib/supabase";
 import imageCompression from "browser-image-compression";
 import PebbleImageViewer, { PebbleImage } from "@/components/admin/PebbleImageViewer";
+import { Portal } from "@/components/ui/Portal";
 
 interface MemberFormModalProps {
   open: boolean;
@@ -228,20 +229,21 @@ export default function MemberFormModal({
   };
 
   return (
-    <div
-      className="fixed inset-0 bg-black/60 dark:bg-black/80 z-[60] flex items-center justify-center p-3 sm:p-4 overflow-y-auto backdrop-blur-sm"
-      onClick={(e) => {
-        if (e.target === e.currentTarget) {
-          onClose();
-        }
-      }}
-    >
+    <Portal>
+      <div
+        className="fixed inset-0 h-[100dvh] w-screen bg-black/80 z-[200] flex items-center justify-center p-3 sm:p-4 overflow-y-auto overscroll-contain backdrop-blur-sm modal-overlay-in"
+        onClick={(e) => {
+          if (e.target === e.currentTarget) {
+            onClose();
+          }
+        }}
+      >
       <form
         {...modalProps}
         onSubmit={handleSubmit}
         onClick={(e) => e.stopPropagation()}
         aria-label={member ? "Edit member details" : "Register new member"}
-        className="w-full max-w-2xl my-auto sm:my-8 max-h-[92dvh] sm:max-h-[calc(100vh-4rem)] rounded-3xl border border-surface-border bg-surface-modal overflow-hidden flex flex-col shadow-2xl transition-colors"
+        className="w-full max-w-2xl my-auto max-h-[92dvh] rounded-3xl border border-surface-border bg-surface-modal overflow-hidden flex flex-col shadow-2xl transition-colors modal-panel-in relative"
       >
         {/* Modal Top Bar */}
         <div className="p-4 sm:p-5 border-b border-surface-border bg-surface-elevated/80 flex justify-between items-center shrink-0">
@@ -537,5 +539,6 @@ export default function MemberFormModal({
         onClose={() => setViewingPebble(null)}
       />
     </div>
+  </Portal>
   );
 }
