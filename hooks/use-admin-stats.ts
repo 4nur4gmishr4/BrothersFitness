@@ -62,37 +62,80 @@ export type AdminDashboardStats = MemberStatusCount & {
   };
 };
 
+// In-memory module cache for instant zero-delay route switching between admin tabs
+let memoryMembersCache: GymMember[] | null = null;
+let memoryFetchPromise: Promise<GymMember[] | null> | null = null;
+
+export async function preloadAdminData(): Promise<GymMember[] | null> {
+  if (memoryMembersCache) return memoryMembersCache;
+  if (memoryFetchPromise) return memoryFetchPromise;
+  memoryFetchPromise = (async () => {
+    try {
+      const res = await adminFetch("/api/admin/members", { cache: "no-store" });
+      if (!res.ok) return null;
+      const data = await res.json();
+      memoryMembersCache = data.members || [];
+      return memoryMembersCache;
+    } catch {
+      return null;
+    } finally {
+      memoryFetchPromise = null;
+    }
+  })();
+  return memoryFetchPromise;
+}
+
 export function useAllMembers() {
   const router = useRouter();
-  const [members, setMembers] = useState<GymMember[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [members, setMembersState] = useState<GymMember[]>(() => memoryMembersCache || []);
+  const [loading, setLoading] = useState<boolean>(() => !memoryMembersCache);
   const [error, setError] = useState<string | null>(null);
 
-  const refresh = useCallback(async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      const res = await adminFetch("/api/admin/members", {
-        cache: "no-store",
+  const setMembers = useCallback(
+    (updater: GymMember[] | ((prev: GymMember[]) => GymMember[])) => {
+      setMembersState((prev) => {
+        const next = typeof updater === "function" ? updater(prev) : updater;
+        memoryMembersCache = next;
+        return next;
       });
-      if (res.status === 401 || res.status === 403) {
-        sessionStorage.removeItem("admin_token");
-        router.replace("/admin/login");
-        return;
+    },
+    []
+  );
+
+  const refresh = useCallback(
+    async (isSilent?: boolean | unknown) => {
+      const silent = typeof isSilent === "boolean" ? isSilent : false;
+      try {
+        if (!silent && !memoryMembersCache) {
+          setLoading(true);
+        }
+        setError(null);
+        const res = await adminFetch("/api/admin/members", {
+          cache: "no-store",
+        });
+        if (res.status === 401 || res.status === 403) {
+          sessionStorage.removeItem("admin_token");
+          router.replace("/admin/login");
+          return;
+        }
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+        const list = data.members || [];
+        memoryMembersCache = list;
+        setMembersState(list);
+      } catch (err: unknown) {
+        const msg = err instanceof Error ? err.message : "Failed to load members";
+        setError(msg);
+      } finally {
+        setLoading(false);
       }
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const data = await res.json();
-      setMembers(data.members || []);
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : "Failed to load members";
-      setError(msg);
-    } finally {
-      setLoading(false);
-    }
-  }, [router]);
+    },
+    [router]
+  );
 
   useEffect(() => {
-    refresh();
+    // If cached data is present, revalidate silently in the background (0ms UI render!)
+    refresh(!!memoryMembersCache);
   }, [refresh]);
 
   return { members, loading, error, refresh, setMembers };
