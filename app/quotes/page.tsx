@@ -205,7 +205,11 @@ export default function QuotesPage() {
     }
   }, []);
 
+  const safeIndex = currentQuoteIndex < currentQuotes.length ? currentQuoteIndex : 0;
+  const currentQuote = currentQuotes[safeIndex] || currentQuotes[0] || "";
+
   const toggleFavorite = (quote: string) => {
+    if (!quote) return;
     const newFavorites = favorites.includes(quote)
       ? favorites.filter(q => q !== quote)
       : [...favorites, quote];
@@ -221,9 +225,10 @@ export default function QuotesPage() {
     setCurrentQuoteIndex((prev) => (prev + 1) % currentQuotes.length);
   };
 
-  useEffect(() => {
+  const handleCategoryChange = (catId: keyof typeof quotes) => {
+    setActiveCategory(catId);
     setCurrentQuoteIndex(0);
-  }, [activeCategory]);
+  };
 
   return (
     <div className="min-h-screen surface-canvas text-hi relative overflow-hidden">
@@ -232,14 +237,13 @@ export default function QuotesPage() {
       <div
         className="absolute inset-0 opacity-[0.03] pointer-events-none"
         style={{
-          
           backgroundSize: "80px 80px",
         }}
       />
 
       <div className="relative z-10 min-h-screen flex flex-col">
         {/* Top Display Header */}
-        <div className="pt-20 sm:pt-24 pb-8 px-4 sm:px-8 md:px-12 lg:px-16 max-w-[1600px] mx-auto w-full">
+        <div className="pt-6 sm:pt-10 pb-8 px-4 sm:px-8 md:px-12 lg:px-16 max-w-[1600px] mx-auto w-full">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-8 gap-6 pb-8 border-b border-surface-border/70">
             <div>
               <span className="text-xs uppercase tracking-widest text-accent mb-2 block font-semibold">
@@ -284,7 +288,7 @@ export default function QuotesPage() {
             {categories.map((cat) => (
               <button
                 key={cat.id}
-                onClick={() => setActiveCategory(cat.id as keyof typeof quotes)}
+                onClick={() => handleCategoryChange(cat.id as keyof typeof quotes)}
                 className={`flex items-center gap-2 px-6 py-3 label-text border transition-colors duration-fast ${
                   activeCategory === cat.id
                     ? "bg-accent text-white border-accent"
@@ -302,15 +306,15 @@ export default function QuotesPage() {
         <div className="flex-1 px-4 pb-8">
           {displayMode === "single" ? (
             <div className="max-w-5xl mx-auto">
-              <div key={`${activeCategory}-${currentQuoteIndex}`} className="surface-card hairline p-12 md:p-16 relative">
+              <div key={`${activeCategory}-${safeIndex}`} className="surface-card hairline p-12 md:p-16 relative">
                 <button
-                  onClick={() => toggleFavorite(currentQuotes[currentQuoteIndex])}
+                  onClick={() => toggleFavorite(currentQuote)}
                   className="absolute top-4 right-4"
                   aria-label="Toggle favorite"
                 >
                   <Heart
                     className={`w-6 h-6 transition-colors duration-fast ${
-                      favorites.includes(currentQuotes[currentQuoteIndex])
+                      favorites.includes(currentQuote)
                         ? "fill-accent text-accent"
                         : "text-faint hover:text-mid"
                     }`}
@@ -318,7 +322,7 @@ export default function QuotesPage() {
                 </button>
 
                 <p className="heading-display text-2xl md:text-4xl lg:text-5xl font-bold text-hi text-center leading-relaxed">
-                  &quot;{currentQuotes[currentQuoteIndex]}&quot;
+                  &quot;{currentQuote}&quot;
                 </p>
 
                 <div className="flex justify-center gap-4 mt-12">
@@ -328,7 +332,7 @@ export default function QuotesPage() {
                 </div>
 
                 <p className="text-center label-text text-faint mt-8">
-                  {currentQuoteIndex + 1} / {currentQuotes.length}
+                  {safeIndex + 1} / {currentQuotes.length}
                 </p>
               </div>
             </div>

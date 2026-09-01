@@ -115,7 +115,7 @@ export const Footer = (props: Partial<FooterProps>) => {
           <div className="col-span-2 lg:col-span-2 flex flex-col justify-between pb-4 lg:pb-0 border-b border-surface-border/50 lg:border-b-0">
             <div>
               <Link href={logo?.url || "/"} className="inline-flex items-center gap-3 group">
-                <div className="w-10 h-10 rounded-xl bg-surface-card border border-surface-border p-1.5 flex items-center justify-center shadow-md group-hover:border-accent transition-colors">
+                <div className="w-10 h-10 rounded-xl bg-black border border-white/10 p-1.5 flex items-center justify-center shadow-md group-hover:border-accent transition-colors shrink-0">
                   <Image
                     src={logo?.src || "/assets/favicon.png"}
                     alt={logo?.alt || "Logo"}
@@ -152,20 +152,20 @@ export const Footer = (props: Partial<FooterProps>) => {
                 href="https://www.instagram.com/brothers_fitness_17"
                 target="_blank"
                 rel="noreferrer"
-                className="p-2 rounded-md bg-surface-card border border-surface-border text-mid hover:text-hi hover:border-accent transition-colors"
+                className="p-2 rounded-md bg-surface-card border border-surface-border text-mid hover:text-[#E1306C] hover:border-[#E1306C]/40 hover:bg-[#E1306C]/10 active:scale-95 transition-all shadow-xs"
                 aria-label="Instagram"
               >
-                <FaInstagram className="w-4 h-4" />
+                <FaInstagram className="w-4 h-4 transition-colors" />
               </a>
 
               <a
                 href="https://wa.me/919131179343"
                 target="_blank"
                 rel="noreferrer"
-                className="p-2 rounded-md bg-surface-card border border-surface-border text-mid hover:text-hi hover:border-accent transition-colors"
+                className="p-2 rounded-md bg-surface-card border border-surface-border text-mid hover:text-[#25D366] hover:border-[#25D366]/40 hover:bg-[#25D366]/10 active:scale-95 transition-all shadow-xs"
                 aria-label="WhatsApp"
               >
-                <FaWhatsapp className="w-4 h-4" />
+                <FaWhatsapp className="w-4 h-4 transition-colors" />
               </a>
             </div>
           </div>
@@ -189,18 +189,18 @@ export const Footer = (props: Partial<FooterProps>) => {
                           href={link.href}
                           target={link.href.startsWith("http") ? "_blank" : undefined}
                           rel={link.href.startsWith("http") ? "noreferrer" : undefined}
-                          className="inline-flex items-center gap-2 text-mid hover:text-accent transition-colors group"
+                          className="inline-flex items-center gap-2 text-mid hover:text-hi transition-colors group"
                         >
-                          {Icon && <Icon className="w-3.5 h-3.5 text-low group-hover:text-accent shrink-0" />}
+                          {Icon && <Icon className="w-3.5 h-3.5 text-mid group-hover:text-hi shrink-0 transition-colors" />}
                           <span className="truncate">{link.name}</span>
                           {link.href.startsWith("http") && <ExternalLink className="w-2.5 h-2.5 opacity-40 group-hover:opacity-100" />}
                         </a>
                       ) : (
                         <Link
                           href={link.href}
-                          className="inline-flex items-center gap-2 text-mid hover:text-accent transition-colors group"
+                          className="inline-flex items-center gap-2 text-mid hover:text-hi transition-colors group"
                         >
-                          {Icon && <Icon className="w-3.5 h-3.5 text-low group-hover:text-accent shrink-0" />}
+                          {Icon && <Icon className="w-3.5 h-3.5 text-mid group-hover:text-hi shrink-0 transition-colors" />}
                           <span>{link.name}</span>
                         </Link>
                       )}
@@ -229,7 +229,7 @@ export const Footer = (props: Partial<FooterProps>) => {
               href="https://wa.me/919302786886?text=Hi%20Anurag"
               target="_blank"
               rel="noreferrer"
-              className="text-faint hover:text-hi transition-colors"
+              className="text-faint hover:text-[#8b5cf6] transition-colors"
             >
               Architect: Anurag Mishra
             </a>

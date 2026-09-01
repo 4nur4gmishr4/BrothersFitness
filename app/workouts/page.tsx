@@ -8,7 +8,7 @@ export default function WorkoutsPage() {
   return (
     <div className="min-h-screen surface-canvas text-hi">
       <Navbar />
-      <div className="pt-20 sm:pt-24 pb-12 px-4 sm:px-8 md:px-12 lg:px-16 max-w-[1600px] mx-auto">
+      <div className="pt-6 sm:pt-10 pb-12 px-4 sm:px-8 md:px-12 lg:px-16 max-w-[1600px] mx-auto">
         {/* Top Display Header */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-10 md:mb-14 gap-6 pb-8 border-b border-surface-border/70">
           <div>
