@@ -6,6 +6,7 @@ import { MAX_DAILY_CREDITS } from "@/lib/config";
 import { useUserAuth, ProfileUpdateData } from "@/lib/user-auth-context";
 import { useModalDismiss } from "@/hooks/useModalDismiss";
 import Image from "next/image";
+import { Portal } from "@/components/ui/Portal";
 
 interface ProfileModalProps {
     isOpen: boolean;
@@ -133,14 +134,15 @@ export default function ProfileModal({ isOpen, onClose }: ProfileModalProps) {
     if (!isOpen || !isLoggedIn) return null;
 
     return (
-        <div
-            className="fixed inset-0 z-[200] flex items-center justify-center bg-black/80 p-4 modal-overlay-in"
-            onClick={(e) => { if (e.target === e.currentTarget) handleClose(); }}
-        >
+        <Portal>
+            <div
+                className="fixed inset-0 h-[100dvh] w-screen z-[200] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 overflow-y-auto overscroll-contain modal-overlay-in"
+                onClick={(e) => { if (e.target === e.currentTarget) handleClose(); }}
+            >
             <div
                 {...modalProps}
                 aria-label="Customize profile"
-                className="relative w-full max-w-md surface-modal hairline overflow-hidden max-h-[90vh] overflow-y-auto modal-panel-in"
+                className="relative w-full max-w-md my-auto surface-modal hairline rounded-3xl overflow-hidden max-h-[90dvh] overflow-y-auto modal-panel-in shadow-2xl"
                 onClick={(e) => e.stopPropagation()}
             >
                 {/* Header */}
@@ -343,5 +345,6 @@ export default function ProfileModal({ isOpen, onClose }: ProfileModalProps) {
                 </div>
             </div>
         </div>
+        </Portal>
     );
 }

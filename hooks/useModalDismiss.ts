@@ -3,11 +3,10 @@
 import { useEffect, useRef } from "react";
 
 /**
- * M33 — modal accessibility: closes the dialog on Escape, matching the
- * backdrop-click dismiss every modal already has. The callback is kept in a
- * ref so the window listener registers exactly once regardless of how often
- * the parent recreates `onClose`. Returns props to spread onto the dialog
- * element so it is announced as a modal dialog.
+ * Modal accessibility and scroll-lock helper:
+ * 1. Closes the dialog on Escape key.
+ * 2. Locks body scroll so the background page cannot be scrolled while modal is active.
+ * 3. Returns accessibility ARIA props.
  */
 export function useModalDismiss(onClose: () => void) {
     const onCloseRef = useRef(onClose);
@@ -22,6 +21,15 @@ export function useModalDismiss(onClose: () => void) {
         };
         window.addEventListener("keydown", handler);
         return () => window.removeEventListener("keydown", handler);
+    }, []);
+
+    useEffect(() => {
+        const originalOverflow = document.body.style.overflow;
+        document.body.style.overflow = "hidden";
+
+        return () => {
+            document.body.style.overflow = originalOverflow;
+        };
     }, []);
 
     return {
