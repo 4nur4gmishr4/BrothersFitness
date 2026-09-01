@@ -90,7 +90,7 @@ export default function TacticalStopwatch() {
       {/* iOS Floating Timer Button */}
       <button
         onClick={() => setIsOpen(true)}
-        className="fixed bottom-24 left-6 z-[105] w-13 h-13 rounded-full bg-accent text-white flex items-center justify-center shadow-lg shadow-accent/25 hover:scale-105 active:scale-95 transition-all duration-200"
+        className="fixed bottom-24 left-6 z-[105] w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-accent text-white flex items-center justify-center shadow-lg shadow-accent/25 hover:scale-105 active:scale-95 transition-all duration-200"
         aria-label="Open Workout Timer"
       >
         <Timer className="w-6 h-6" />

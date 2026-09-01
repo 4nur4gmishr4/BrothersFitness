@@ -6,7 +6,7 @@ export default function PricingPage() {
     return (
         <div className="min-h-screen surface-canvas text-hi">
             <Navbar />
-            <div className="pt-20">
+            <div className="pt-4 sm:pt-8">
                 <PaymentSection />
             </div>
             <Footer />

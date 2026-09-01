@@ -123,36 +123,36 @@ export default function Architects() {
 
                     {/* Connect Actions Row: Monochrome Exact Shape Logos with iOS Tactile Hover/Active States */}
                     <div className="w-full flex items-center justify-end gap-2.5">
-                      {/* Call Button */}
+                      {/* Call Button (slight blue hover) */}
                       <a
                         href={`tel:${c.phone}`}
                         aria-label={`Call ${c.name}`}
-                        className="w-10 h-10 flex items-center justify-center rounded-xl bg-surface-elevated border border-surface-border hover:border-accent hover:bg-surface-soft hover:text-accent active:scale-95 transition-all duration-150 text-mid group shadow-sm"
+                        className="w-10 h-10 flex items-center justify-center rounded-xl bg-surface-elevated border border-surface-border text-mid hover:text-[#007AFF] hover:border-[#007AFF]/40 hover:bg-[#007AFF]/10 active:scale-95 transition-all duration-150 group shadow-sm"
                       >
                         <PhoneIcon className="w-4 h-4 group-hover:scale-110 transition-transform duration-150" />
                       </a>
 
-                      {/* Instagram Button */}
+                      {/* Instagram Button (slight pink hover) */}
                       {c.instagram && (
                         <a
                           href={c.instagram}
                           target="_blank"
                           rel="noopener noreferrer"
                           aria-label={`${c.name} on Instagram`}
-                          className="w-10 h-10 flex items-center justify-center rounded-xl bg-surface-elevated border border-surface-border hover:border-accent hover:bg-surface-soft hover:text-accent active:scale-95 transition-all duration-150 text-mid group shadow-sm"
+                          className="w-10 h-10 flex items-center justify-center rounded-xl bg-surface-elevated border border-surface-border text-mid hover:text-[#E1306C] hover:border-[#E1306C]/40 hover:bg-[#E1306C]/10 active:scale-95 transition-all duration-150 group shadow-sm"
                         >
                           <InstagramIcon className="w-4 h-4 group-hover:scale-110 transition-transform duration-150" />
                         </a>
                       )}
 
-                      {/* WhatsApp Button */}
+                      {/* WhatsApp Button (slight green hover) */}
                       {c.whatsapp && (
                         <a
                           href={`https://wa.me/${c.whatsapp}?text=Hi%20${encodeURIComponent(c.name)},%20I'm%20interested%20in%20joining%20Brother's%20Fitness!`}
                           target="_blank"
                           rel="noopener noreferrer"
                           aria-label={`${c.name} on WhatsApp`}
-                          className="w-10 h-10 flex items-center justify-center rounded-xl bg-surface-elevated border border-surface-border hover:border-accent hover:bg-surface-soft hover:text-accent active:scale-95 transition-all duration-150 text-mid group shadow-sm"
+                          className="w-10 h-10 flex items-center justify-center rounded-xl bg-surface-elevated border border-surface-border text-mid hover:text-[#25D366] hover:border-[#25D366]/40 hover:bg-[#25D366]/10 active:scale-95 transition-all duration-150 group shadow-sm"
                         >
                           <WhatsAppIcon className="w-4 h-4 group-hover:scale-110 transition-transform duration-150" />
                         </a>

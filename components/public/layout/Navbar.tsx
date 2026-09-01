@@ -87,9 +87,9 @@ export default function Navbar() {
     <>
       {/* Editorial Apple-Grade Navigation Header */}
       <header
-        className={`fixed top-0 left-0 right-0 z-[110] w-full select-none transition-colors duration-200 ${
+        className={`sticky top-0 z-[110] w-full select-none transition-colors duration-200 ${
           isOpen || isScrolled
-            ? "bg-surface-canvas border-b border-surface-border/80 shadow-sm"
+            ? "bg-surface-canvas/95 backdrop-blur-md border-b border-surface-border/80 shadow-xs"
             : "bg-surface-canvas/80 backdrop-blur-md border-b border-surface-border/40"
         }`}
       >
@@ -133,10 +133,10 @@ export default function Navbar() {
                 href="https://www.instagram.com/brothers_fitness_17"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-10 h-10 rounded-full flex items-center justify-center bg-surface-card border border-surface-border hover:bg-surface-elevated active:scale-90 transition-all duration-150 shadow-sm"
+                className="w-10 h-10 rounded-full flex items-center justify-center bg-surface-card border border-surface-border text-mid hover:text-[#E1306C] hover:border-[#E1306C]/40 hover:bg-[#E1306C]/10 active:scale-90 transition-all duration-150 shadow-sm"
                 aria-label="Instagram"
               >
-                <Instagram className="w-4 h-4 text-mid hover:text-hi transition-colors" />
+                <Instagram className="w-4 h-4 transition-colors" />
               </a>
 
               {/* Option 3: WhatsApp Coach */}
@@ -144,10 +144,10 @@ export default function Navbar() {
                 href="https://wa.me/919131179343"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-10 h-10 rounded-full flex items-center justify-center bg-surface-card border border-surface-border hover:bg-surface-elevated active:scale-90 transition-all duration-150 shadow-sm"
+                className="w-10 h-10 rounded-full flex items-center justify-center bg-surface-card border border-surface-border text-mid hover:text-[#25D366] hover:border-[#25D366]/40 hover:bg-[#25D366]/10 active:scale-90 transition-all duration-150 shadow-sm"
                 aria-label="WhatsApp Coach"
               >
-                <WhatsAppIcon className="w-4 h-4 text-[#25D366]" />
+                <WhatsAppIcon className="w-4 h-4 transition-colors" />
               </a>
 
                   {/* Option 4: User Auth / Profile */}
@@ -264,170 +264,212 @@ export default function Navbar() {
                   </div>
                 </div>
 
-                {/* Right Column: People & Direct Access Rows in Matching Editorial Style */}
-                <div className="lg:col-span-5 space-y-1 pt-4 lg:pt-0">
-                  <span className="text-xs uppercase tracking-widest text-accent mb-4 block font-semibold">
-                    OUR TEAM &amp; DIRECT CONTACT
-                  </span>
+                {/* Right Column: People & Direct Access with Coaches + Separate System Architect */}
+                <div className="lg:col-span-5 space-y-6 pt-4 lg:pt-0">
+                  
+                  {/* Part 1: Gym Coaches */}
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between pb-2 border-b border-surface-border/60">
+                      <span className="text-xs uppercase tracking-widest text-accent font-semibold">
+                        GYM COACHES &amp; TRAINERS
+                      </span>
+                      <span className="text-[11px] text-mid font-medium">2 Coaches</span>
+                    </div>
 
-                  <div className="space-y-2">
-                    {/* 01 Aman Shrivastava */}
-                    <div className="group w-full py-3.5 sm:py-4 flex items-center justify-between border-b border-surface-border/60 text-left transition-colors">
-                      <div className="flex items-center gap-4 sm:gap-6 min-w-0 pr-2">
-                        <span className="text-xs text-mid group-hover:text-accent transition-colors flex-shrink-0 font-medium">
-                          01
-                        </span>
-                        <div className="truncate">
-                          <span className="text-xl sm:text-2xl md:text-3xl font-bold tracking-tight text-hi group-hover:text-accent transition-colors block truncate">
-                            Aman Shrivastava
-                          </span>
-                          <span className="text-xs text-mid truncate block mt-0.5">
-                            Founder &bull; Head Coach
-                          </span>
+                    <div className="space-y-3">
+                      {/* 01 Aman Shrivastava */}
+                      <div className="group w-full pb-3 border-b border-surface-border/60 flex items-center justify-between gap-3 text-left transition-colors">
+                        <div className="flex items-center gap-3 sm:gap-4 min-w-0 pr-2">
+                          {/* Pebble Shaped Image Avatar */}
+                          <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-[18px] sm:rounded-[22px] overflow-hidden border border-surface-border bg-surface-soft shrink-0 shadow-sm relative group-hover:border-accent group-hover:scale-105 transition-all duration-200">
+                            <Image
+                              src="/assets/aman.jpeg"
+                              alt="Aman Shrivastava"
+                              width={56}
+                              height={56}
+                              className="w-full h-full object-cover"
+                            />
+                          </div>
+
+                          <div className="truncate">
+                            <span className="text-base sm:text-lg font-bold tracking-tight text-hi group-hover:text-accent transition-colors block truncate">
+                              Aman Shrivastava
+                            </span>
+                            <span className="text-xs text-mid truncate block mt-0.5 font-medium">
+                              Founder &bull; Head Coach
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* 3 Action Buttons: Call (slight blue hover), WhatsApp (slight green hover), Insta (slight pink hover) */}
+                        <div className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
+                          <a
+                            href="tel:+919131179343"
+                            className="w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center bg-surface-card border border-surface-border text-mid hover:text-[#007AFF] hover:border-[#007AFF]/40 hover:bg-[#007AFF]/10 active:scale-90 transition-all shadow-sm"
+                            aria-label="Call Aman"
+                            title="Call Aman"
+                          >
+                            <Phone className="w-4 h-4" />
+                          </a>
+                          <a
+                            href="https://wa.me/919131179343"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center bg-surface-card border border-surface-border text-mid hover:text-[#25D366] hover:border-[#25D366]/40 hover:bg-[#25D366]/10 active:scale-90 transition-all shadow-sm"
+                            aria-label="WhatsApp Aman"
+                            title="WhatsApp Aman"
+                          >
+                            <WhatsAppIcon className="w-4 h-4" />
+                          </a>
+                          <a
+                            href="https://www.instagram.com/aman_shrivastavaaa72"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center bg-surface-card border border-surface-border text-mid hover:text-[#E1306C] hover:border-[#E1306C]/40 hover:bg-[#E1306C]/10 active:scale-90 transition-all shadow-sm"
+                            aria-label="Instagram Aman"
+                            title="Instagram Aman"
+                          >
+                            <Instagram className="w-4 h-4" />
+                          </a>
                         </div>
                       </div>
 
-                      {/* Action Icons (Logo Only) */}
-                      <div className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
-                        <a
-                          href="tel:+919131179343"
-                          className="w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center bg-surface-card border border-surface-border hover:bg-surface-elevated hover:border-accent active:scale-90 transition-all text-hi shadow-sm"
-                          aria-label="Call Aman"
-                          title="Call Aman"
-                        >
-                          <Phone className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                        </a>
-                        <a
-                          href="https://wa.me/919131179343"
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center bg-surface-card border border-surface-border hover:bg-surface-elevated hover:border-[#25D366] active:scale-90 transition-all text-[#25D366] shadow-sm"
-                          aria-label="WhatsApp Aman"
-                          title="WhatsApp Aman"
-                        >
-                          <WhatsAppIcon className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                        </a>
-                        <a
-                          href="https://www.instagram.com/aman_shrivastavaaa72"
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center bg-surface-card border border-surface-border hover:bg-surface-elevated hover:border-accent active:scale-90 transition-all text-mid hover:text-hi shadow-sm"
-                          aria-label="Instagram Aman"
-                          title="Instagram Aman"
-                        >
-                          <Instagram className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                        </a>
-                      </div>
-                    </div>
+                      {/* 02 Pradeep Shrivastava */}
+                      <div className="group w-full flex items-center justify-between gap-3 text-left transition-colors">
+                        <div className="flex items-center gap-3 sm:gap-4 min-w-0 pr-2">
+                          {/* Pebble Shaped Image Avatar */}
+                          <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-[18px] sm:rounded-[22px] overflow-hidden border border-surface-border bg-surface-soft shrink-0 shadow-sm relative group-hover:border-accent group-hover:scale-105 transition-all duration-200">
+                            <Image
+                              src="/assets/pradeep.jpeg"
+                              alt="Pradeep Shrivastava"
+                              width={56}
+                              height={56}
+                              className="w-full h-full object-cover"
+                            />
+                          </div>
 
-                    {/* 02 Pradeep Shrivastava */}
-                    <div className="group w-full py-3.5 sm:py-4 flex items-center justify-between border-b border-surface-border/60 text-left transition-colors">
-                      <div className="flex items-center gap-4 sm:gap-6 min-w-0 pr-2">
-                        <span className="text-xs text-mid group-hover:text-accent transition-colors flex-shrink-0 font-medium">
-                          02
-                        </span>
-                        <div className="truncate">
-                          <span className="text-xl sm:text-2xl md:text-3xl font-bold tracking-tight text-hi group-hover:text-accent transition-colors block truncate">
-                            Pradeep Shrivastava
-                          </span>
-                          <span className="text-xs text-mid truncate block mt-0.5">
-                            Co-Founder &bull; Senior Trainer
-                          </span>
+                          <div className="truncate">
+                            <span className="text-base sm:text-lg font-bold tracking-tight text-hi group-hover:text-accent transition-colors block truncate">
+                              Pradeep Shrivastava
+                            </span>
+                            <span className="text-xs text-mid truncate block mt-0.5 font-medium">
+                              Co-Founder &bull; Senior Trainer
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* 3 Action Buttons: Call, WhatsApp, Insta */}
+                        <div className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
+                          <a
+                            href="tel:+919131272754"
+                            className="w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center bg-surface-card border border-surface-border text-mid hover:text-[#007AFF] hover:border-[#007AFF]/40 hover:bg-[#007AFF]/10 active:scale-90 transition-all shadow-sm"
+                            aria-label="Call Pradeep"
+                            title="Call Pradeep"
+                          >
+                            <Phone className="w-4 h-4" />
+                          </a>
+                          <a
+                            href="https://wa.me/919131272754"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center bg-surface-card border border-surface-border text-mid hover:text-[#25D366] hover:border-[#25D366]/40 hover:bg-[#25D366]/10 active:scale-90 transition-all shadow-sm"
+                            aria-label="WhatsApp Pradeep"
+                            title="WhatsApp Pradeep"
+                          >
+                            <WhatsAppIcon className="w-4 h-4" />
+                          </a>
+                          <a
+                            href="https://www.instagram.com/brothers_fitness_17"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center bg-surface-card border border-surface-border text-mid hover:text-[#E1306C] hover:border-[#E1306C]/40 hover:bg-[#E1306C]/10 active:scale-90 transition-all shadow-sm"
+                            aria-label="Instagram Pradeep"
+                            title="Instagram Pradeep"
+                          >
+                            <Instagram className="w-4 h-4" />
+                          </a>
                         </div>
                       </div>
+                    </div>
+                  </div>
 
-                      {/* Action Icons (Logo Only) */}
-                      <div className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
-                        <a
-                          href="tel:+919131272754"
-                          className="w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center bg-surface-card border border-surface-border hover:bg-surface-elevated hover:border-accent active:scale-90 transition-all text-hi shadow-sm"
-                          aria-label="Call Pradeep"
-                          title="Call Pradeep"
-                        >
-                          <Phone className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                        </a>
-                        <a
-                          href="https://wa.me/919131272754"
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center bg-surface-card border border-surface-border hover:bg-surface-elevated hover:border-[#25D366] active:scale-90 transition-all text-[#25D366] shadow-sm"
-                          aria-label="WhatsApp Pradeep"
-                          title="WhatsApp Pradeep"
-                        >
-                          <WhatsAppIcon className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                        </a>
-                        <a
-                          href="https://www.instagram.com/brothers_fitness_17"
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center bg-surface-card border border-surface-border hover:bg-surface-elevated hover:border-accent active:scale-90 transition-all text-mid hover:text-hi shadow-sm"
-                          aria-label="Instagram Pradeep"
-                          title="Instagram Pradeep"
-                        >
-                          <Instagram className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                        </a>
-                      </div>
+                  {/* Part 2: Individual System Architect Section */}
+                  <div className="space-y-3 pt-2">
+                    <div className="flex items-center justify-between pb-2 border-b border-surface-border/60">
+                      <span className="text-xs uppercase tracking-widest text-accent font-semibold">
+                        SYSTEM ARCHITECT &amp; DEVELOPER
+                      </span>
+                      <span className="text-[11px] text-mid font-medium">Engineering</span>
                     </div>
 
-                    {/* 03 Anurag Mishra */}
-                    <div className="group w-full py-3.5 sm:py-4 flex items-center justify-between border-b border-surface-border/60 text-left transition-colors">
-                      <div className="flex items-center gap-4 sm:gap-6 min-w-0 pr-2">
-                        <span className="text-xs text-mid group-hover:text-accent transition-colors flex-shrink-0 font-medium">
-                          03
-                        </span>
+                    <div className="group w-full flex items-center justify-between gap-3 text-left transition-colors">
+                      <div className="flex items-center gap-3 sm:gap-4 min-w-0 pr-2">
+                        {/* Pebble Shaped Image Avatar */}
+                        <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-[18px] sm:rounded-[22px] overflow-hidden border border-surface-border bg-surface-soft shrink-0 shadow-sm relative group-hover:border-accent group-hover:scale-105 transition-all duration-200">
+                          <Image
+                            src="https://github.com/4nur4gmishr4.png"
+                            alt="Anurag Mishra"
+                            width={56}
+                            height={56}
+                            unoptimized
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+
                         <div className="truncate">
-                          <span className="text-xl sm:text-2xl md:text-3xl font-bold tracking-tight text-hi group-hover:text-accent transition-colors block truncate">
+                          <span className="text-base sm:text-lg font-bold tracking-tight text-hi group-hover:text-accent transition-colors block truncate">
                             Anurag Mishra
                           </span>
-                          <span className="text-xs text-mid truncate block mt-0.5">
-                            Website &amp; App Developer
+                          <span className="text-xs text-mid truncate block mt-0.5 font-medium">
+                            System Architect &bull; Full Stack
                           </span>
                         </div>
                       </div>
 
-                      {/* Action Icons (Logo Only: WhatsApp, Call, Insta, GitHub) */}
+                      {/* 4 Action Buttons: Call (blue), WhatsApp (green), Insta (pink), GitHub (purplish blue) */}
                       <div className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
                         <a
                           href="tel:+919302786886"
-                          className="w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center bg-surface-card border border-surface-border hover:bg-surface-elevated hover:border-accent active:scale-90 transition-all text-hi shadow-sm"
-                          aria-label="Call Developer"
-                          title="Call Developer"
+                          className="w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center bg-surface-card border border-surface-border text-mid hover:text-[#007AFF] hover:border-[#007AFF]/40 hover:bg-[#007AFF]/10 active:scale-90 transition-all shadow-sm"
+                          aria-label="Call Anurag"
+                          title="Call Anurag"
                         >
-                          <Phone className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                          <Phone className="w-4 h-4" />
                         </a>
                         <a
                           href="https://wa.me/919302786886"
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center bg-surface-card border border-surface-border hover:bg-surface-elevated hover:border-[#25D366] active:scale-90 transition-all text-[#25D366] shadow-sm"
-                          aria-label="WhatsApp Developer"
-                          title="WhatsApp Developer"
+                          className="w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center bg-surface-card border border-surface-border text-mid hover:text-[#25D366] hover:border-[#25D366]/40 hover:bg-[#25D366]/10 active:scale-90 transition-all shadow-sm"
+                          aria-label="WhatsApp Anurag"
+                          title="WhatsApp Anurag"
                         >
-                          <WhatsAppIcon className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                          <WhatsAppIcon className="w-4 h-4" />
                         </a>
                         <a
-                          href="https://www.instagram.com/4nur4gmishr4?igsh=MTZkb3N6NDNhc2kwaQ=="
+                          href="https://www.instagram.com/4nur4gmishr4"
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center bg-surface-card border border-surface-border hover:bg-surface-elevated hover:border-accent active:scale-90 transition-all text-mid hover:text-hi shadow-sm"
-                          aria-label="Instagram Developer"
-                          title="Instagram Developer"
+                          className="w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center bg-surface-card border border-surface-border text-mid hover:text-[#E1306C] hover:border-[#E1306C]/40 hover:bg-[#E1306C]/10 active:scale-90 transition-all shadow-sm"
+                          aria-label="Instagram Anurag"
+                          title="Instagram Anurag"
                         >
-                          <Instagram className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                          <Instagram className="w-4 h-4" />
                         </a>
                         <a
                           href="https://github.com/4nur4gmishr4"
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center bg-surface-card border border-surface-border hover:bg-surface-elevated hover:border-hi active:scale-90 transition-all text-mid hover:text-hi shadow-sm"
-                          aria-label="GitHub Developer"
-                          title="GitHub Developer"
+                          className="w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center bg-surface-card border border-surface-border text-mid hover:text-[#8b5cf6] hover:border-[#8b5cf6]/40 hover:bg-[#8b5cf6]/10 active:scale-90 transition-all shadow-sm"
+                          aria-label="GitHub Anurag"
+                          title="GitHub Anurag"
                         >
-                          <Github className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                          <Github className="w-4 h-4" />
                         </a>
                       </div>
                     </div>
                   </div>
+
                 </div>
 
               </div>
