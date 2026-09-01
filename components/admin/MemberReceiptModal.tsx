@@ -34,38 +34,38 @@ export default function MemberReceiptModal({ member, onClose }: MemberReceiptMod
                 onClick={(e) => e.stopPropagation()}
             >
                 <div className="text-center mb-4">
-                    <h2 className="heading-display text-2xl text-accent">BROTHER&apos;S FITNESS</h2>
-                    <p className="label-text text-low">Pain is Temporary. Pride is Forever.</p>
+                    <h2 className="font-bold text-xl text-accent tracking-tight">BROTHER&apos;S FITNESS</h2>
+                    <p className="text-xs text-mid mt-0.5">Pain is Temporary. Pride is Forever.</p>
                 </div>
-                <div className="hairline-t hairline-b py-4 my-4">
-                    <div className="flex justify-between mb-2">
-                        <span className="text-low">Member:</span>
-                        <span className="font-bold text-hi">{member.full_name}</span>
+                <div className="hairline-t hairline-b py-4 my-4 space-y-2.5 text-xs">
+                    <div className="flex justify-between items-center">
+                        <span className="text-mid">Member:</span>
+                        <span className="font-semibold text-hi">{member.full_name}</span>
                     </div>
-                    <div className="flex justify-between mb-2">
-                        <span className="text-low">Mobile:</span>
-                        <span className="text-hi">{member.mobile}</span>
+                    <div className="flex justify-between items-center">
+                        <span className="text-mid">Mobile:</span>
+                        <span className="text-hi font-medium tabular-nums">{member.mobile}</span>
                     </div>
-                    <div className="flex justify-between mb-2">
-                        <span className="text-low">Plan:</span>
-                        <span className="font-bold text-hi">{member.membership_type}</span>
+                    <div className="flex justify-between items-center">
+                        <span className="text-mid">Plan:</span>
+                        <span className="font-semibold text-hi">{member.membership_type}</span>
                     </div>
-                    <div className="flex justify-between mb-2">
-                        <span className="text-low">Valid From:</span>
-                        <span className="text-hi">{formatDate(member.membership_start)}</span>
+                    <div className="flex justify-between items-center">
+                        <span className="text-mid">Valid From:</span>
+                        <span className="text-hi font-medium tabular-nums">{formatDate(member.membership_start)}</span>
                     </div>
-                    <div className="flex justify-between mb-2">
-                        <span className="text-low">Valid Until:</span>
-                        <span className="text-hi">{formatDate(member.membership_end)}</span>
+                    <div className="flex justify-between items-center">
+                        <span className="text-mid">Valid Until:</span>
+                        <span className="text-hi font-medium tabular-nums">{formatDate(member.membership_end)}</span>
                     </div>
                 </div>
                 <div className="flex justify-between items-center mb-4">
-                    <span className="heading-section text-lg text-hi">Amount Paid:</span>
-                    <span className="heading-section text-2xl text-accent">
+                    <span className="font-semibold text-sm text-hi">Amount Paid:</span>
+                    <span className="font-bold text-xl text-accent tabular-nums">
                         ₹{amount?.toLocaleString('en-IN') || '0'}
                     </span>
                 </div>
-                <div className="text-center text-xs text-faint mb-4">
+                <div className="text-center text-xs text-faint mb-4 tabular-nums">
                     Receipt Date: {formatTodayIST()}
                 </div>
                 <div className="flex gap-3">
