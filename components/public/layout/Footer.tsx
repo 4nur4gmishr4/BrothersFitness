@@ -2,6 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
+import Image from "next/image";
 import {
   MapPin,
   Phone,
@@ -115,9 +116,11 @@ export const Footer = (props: Partial<FooterProps>) => {
             <div>
               <Link href={logo?.url || "/"} className="inline-flex items-center gap-3 group">
                 <div className="w-10 h-10 rounded-xl bg-surface-card border border-surface-border p-1.5 flex items-center justify-center shadow-md group-hover:border-accent transition-colors">
-                  <img
-                    src={logo?.src}
+                  <Image
+                    src={logo?.src || "/assets/favicon.png"}
                     alt={logo?.alt || "Logo"}
+                    width={40}
+                    height={40}
                     className="w-full h-full object-contain"
                   />
                 </div>

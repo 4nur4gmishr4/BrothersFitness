@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef } from "react";
-import { CreditCard, User, Users, Phone, QrCode, Smartphone, MessageCircle, ExternalLink, CheckCircle } from "lucide-react";
+import { User, Users, Phone, QrCode, Smartphone, MessageCircle, ExternalLink, CheckCircle } from "lucide-react";
 import Image from "next/image";
 
 type PaymentStep = "plan" | "details" | "paymentChoice" | "qrCode";

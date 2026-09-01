@@ -1,8 +1,8 @@
 "use client";
 
 import { useState, useEffect, Suspense, useCallback, useMemo } from "react";
-import { useSearchParams, useRouter } from "next/navigation";
-import { ArrowLeft, Cpu, Calculator } from "lucide-react";
+import { useSearchParams } from "next/navigation";
+import { Cpu, Calculator } from "lucide-react";
 import { toast } from "sonner";
 import Navbar from "@/components/public/layout/Navbar";
 import { useUserAuth } from "@/lib/user-auth-context";
@@ -16,7 +16,6 @@ import BellRing from "@/components/ui/animations/BellRing";
 import PageSpinner from "@/components/ui/animations/PageSpinner";
 
 function FuelSynthesizerContent() {
-    const router = useRouter();
     const searchParams = useSearchParams();
 
     const [calories] = useState(searchParams.get("calories") || "");

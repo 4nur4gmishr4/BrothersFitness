@@ -5,7 +5,6 @@ import { useRouter, useSearchParams } from "next/navigation";
 import {
   UserPlus,
   FileDown,
-  Search,
   Filter,
   ArrowUpDown,
   Edit2,
@@ -27,7 +26,6 @@ import {
 import { toast } from "sonner";
 import Image from "next/image";
 import dynamic from "next/dynamic";
-import Link from "next/link";
 import type { GymMember } from "@/lib/supabase";
 import {
   StatCard,
@@ -35,9 +33,7 @@ import {
   SectionCard,
   StatusBadge,
   EmptyState,
-  DataTableSkeleton,
   SearchField,
-  Skeleton,
   AdminLoader,
 } from "@/components/admin/AdminUI";
 import { useAllMembers } from "@/hooks/use-admin-stats";
@@ -45,9 +41,8 @@ import { getMemberStatus, formatDate, parseLocalDate } from "@/lib/member-utils"
 import {
   adminFetch,
   openWhatsApp,
-  buildWhatsAppUrl,
 } from "@/lib/admin-api";
-import { PLAN_PRICES, getPlanPrice } from "@/lib/config";
+import { getPlanPrice } from "@/lib/config";
 import CountUp from "@/components/ui/text/CountUp";
 import PebbleImageViewer, { PebbleImage } from "@/components/admin/PebbleImageViewer";
 
@@ -406,7 +401,7 @@ function AdminMembersPageInner() {
       toast.success("Member deleted");
       setDeletingId(null);
       setDeleteConfirmText("");
-    } catch (e) {
+    } catch {
       toast.error("Failed to delete member");
     } finally {
       setIsDeleting(false);

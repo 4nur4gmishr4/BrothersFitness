@@ -17,7 +17,6 @@ import {
   ArrowUpRight,
   Github,
   Instagram,
-  Bell,
   User as UserIcon,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -32,7 +31,7 @@ const ProfileModal = dynamic(() => import("@/components/ui/primitives/ProfileMod
 const LoginModal = dynamic(() => import("@/components/ui/primitives/LoginModal"), { ssr: false });
 const WelcomeModal = dynamic(() => import("@/components/ui/primitives/WelcomeModal"), { ssr: false });
 
-export default function Navbar({ unreadLeads = 0 }: { unreadLeads?: number } = {}) {
+export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);

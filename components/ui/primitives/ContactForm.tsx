@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { MapPin, Phone, Mail, MessageCircle, Send, Loader2, ExternalLink } from "lucide-react";
+import { MapPin, Phone, MessageCircle, Send, Loader2, ExternalLink } from "lucide-react";
 import { toast } from "sonner";
 
 export default function ContactForm() {

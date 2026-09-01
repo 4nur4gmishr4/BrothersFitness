@@ -8,9 +8,6 @@ import { MAX_DAILY_CREDITS } from "@/lib/config";
 import TypingDots from "@/components/ui/animations/TypingDots";
 import SendArrow from "@/components/ui/animations/SendArrow";
 import DecryptedText from "@/components/ui/animations/DecryptedText";
-import dynamic from "next/dynamic";
-
-const LoginModal = dynamic(() => import("@/components/ui/primitives/LoginModal"), { ssr: false });
 
 type ChatMessage = {
     role: "user" | "model";
@@ -33,14 +30,13 @@ const SUGGESTIONS = {
 };
 
 export default function TacticalChatbot() {
-    const { isLoggedIn, remainingCredits, refreshCredits, accessToken } = useUserAuth();
+    const { isLoggedIn, remainingCredits, refreshCredits, accessToken, setShowLoginModal } = useUserAuth();
 
     const [isOpen, setIsOpen] = useState(false);
     const [messages, setMessages] = useState<ChatMessage[]>([]);
     const [input, setInput] = useState("");
     const [loading, setLoading] = useState(false);
     const [language, setLanguage] = useState<"en" | "hi" | null>(null);
-    const [showLoginModal, setShowLoginModal] = useState(false);
     const [sentFlash, setSentFlash] = useState(false);
 
     const scrollRef = useRef<HTMLDivElement>(null);

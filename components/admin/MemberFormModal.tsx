@@ -121,6 +121,7 @@ export default function MemberFormModal({
         }));
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [formData.membership_start, formData.membership_type, isManualEndDate, member]);
 
   const modalProps = useModalDismiss(onClose);

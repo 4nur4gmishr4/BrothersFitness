@@ -2,6 +2,7 @@
 
 import React, { useState, FormEvent } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import {
   Lock,
   Eye,
@@ -111,10 +112,12 @@ export function AdminLoginForm({
               href={logo.url || "/"}
               className="relative group mb-4 p-2 rounded-2xl bg-surface-card border border-surface-border shadow-lg transition-transform hover:scale-105 duration-fast"
             >
-              <img
-                src={logo.src}
+              <Image
+                src={logo.src || "/assets/favicon.png"}
                 alt={logo.alt || "Logo"}
                 title={logo.title}
+                width={56}
+                height={56}
                 className={cn("w-14 h-14 object-contain rounded-xl", logo.className)}
               />
               <div className="absolute -inset-0.5 bg-accent/20 rounded-2xl blur-md -z-10 group-hover:bg-accent/40 transition-colors" />
