@@ -61,7 +61,7 @@ export type GenerateDietPayload = z.infer<typeof GenerateDietSchema>;
 // --- AI Response Schema (lenient, for safeParse) ---
 // This validates the *structure* of the AI response to prevent crashes.
 export const DietResponseSchema = z.object({
-    summary: z.record(z.string(), z.string()).optional(),
+    summary: z.union([z.string(), z.record(z.string(), z.any())]).optional(),
     user_inputs_summary: z.record(z.string(), z.any()).optional(),
     transformation_timeline: z.object({
         estimated_duration: z.string().optional(),
