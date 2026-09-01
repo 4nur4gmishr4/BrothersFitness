@@ -93,3 +93,11 @@ export function getDaysUntil(dateString: string): number {
     target.setHours(0, 0, 0, 0);
     return Math.ceil((target.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
 }
+
+/** Extract uppercase initials from a member's full name (e.g. "Aman Shrivastava" -> "AS"). */
+export function initials(name?: string | null): string {
+    if (!name) return '—';
+    const parts = name.trim().split(/\s+/);
+    if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+    return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+}

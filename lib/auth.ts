@@ -96,11 +96,13 @@ async function isNonceRevoked(nonce: string): Promise<boolean> {
 }
 
 export async function verifyAdminToken(token: string): Promise<boolean> {
-    if (!token || !token.includes('.')) return false;
+    if (!token || typeof token !== 'string') return false;
 
-    const [body, signature] = token.split('.');
+    const parts = token.split('.');
+    if (parts.length !== 2) return false;
+    const [body, signature] = parts;
     const payload = decodePayload(body);
-    if (!payload || typeof signature !== 'string') return false;
+    if (!payload || !signature) return false;
 
     const now = Date.now();
     if (now > payload.exp) return false;              // expired

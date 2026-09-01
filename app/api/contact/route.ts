@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { supabase } from "@/lib/supabase";
+import { getServiceSupabase } from "@/lib/server-supabase";
 import { checkRateLimit, RATE_LIMITS, getClientIp } from "@/lib/rate-limit";
 import { ContactSchema } from "@/lib/validation";
 import { logger } from "@/lib/logger";
@@ -45,9 +46,16 @@ export async function POST(req: Request) {
 
     const { name, email, phone, message } = parsed.data;
 
-    // Store in Supabase. If this fails we must NOT tell the visitor their
-    // message went through — silent drops (M4) lose real lead data.
-    const { error: dbError } = await supabase.from('contact_submissions').insert([{
+    // Store in Supabase. Use service client when available (bypasses RLS) to prevent
+    // silent lead drops if anon insert permissions change.
+    let client;
+    try {
+      client = getServiceSupabase();
+    } catch {
+      client = supabase;
+    }
+
+    const { error: dbError } = await client.from('contact_submissions').insert([{
       name,
       email,
       phone: phone || null,

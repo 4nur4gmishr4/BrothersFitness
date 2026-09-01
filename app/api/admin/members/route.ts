@@ -303,9 +303,16 @@ export async function PUT(req: Request) {
             .update({ ...parsed.data, updated_at: new Date().toISOString() })
             .eq('id', id)
             .select()
-            .single();
+            .maybeSingle();
 
         if (error) throw error;
+
+        if (!data) {
+            return NextResponse.json(
+                { error: 'Member not found' },
+                { status: 404 }
+            );
+        }
 
         // Log the update
         await logActivity('UPDATE', id, data.full_name, {

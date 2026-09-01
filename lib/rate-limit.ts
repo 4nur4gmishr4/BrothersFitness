@@ -202,14 +202,18 @@ function isTrustedProxy(): boolean {
  */
 export function getClientIp(req: Request): string {
     if (isTrustedProxy()) {
+        const cfIp = req.headers.get('cf-connecting-ip');
+        if (cfIp && isPlausibleIp(cfIp.trim())) return cfIp.trim();
+
         const realIp = req.headers.get('x-real-ip');
         if (realIp && isPlausibleIp(realIp.trim())) return realIp.trim();
 
         const forwarded = req.headers.get('x-forwarded-for');
         if (forwarded) {
-            const parts = forwarded.split(',');
-            const last = parts[parts.length - 1]?.trim();
-            if (last && isPlausibleIp(last)) return last;
+            const parts = forwarded.split(',').map((p) => p.trim());
+            for (let i = parts.length - 1; i >= 0; i--) {
+                if (parts[i] && isPlausibleIp(parts[i])) return parts[i];
+            }
         }
     }
 
