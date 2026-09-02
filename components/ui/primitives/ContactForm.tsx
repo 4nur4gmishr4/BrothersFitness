@@ -1,8 +1,9 @@
 "use client";
 
 import React, { useState } from "react";
-import { MapPin, Phone, MessageCircle, Send, Loader2, ExternalLink } from "lucide-react";
+import { MapPin, Send, Loader2, ExternalLink } from "lucide-react";
 import { toast } from "sonner";
+import { AnimatedPhone, AnimatedWhatsApp } from "@/components/ui/icons";
 
 export default function ContactForm() {
   return (
@@ -44,17 +45,17 @@ export default function ContactForm() {
                 <div className="flex items-center gap-1.5">
                   <a
                     href="tel:+919131179343"
-                    className="px-2.5 py-1 text-xs font-medium bg-surface-card border border-surface-border text-mid hover:text-[#007AFF] hover:border-[#007AFF]/40 hover:bg-[#007AFF]/10 rounded-full active:scale-95 transition-all inline-flex items-center gap-1 shadow-xs"
+                    className="px-2.5 py-1 text-xs font-medium bg-surface-card border border-surface-border text-mid hover:text-[#007AFF] hover:border-[#007AFF]/40 hover:bg-[#007AFF]/10 rounded-full active:scale-95 transition-all inline-flex items-center gap-1.5 shadow-xs"
                   >
-                    <Phone className="w-3 h-3" /> Call
+                    <AnimatedPhone size={13} /> Call
                   </a>
                   <a
                     href="https://wa.me/919131179343?text=Hi%20Aman,%20I'm%20interested%20in%20joining%20Brother's%20Fitness!"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="px-2.5 py-1 text-xs font-medium bg-surface-card border border-surface-border text-mid hover:text-[#25D366] hover:border-[#25D366]/40 hover:bg-[#25D366]/10 rounded-full active:scale-95 transition-all inline-flex items-center gap-1 shadow-xs"
+                    className="px-2.5 py-1 text-xs font-medium bg-surface-card border border-surface-border text-mid hover:text-[#25D366] hover:border-[#25D366]/40 hover:bg-[#25D366]/10 rounded-full active:scale-95 transition-all inline-flex items-center gap-1.5 shadow-xs"
                   >
-                    <MessageCircle className="w-3 h-3" /> WhatsApp
+                    <AnimatedWhatsApp size={13} /> WhatsApp
                   </a>
                 </div>
               </div>
@@ -68,21 +69,20 @@ export default function ContactForm() {
                 <div className="flex items-center gap-1.5">
                   <a
                     href="tel:+919131272754"
-                    className="px-2.5 py-1 text-xs font-medium bg-surface-card border border-surface-border text-mid hover:text-[#007AFF] hover:border-[#007AFF]/40 hover:bg-[#007AFF]/10 rounded-full active:scale-95 transition-all inline-flex items-center gap-1 shadow-xs"
+                    className="px-2.5 py-1 text-xs font-medium bg-surface-card border border-surface-border text-mid hover:text-[#007AFF] hover:border-[#007AFF]/40 hover:bg-[#007AFF]/10 rounded-full active:scale-95 transition-all inline-flex items-center gap-1.5 shadow-xs"
                   >
-                    <Phone className="w-3 h-3" /> Call
+                    <AnimatedPhone size={13} /> Call
                   </a>
                   <a
                     href="https://wa.me/919131272754?text=Hi%20Pradeep,%20I'm%20interested%20in%20joining%20Brother's%20Fitness!"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="px-2.5 py-1 text-xs font-medium bg-surface-card border border-surface-border text-mid hover:text-[#25D366] hover:border-[#25D366]/40 hover:bg-[#25D366]/10 rounded-full active:scale-95 transition-all inline-flex items-center gap-1 shadow-xs"
+                    className="px-2.5 py-1 text-xs font-medium bg-surface-card border border-surface-border text-mid hover:text-[#25D366] hover:border-[#25D366]/40 hover:bg-[#25D366]/10 rounded-full active:scale-95 transition-all inline-flex items-center gap-1.5 shadow-xs"
                   >
-                    <MessageCircle className="w-3 h-3" /> WhatsApp
+                    <AnimatedWhatsApp size={13} /> WhatsApp
                   </a>
                 </div>
               </div>
-
             </div>
 
             {/* Compact Message Form */}

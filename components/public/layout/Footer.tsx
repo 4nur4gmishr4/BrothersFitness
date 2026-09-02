@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import { FaInstagram, FaWhatsapp } from "react-icons/fa";
 import { cn } from "@/lib/utils";
+import LiveBeacon from "@/components/ui/primitives/LiveBeacon";
 
 interface FooterLink {
   name: string;
@@ -220,10 +221,7 @@ export const Footer = (props: Partial<FooterProps>) => {
           </p>
 
           <div className="flex items-center gap-4">
-            <span className="inline-flex items-center gap-1.5 text-status-success font-bold text-[11px] bg-status-success/10 border border-status-success/30 px-2.5 py-0.5 rounded-full">
-              <span className="w-1.5 h-1.5 bg-status-success rounded-full animate-pulse" />
-              LAKHNADON BRANCH OPEN
-            </span>
+            <LiveBeacon status="active" label="LAKHNADON BRANCH OPEN" size="xs" />
 
             <a
               href="https://wa.me/919302786886?text=Hi%20Anurag"

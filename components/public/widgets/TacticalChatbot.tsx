@@ -1,12 +1,14 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { X, Dumbbell, Utensils, Zap, Send, RotateCcw, Bot } from "lucide-react";
+import { X, Send, RotateCcw } from "lucide-react";
 import { useUserAuth } from "@/lib/user-auth-context";
 import { useModalDismiss } from "@/hooks/useModalDismiss";
 import { MAX_DAILY_CREDITS } from "@/lib/config";
 import TypingDots from "@/components/ui/animations/TypingDots";
 import { Portal } from "@/components/ui/Portal";
+import LiveBeacon from "@/components/ui/primitives/LiveBeacon";
+import { AnimatedChat, AnimatedDumbbell, AnimatedFlame, AnimatedSparkles } from "@/components/ui/icons";
 
 type ChatMessage = {
   role: "user" | "model";
@@ -17,14 +19,14 @@ type ChatMessage = {
 
 const SUGGESTIONS = {
   en: [
-    { icon: Dumbbell, text: "Best workout routine for fat loss?" },
-    { icon: Utensils, text: "Vegetarian high-protein foods?" },
-    { icon: Zap, text: "How to build lean muscle mass?" },
+    { icon: AnimatedDumbbell, text: "Best workout routine for fat loss?" },
+    { icon: AnimatedFlame, text: "Vegetarian high-protein foods?" },
+    { icon: AnimatedSparkles, text: "How to build lean muscle mass?" },
   ],
   hi: [
-    { icon: Dumbbell, text: "Muscle badhane ki best exercises?" },
-    { icon: Utensils, text: "Veg protein diet sources kya hain?" },
-    { icon: Zap, text: "Fat loss ke liye daily routine?" },
+    { icon: AnimatedDumbbell, text: "Muscle badhane ki best exercises?" },
+    { icon: AnimatedFlame, text: "Veg protein diet sources kya hain?" },
+    { icon: AnimatedSparkles, text: "Fat loss ke liye daily routine?" },
   ],
 };
 
@@ -41,7 +43,7 @@ export default function TacticalChatbot() {
 
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  const modalProps = useModalDismiss(() => setIsOpen(false));
+  const modalProps = useModalDismiss(() => setIsOpen(false), isOpen);
 
   useEffect(() => {
     const handleNavToggle = (e: Event) => {
@@ -191,36 +193,30 @@ export default function TacticalChatbot() {
           aria-label="Open Brother's Fitness AI Assistant"
           title="Ask BroFit AI Coach"
         >
-          <Bot className="w-6 h-6 transition-transform group-hover:scale-110" />
-          <span className="absolute top-1 right-1 w-3 h-3 rounded-full bg-emerald-500 border-2 border-accent animate-pulse" />
+          <AnimatedChat size={26} className="text-white group-hover:scale-110" />
+          <LiveBeacon status="active" size="xs" className="absolute top-1.5 right-1.5" />
         </button>
       )}
 
-      {/* iOS Modal View */}
+      {/* Tactical AI Chatbot Modal */}
       {isOpen && (
         <Portal>
-          <div className="fixed inset-0 h-[100dvh] w-screen z-[200] flex items-end sm:items-center justify-center p-0 sm:p-4 overflow-hidden overscroll-contain">
-            {/* Backdrop with iOS Blur */}
-            <div
-              className="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity"
-              onClick={() => setIsOpen(false)}
-            />
-
+          <div className="fixed inset-0 h-[100dvh] w-screen z-[200] flex items-center justify-center p-3.5 sm:p-4 overflow-y-auto overscroll-contain bg-black/80 backdrop-blur-sm modal-overlay-in">
             <div
               {...modalProps}
               aria-label="Brother's Fitness AI Assistant"
-              className="relative w-full sm:max-w-[420px] h-[85vh] sm:h-[620px] bg-surface-canvas rounded-t-[28px] sm:rounded-[28px] border border-surface-border shadow-2xl flex flex-col overflow-hidden animate-in slide-in-from-bottom duration-200"
+              className="relative w-full max-w-[440px] h-[85dvh] max-h-[640px] my-auto surface-modal rounded-3xl border border-surface-border shadow-2xl flex flex-col overflow-hidden modal-panel-in"
             >
               {/* iOS Header */}
               <div className="p-4 bg-surface-card border-b border-surface-border flex justify-between items-center shrink-0">
                 <div className="flex items-center gap-3">
                   <div className="w-8 h-8 rounded-full bg-accent/10 flex items-center justify-center text-accent">
-                    <Bot className="w-4 h-4" />
+                    <AnimatedChat size={18} />
                   </div>
                   <div>
                     <h3 className="text-sm font-semibold text-hi">Fitness AI Assistant</h3>
                     <div className="flex items-center gap-1.5 text-[11px] text-mid">
-                      <span className="w-1.5 h-1.5 rounded-full bg-status-success animate-pulse" />
+                      <LiveBeacon status="active" size="xs" />
                       <span>Brother&apos;s Fitness Coach</span>
                     </div>
                   </div>
@@ -286,7 +282,7 @@ export default function TacticalChatbot() {
                   <div className="space-y-4">
                     <div className="flex items-start gap-2.5">
                       <div className="w-7 h-7 rounded-full bg-accent/10 flex items-center justify-center text-accent shrink-0">
-                        <Bot className="w-3.5 h-3.5" />
+                        <AnimatedChat size={16} />
                       </div>
                       <div className="bg-surface-card border border-surface-border rounded-2xl rounded-tl-xs p-3.5 text-xs text-hi leading-relaxed shadow-xs space-y-2">
                         <p className="font-semibold text-hi">

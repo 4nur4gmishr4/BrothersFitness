@@ -17,10 +17,11 @@ import {
   ArrowUpRight,
   Github,
   Instagram,
-  User as UserIcon,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Portal } from "@/components/ui/Portal";
+import LiveBeacon from "@/components/ui/primitives/LiveBeacon";
+import { AnimatedProfile } from "@/components/ui/icons";
 
 const WhatsAppIcon = ({ className }: { className?: string }) => (
   <svg xmlns="http://www.w3.org/2000/svg" className={className} viewBox="0 0 24 24" fill="currentColor">
@@ -199,11 +200,11 @@ export default function Navbar() {
                           {user?.full_name ? user.full_name.charAt(0) : "U"}
                         </div>
                       ) : (
-                        <UserIcon className="w-4 h-4 text-hi" />
+                        <AnimatedProfile size={18} className="text-hi" />
                       )}
                     </button>
                     {isLoggedIn && (
-                      <span className="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-emerald-500 border-2 border-surface-canvas pointer-events-none shadow-xs" />
+                      <LiveBeacon status="active" size="xs" className="absolute bottom-0 right-0 pointer-events-none" />
                     )}
                   </div>
 
@@ -337,7 +338,7 @@ export default function Navbar() {
                               {user?.full_name ? user.full_name.charAt(0) : "U"}
                             </div>
                           ) : (
-                            <UserIcon className="w-4 h-4 text-hi" />
+                            <AnimatedProfile size={18} className="text-hi" />
                           )}
                         </button>
                       </div>
@@ -412,7 +413,7 @@ export default function Navbar() {
                     >
                       <div className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded-full bg-accent/10 flex items-center justify-center text-accent shrink-0">
-                          <UserIcon className="w-5 h-5" />
+                          <AnimatedProfile size={22} />
                         </div>
                         <div>
                           <p className="font-bold text-sm text-hi">Member Sign In</p>
