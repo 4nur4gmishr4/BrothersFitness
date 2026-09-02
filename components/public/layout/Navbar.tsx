@@ -42,16 +42,6 @@ export default function Navbar() {
   const pathname = usePathname();
   const router = useRouter();
 
-  // Reset scroll to top on page load and refresh
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      if ("scrollRestoration" in window.history) {
-        window.history.scrollRestoration = "manual";
-      }
-      window.scrollTo(0, 0);
-    }
-  }, []);
-
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 15);
     window.addEventListener("scroll", handleScroll, { passive: true });
