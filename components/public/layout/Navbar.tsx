@@ -19,7 +19,7 @@ import {
   Instagram,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Portal } from "@/components/ui/Portal";
+import { Portal } from "@/components/ui/primitives/Portal";
 import LiveBeacon from "@/components/ui/primitives/LiveBeacon";
 import { AnimatedProfile } from "@/components/ui/icons";
 

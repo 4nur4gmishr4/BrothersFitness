@@ -16,7 +16,7 @@ import { useModalDismiss } from "@/hooks/useModalDismiss";
 import { openWhatsApp, buildWhatsAppUrl } from "@/lib/admin-api";
 import type { GymMember } from "@/lib/supabase";
 import { getMemberStatus, parseLocalDate } from "@/lib/member-utils";
-import { Portal } from "@/components/ui/Portal";
+import { Portal } from "@/components/ui/primitives/Portal";
 
 interface BulkMessageModalProps {
   open: boolean;

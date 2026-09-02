@@ -6,7 +6,7 @@ import { useUserAuth } from "@/lib/user-auth-context";
 import { useModalDismiss } from "@/hooks/useModalDismiss";
 import { MAX_DAILY_CREDITS } from "@/lib/config";
 import TypingDots from "@/components/ui/animations/TypingDots";
-import { Portal } from "@/components/ui/Portal";
+import { Portal } from "@/components/ui/primitives/Portal";
 import LiveBeacon from "@/components/ui/primitives/LiveBeacon";
 import { AnimatedChat, AnimatedDumbbell, AnimatedFlame, AnimatedSparkles } from "@/components/ui/icons";
 

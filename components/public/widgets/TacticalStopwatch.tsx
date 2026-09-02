@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { Play, Pause, RotateCcw, X, Bell } from "lucide-react";
 import TimerTick from "@/components/ui/animations/TimerTick";
-import { Portal } from "@/components/ui/Portal";
+import { Portal } from "@/components/ui/primitives/Portal";
 import { useModalDismiss } from "@/hooks/useModalDismiss";
 import { AnimatedClock } from "@/components/ui/icons";
 import LiveBeacon from "@/components/ui/primitives/LiveBeacon";

@@ -8,7 +8,7 @@ import { PLAN_PRICES } from "@/lib/config";
 import { formatDate, formatTodayIST, initials } from "@/lib/member-utils";
 import { useModalDismiss } from "@/hooks/useModalDismiss";
 import { openWhatsApp } from "@/lib/admin-api";
-import { Portal } from "@/components/ui/Portal";
+import { Portal } from "@/components/ui/primitives/Portal";
 import type { GymMember } from "@/lib/supabase";
 import LiveBeacon from "@/components/ui/primitives/LiveBeacon";
 
