@@ -24,7 +24,6 @@ export default function SmartPreloaderWrapper() {
         return;
       }
       sessionStorage.setItem("brofit_preloader_seen", "1");
-      document.body.style.overflow = "hidden";
     }
 
     // Exact timings extracted from Framer source code
@@ -41,9 +40,6 @@ export default function SmartPreloaderWrapper() {
     // Unmount safely after animation finishes.
     const t4 = setTimeout(() => {
       setIsVisible(false);
-      if (typeof window !== "undefined") {
-        document.body.style.overflow = "";
-      }
     }, 1000);
 
     return () => {
@@ -51,9 +47,6 @@ export default function SmartPreloaderWrapper() {
       clearTimeout(t2);
       clearTimeout(t3);
       clearTimeout(t4);
-      if (typeof window !== "undefined") {
-        document.body.style.overflow = "";
-      }
     };
   }, []);
 
@@ -75,7 +68,7 @@ export default function SmartPreloaderWrapper() {
       {[0, 1, 2, 3, 4].map((colIndex) => (
         <motion.div
           key={colIndex}
-          className="relative flex-1 h-full bg-[#080808]"
+          className="relative flex-1 h-full bg-[#D71921]"
           initial={{ height: "100%" }}
           animate={{ height: getHeight(colIndex) }}
           transition={{

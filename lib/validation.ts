@@ -27,8 +27,15 @@ export const ChatSchema = z.object({
     message: z.string().min(1, 'Message is required').max(4000, 'Message must be under 4000 characters'),
     context: z.object({
         language: z.enum(['en', 'hi']).optional().default('en'),
-    }).passthrough(), // Allow extra fields
-});
+    }).passthrough().optional().default({ language: 'en' }),
+    language: z.enum(['en', 'hi']).optional(),
+}).transform((data) => ({
+    message: data.message,
+    context: {
+        ...(data.context || {}),
+        language: data.language || data.context?.language || 'en',
+    },
+}));
 export type ChatPayload = z.infer<typeof ChatSchema>;
 
 // --- Generate Diet ---

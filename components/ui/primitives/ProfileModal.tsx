@@ -132,8 +132,8 @@ export default function ProfileModal({ isOpen, onClose }: ProfileModalProps) {
     };
 
     const handleLogout = async () => {
-        await logout();
         onClose();
+        await logout();
     };
 
     const [isReady, setIsReady] = useState(false);

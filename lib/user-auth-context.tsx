@@ -267,12 +267,22 @@ export function UserAuthProvider({ children }: { children: ReactNode }) {
 
     const logout = useCallback(async () => {
         try {
-            await supabase.auth.signOut();
             setUser(null);
             setAccessToken(null);
+            if (typeof window !== 'undefined') {
+                Object.keys(localStorage).forEach((k) => {
+                    if (k.startsWith('brofit_') || k.startsWith('sb-')) {
+                        localStorage.removeItem(k);
+                    }
+                });
+            }
+            await supabase.auth.signOut({ scope: 'local' });
             toast.success("Signed out successfully");
         } catch (error) {
             console.error('Logout error:', error);
+            setUser(null);
+            setAccessToken(null);
+            toast.success("Signed out successfully");
         }
     }, []);
 
