@@ -31,19 +31,18 @@ export default function Hero() {
                 text="BROTHER'S FITNESS"
                 highlightWord="FITNESS"
                 highlightColor="#D71921"
-                strokeWidth={2}
-                drawDuration={1.3}
+                strokeWidth={1.6}
+                drawDuration={1.4}
                 fillDelay={0.15}
-                stagger={0.035}
+                stagger={0.04}
                 ease="power2.out"
                 trigger="mount"
                 fillMode="wipe"
-                fontSize={105}
-                fontWeight={900}
-                fontFamily="'Anton', 'Impact', sans-serif"
-                letterSpacing={1.5}
+                fontSize={110}
+                fontWeight={800}
+                letterSpacing={-2}
                 align="left"
-                className="w-full font-display"
+                className="w-full"
               />
             </div>
 

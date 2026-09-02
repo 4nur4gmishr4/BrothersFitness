@@ -68,9 +68,9 @@ const StrokeText = ({
   trigger = "mount",
   fillMode = "wipe",
   fontSize = 110,
-  fontWeight = 900,
-  fontFamily = "'Anton', 'Impact', sans-serif",
-  letterSpacing = 1,
+  fontWeight = 800,
+  fontFamily,
+  letterSpacing = -2,
   reverse = false,
   align = "left",
   className = "",
@@ -119,7 +119,7 @@ const StrokeText = ({
     () => ({
       fontSize: `${fontSize}px`,
       fontWeight,
-      fontFamily,
+      ...(fontFamily ? { fontFamily } : {}),
       letterSpacing: `${letterSpacing}px`,
     }),
     [fontSize, fontWeight, fontFamily, letterSpacing]
