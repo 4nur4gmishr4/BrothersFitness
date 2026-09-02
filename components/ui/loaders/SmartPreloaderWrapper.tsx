@@ -68,17 +68,23 @@ export default function SmartPreloaderWrapper() {
   };
 
   return (
-    <div className="fixed inset-0 z-[99999] flex items-start pointer-events-none">
-      {[0, 1, 2, 3, 4].map((i) => (
+    <aside
+      aria-hidden="true"
+      className="fixed inset-0 z-[99999] flex w-full h-full pointer-events-none select-none bg-transparent"
+    >
+      {[0, 1, 2, 3, 4].map((colIndex) => (
         <motion.div
-          key={i}
-          initial={{ scaleY: 1 }}
-          animate={{ scaleY: getHeight(i) === "0%" ? 0 : 1 }}
-          transition={{ duration: 0.6, ease: customEase }}
-          style={{ transformOrigin: "top" }}
-          className="flex-1 h-full bg-accent border-l border-surface-border/50 first:border-l-0"
+          key={colIndex}
+          className="relative flex-1 h-full bg-[#080808]"
+          initial={{ height: "100%" }}
+          animate={{ height: getHeight(colIndex) }}
+          transition={{
+            duration: 0.6,
+            ease: customEase,
+          }}
+          style={{ originY: 0 }}
         />
       ))}
-    </div>
+    </aside>
   );
 }

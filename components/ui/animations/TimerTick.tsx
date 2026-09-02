@@ -1,7 +1,7 @@
 /** req #12 — timer_tick: seconds pop on each tick while running.
  *  Uses `key` remount to replay the animation each second. */
 
-import AnimatedSvgIcon from "@/components/ui/AnimatedSvgIcon";
+import AnimatedSvgIcon from "./AnimatedSvgIcon";
 
 export default function TimerTick({
   seconds,

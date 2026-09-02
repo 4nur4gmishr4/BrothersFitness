@@ -1,4 +1,4 @@
-import AnimatedSvgIcon from "@/components/ui/AnimatedSvgIcon";
+import AnimatedSvgIcon from "./AnimatedSvgIcon";
 
 export default function PageSpinner({ label = "LOADING" }: { label?: string }) {
   return (

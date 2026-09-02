@@ -1,4 +1,4 @@
-﻿import Image from "next/image";
+import Image from "next/image";
 
 interface AnimatedSvgIconProps {
   src: string;
@@ -35,4 +35,3 @@ export default function AnimatedSvgIcon({
     </div>
   );
 }
-
