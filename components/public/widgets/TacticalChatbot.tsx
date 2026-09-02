@@ -116,6 +116,7 @@ export default function TacticalChatbot() {
         },
         body: JSON.stringify({
           message: text,
+          context: { language },
           language,
         }),
       });

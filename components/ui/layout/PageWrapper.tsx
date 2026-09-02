@@ -7,7 +7,8 @@ import ScrollRevealDriver from "@/components/ui/layout/ScrollRevealDriver";
 
 export default function PageWrapper({ children }: { children: React.ReactNode }) {
     const pathname = usePathname();
-    const isPublic = !pathname?.startsWith("/admin");
+    const isHome = pathname === "/";
+    const isWorkouts = pathname === "/workouts" || pathname?.startsWith("/workouts");
 
     return (
         <>
@@ -20,12 +21,8 @@ export default function PageWrapper({ children }: { children: React.ReactNode })
                 {children}
             </div>
 
-            {isPublic && (
-                <>
-                    <TacticalStopwatch />
-                    <TacticalChatbot />
-                </>
-            )}
+            {isHome && <TacticalChatbot />}
+            {isWorkouts && <TacticalStopwatch />}
         </>
     );
 }
