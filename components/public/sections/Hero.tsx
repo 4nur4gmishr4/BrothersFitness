@@ -26,25 +26,50 @@ export default function Hero() {
             className="space-y-3 sm:space-y-4 mb-4 sm:mb-6"
           >
             <h1 className="sr-only">Brother&apos;s Fitness Lakhnadon</h1>
-            <div className="w-full h-auto min-h-[70px] sm:min-h-[100px] md:min-h-[130px] lg:min-h-[150px] -ml-1 sm:-ml-2">
-              <StrokeText
-                text="BROTHER'S FITNESS"
-                highlightWord="FITNESS"
-                highlightColor="#D71921"
-                strokeWidth={1.8}
-                drawDuration={1.3}
-                fillDelay={0.12}
-                stagger={0.035}
-                ease="power2.out"
-                trigger="mount"
-                fillMode="wipe"
-                fontSize={98}
-                fontWeight={800}
-                fontFamily="var(--font-syne), 'Syne', sans-serif"
-                letterSpacing={0}
-                align="left"
-                className="w-full"
-              />
+            {/* Prominent Brand Headline: BROTHER'S on Line 1, FITNESS on Line 2 with Left Alignment */}
+            <div className="flex flex-col items-start -ml-1 sm:-ml-2 max-w-full">
+              <div className="w-full">
+                <StrokeText
+                  text="BROTHER'S"
+                  delay={0}
+                  strokeWidth={1.8}
+                  drawDuration={1.1}
+                  fillDelay={0.1}
+                  stagger={0.035}
+                  ease="power2.out"
+                  trigger="mount"
+                  fillMode="wipe"
+                  fontSize={105}
+                  fontWeight={800}
+                  fontFamily="var(--font-syne), 'Syne', sans-serif"
+                  letterSpacing={0}
+                  align="left"
+                  className="w-full"
+                />
+              </div>
+              <div className="w-full -mt-2 sm:-mt-3 md:-mt-4">
+                <StrokeText
+                  text="FITNESS"
+                  delay={0.15}
+                  strokeColor="#D71921"
+                  fillColor="#D71921"
+                  highlightWord="FITNESS"
+                  highlightColor="#D71921"
+                  strokeWidth={1.8}
+                  drawDuration={1.1}
+                  fillDelay={0.1}
+                  stagger={0.035}
+                  ease="power2.out"
+                  trigger="mount"
+                  fillMode="wipe"
+                  fontSize={105}
+                  fontWeight={800}
+                  fontFamily="var(--font-syne), 'Syne', sans-serif"
+                  letterSpacing={0}
+                  align="left"
+                  className="w-full"
+                />
+              </div>
             </div>
 
             <div className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-semibold text-hi/90 tracking-tight leading-snug flex flex-wrap items-center gap-x-2.5 sm:gap-x-3">

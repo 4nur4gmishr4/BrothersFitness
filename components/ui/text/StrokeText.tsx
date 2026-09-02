@@ -22,6 +22,7 @@ export type StrokeTextFillMode = "wipe" | "fade" | "none";
 
 export interface StrokeTextProps {
   text?: string;
+  delay?: number;
   strokeColor?: string;
   fillColor?: string;
   highlightWord?: string;
@@ -55,6 +56,7 @@ const DEFAULT_TEXT = "BROTHER'S FITNESS";
 
 const StrokeText = ({
   text = DEFAULT_TEXT,
+  delay = 0,
   strokeColor,
   fillColor,
   highlightWord = "FITNESS",
@@ -228,6 +230,7 @@ const StrokeText = ({
       setStart();
       const tl = gsap.timeline({
         paused: true,
+        delay: delay ?? 0,
         repeat: trigger === "loop" ? -1 : 0,
         repeatDelay: trigger === "loop" ? 0.9 : 0,
         defaults: { overwrite: "auto" },
@@ -324,7 +327,7 @@ const StrokeText = ({
     ? `${box.x} ${box.y} ${box.width} ${box.height}`
     : `0 ${-fontSize} 720 ${fontSize * 1.3}`;
 
-  const aspect = align === "left" ? "xMinYMid meet" : "xMidYMid meet";
+  const aspect = align === "left" ? "xMinYMin meet" : "xMidYMin meet";
 
   return (
     <span
@@ -339,7 +342,9 @@ const StrokeText = ({
       <svg
         className="block w-full"
         style={{
-          height: `${Math.round(fontSize * 1.28)}px`,
+          height: box
+            ? `${Math.ceil(box.height)}px`
+            : `${Math.round(fontSize * 1.15)}px`,
           maxHeight: "100%",
         }}
         viewBox={viewBox}
