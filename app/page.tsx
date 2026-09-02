@@ -6,11 +6,10 @@ import WorkoutSplits from "@/components/public/sections/WorkoutSplits";
 import Architects from "@/components/public/sections/Architects";
 import ContactForm from "@/components/ui/primitives/ContactForm";
 import Footer from "@/components/public/layout/Footer";
-import PageWrapper from "@/components/ui/layout/PageWrapper";
 
 export default function Home() {
   return (
-    <PageWrapper>
+    <div className="min-h-screen">
       <Navbar />
       
       <main className="w-full max-w-[1600px] mx-auto px-4 sm:px-8 md:px-12 lg:px-16 space-y-12 sm:space-y-16 py-4 sm:py-8">
@@ -60,6 +59,6 @@ export default function Home() {
       </main>
 
       <Footer />
-    </PageWrapper>
+    </div>
   );
 }
