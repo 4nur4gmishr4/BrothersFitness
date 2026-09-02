@@ -8,23 +8,18 @@ const customEase: [number, number, number, number] = [1, 0, 0.56, 1];
 
 export default function SmartPreloaderWrapper() {
   const [stage, setStage] = useState(0);
-  const [isVisible, setIsVisible] = useState(() => {
-    if (typeof window !== "undefined") {
-      const seen = sessionStorage.getItem("brofit_preloader_seen");
-      return !seen;
-    }
-    return false;
-  });
+  // Always start hidden on SSR to avoid hydration mismatch.
+  // The correct value is set in useEffect (client-only).
+  const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      const seen = sessionStorage.getItem("brofit_preloader_seen");
-      if (seen) {
-        setIsVisible(false);
-        return;
-      }
-      sessionStorage.setItem("brofit_preloader_seen", "1");
+    const seen = sessionStorage.getItem("brofit_preloader_seen");
+    if (seen) {
+      // Already seen — stay hidden (isVisible starts false, nothing to do)
+      return;
     }
+    sessionStorage.setItem("brofit_preloader_seen", "1");
+    setIsVisible(true);
 
     // Exact timings extracted from Framer source code
     // Stage 1 (Center column) delay: 150ms
