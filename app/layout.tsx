@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Inter, Anton } from "next/font/google";
+import { Inter, Anton, Syne } from "next/font/google";
 import "./globals.css";
 import PageWrapper from "@/components/ui/layout/PageWrapper";
 import { GamificationProvider } from "@/components/ui/providers/GamificationContext";
@@ -36,6 +36,14 @@ const anton = Anton({
   weight: "400",
   subsets: ["latin"],
   variable: "--font-display"
+});
+
+// Unique, sculptural display face tailored for high-impact stroke animations
+const syne = Syne({
+  weight: ["800"],
+  subsets: ["latin"],
+  variable: "--font-syne",
+  display: "swap"
 });
 
 export const viewport: Viewport = {
@@ -199,7 +207,7 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body className={`${inter.variable} ${anton.variable} font-sans surface-canvas text-hi antialiased`}>
+      <body className={`${inter.variable} ${anton.variable} ${syne.variable} font-sans surface-canvas text-hi antialiased`}>
         <ThemeProvider>
           <PreloaderGate />
           <ReadingProgressBar />

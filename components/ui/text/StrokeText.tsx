@@ -61,16 +61,16 @@ const StrokeText = ({
   highlightColor = "#D71921",
   highlightStrokeColor,
   strokeWidth = 1.8,
-  drawDuration = 1.4,
-  fillDelay = 0.15,
-  stagger = 0.04,
+  drawDuration = 1.3,
+  fillDelay = 0.12,
+  stagger = 0.035,
   ease = "power2.out",
   trigger = "mount",
   fillMode = "wipe",
-  fontSize = 110,
+  fontSize = 100,
   fontWeight = 800,
-  fontFamily,
-  letterSpacing = -2,
+  fontFamily = "var(--font-syne), 'Syne', sans-serif",
+  letterSpacing = 0,
   reverse = false,
   align = "left",
   className = "",
@@ -79,6 +79,7 @@ const StrokeText = ({
   const rootRef = useRef<HTMLSpanElement | null>(null);
   const strokeTextRef = useRef<SVGTextElement | null>(null);
   const wipeRectRef = useRef<SVGRectElement | null>(null);
+  const hasMountedAnimRef = useRef(false);
 
   const { resolvedTheme } = useTheme();
 
@@ -119,7 +120,7 @@ const StrokeText = ({
     () => ({
       fontSize: `${fontSize}px`,
       fontWeight,
-      ...(fontFamily ? { fontFamily } : {}),
+      fontFamily,
       letterSpacing: `${letterSpacing}px`,
     }),
     [fontSize, fontWeight, fontFamily, letterSpacing]
@@ -157,6 +158,11 @@ const StrokeText = ({
           ? prev
           : next
       );
+
+      // If animation already completed in the past, immediately maintain full wipe width
+      if (hasMountedAnimRef.current && wipeRectRef.current) {
+        gsap.set(wipeRectRef.current, { attr: { width: next.width } });
+      }
     };
 
     measure();
@@ -203,11 +209,18 @@ const StrokeText = ({
         gsap.set(wipe, { attr: { width: fillEnabled ? box.width : 0 } });
     };
 
+    // If already animated on initial mount, keep the text rendered and do NOT restart!
+    if (hasMountedAnimRef.current && trigger !== "hover" && trigger !== "loop") {
+      setEnd();
+      return undefined;
+    }
+
     const prefersReducedMotion = window.matchMedia?.(
       "(prefers-reduced-motion: reduce)"
     ).matches;
     if (prefersReducedMotion) {
       setEnd();
+      hasMountedAnimRef.current = true;
       return () => gsap.killTweensOf(targets);
     }
 
@@ -218,6 +231,9 @@ const StrokeText = ({
         repeat: trigger === "loop" ? -1 : 0,
         repeatDelay: trigger === "loop" ? 0.9 : 0,
         defaults: { overwrite: "auto" },
+        onComplete: () => {
+          hasMountedAnimRef.current = true;
+        },
       });
 
       tl.to(
@@ -290,6 +306,8 @@ const StrokeText = ({
       timeline?.kill();
       gsap.killTweensOf(targets);
     };
+    // CRITICAL: Notice activeFillColor, activeStrokeColor, activeHighlightColor are deliberately NOT dependencies here!
+    // Theme toggling must NEVER restart or replay the stroke drawing timeline!
   }, [
     box,
     dash,
@@ -300,9 +318,6 @@ const StrokeText = ({
     trigger,
     fillMode,
     reverse,
-    activeFillColor,
-    activeStrokeColor,
-    activeHighlightColor,
   ]);
 
   const viewBox = box
@@ -324,7 +339,7 @@ const StrokeText = ({
       <svg
         className="block w-full"
         style={{
-          height: `${Math.round(fontSize * 1.25)}px`,
+          height: `${Math.round(fontSize * 1.28)}px`,
           maxHeight: "100%",
         }}
         viewBox={viewBox}
