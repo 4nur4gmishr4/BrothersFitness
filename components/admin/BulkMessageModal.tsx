@@ -214,13 +214,13 @@ export default function BulkMessageModal({
   return (
     <Portal>
       <div
-        className="fixed inset-0 h-[100dvh] w-screen bg-black/80 z-[200] flex items-center justify-center overflow-y-auto overscroll-contain backdrop-blur-sm modal-overlay-in p-3 sm:p-4"
+        className="fixed inset-0 h-[100dvh] w-full bg-black/80 z-[200] flex items-center justify-center overflow-y-auto overscroll-contain scrollbar-hide backdrop-blur-sm modal-overlay-in p-3 sm:p-4"
         onClick={onClose}
       >
       <div
         {...modalProps}
         aria-label="Bulk WhatsApp message"
-        className="surface-modal border border-surface-border p-4 sm:p-6 w-full max-w-2xl my-auto max-h-[88dvh] overflow-y-auto modal-panel-in flex flex-col rounded-3xl shadow-2xl relative"
+        className="surface-modal border border-surface-border p-4 sm:p-6 w-full max-w-2xl my-auto max-h-[88dvh] overflow-y-auto scrollbar-hide modal-panel-in flex flex-col rounded-3xl shadow-2xl relative"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}

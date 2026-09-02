@@ -4,6 +4,7 @@ import React, { useEffect } from "react";
 import Image from "next/image";
 import { X } from "lucide-react";
 import { Portal } from "@/components/ui/primitives/Portal";
+import { lockScroll, unlockScroll } from "@/lib/scroll-lock";
 
 export interface PebbleImage {
   url: string;
@@ -19,15 +20,14 @@ interface PebbleImageViewerProps {
 export function PebbleImageViewer({ image, onClose }: PebbleImageViewerProps) {
   useEffect(() => {
     if (!image) return;
-    const originalOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
+    lockScroll();
 
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") onClose();
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => {
-      document.body.style.overflow = originalOverflow;
+      unlockScroll();
       window.removeEventListener("keydown", handleKeyDown);
     };
   }, [image, onClose]);
@@ -37,7 +37,7 @@ export function PebbleImageViewer({ image, onClose }: PebbleImageViewerProps) {
   return (
     <Portal>
       <div
-        className="fixed inset-0 h-[100dvh] w-screen z-[200] bg-black/85 backdrop-blur-xl flex items-center justify-center p-3.5 sm:p-6 overflow-y-auto overscroll-contain modal-overlay-in"
+        className="fixed inset-0 h-[100dvh] w-full z-[200] bg-black/85 backdrop-blur-xl flex items-center justify-center p-3.5 sm:p-6 overflow-y-auto overscroll-contain scrollbar-hide modal-overlay-in"
         onClick={(e) => {
           if (e.target === e.currentTarget) onClose();
         }}

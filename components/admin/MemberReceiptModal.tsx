@@ -92,13 +92,13 @@ _“Pain is Temporary. Pride is Forever.”_ 💪`;
   return (
     <Portal>
       <div
-        className="fixed inset-0 h-[100dvh] w-screen bg-black/80 z-[200] flex items-center justify-center p-3 sm:p-4 overflow-y-auto overscroll-contain backdrop-blur-sm modal-overlay-in"
+        className="fixed inset-0 h-[100dvh] w-full bg-black/80 z-[200] flex items-center justify-center p-3 sm:p-4 overflow-y-auto overscroll-contain scrollbar-hide backdrop-blur-sm modal-overlay-in"
         onClick={onClose}
       >
         <div
           {...modalProps}
           aria-label="Membership receipt"
-          className="surface-modal border border-surface-border p-4 sm:p-6 max-w-md w-full my-auto rounded-3xl overflow-y-auto max-h-[88dvh] modal-panel-in relative shadow-2xl"
+          className="surface-modal border border-surface-border p-4 sm:p-6 max-w-md w-full my-auto rounded-3xl overflow-y-auto max-h-[88dvh] scrollbar-hide modal-panel-in relative shadow-2xl"
           onClick={(e) => e.stopPropagation()}
         >
           {/* Top Header Controls */}

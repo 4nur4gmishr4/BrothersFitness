@@ -10,14 +10,14 @@ interface WelcomeModalProps {
 }
 
 export default function WelcomeModal({ isOpen, onClose }: WelcomeModalProps) {
-    const modalProps = useModalDismiss(onClose);
+    const modalProps = useModalDismiss(onClose, isOpen);
 
     if (!isOpen) return null;
 
     return (
         <Portal>
             <div
-                className="fixed inset-0 h-[100dvh] w-screen z-[200] flex items-center justify-center p-3.5 sm:p-4 overflow-y-auto overscroll-contain bg-black/80 backdrop-blur-sm modal-overlay-in"
+                className="fixed inset-0 h-[100dvh] w-full z-[250] flex items-center justify-center p-3.5 sm:p-4 overflow-y-auto overscroll-contain scrollbar-hide bg-black/80 backdrop-blur-sm modal-overlay-in"
                 onClick={onClose}
             >
                 <div
