@@ -15,8 +15,19 @@ export default function TacticalStopwatch() {
   const [mode, setMode] = useState<"stopwatch" | "countdown">("stopwatch");
   const [targetTime, setTargetTime] = useState(0);
   const [hasAlerted, setHasAlerted] = useState(false);
+  const [isNavOpen, setIsNavOpen] = useState(false);
 
   const modalProps = useModalDismiss(() => setIsOpen(false), isOpen);
+
+  useEffect(() => {
+    const handleNavToggle = (e: Event) => {
+      const customEvent = e as CustomEvent<{ isOpen: boolean }>;
+      setIsNavOpen(customEvent.detail?.isOpen ?? false);
+    };
+
+    window.addEventListener("brofit-nav-toggle", handleNavToggle);
+    return () => window.removeEventListener("brofit-nav-toggle", handleNavToggle);
+  }, []);
 
   useEffect(() => {
     let interval: NodeJS.Timeout | null = null;
@@ -102,12 +113,12 @@ export default function TacticalStopwatch() {
 
   return (
     <>
-      {/* Prominent Floating Timer Trigger Button at Bottom Right (Stacked above Chatbot) */}
-      {!isOpen && (
+      {/* Prominent Floating Timer Trigger Button on Right Side */}
+      {!isOpen && !isNavOpen && (
         <button
           id="tactical-stopwatch-button"
           onClick={() => setIsOpen(true)}
-          className={`fixed bottom-5 sm:bottom-6 right-5 sm:right-6 z-[120] w-13 h-13 sm:w-14 sm:h-14 rounded-full flex items-center justify-center shadow-2xl transition-all duration-200 cursor-pointer active:scale-95 group relative ${
+          className={`fixed right-3.5 sm:right-5 top-[calc(50%-32px)] -translate-y-1/2 z-[120] w-12 h-12 sm:w-13 sm:h-13 rounded-full flex items-center justify-center shadow-xl transition-all duration-200 cursor-pointer active:scale-95 group relative ${
             isRunning
               ? "bg-accent text-white shadow-accent/40 scale-105"
               : "bg-surface-card/95 backdrop-blur-md border border-surface-border text-hi hover:border-accent hover:text-accent shadow-black/20 hover:scale-105"
@@ -115,17 +126,22 @@ export default function TacticalStopwatch() {
           aria-label="Open Workout Timer"
           title="Tactical Workout Stopwatch & Rest Timer"
         >
-          <AnimatedClock size={24} ticking={isRunning} className={isRunning ? "text-white" : "text-hi group-hover:text-accent"} />
+          <AnimatedClock size={22} ticking={isRunning} className={isRunning ? "text-white" : "text-hi group-hover:text-accent"} />
           {isRunning && (
-            <LiveBeacon status="alert" size="xs" className="absolute top-1.5 right-1.5 pointer-events-none" />
+            <span className="absolute -top-1.5 -left-2 px-1.5 py-0.5 rounded-full bg-accent text-[9px] font-black text-white shadow-xs border border-white/20 tabular-nums">
+              {formatTime(time)}
+            </span>
           )}
+          <span className="pointer-events-none absolute right-full mr-3 hidden rounded-xl border border-surface-border bg-surface-card/95 px-2.5 py-1 text-[11px] font-semibold tracking-wide text-hi shadow-xl backdrop-blur-md transition-all duration-150 group-hover:block whitespace-nowrap">
+            Workout Timer
+          </span>
         </button>
       )}
 
       {/* Centered Tactical Workout Timer Modal */}
       {isOpen && (
         <Portal>
-          <div className="fixed inset-0 h-[100dvh] w-screen z-[200] flex items-center justify-center p-3.5 sm:p-4 overflow-y-auto overscroll-contain bg-black/80 backdrop-blur-sm modal-overlay-in">
+          <div className="fixed inset-0 h-[100dvh] w-full z-[250] flex items-center justify-center p-3.5 sm:p-4 overflow-y-auto overscroll-contain scrollbar-hide bg-black/80 backdrop-blur-sm modal-overlay-in">
             <div
               {...modalProps}
               aria-label="Tactical Workout Timer"

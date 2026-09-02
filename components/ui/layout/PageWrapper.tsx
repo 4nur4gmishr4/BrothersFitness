@@ -7,22 +7,25 @@ import ScrollRevealDriver from "@/components/ui/layout/ScrollRevealDriver";
 
 export default function PageWrapper({ children }: { children: React.ReactNode }) {
     const pathname = usePathname();
-    const isHome = pathname === "/";
-    const isWorkouts = pathname === "/workouts" || pathname?.startsWith("/workouts");
+    const isAdmin = pathname?.startsWith("/admin");
 
     return (
         <>
             <ScrollRevealDriver />
 
             <div
-                className="relative min-h-screen animate-page-in"
+                className="relative min-h-screen"
                 id="main-content-wrapper"
             >
                 {children}
             </div>
 
-            {isHome && <TacticalChatbot />}
-            {isWorkouts && <TacticalStopwatch />}
+            {!isAdmin && (
+                <>
+                    <TacticalStopwatch />
+                    <TacticalChatbot />
+                </>
+            )}
         </>
     );
 }
