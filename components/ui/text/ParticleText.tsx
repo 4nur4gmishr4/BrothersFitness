@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, type CSSProperties } from "react";
+import { useTheme } from "@/components/ui/providers/ThemeProvider";
 
 export interface ParticleTextProps {
   text?: string;
@@ -38,6 +39,7 @@ type Particle = {
   seed: number;
   depth: number;
   delay: number;
+  isHighlight?: boolean;
 };
 
 const hexToRgb = (hex: string): Rgb | null => {
@@ -102,7 +104,7 @@ const ParticleText = ({
   text = "BROTHER'S FITNESS",
   particleSize = 2.2,
   density = 4,
-  color = "#ffffff",
+  color,
   highlightColor = "#E60000",
   scatter = 140,
   gatherDuration = 1400,
@@ -119,6 +121,12 @@ const ParticleText = ({
   className = "",
   style,
 }: ParticleTextProps) => {
+  const { resolvedTheme } = useTheme();
+  // In light theme: 100% black dots for BROTHER'S, 100% red dots for FITNESS
+  // In dark theme: 100% white dots for BROTHER'S, 100% red dots for FITNESS
+  const activeColor = color ?? (resolvedTheme === "light" ? "#000000" : "#ffffff");
+  const activeHighlight = highlightColor ?? "#E60000";
+
   const containerRef = useRef<HTMLDivElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
@@ -198,9 +206,9 @@ const ParticleText = ({
     const render = (now: number): void => {
       ctx.clearRect(0, 0, width, height);
 
-      if (glow && !reducedMotion) {
-        ctx.shadowBlur = particleSize * 3;
-        ctx.shadowColor = highlightColor;
+      if (glow && !reducedMotion && resolvedTheme === "dark") {
+        ctx.shadowBlur = particleSize * 2.5;
+        ctx.shadowColor = activeHighlight;
       } else {
         ctx.shadowBlur = 0;
       }
@@ -403,8 +411,8 @@ const ParticleText = ({
       particles = selected.map((target, index) => {
         const seed = ((index * 9301 + 49297) % 233280) / 233280;
         const depth = 0.45 + (((index * 233 + 97) % 1000) / 1000) * 0.9;
-        // 100% pure saturated red for highlight, 100% crisp white for base (no washed-out pink!)
-        const particleColor = target.isHighlight ? highlightColor : color;
+        // 100% pure saturated red for highlight, 100% black (light) or white (dark) for base
+        const particleColor = target.isHighlight ? activeHighlight : activeColor;
         const angle = seed * Math.PI * 2;
         const distance = (reducedMotion ? 0 : scatter) * (0.35 + depth * 0.75);
         const startX =
@@ -428,6 +436,7 @@ const ParticleText = ({
           seed,
           depth,
           delay: seed * stagger,
+          isHighlight: target.isHighlight,
         };
       });
 
@@ -511,8 +520,10 @@ const ParticleText = ({
     text,
     particleSize,
     density,
-    color,
-    highlightColor,
+    activeColor,
+    activeHighlight,
+    resolvedTheme,
+    align,
     scatter,
     gatherDuration,
     stagger,

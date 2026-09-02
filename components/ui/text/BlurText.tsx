@@ -30,9 +30,9 @@ export default function BlurText({
           initial={{ opacity: 0, filter: "blur(8px)", y: 6 }}
           animate={inView ? { opacity: 1, filter: "blur(0px)", y: 0 } : {}}
           transition={{
-            duration: 0.45,
+            duration: 0.55,
             delay: (index * delay) / 1000,
-            ease: [0.16, 1, 0.3, 1],
+            ease: [0.25, 1, 0.5, 1],
           }}
           className="inline-block mr-1 last:mr-0"
         >
