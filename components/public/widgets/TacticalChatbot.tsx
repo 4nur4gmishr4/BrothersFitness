@@ -188,13 +188,13 @@ export default function TacticalChatbot() {
       {!isOpen && !isNavOpen && (
         <button
           id="tactical-chatbot-button"
-          className="fixed bottom-6 right-6 z-[90] w-14 h-14 rounded-full bg-accent hover:bg-accent-hover text-white shadow-2xl shadow-accent/30 flex items-center justify-center hover:scale-105 active:scale-95 transition-all duration-200 cursor-pointer group relative"
+          className="fixed bottom-5 sm:bottom-6 right-5 sm:right-6 z-[120] w-13 h-13 sm:w-14 sm:h-14 rounded-full bg-accent hover:bg-accent-hover text-white shadow-2xl shadow-accent/40 flex items-center justify-center hover:scale-105 active:scale-95 transition-all duration-200 cursor-pointer group relative"
           onClick={() => setIsOpen(true)}
           aria-label="Open Brother's Fitness AI Assistant"
           title="Ask BroFit AI Coach"
         >
           <AnimatedChat size={26} className="text-white group-hover:scale-110" />
-          <LiveBeacon status="active" size="xs" className="absolute top-1.5 right-1.5" />
+          <LiveBeacon status="active" size="xs" className="absolute top-1.5 right-1.5 pointer-events-none" />
         </button>
       )}
 

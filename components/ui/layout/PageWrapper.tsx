@@ -2,10 +2,12 @@
 
 import { usePathname } from "next/navigation";
 import TacticalChatbot from "@/components/public/widgets/TacticalChatbot";
+import TacticalStopwatch from "@/components/public/widgets/TacticalStopwatch";
 import ScrollRevealDriver from "@/components/ui/layout/ScrollRevealDriver";
 
 export default function PageWrapper({ children }: { children: React.ReactNode }) {
     const pathname = usePathname();
+    const isPublic = !pathname?.startsWith("/admin");
 
     return (
         <>
@@ -18,7 +20,12 @@ export default function PageWrapper({ children }: { children: React.ReactNode })
                 {children}
             </div>
 
-            {pathname === "/" && <TacticalChatbot />}
+            {isPublic && (
+                <>
+                    <TacticalStopwatch />
+                    <TacticalChatbot />
+                </>
+            )}
         </>
     );
 }
