@@ -10,11 +10,12 @@ import ClickSpark from "@/components/ui/animations/ClickSpark";
 import RotatingText from "@/components/ui/text/RotatingText";
 import BlurText from "@/components/ui/text/BlurText";
 import StrokeText from "@/components/ui/text/StrokeText";
+import TextLoop from "@/components/ui/text/TextLoop";
 
 export default function Hero() {
   return (
     <ClickSpark sparkColor="rgba(215, 25, 33, 0.75)" sparkCount={7} sparkRadius={18}>
-      <section className="relative flex flex-col justify-start overflow-hidden pt-1.5 sm:pt-2 lg:pt-3 pb-8 sm:pb-12 lg:pb-14 bg-surface-canvas text-hi">
+      <section className="relative flex flex-col justify-start overflow-hidden pt-5 sm:pt-2 lg:pt-3 pb-8 sm:pb-12 lg:pb-14 bg-surface-canvas text-hi">
         
         <div className="relative z-10 w-full max-w-[1600px] mx-auto px-4 sm:px-8 md:px-12 lg:px-16">
           
@@ -27,7 +28,7 @@ export default function Hero() {
           >
             <h1 className="sr-only">Brother&apos;s Fitness Lakhnadon</h1>
             {/* Prominent Brand Headline: BROTHER'S on Line 1, FITNESS on Line 2 with Left Alignment & Unified Scale */}
-            <div className="w-full max-w-full -ml-1 sm:-ml-2">
+            <div className="w-full max-w-full -ml-1 sm:-ml-2 mb-3.5 sm:mb-1">
               <StrokeText
                 lines={["BROTHER'S", "FITNESS"]}
                 lineHeight={1.26}
@@ -62,16 +63,15 @@ export default function Hero() {
                   "Functional Athletics",
                   "Muscle Building",
                 ]}
-                mainClassName="text-accent inline-flex font-bold tracking-tight"
-                staggerFrom="last"
+                rotationInterval={3000}
+                staggerDuration={0.03}
+                transition={{ type: "spring", damping: 25, stiffness: 280 }}
+                mainClassName="text-accent font-bold px-1"
+                splitLevelClassName="overflow-hidden"
+                splitBy="characters"
                 initial={{ y: "100%", opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 exit={{ y: "-120%", opacity: 0 }}
-                staggerDuration={0.025}
-                splitLevelClassName="overflow-hidden"
-                splitBy="characters"
-                transition={{ type: "spring", damping: 25, stiffness: 300 }}
-                rotationInterval={3000}
                 auto={true}
                 loop={true}
               />
@@ -115,6 +115,34 @@ export default function Hero() {
               <span>View Operating Hours</span>
             </Link>
           </motion.div>
+
+          {/* Mobile-Only Quotes TextLoop: Above Facilities & Features in proper Red Color */}
+          <div
+            id="mobile-quotes-ticker"
+            className="block sm:hidden mt-8 -mx-4 overflow-hidden border-y border-accent/25 bg-accent/[0.04] py-2"
+          >
+            <TextLoop
+              texts={[
+                "Pain is Temporary. Pride is Forever.",
+                "The Iron Never Lies.",
+                "Be Stronger Than Your Excuses.",
+                "Train Insane Or Remain The Same.",
+                "Nobody Cares. Work Harder.",
+                "Fall In Love With The Process.",
+                "Light Weight, Baby!",
+                "Be Unstoppable.",
+                "Blood, Sweat, and Respect."
+              ]}
+              speed={55}
+              separator="•"
+              shape="line"
+              color="#D71921"
+              fontSize={24}
+              fontWeight={800}
+              letterSpacing={1.5}
+              className="w-full"
+            />
+          </div>
 
         </div>
       </section>
