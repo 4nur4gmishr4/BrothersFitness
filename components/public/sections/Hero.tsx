@@ -14,7 +14,7 @@ import StrokeText from "@/components/ui/text/StrokeText";
 export default function Hero() {
   return (
     <ClickSpark sparkColor="rgba(215, 25, 33, 0.75)" sparkCount={7} sparkRadius={18}>
-      <section className="relative flex flex-col justify-start overflow-hidden pt-4 pb-10 sm:pt-8 sm:pb-14 lg:pt-12 lg:pb-16 bg-surface-canvas text-hi">
+      <section className="relative flex flex-col justify-start overflow-hidden pt-1.5 sm:pt-2 lg:pt-3 pb-8 sm:pb-12 lg:pb-14 bg-surface-canvas text-hi">
         
         <div className="relative z-10 w-full max-w-[1600px] mx-auto px-4 sm:px-8 md:px-12 lg:px-16">
           
@@ -23,7 +23,7 @@ export default function Hero() {
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4 }}
-            className="space-y-3 sm:space-y-4 mb-4 sm:mb-6"
+            className="space-y-2 sm:space-y-3 mb-4 sm:mb-6"
           >
             <h1 className="sr-only">Brother&apos;s Fitness Lakhnadon</h1>
             {/* Prominent Brand Headline: BROTHER'S on Line 1, FITNESS on Line 2 with Left Alignment */}
@@ -47,7 +47,7 @@ export default function Hero() {
                   className="w-full"
                 />
               </div>
-              <div className="w-full -mt-2 sm:-mt-3 md:-mt-4">
+              <div className="w-full -mt-3 sm:-mt-4 md:-mt-5">
                 <StrokeText
                   text="FITNESS"
                   delay={0.15}

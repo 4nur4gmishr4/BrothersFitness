@@ -12,7 +12,7 @@ export default function Home() {
     <div className="min-h-screen">
       <Navbar />
       
-      <main className="w-full max-w-[1600px] mx-auto px-4 sm:px-8 md:px-12 lg:px-16 space-y-12 sm:space-y-16 py-4 sm:py-8">
+      <main className="w-full max-w-[1600px] mx-auto px-4 sm:px-8 md:px-12 lg:px-16 space-y-10 sm:space-y-14 pt-0 pb-6 sm:pb-10">
         
         {/* 1. Hero Section (Full Width) */}
         <Hero />
