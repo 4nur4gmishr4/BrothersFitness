@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { resetScrollLock } from "@/lib/scroll-lock";
 
 /**
  * Global scroll-reveal driver. Watches every [data-reveal] element and
@@ -14,6 +15,7 @@ import { useEffect } from "react";
 export default function ScrollRevealDriver() {
   useEffect(() => {
     if (typeof window === "undefined") return;
+    resetScrollLock();
     if (!("IntersectionObserver" in window)) {
       // No observer support — reveal everything instantly.
       document.querySelectorAll("[data-reveal]").forEach((el) => el.classList.add("reveal-in"));

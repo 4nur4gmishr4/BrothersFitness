@@ -583,7 +583,7 @@ export default function AdminMessagesPage() {
       {/* Delete Confirmation Modal */}
       {deletingId && (
         <Portal>
-          <div className="fixed inset-0 h-[100dvh] w-screen z-[200] bg-black/80 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 overflow-y-auto overscroll-contain modal-overlay-in">
+          <div className="fixed inset-0 h-[100dvh] w-full z-[200] bg-black/80 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 overflow-y-auto overscroll-contain scrollbar-hide modal-overlay-in">
             <div className="w-full max-w-sm my-auto rounded-3xl border border-[#dfe1e5] dark:border-[#232e3c] bg-white dark:bg-[#17212b] p-5 sm:p-6 space-y-4 shadow-2xl modal-panel-in relative">
               <h3 className="font-semibold text-lg text-[#000000] dark:text-white">Delete Conversation?</h3>
               <p className="text-xs text-[#707579] dark:text-[#708499] leading-relaxed">

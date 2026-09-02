@@ -55,7 +55,7 @@ export default function LoginModal({ isOpen, onClose, onSuccess }: LoginModalPro
         if (isReady) onClose();
     }, [isReady, onClose]);
 
-    const modalProps = useModalDismiss(handleClose);
+    const modalProps = useModalDismiss(handleClose, isOpen && !isLoggedIn);
 
     if (!isOpen || isLoggedIn) return null;
 
@@ -64,7 +64,7 @@ export default function LoginModal({ isOpen, onClose, onSuccess }: LoginModalPro
             <div
                 {...modalProps}
                 aria-label="Sign in"
-                className="fixed inset-0 h-[100dvh] w-screen z-[200] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 overflow-y-auto overscroll-contain modal-overlay-in"
+                className="fixed inset-0 h-[100dvh] w-full z-[250] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 overflow-y-auto overscroll-contain scrollbar-hide modal-overlay-in"
                 onClick={(e) => { if (e.target === e.currentTarget) handleClose(); }}
             >
                 <div

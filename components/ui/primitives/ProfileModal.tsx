@@ -150,14 +150,14 @@ export default function ProfileModal({ isOpen, onClose }: ProfileModalProps) {
         if (isReady) onClose();
     }, [isReady, onClose]);
 
-    const modalProps = useModalDismiss(handleClose);
+    const modalProps = useModalDismiss(handleClose, isOpen && isLoggedIn && !!user);
 
     if (!isOpen || !isLoggedIn || !user) return null;
 
     return (
         <Portal>
             <div
-                className="fixed inset-0 h-[100dvh] w-screen z-[200] flex items-center justify-center bg-black/80 backdrop-blur-sm p-3 sm:p-4 overflow-y-auto overscroll-contain modal-overlay-in"
+                className="fixed inset-0 h-[100dvh] w-full z-[250] flex items-center justify-center bg-black/80 backdrop-blur-sm p-3 sm:p-4 overflow-y-auto overscroll-contain scrollbar-hide modal-overlay-in"
                 onClick={(e) => { if (e.target === e.currentTarget) handleClose(); }}
             >
                 <div
@@ -187,7 +187,7 @@ export default function ProfileModal({ isOpen, onClose }: ProfileModalProps) {
                     </div>
 
                     {/* Scrollable Body */}
-                    <div className="p-4 sm:p-6 overflow-y-auto space-y-6 flex-1">
+                    <div className="p-4 sm:p-6 overflow-y-auto space-y-6 flex-1 scrollbar-hide">
                         {/* Profile Header & Google Avatar Display */}
                         <div className="flex items-center gap-4 p-4 rounded-2xl bg-surface-card border border-surface-border">
                             <div className="relative w-16 h-16 sm:w-18 sm:h-18 rounded-full overflow-hidden bg-black border-2 border-accent/40 shrink-0 shadow-md">

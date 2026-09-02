@@ -22,6 +22,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Portal } from "@/components/ui/primitives/Portal";
 import LiveBeacon from "@/components/ui/primitives/LiveBeacon";
 import { AnimatedProfile } from "@/components/ui/icons";
+import { lockScroll, unlockScroll } from "@/lib/scroll-lock";
 
 const WhatsAppIcon = ({ className }: { className?: string }) => (
   <svg xmlns="http://www.w3.org/2000/svg" className={className} viewBox="0 0 24 24" fill="currentColor">
@@ -51,24 +52,28 @@ export default function Navbar() {
   // Lock document scroll without layout shift when menu is open
   useEffect(() => {
     if (isOpen) {
-      const scrollBarWidth = window.innerWidth - document.documentElement.clientWidth;
-      document.body.style.overflow = "hidden";
+      lockScroll("navbar-mobile-menu");
       document.body.classList.add("mobile-menu-open");
-      if (scrollBarWidth > 0) {
-        document.body.style.paddingRight = `${scrollBarWidth}px`;
-      }
     } else {
-      document.body.style.overflow = "";
-      document.body.style.paddingRight = "";
+      unlockScroll("navbar-mobile-menu");
       document.body.classList.remove("mobile-menu-open");
     }
     window.dispatchEvent(new CustomEvent("brofit-nav-toggle", { detail: { isOpen } }));
     return () => {
-      document.body.style.overflow = "";
-      document.body.style.paddingRight = "";
+      unlockScroll("navbar-mobile-menu");
       document.body.classList.remove("mobile-menu-open");
       window.dispatchEvent(new CustomEvent("brofit-nav-toggle", { detail: { isOpen: false } }));
     };
+  }, [isOpen]);
+
+  // Close menu on Escape key
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setIsOpen(false);
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
   }, [isOpen]);
 
   const navLinks = [
@@ -91,10 +96,12 @@ export default function Navbar() {
 
   return (
     <>
-      {/* Editorial Apple-Grade Navigation Header */}
+      {/* Editorial Apple-Grade Navigation Header - Permanently Fixed */}
       <header
-        className={`sticky top-0 z-[130] w-full select-none transition-colors duration-200 ${
-          isOpen || isScrolled
+        className={`fixed top-0 left-0 right-0 z-[200] w-full select-none transition-colors duration-200 ${
+          isOpen
+            ? "bg-surface-canvas border-b border-surface-border shadow-xs"
+            : isScrolled
             ? "bg-surface-canvas/95 backdrop-blur-md border-b border-surface-border/80 shadow-xs"
             : "bg-surface-canvas/80 backdrop-blur-md border-b border-surface-border/40"
         }`}
@@ -222,6 +229,8 @@ export default function Navbar() {
           </div>
         </div>
       </header>
+      {/* Spacer to preserve normal document flow beneath permanently fixed header */}
+      <div className="h-16 sm:h-20 shrink-0 pointer-events-none" aria-hidden="true" />
 
       {/* Solid Opaque Full-Screen Navigation Menu mounted to Body via Portal */}
       <AnimatePresence>
@@ -232,121 +241,10 @@ export default function Navbar() {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.15 }}
-              className="fixed inset-0 z-[150] bg-surface-canvas overflow-y-auto overscroll-contain w-full h-[100dvh] flex flex-col"
+              className="fixed top-16 sm:top-20 inset-x-0 bottom-0 z-[190] bg-surface-canvas overflow-y-auto overscroll-contain touch-pan-y w-full h-[calc(100dvh-4rem)] sm:h-[calc(100dvh-5rem)] flex flex-col scrollbar-hide"
               role="dialog"
               aria-modal="true"
             >
-              {/* Top Header Bar INSIDE the Fullscreen Menu Overlay */}
-              <div className="sticky top-0 z-30 w-full bg-surface-canvas/95 backdrop-blur-md border-b border-surface-border/80 shadow-xs shrink-0 select-none">
-                <div className="w-full max-w-[1600px] mx-auto px-4 sm:px-8 md:px-12 lg:px-16">
-                  <div className="flex items-center justify-between h-16 sm:h-20">
-                    
-                    {/* Left: Brand Wordmark */}
-                    <div
-                      onClick={() => {
-                        setIsOpen(false);
-                        router.push("/");
-                        window.scrollTo({ top: 0, behavior: "smooth" });
-                      }}
-                      className="flex items-center gap-2 group text-left cursor-pointer focus:outline-none"
-                    >
-                      <div className="text-base sm:text-xl font-bold tracking-tight text-hi group-hover:text-accent transition-colors duration-150">
-                        BROTHER&apos;S <span className="text-accent">FITNESS</span>
-                      </div>
-                    </div>
-
-                    {/* Right: Actions and Close (X) */}
-                    <div className="flex items-center gap-2 sm:gap-2.5">
-                      {/* Theme Switcher */}
-                      <button
-                        onClick={() => setTheme(theme === "system" ? "light" : theme === "light" ? "dark" : "system")}
-                        className="w-10 h-10 rounded-full flex items-center justify-center bg-surface-card border border-surface-border hover:bg-surface-elevated active:scale-90 transition-all duration-150 shadow-sm cursor-pointer"
-                        aria-label="Toggle theme"
-                      >
-                        <div className="w-4 h-4 text-hi">
-                          {!mounted ? (
-                            <Monitor className="w-full h-full" />
-                          ) : theme === "system" ? (
-                            <Monitor className="w-full h-full" />
-                          ) : theme === "dark" ? (
-                            <Moon className="w-full h-full" />
-                          ) : (
-                            <Sun className="w-full h-full" />
-                          )}
-                        </div>
-                      </button>
-
-                      {/* Instagram */}
-                      <a
-                        href="https://www.instagram.com/brothers_fitness_17"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="w-10 h-10 rounded-full flex items-center justify-center bg-surface-card border border-surface-border text-hi hover:text-[#E1306C] hover:border-[#E1306C]/40 hover:bg-[#E1306C]/10 active:scale-90 transition-all duration-150 shadow-sm"
-                        aria-label="Instagram"
-                      >
-                        <Instagram className="w-4 h-4" />
-                      </a>
-
-                      {/* WhatsApp */}
-                      <a
-                        href="https://wa.me/919131179343"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="w-10 h-10 rounded-full flex items-center justify-center bg-surface-card border border-surface-border text-hi hover:text-[#25D366] hover:border-[#25D366]/40 hover:bg-[#25D366]/10 active:scale-90 transition-all duration-150 shadow-sm"
-                        aria-label="WhatsApp"
-                      >
-                        <WhatsAppIcon className="w-4 h-4" />
-                      </a>
-
-                      {/* Profile */}
-                      <div className="relative">
-                        <button
-                          onClick={(e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            setIsOpen(false);
-                            if (isLoggedIn) {
-                              setShowProfileModal(true);
-                            } else {
-                              setShowLoginModal(true);
-                            }
-                          }}
-                          className="w-10 h-10 rounded-full flex items-center justify-center bg-surface-card border border-surface-border hover:bg-surface-elevated active:scale-90 transition-all duration-150 shadow-sm overflow-hidden relative cursor-pointer"
-                          aria-label="Profile"
-                        >
-                          {isLoggedIn && user?.photo_url ? (
-                            <Image
-                              src={user.photo_url}
-                              alt={user.full_name || "Profile Photo"}
-                              fill
-                              sizes="40px"
-                              className="object-cover"
-                              unoptimized
-                            />
-                          ) : isLoggedIn ? (
-                            <div className="w-full h-full rounded-full bg-accent text-white flex items-center justify-center font-bold text-xs uppercase">
-                              {user?.full_name ? user.full_name.charAt(0) : "U"}
-                            </div>
-                          ) : (
-                            <AnimatedProfile size={18} className="text-hi" />
-                          )}
-                        </button>
-                      </div>
-
-                      {/* Close Menu (X) Button */}
-                      <button
-                        onClick={() => setIsOpen(false)}
-                        className="w-10 h-10 rounded-full flex items-center justify-center bg-accent text-white active:scale-90 transition-all duration-150 shadow-sm cursor-pointer"
-                        aria-label="Close menu"
-                      >
-                        <X className="w-4 h-4" />
-                      </button>
-
-                    </div>
-                  </div>
-                </div>
-              </div>
-
               {/* Staggered Navigation Body */}
               <div className="flex-1 w-full max-w-[1600px] mx-auto px-4 sm:px-8 md:px-12 lg:px-16 py-6 sm:py-10 md:py-14">
               

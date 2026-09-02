@@ -7,6 +7,7 @@ import { PanelLeft } from "lucide-react"
 
 import { useIsMobile } from "@/hooks/use-mobile"
 import { cn } from "@/lib/utils"
+import { lockScroll, unlockScroll } from "@/lib/scroll-lock"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Separator } from "@/components/ui/separator"
@@ -138,10 +139,9 @@ const SidebarProvider = React.forwardRef<
     // Lock body scroll when mobile sidebar is open
     React.useEffect(() => {
       if (openMobile && isMobile) {
-        const originalOverflow = document.body.style.overflow;
-        document.body.style.overflow = "hidden";
+        lockScroll();
         return () => {
-          document.body.style.overflow = originalOverflow;
+          unlockScroll();
         };
       }
     }, [openMobile, isMobile]);

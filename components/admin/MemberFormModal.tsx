@@ -231,7 +231,7 @@ export default function MemberFormModal({
   return (
     <Portal>
       <div
-        className="fixed inset-0 h-[100dvh] w-screen bg-black/80 z-[200] flex items-center justify-center p-3 sm:p-4 overflow-y-auto overscroll-contain backdrop-blur-sm modal-overlay-in"
+        className="fixed inset-0 h-[100dvh] w-full bg-black/80 z-[200] flex items-center justify-center p-3 sm:p-4 overflow-y-auto overscroll-contain scrollbar-hide backdrop-blur-sm modal-overlay-in"
         onClick={(e) => {
           if (e.target === e.currentTarget) {
             onClose();

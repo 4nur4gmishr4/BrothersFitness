@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { lockScroll, unlockScroll } from "@/lib/scroll-lock";
 
 /**
  * Modal accessibility and scroll-lock helper:
@@ -8,8 +9,12 @@ import { useEffect, useRef } from "react";
  * 2. Locks body scroll so the background page cannot be scrolled while modal is active.
  * 3. Returns accessibility ARIA props.
  */
-export function useModalDismiss(onClose: () => void, enabled = true) {
+export function useModalDismiss(onClose: () => void, enabled = false) {
     const onCloseRef = useRef(onClose);
+    const idRef = useRef<string | null>(null);
+    if (!idRef.current) {
+        idRef.current = "modal-" + Math.random().toString(36).substring(2, 9);
+    }
 
     useEffect(() => {
         onCloseRef.current = onClose;
@@ -26,11 +31,11 @@ export function useModalDismiss(onClose: () => void, enabled = true) {
 
     useEffect(() => {
         if (!enabled) return;
-        const originalOverflow = document.body.style.overflow;
-        document.body.style.overflow = "hidden";
+        const modalId = idRef.current || "modal";
+        lockScroll(modalId);
 
         return () => {
-            document.body.style.overflow = originalOverflow;
+            unlockScroll(modalId);
         };
     }, [enabled]);
 
