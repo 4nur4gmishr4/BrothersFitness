@@ -1013,39 +1013,137 @@ html, body, * {
 }
 
 /* ============================================================
-   Modal entrance â€” mounted conditionally, so a CSS animation
-   plays on mount (fade the overlay, lift the panel). No exit
-   keyframes: conditional modals unmount instantly.
+   iOS-Grade Fluid Modal Hero Animations (GPU Composited)
+   Runs 100% on compositor thread (transform & opacity only)
+   with Apple Spring curve: cubic-bezier(0.32, 0.72, 0, 1)
    ============================================================ */
 
-@keyframes modal-overlay-in {
-  from {
+@keyframes modal-overlay-hero {
+  0% {
     opacity: 0;
+    backdrop-filter: blur(0px);
+    -webkit-backdrop-filter: blur(0px);
   }
-}
-
-@keyframes modal-panel-in {
-  from {
-    opacity: 0;
-    transform: translateY(8px) scale(0.98);
-  }
-  to {
+  100% {
     opacity: 1;
-    transform: translateY(0) scale(1);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
   }
 }
 
-@keyframes modal-overlay-in {
-  from { opacity: 0; }
-  to { opacity: 1; }
+@keyframes modal-overlay-hero-out {
+  0% {
+    opacity: 1;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+  }
+  100% {
+    opacity: 0;
+    backdrop-filter: blur(0px);
+    -webkit-backdrop-filter: blur(0px);
+  }
+}
+
+@keyframes modal-panel-hero {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, 24px, 0) scale3d(0.92, 0.92, 1);
+  }
+  70% {
+    opacity: 1;
+    transform: translate3d(0, -1.5px, 0) scale3d(1.006, 1.006, 1);
+  }
+  100% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale3d(1, 1, 1);
+  }
+}
+
+@keyframes modal-panel-hero-out {
+  0% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale3d(1, 1, 1);
+  }
+  100% {
+    opacity: 0;
+    transform: translate3d(0, 18px, 0) scale3d(0.94, 0.94, 1);
+  }
 }
 
 .modal-overlay-in {
-  animation: modal-overlay-in var(--motion-fast) ease-out forwards;
+  animation: modal-overlay-hero 240ms cubic-bezier(0.32, 0.72, 0, 1) forwards;
+  will-change: opacity, backdrop-filter;
+}
+
+.modal-overlay-out {
+  animation: modal-overlay-hero-out 180ms cubic-bezier(0.32, 0.72, 0, 1) forwards;
+  will-change: opacity, backdrop-filter;
 }
 
 .modal-panel-in {
-  animation: modal-panel-in var(--motion-normal) var(--ease-emphasis) forwards;
+  animation: modal-panel-hero 280ms cubic-bezier(0.32, 0.72, 0, 1) forwards;
+  will-change: transform, opacity;
+  transform-origin: center center;
+}
+
+.modal-panel-out {
+  animation: modal-panel-hero-out 180ms cubic-bezier(0.32, 0.72, 0, 1) forwards;
+  will-change: transform, opacity;
+  transform-origin: center center;
+}
+
+/* ============================================================
+   LiveBeacon & Minimalist Kinetic Icon Animations
+   ============================================================ */
+
+@keyframes beacon-wave {
+  0% {
+    transform: scale(0.85);
+    opacity: 0.9;
+  }
+  50% {
+    transform: scale(1.65);
+    opacity: 0.25;
+  }
+  100% {
+    transform: scale(2.1);
+    opacity: 0;
+  }
+}
+
+.animate-beacon-wave {
+  animation: beacon-wave 2.2s cubic-bezier(0.24, 0, 0.38, 1) infinite;
+  will-change: transform, opacity;
+}
+
+@keyframes icon-tilt-shift {
+  0%, 100% { transform: rotate(0deg); }
+  25% { transform: rotate(-6deg); }
+  75% { transform: rotate(6deg); }
+}
+
+.group:hover .icon-hover-tilt {
+  animation: icon-tilt-shift 400ms ease-in-out;
+}
+
+@keyframes icon-pulse-subtle {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.08); opacity: 0.85; }
+}
+
+.animate-icon-pulse {
+  animation: icon-pulse-subtle 2.4s ease-in-out infinite;
+  will-change: transform, opacity;
+}
+
+@keyframes clock-tick-rot {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.animate-clock-tick {
+  transform-origin: center center;
+  animation: clock-tick-rot 8s linear infinite;
 }
 
 /* Full-screen menu â€” items cascade in from below, 40ms apart.
