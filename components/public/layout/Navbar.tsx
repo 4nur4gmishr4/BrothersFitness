@@ -36,9 +36,8 @@ export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
-  const { showLoginModal, setShowLoginModal, showWelcome, setShowWelcome } = useUserAuth();
+  const { user, isLoggedIn, isLoading, showLoginModal, setShowLoginModal, showWelcome, setShowWelcome } = useUserAuth();
   const { theme, setTheme, mounted } = useTheme();
-  const { user, isLoggedIn, isLoading } = useUserAuth();
   const pathname = usePathname();
   const router = useRouter();
 
