@@ -20,7 +20,6 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Portal } from "@/components/ui/primitives/Portal";
-import LiveBeacon from "@/components/ui/primitives/LiveBeacon";
 import { AnimatedProfile } from "@/components/ui/icons";
 import { lockScroll, unlockScroll } from "@/lib/scroll-lock";
 
@@ -201,7 +200,7 @@ export default function Navbar() {
                       )}
                     </button>
                     {isLoggedIn && (
-                      <LiveBeacon status="active" size="xs" className="absolute bottom-0 right-0 pointer-events-none" />
+                      <span className="absolute bottom-0 right-0 w-2 h-2 rounded-full bg-status-success ring-2 ring-surface-card pointer-events-none" />
                     )}
                   </div>
 

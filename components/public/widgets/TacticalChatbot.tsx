@@ -7,7 +7,6 @@ import { useModalDismiss } from "@/hooks/useModalDismiss";
 import { MAX_DAILY_CREDITS } from "@/lib/config";
 import TypingDots from "@/components/ui/animations/TypingDots";
 import { Portal } from "@/components/ui/primitives/Portal";
-import LiveBeacon from "@/components/ui/primitives/LiveBeacon";
 import { AnimatedChat, AnimatedDumbbell, AnimatedFlame, AnimatedSparkles } from "@/components/ui/icons";
 
 type ChatMessage = {
@@ -218,7 +217,7 @@ export default function TacticalChatbot() {
           title="Ask BroFit AI Coach"
         >
           <AnimatedChat size={26} className="text-white group-hover:scale-110" />
-          <LiveBeacon status="active" size="xs" className="absolute top-1.5 right-1.5 pointer-events-none" />
+          <span className="absolute top-2 right-2 w-2 h-2 rounded-full bg-status-success ring-2 ring-accent pointer-events-none" />
           <span className="pointer-events-none absolute right-full mr-3 hidden rounded-xl border border-surface-border bg-surface-card/95 px-2.5 py-1 text-[11px] font-semibold tracking-wide text-hi shadow-xl backdrop-blur-md transition-all duration-150 group-hover:block whitespace-nowrap">
             Ask AI Coach
           </span>
@@ -243,7 +242,7 @@ export default function TacticalChatbot() {
                   <div>
                     <h3 className="text-sm font-semibold text-hi">Fitness AI Assistant</h3>
                     <div className="flex items-center gap-1.5 text-[11px] text-mid">
-                      <LiveBeacon status="active" size="xs" />
+                      <span className="w-2 h-2 rounded-full bg-status-success shrink-0" />
                       <span>Brother&apos;s Fitness Coach</span>
                     </div>
                   </div>

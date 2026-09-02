@@ -19,7 +19,6 @@ import { useModalDismiss } from "@/hooks/useModalDismiss";
 import Image from "next/image";
 import { Portal } from "./Portal";
 import { toast } from "sonner";
-import LiveBeacon from "@/components/ui/primitives/LiveBeacon";
 import { AnimatedProfile, AnimatedShield, AnimatedSparkles } from "@/components/ui/icons";
 
 interface ProfileModalProps {
@@ -205,7 +204,7 @@ export default function ProfileModal({ isOpen, onClose }: ProfileModalProps) {
                                         {user.full_name?.charAt(0).toUpperCase() || "U"}
                                     </div>
                                 )}
-                                <LiveBeacon status="active" size="xs" className="absolute bottom-0 right-0 pointer-events-none" />
+                                <span className="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-status-success ring-2 ring-surface-card pointer-events-none" />
                             </div>
 
                             <div className="min-w-0 flex-1">
@@ -213,7 +212,9 @@ export default function ProfileModal({ isOpen, onClose }: ProfileModalProps) {
                                     <h4 className="font-bold text-base text-hi truncate">
                                         {user.full_name || "Valued Member"}
                                     </h4>
-                                    <LiveBeacon status="success" label="Verified" size="xs" />
+                                    <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-status-success bg-status-success/10 border border-status-success/30 px-2 py-0.5 rounded-full">
+                                        <CheckCircle className="w-3 h-3" /> Verified
+                                    </span>
                                 </div>
                                 <p className="text-xs text-mid truncate mt-0.5">{user.email}</p>
                                 <p className="text-[10px] text-faint mt-1">Google OAuth Connected</p>

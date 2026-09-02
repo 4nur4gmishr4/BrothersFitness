@@ -19,7 +19,6 @@ import {
   Instagram,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import LiveBeacon from "@/components/ui/primitives/LiveBeacon";
 import { AnimatedWhatsApp } from "@/components/ui/icons";
 
 interface FooterLink {
@@ -222,7 +221,10 @@ export const Footer = (props: Partial<FooterProps>) => {
           </p>
 
           <div className="flex items-center gap-4">
-            <LiveBeacon status="active" label="LAKHNADON BRANCH OPEN" size="xs" />
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-surface-soft border border-surface-border text-hi text-[11px] font-semibold tracking-wide shadow-xs">
+              <MapPin className="w-3.5 h-3.5 text-accent" />
+              <span>Lakhnadon Branch Open</span>
+            </div>
 
             <a
               href="https://wa.me/919302786886?text=Hi%20Anurag"

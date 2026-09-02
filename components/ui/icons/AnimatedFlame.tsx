@@ -8,6 +8,9 @@ interface AnimatedFlameProps {
   size?: number;
 }
 
+/**
+ * Apple Activity (`flame.fill`) & Google Fit standard vector.
+ */
 export default function AnimatedFlame({
   className,
   size = 20,
@@ -19,22 +22,14 @@ export default function AnimatedFlame({
       viewBox="0 0 24 24"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
-      className={cn("group/flame shrink-0 transition-transform duration-200", className)}
+      className={cn("shrink-0 transition-transform duration-200 group-hover:scale-105", className)}
     >
-      {/* Outer Flame Curve */}
       <path
-        d="M12 2C9.5 6 6 9 6 14C6 17.5 8.7 20.5 12 20.5C15.3 20.5 18 17.5 18 14C18 9 14.5 6 12 2Z"
+        d="M8.5 14.5A2.5 2.5 0 0 0 11 12C11 10.62 10.5 10 10 9C8.928 6.857 9.776 4.946 12 3C12.5 5.5 14 7.9 16 9.5C18 11.1 19 13 19 15C19 18.866 15.866 22 12 22C8.134 22 5 18.866 5 15C5 13.847 5.433 12.706 6 12C6 12 6.5 14.5 8.5 14.5Z"
         stroke="currentColor"
         strokeWidth="1.75"
         strokeLinecap="round"
         strokeLinejoin="round"
-        className="group-hover/flame:stroke-accent transition-colors duration-200"
-      />
-      {/* Inner Emissive Core */}
-      <path
-        d="M12 11C10.5 13 10 14.5 10 16C10 17.1 10.9 18 12 18C13.1 18 14 17.1 14 16C14 14.5 13.5 13 12 11Z"
-        fill="currentColor"
-        className="opacity-40 group-hover/flame:opacity-100 group-hover/flame:scale-110 origin-bottom transition-all duration-300 text-accent"
       />
     </svg>
   );

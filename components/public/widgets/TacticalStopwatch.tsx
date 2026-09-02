@@ -6,7 +6,6 @@ import TimerTick from "@/components/ui/animations/TimerTick";
 import { Portal } from "@/components/ui/primitives/Portal";
 import { useModalDismiss } from "@/hooks/useModalDismiss";
 import { AnimatedClock } from "@/components/ui/icons";
-import LiveBeacon from "@/components/ui/primitives/LiveBeacon";
 
 export default function TacticalStopwatch() {
   const [isOpen, setIsOpen] = useState(false);
