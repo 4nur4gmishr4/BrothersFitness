@@ -1,7 +1,6 @@
 import { Suspense } from "react";
 import WorkoutLibrary from "@/components/features/workouts/WorkoutLibrary";
 import Navbar from "@/components/public/layout/Navbar";
-import TacticalStopwatch from "@/components/public/widgets/TacticalStopwatch";
 import Footer from "@/components/public/layout/Footer";
 
 export default function WorkoutsPage() {
@@ -31,8 +30,6 @@ export default function WorkoutsPage() {
         </Suspense>
       </div>
 
-      {/* Floating workout timer */}
-      <TacticalStopwatch />
       <Footer />
     </div>
   );
