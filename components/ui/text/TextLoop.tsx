@@ -35,39 +35,43 @@ interface Metrics {
   reps: number;
 }
 
-const buildPath = (shape: TextLoopShape, curviness: number, ribbonWidth: number, viewW: number, viewH: number): string => {
-  const cx = viewW / 2;
-  const cy = viewH / 2;
+const VIEW_W = 1200;
+const VIEW_H = 520;
+const CX = VIEW_W / 2;
+const CY = VIEW_H / 2;
+const EDGE_PAD = 6;
+
+const buildPath = (shape: TextLoopShape, curviness: number, ribbonWidth: number): string => {
   const c = Math.max(0, curviness);
-  const room = Math.max(20, cy - Math.max(0, ribbonWidth) / 2 - 6);
+  const room = Math.max(20, CY - Math.max(0, ribbonWidth) / 2 - EDGE_PAD);
 
   switch (shape) {
     case "circle": {
       const r = Math.min(90 + c * 0.95, room);
-      return `M ${cx - r} ${cy} A ${r} ${r} 0 1 1 ${cx + r} ${cy} A ${r} ${r} 0 1 1 ${cx - r} ${cy} Z`;
+      return `M ${CX - r} ${CY} A ${r} ${r} 0 1 1 ${CX + r} ${CY} A ${r} ${r} 0 1 1 ${CX - r} ${CY} Z`;
     }
     case "infinity": {
       const r = 150 + c * 1.4;
       const h = Math.min(60 + c * 0.95, room);
       return [
-        `M ${cx} ${cy}`,
-        `C ${cx + r * 0.55} ${cy - h} ${cx + r} ${cy - h} ${cx + r} ${cy}`,
-        `C ${cx + r} ${cy + h} ${cx + r * 0.55} ${cy + h} ${cx} ${cy}`,
-        `C ${cx - r * 0.55} ${cy - h} ${cx - r} ${cy - h} ${cx - r} ${cy}`,
-        `C ${cx - r} ${cy + h} ${cx - r * 0.55} ${cy + h} ${cx} ${cy}`,
+        `M ${CX} ${CY}`,
+        `C ${CX + r * 0.55} ${CY - h} ${CX + r} ${CY - h} ${CX + r} ${CY}`,
+        `C ${CX + r} ${CY + h} ${CX + r * 0.55} ${CY + h} ${CX} ${CY}`,
+        `C ${CX - r * 0.55} ${CY - h} ${CX - r} ${CY - h} ${CX - r} ${CY}`,
+        `C ${CX - r} ${CY + h} ${CX - r * 0.55} ${CY + h} ${CX} ${CY}`,
         "Z",
       ].join(" ");
     }
     case "arch": {
       const rise = Math.min(120 + c * 1.1, room * 2);
-      return `M 80 ${cy + rise / 2} Q ${cx} ${cy - rise * 1.5} ${viewW - 80} ${cy + rise / 2}`;
+      return `M 120 ${CY + rise / 2} Q ${CX} ${CY - rise * 1.5} ${VIEW_W - 120} ${CY + rise / 2}`;
     }
     case "line":
-      return `M -400 ${cy} L ${viewW + 400} ${cy}`;
+      return `M -320 ${CY} L ${VIEW_W + 320} ${CY}`;
     case "wave":
     default: {
-      const a = Math.min(c * 1.5, room * 1.2);
-      return `M -400 ${cy} Q -200 ${cy - a} 0 ${cy} T 200 ${cy} T 400 ${cy} T 600 ${cy} T 800 ${cy} T ${viewW + 400} ${cy}`;
+      const a = Math.min(c * 2.2, room * 2);
+      return `M -320 ${CY} Q -160 ${CY - a} 0 ${CY} T 320 ${CY} T 640 ${CY} T 960 ${CY} T 1280 ${CY} T ${VIEW_W + 320} ${CY}`;
     }
   }
 };
@@ -75,21 +79,21 @@ const buildPath = (shape: TextLoopShape, curviness: number, ribbonWidth: number,
 const TextLoop = ({
   text,
   texts,
-  shape = "line",
+  shape = "wave",
   path,
-  speed = 70,
+  speed = 90,
   direction = "forward",
-  separator = "•",
-  curviness = 40,
-  fontSize = 20,
+  separator = "✦",
+  curviness = 90,
+  fontSize = 44,
   fontWeight = 800,
   fontFamily = "var(--font-syne), 'Syne', sans-serif",
-  letterSpacing = 1.5,
+  letterSpacing = 2,
   uppercase = true,
-  color = "#D71921",
-  ribbon = false,
+  color = "#ffffff",
+  ribbon = true,
   ribbonColor = "#D71921",
-  ribbonWidth = 44,
+  ribbonWidth = 86,
   pauseOnHover = true,
   className = "",
   style = {},
@@ -105,16 +109,9 @@ const TextLoop = ({
   const rawId = useId();
   const pathId = `text-loop-${rawId.replace(/[^a-zA-Z0-9_-]/g, "")}`;
 
-  // Viewport proportions optimized for slimline mobile ticker
-  const viewW = 800;
-  const viewH = shape === "line" ? 54 : shape === "wave" ? 90 : 260;
+  const d = useMemo(() => path || buildPath(shape, curviness, ribbonWidth), [path, shape, curviness, ribbonWidth]);
 
-  const d = useMemo(
-    () => path || buildPath(shape, curviness, ribbonWidth, viewW, viewH),
-    [path, shape, curviness, ribbonWidth, viewW, viewH]
-  );
-
-  const rawTextContent = useMemo(() => {
+  const rawText = useMemo(() => {
     if (texts && texts.length > 0) {
       return texts.join(` ${separator} `);
     }
@@ -122,10 +119,10 @@ const TextLoop = ({
   }, [text, texts, separator]);
 
   const unit = useMemo(() => {
-    const base = uppercase ? String(rawTextContent).toUpperCase() : String(rawTextContent);
-    const gap = separator ? `\u00A0\u00A0${separator}\u00A0\u00A0` : "\u00A0\u00A0\u00A0";
+    const base = uppercase ? String(rawText).toUpperCase() : String(rawText);
+    const gap = separator ? `\u00A0${separator}\u00A0` : "\u00A0\u00A0\u00A0";
     return `${base}${gap}`;
-  }, [rawTextContent, separator, uppercase]);
+  }, [rawText, separator, uppercase]);
 
   const textStyle = useMemo<CSSProperties>(
     () => ({
@@ -156,7 +153,6 @@ const TextLoop = ({
       }
       if (!length || !unitWidth) return;
 
-      // Ensure enough repetitions to seamlessly cover the path length
       const reps = Math.max(2, Math.ceil(length / unitWidth) + 1);
       setMetrics((prev) =>
         prev.length === length && prev.unitWidth === unitWidth && prev.reps === reps
@@ -173,7 +169,7 @@ const TextLoop = ({
     return () => {
       cancelled = true;
     };
-  }, [d, unit, fontSize, fontWeight, fontFamily, letterSpacing]);
+  }, [d, unit, fontSize, fontWeight, letterSpacing]);
 
   useEffect(() => {
     const { unitWidth, reps } = metrics;
@@ -191,8 +187,7 @@ const TextLoop = ({
     apply(0);
 
     const prefersReduced =
-      typeof window !== "undefined" &&
-      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (prefersReduced || speed <= 0) return undefined;
 
     const state = { offset: 0 };
@@ -225,17 +220,13 @@ const TextLoop = ({
   const loopText = unit.repeat(metrics.reps);
 
   return (
-    <div
-      ref={rootRef}
-      className={`relative w-full overflow-hidden ${className}`.trim()}
-      style={style}
-    >
+    <div ref={rootRef} className={`relative w-full overflow-hidden ${className}`.trim()} style={style}>
       <svg
         className="block w-full h-auto"
-        viewBox={`0 0 ${viewW} ${viewH}`}
+        viewBox={`0 0 ${VIEW_W} ${VIEW_H}`}
         preserveAspectRatio="xMidYMid meet"
         role="img"
-        aria-label={rawTextContent}
+        aria-label={rawText}
       >
         <path
           ref={pathRef}
@@ -248,35 +239,18 @@ const TextLoop = ({
           strokeLinejoin="round"
         />
 
-        <text
-          ref={measureRef}
-          className="invisible pointer-events-none"
-          style={textStyle}
-          aria-hidden="true"
-        >
+        <text ref={measureRef} className="invisible pointer-events-none" style={textStyle} aria-hidden="true">
           {unit}
         </text>
 
-        <text
-          className="select-none"
-          style={textStyle}
-          fill={color}
-          dominantBaseline="central"
-          aria-hidden="true"
-        >
-          <textPath ref={headRef} href={`#${pathId}`} startOffset="0px">
+        <text className="select-none" style={textStyle} fill={color} dominantBaseline="central" aria-hidden="true">
+          <textPath ref={headRef} href={`#${pathId}`} startOffset={0}>
             {loopText}
           </textPath>
         </text>
 
-        <text
-          className="select-none"
-          style={textStyle}
-          fill={color}
-          dominantBaseline="central"
-          aria-hidden="true"
-        >
-          <textPath ref={tailRef} href={`#${pathId}`} startOffset="0px">
+        <text className="select-none" style={textStyle} fill={color} dominantBaseline="central" aria-hidden="true">
+          <textPath ref={tailRef} href={`#${pathId}`} startOffset={0}>
             {loopText}
           </textPath>
         </text>
