@@ -32,14 +32,15 @@ export default function Hero() {
                 particleSize={2.4}
                 density={4}
                 color="#ffffff"
-                highlightColor="#D71921"
+                highlightColor="#E60000"
                 scatter={140}
                 gatherDuration={1400}
                 stagger={300}
-                pointerRepel={50}
+                pointerRepel={55}
                 repelRadius={110}
                 idleDrift={0.5}
-                trigger="hover"
+                trigger="mount"
+                align="left"
                 fontSize="clamp(2.6rem, 8.5vw, 6.5rem)"
                 fontWeight={900}
                 glow={true}
@@ -47,28 +48,30 @@ export default function Hero() {
               />
             </div>
 
-            <div className="text-xl sm:text-3xl md:text-4xl font-semibold text-hi/90 tracking-tight leading-snug flex flex-wrap items-center gap-x-2.5">
-              <span>Lakhnadon&apos;s Premier Center for</span>
-              <RotatingText
-                texts={[
-                  "Strength Training",
-                  "Personal Coaching",
-                  "Women's Batches",
-                  "Custom Nutrition",
-                ]}
-                mainClassName="text-accent inline-flex font-bold"
-                staggerFrom="last"
-                initial={{ y: "100%", opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                exit={{ y: "-120%", opacity: 0 }}
-                staggerDuration={0.025}
-                splitLevelClassName="overflow-hidden"
-                splitBy="characters"
-                transition={{ type: "spring", damping: 25, stiffness: 300 }}
-                rotationInterval={2800}
-                auto={true}
-                loop={true}
-              />
+            <div className="text-lg sm:text-2xl md:text-3xl font-semibold text-hi/90 tracking-tight leading-snug flex flex-wrap items-center gap-2.5 sm:gap-3">
+              <span className="text-mid font-medium">Lakhnadon&apos;s Premier Center for</span>
+              <span className="inline-flex items-center px-3 sm:px-4 py-1 sm:py-1.5 rounded-xl bg-accent/10 border border-accent/30 text-accent font-bold shadow-xs">
+                <RotatingText
+                  texts={[
+                    "Strength Training",
+                    "Personal Coaching",
+                    "Women's Batches",
+                    "Custom Nutrition",
+                  ]}
+                  mainClassName="inline-flex text-accent font-bold"
+                  staggerFrom="last"
+                  initial={{ y: "100%", opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  exit={{ y: "-120%", opacity: 0 }}
+                  staggerDuration={0.025}
+                  splitLevelClassName="overflow-hidden"
+                  splitBy="characters"
+                  transition={{ type: "spring", damping: 25, stiffness: 300 }}
+                  rotationInterval={2800}
+                  auto={true}
+                  loop={true}
+                />
+              </span>
             </div>
           </motion.div>
 

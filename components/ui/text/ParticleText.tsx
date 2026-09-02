@@ -15,6 +15,7 @@ export interface ParticleTextProps {
   repelRadius?: number;
   idleDrift?: number;
   trigger?: "mount" | "hover" | "click";
+  align?: "left" | "center";
   fontSize?: number | string;
   fontWeight?: number | string;
   fontFamily?: string;
@@ -24,7 +25,7 @@ export interface ParticleTextProps {
 }
 
 type Rgb = { r: number; g: number; b: number };
-type Target = { x: number; y: number; alpha: number };
+type Target = { x: number; y: number; alpha: number; isHighlight?: boolean };
 type Particle = {
   x: number;
   y: number;
@@ -102,14 +103,15 @@ const ParticleText = ({
   particleSize = 2.2,
   density = 4,
   color = "#ffffff",
-  highlightColor = "#D71921",
-  scatter = 160,
-  gatherDuration = 1500,
-  stagger = 380,
-  pointerRepel = 45,
-  repelRadius = 120,
-  idleDrift = 0.6,
-  trigger = "hover",
+  highlightColor = "#E60000",
+  scatter = 140,
+  gatherDuration = 1400,
+  stagger = 320,
+  pointerRepel = 55,
+  repelRadius = 110,
+  idleDrift = 0.5,
+  trigger = "mount",
+  align = "left",
   fontSize = "clamp(2.75rem, 9vw, 6.5rem)",
   fontWeight = 900,
   fontFamily = "inherit",
@@ -355,15 +357,22 @@ const ParticleText = ({
       );
       const targets: Target[] = [];
       const step = Math.max(2, Math.floor(density));
+      const startOffset = align === "left" ? 0 : Math.max(0, width / 2 - offscreen.width / 2);
+
+      // Determine boundary for 100% solid red highlight word (e.g., "FITNESS")
+      const words = content.trim().split(" ");
+      const firstWordWidth = words.length > 1 ? offCtx.measureText(words[0] + " ").width : offscreen.width / 2;
+      const splitBoundary = padding - left + firstWordWidth - 4;
 
       for (let y = 0; y < offscreen.height; y += step) {
         for (let x = 0; x < offscreen.width; x += step) {
           const alpha = imageData.data[(y * offscreen.width + x) * 4 + 3];
           if (alpha > 40) {
             targets.push({
-              x: width / 2 - offscreen.width / 2 + x,
+              x: startOffset + x,
               y: height / 2 - offscreen.height / 2 + y,
               alpha: alpha / 255,
+              isHighlight: x >= splitBoundary,
             });
           }
         }
@@ -374,25 +383,13 @@ const ParticleText = ({
         Math.min(5200, Math.floor((width * height) / 90))
       );
       const stride = Math.max(1, Math.ceil(targets.length / maxParticles));
-      const baseRgb = hexToRgb(color);
-      const highlightRgb = hexToRgb(highlightColor);
       const selected = targets.filter((_, index) => index % stride === 0);
 
       particles = selected.map((target, index) => {
         const seed = ((index * 9301 + 49297) % 233280) / 233280;
         const depth = 0.45 + (((index * 233 + 97) % 1000) / 1000) * 0.9;
-        const blend =
-          baseRgb && highlightRgb
-            ? clamp(
-                target.x / Math.max(1, width) + (seed - 0.5) * 0.35,
-                0,
-                1
-              )
-            : 0;
-        const particleColor =
-          baseRgb && highlightRgb
-            ? rgbToCss(mixRgb(baseRgb, highlightRgb, blend))
-            : color;
+        // 100% pure saturated red for highlight, 100% crisp white for base (no washed-out pink!)
+        const particleColor = target.isHighlight ? highlightColor : color;
         const angle = seed * Math.PI * 2;
         const distance = (reducedMotion ? 0 : scatter) * (0.35 + depth * 0.75);
         const startX =
