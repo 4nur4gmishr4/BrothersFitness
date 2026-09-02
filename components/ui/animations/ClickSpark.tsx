@@ -134,12 +134,13 @@ export default function ClickSpark({
 
   return (
     <div
-      className={`relative w-full h-full ${className}`}
+      className={`relative w-full h-auto ${className}`}
       onClick={handleClick}
     >
       <canvas
         ref={canvasRef}
         className="pointer-events-none absolute inset-0 z-50 block w-full h-full select-none"
+        style={{ touchAction: "none" }}
       />
       {children}
     </div>
