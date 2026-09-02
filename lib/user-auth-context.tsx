@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
+import { createContext, useContext, useState, useEffect, ReactNode, useCallback, useMemo } from 'react';
 import { supabase } from '@/lib/supabase';
 import { toast } from "sonner";
 import { MAX_DAILY_CREDITS, istToday } from '@/lib/config';
@@ -232,7 +232,7 @@ export function UserAuthProvider({ children }: { children: ReactNode }) {
         };
     }, [loadUserFromSession]);
 
-    const signInWithGoogle = async (): Promise<{ success: boolean; error?: string }> => {
+    const signInWithGoogle = useCallback(async (): Promise<{ success: boolean; error?: string }> => {
         try {
             const redirectUrl = typeof window !== 'undefined'
                 ? `${window.location.origin}/`
@@ -265,9 +265,9 @@ export function UserAuthProvider({ children }: { children: ReactNode }) {
             toast.error(msg);
             return { success: false, error: msg };
         }
-    };
+    }, []);
 
-    const logout = async () => {
+    const logout = useCallback(async () => {
         try {
             await supabase.auth.signOut();
             setUser(null);
@@ -276,9 +276,9 @@ export function UserAuthProvider({ children }: { children: ReactNode }) {
         } catch (error) {
             console.error('Logout error:', error);
         }
-    };
+    }, []);
 
-    const updateProfile = async (data: ProfileUpdateData): Promise<{ success: boolean; error?: string }> => {
+    const updateProfile = useCallback(async (data: ProfileUpdateData): Promise<{ success: boolean; error?: string }> => {
         const timeoutPromise = new Promise<{ success: boolean; error: string }>((_, reject) => {
             setTimeout(() => reject(new Error('Update timed out after 7 seconds')), 7000);
         });
@@ -352,7 +352,7 @@ export function UserAuthProvider({ children }: { children: ReactNode }) {
             const message = error instanceof Error ? error.message : 'Update failed';
             return { success: false, error: message };
         }
-    };
+    }, [user]);
 
     const checkCredit = useCallback(async (): Promise<boolean> => {
         if (!user) return false;
@@ -399,26 +399,38 @@ export function UserAuthProvider({ children }: { children: ReactNode }) {
         }
     }, [user]);
 
+    const contextValue = useMemo(() => ({
+        user,
+        accessToken,
+        isLoading,
+        isLoggedIn: !!user,
+        remainingCredits: user?.daily_credits ?? MAX_DAILY_CREDITS,
+        showWelcome,
+        setShowWelcome,
+        showLoginModal,
+        setShowLoginModal,
+        signInWithGoogle,
+        logout,
+        updateProfile,
+        checkCredit,
+        deductCredit,
+        refreshCredits
+    }), [
+        user,
+        accessToken,
+        isLoading,
+        showWelcome,
+        showLoginModal,
+        signInWithGoogle,
+        logout,
+        updateProfile,
+        checkCredit,
+        deductCredit,
+        refreshCredits
+    ]);
+
     return (
-        <UserAuthContext.Provider
-            value={{
-                user,
-                accessToken,
-                isLoading,
-                isLoggedIn: !!user,
-                remainingCredits: user?.daily_credits ?? MAX_DAILY_CREDITS,
-                showWelcome,
-                setShowWelcome,
-                showLoginModal,
-                setShowLoginModal,
-                signInWithGoogle,
-                logout,
-                updateProfile,
-                checkCredit,
-                deductCredit,
-                refreshCredits
-            }}
-        >
+        <UserAuthContext.Provider value={contextValue}>
             {children}
         </UserAuthContext.Provider>
     );

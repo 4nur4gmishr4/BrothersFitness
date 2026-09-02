@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import Image from "next/image";
 import { Search, ChevronLeft, ChevronRight, Dumbbell } from "lucide-react";
 import useSWR from "swr";
@@ -41,7 +41,16 @@ const fetcher = () =>
 export default function WorkoutLibrary() {
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
   const [activeFilter, setActiveFilter] = useState("ALL");
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(search);
+      setPage(1);
+    }, 150);
+    return () => clearTimeout(timer);
+  }, [search]);
 
   const { data: allExercises, error, isLoading } = useSWR("free-exercise-db", fetcher);
 
@@ -63,8 +72,8 @@ export default function WorkoutLibrary() {
   const filteredExercises = useMemo(() => {
     let pool = exercises;
 
-    if (search.trim()) {
-      const fuzzyResults = fuzzysort.go(search.trim(), exercises, {
+    if (debouncedSearch.trim()) {
+      const fuzzyResults = fuzzysort.go(debouncedSearch.trim(), exercises, {
         keys: ['name', 'category', 'equipment', (obj: FreeExercise) => obj.primaryMuscles.join(' ')],
         threshold: -500,
       });
@@ -94,7 +103,7 @@ export default function WorkoutLibrary() {
 
       return matchCategory || matchMuscle;
     });
-  }, [exercises, search, activeFilter]);
+  }, [exercises, debouncedSearch, activeFilter]);
 
   const pageSize = 18;
   const totalCount = filteredExercises.length;

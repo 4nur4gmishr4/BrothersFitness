@@ -8,11 +8,22 @@ const customEase: [number, number, number, number] = [1, 0, 0.56, 1];
 
 export default function SmartPreloaderWrapper() {
   const [stage, setStage] = useState(0);
-  const [isVisible, setIsVisible] = useState(true);
+  const [isVisible, setIsVisible] = useState(() => {
+    if (typeof window !== "undefined") {
+      const seen = sessionStorage.getItem("brofit_preloader_seen");
+      return !seen;
+    }
+    return false;
+  });
 
   useEffect(() => {
-    // Prevent scrolling while preloader is active
     if (typeof window !== "undefined") {
+      const seen = sessionStorage.getItem("brofit_preloader_seen");
+      if (seen) {
+        setIsVisible(false);
+        return;
+      }
+      sessionStorage.setItem("brofit_preloader_seen", "1");
       document.body.style.overflow = "hidden";
     }
 
