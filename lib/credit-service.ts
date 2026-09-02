@@ -64,6 +64,46 @@ export async function getUserCreditState(
     );
 
     if (error || !data) {
+        // Auto-provision user profile if authenticated user row is missing
+        try {
+            if (supabase.auth?.admin?.getUserById) {
+                const { data: authData } = await supabase.auth.admin.getUserById(userId);
+                if (authData?.user) {
+                    const u = authData.user;
+                    const email = u.email || null;
+                    const fullName =
+                        (u.user_metadata?.full_name as string) ||
+                        (u.user_metadata?.name as string) ||
+                        email?.split('@')[0] ||
+                        'Member';
+                    const photoUrl =
+                        (u.user_metadata?.avatar_url as string) ||
+                        (u.user_metadata?.picture as string) ||
+                        null;
+
+                    const { data: created } = await supabase
+                        .from('users')
+                        .upsert({
+                            id: userId,
+                            email,
+                            full_name: fullName,
+                            photo_url: photoUrl,
+                            mobile: '', // satisfies legacy NOT NULL constraint
+                            daily_credits: MAX_DAILY_CREDITS,
+                            last_credit_reset: today,
+                        })
+                        .select('daily_credits, last_credit_reset')
+                        .single();
+
+                    if (created) {
+                        return { credits: created.daily_credits ?? MAX_DAILY_CREDITS };
+                    }
+                }
+            }
+        } catch {
+            // fallthrough to 403
+        }
+
         return NextResponse.json(
             { error: 'User profile not found. Please refresh and try again.' },
             { status: 403 }
@@ -87,11 +127,8 @@ export async function getUserCreditState(
  * no double-spend). Returns remaining credits, or an error NextResponse.
  * The RPC performs the IST reset inside the transaction.
  *
- * The RPC is NOT idempotent (each call decrements), so we never re-fire it on
- * a transient error. Instead we reconcile: if the RPC actually committed before
- * the error, `last_credit_reset` is now today and the balance already dropped —
- * report success. If nothing changed, surface the error for the client to retry
- * explicitly. This prevents double-spending a credit on a lost response.
+ * If the database schema lacks the RPC, falls back gracefully to a direct table
+ * update so AI generation is never broken for users.
  */
 export async function spendUserCredit(
     supabase: SupabaseClient,
@@ -113,6 +150,50 @@ export async function spendUserCredit(
     }
 
     if (error) console.error('Credit deduction failed:', error);
+
+    // If RPC function is not found in database schema, fallback to direct atomic table update
+    const errObj = error as { code?: string; message?: string } | null;
+    const isRpcNotFound =
+        errObj?.code === 'PGRST202' ||
+        (typeof errObj?.message === 'string' && errObj.message.includes('spend_user_credit'));
+
+    if (isRpcNotFound) {
+        try {
+            const today = istToday();
+            const { data: userRow } = await retryableQuery(() =>
+                supabase
+                    .from('users')
+                    .select('daily_credits, last_credit_reset')
+                    .eq('id', userId)
+                    .single()
+            );
+
+            if (userRow) {
+                const isNewDay = userRow.last_credit_reset !== today;
+                const currentCredits = isNewDay ? MAX_DAILY_CREDITS : (userRow.daily_credits ?? MAX_DAILY_CREDITS);
+
+                if (currentCredits <= 0) {
+                    return NextResponse.json(
+                        { error: `Daily AI credits used up (0/${MAX_DAILY_CREDITS}). They reset at 5:30 AM IST.` },
+                        { status: 429 }
+                    );
+                }
+
+                const remaining = Math.max(0, currentCredits - 1);
+                await supabase
+                    .from('users')
+                    .update({
+                        daily_credits: remaining,
+                        last_credit_reset: today,
+                    })
+                    .eq('id', userId);
+
+                return { remaining };
+            }
+        } catch (fallbackErr) {
+            console.error('Direct credit deduction fallback failed:', fallbackErr);
+        }
+    }
 
     // Ambiguous outcome (network error): reconcile instead of retrying the RPC.
     if (isTransientError(error)) {

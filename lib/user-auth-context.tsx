@@ -150,6 +150,7 @@ export function UserAuthProvider({ children }: { children: ReactNode }) {
                         email: session.user.email || null,
                         full_name: metadataName,
                         photo_url: metadataPhoto,
+                        mobile: (metadata.phone as string) || (localPrefs.phone as string) || '',
                         daily_credits: MAX_DAILY_CREDITS,
                         last_credit_reset: today,
                     })
@@ -290,7 +291,7 @@ export function UserAuthProvider({ children }: { children: ReactNode }) {
                 updated_at: new Date().toISOString()
             };
             if (data.full_name !== undefined) updatePayload.full_name = data.full_name;
-            if (data.phone !== undefined) updatePayload.phone = data.phone;
+            if (data.phone !== undefined) updatePayload.mobile = data.phone;
             if (data.date_of_birth !== undefined) updatePayload.date_of_birth = data.date_of_birth;
             if (data.height_cm !== undefined) updatePayload.height_cm = data.height_cm;
             if (data.weight_kg !== undefined) updatePayload.weight_kg = data.weight_kg;
