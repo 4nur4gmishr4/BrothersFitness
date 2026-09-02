@@ -8,7 +8,7 @@ import { useEffect, useRef } from "react";
  * 2. Locks body scroll so the background page cannot be scrolled while modal is active.
  * 3. Returns accessibility ARIA props.
  */
-export function useModalDismiss(onClose: () => void) {
+export function useModalDismiss(onClose: () => void, enabled = true) {
     const onCloseRef = useRef(onClose);
 
     useEffect(() => {
@@ -16,21 +16,23 @@ export function useModalDismiss(onClose: () => void) {
     }, [onClose]);
 
     useEffect(() => {
+        if (!enabled) return;
         const handler = (e: KeyboardEvent) => {
             if (e.key === "Escape") onCloseRef.current();
         };
         window.addEventListener("keydown", handler);
         return () => window.removeEventListener("keydown", handler);
-    }, []);
+    }, [enabled]);
 
     useEffect(() => {
+        if (!enabled) return;
         const originalOverflow = document.body.style.overflow;
         document.body.style.overflow = "hidden";
 
         return () => {
             document.body.style.overflow = originalOverflow;
         };
-    }, []);
+    }, [enabled]);
 
     return {
         role: "dialog" as const,

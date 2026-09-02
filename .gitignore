@@ -68,3 +68,6 @@ public/fallback-*.js
 
 # Turbo
 .turbo
+
+# Scratch
+scratch/
