@@ -10,23 +10,21 @@ interface WelcomeModalProps {
 }
 
 export default function WelcomeModal({ isOpen, onClose }: WelcomeModalProps) {
-    // M33: call unconditionally before the early return.
     const modalProps = useModalDismiss(onClose);
 
     if (!isOpen) return null;
 
     return (
         <Portal>
-            <div className="fixed inset-0 h-[100dvh] w-screen z-[200] flex items-center justify-center p-3 sm:p-4 overflow-y-auto overscroll-contain backdrop-blur-sm">
-                <div
-                    onClick={onClose}
-                    className="absolute inset-0 bg-black/80 modal-overlay-in"
-                />
-
+            <div
+                className="fixed inset-0 h-[100dvh] w-screen z-[200] flex items-center justify-center p-3.5 sm:p-4 overflow-y-auto overscroll-contain bg-black/80 backdrop-blur-sm modal-overlay-in"
+                onClick={onClose}
+            >
                 <div
                     {...modalProps}
                     aria-label="Welcome"
-                    className="relative w-full max-w-md my-auto surface-modal hairline rounded-3xl overflow-hidden modal-panel-in shadow-2xl"
+                    className="relative w-full max-w-md my-auto surface-modal border border-surface-border rounded-3xl overflow-hidden modal-panel-in shadow-2xl"
+                    onClick={(e) => e.stopPropagation()}
                 >
                     {/* Accent stripe */}
                     <div className="h-1 bg-accent" />
@@ -34,15 +32,15 @@ export default function WelcomeModal({ isOpen, onClose }: WelcomeModalProps) {
                     <button
                         onClick={onClose}
                         aria-label="Close welcome message"
-                        className="absolute top-4 right-4 p-2 text-faint hover:text-hi transition-colors"
+                        className="absolute top-4 right-4 p-2 text-faint hover:text-hi transition-colors rounded-full hover:bg-surface-elevated"
                     >
                         <X className="w-5 h-5" />
                     </button>
 
-                    <div className="p-8">
+                    <div className="p-6 sm:p-8">
                         <div className="flex items-center gap-3 mb-6">
-                            <div className="p-2 bg-accent/10">
-                                <ShieldCheck className="w-6 h-6 text-accent" />
+                            <div className="w-10 h-10 rounded-2xl bg-accent/10 flex items-center justify-center text-accent">
+                                <ShieldCheck className="w-5 h-5 text-accent" />
                             </div>
                             <h2 className="text-xl heading-display text-hi">
                                 Welcome to Brother&apos;s Fitness
@@ -54,8 +52,8 @@ export default function WelcomeModal({ isOpen, onClose }: WelcomeModalProps) {
                                 You&apos;ve been credited with:
                             </p>
 
-                            <div className="surface-card p-4 flex items-center gap-4">
-                                <div className="p-3 bg-accent/10">
+                            <div className="surface-card rounded-2xl border border-surface-border p-4 flex items-center gap-4">
+                                <div className="w-12 h-12 rounded-xl bg-accent/10 flex items-center justify-center text-accent shrink-0">
                                     <Zap className="w-6 h-6 text-accent" />
                                 </div>
                                 <div>
@@ -71,7 +69,7 @@ export default function WelcomeModal({ isOpen, onClose }: WelcomeModalProps) {
 
                         <button
                             onClick={onClose}
-                            className="btn-primary w-full mt-8 py-4 text-xs rounded-full"
+                            className="btn-primary w-full mt-8 py-3.5 text-xs font-bold uppercase tracking-wider rounded-xl cursor-pointer"
                         >
                             Continue
                         </button>
