@@ -5,7 +5,7 @@ import { generateTextWithFallback, type AIRequestConfig } from "@/lib/ai-provide
 import { verifyUserToken, getUserCreditState, spendUserCredit } from "@/lib/credit-service";
 import { getRequestId, withRequestId } from "@/lib/request-id";
 
-// Allow up to 120s for AI generation — multi-provider fallback + JSON retry
+// Allow up to 120s for AI generation - multi-provider fallback + JSON retry
 // needs headroom beyond the default Vercel budget (10s).
 export const maxDuration = 120;
 
@@ -27,7 +27,7 @@ async function requestDietJson(aiConfig: AIRequestConfig, originalPrompt: string
             if (attempt === 1) throw new Error(`AI returned invalid JSON: ${aiResponse.modelUsed}`);
             log.warn('Diet AI returned malformed JSON, retrying once');
             aiConfig.prompt = originalPrompt +
-                '\n\nIMPORTANT: Your previous output was not valid JSON. Return ONLY the raw JSON object — no markdown, no commentary.';
+                '\n\nIMPORTANT: Your previous output was not valid JSON. Return ONLY the raw JSON object - no markdown, no commentary.';
         }
     }
     throw new Error("AI returned invalid JSON");
@@ -74,7 +74,7 @@ export async function POST(req: Request) {
             weightChangeRate
         } = parsed.data;
 
-        // 0 is a valid maintenance rate — only fall back to the default when the
+        // 0 is a valid maintenance rate - only fall back to the default when the
         // value is genuinely absent/unparseable.
         const rateNum = weightChangeRate === undefined || weightChangeRate === null || weightChangeRate === ''
             || Number.isNaN(parseFloat(String(weightChangeRate)))
@@ -240,7 +240,7 @@ export async function POST(req: Request) {
         } else if (errorMessage.includes('quota') || errorMessage.includes('rate') || errorMessage.includes('429')) {
             userMessage = "Daily AI limit reached. Please try again tomorrow.";
         } else if (errorMessage.includes('timeout') || errorMessage.includes('aborted') || errorMessage.includes('ECONNREFUSED')) {
-            userMessage = "Network timeout — please try again.";
+            userMessage = "Network timeout - please try again.";
         } else if (errorMessage.includes('JSON')) {
             userMessage = "The AI returned an invalid response. Please try again.";
         }

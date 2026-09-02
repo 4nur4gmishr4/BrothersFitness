@@ -3,7 +3,7 @@
  * Provides JSON logging for production observability.
  * In development, logs are human-readable.
  *
- * `logger.child({ requestId })` returns a logger bound to that context — every
+ * `logger.child({ requestId })` returns a logger bound to that context - every
  * line it emits carries the request id, so the logs for one serverless
  * invocation can be traced end-to-end.
  */
@@ -40,7 +40,7 @@ interface Logger {
 }
 
 // Keep a bare line truly bare (dev output shows no "{}" when nothing is bound),
-// but attach context the moment any is present — child-scoped or per-call.
+// but attach context the moment any is present - child-scoped or per-call.
 function mergeContext(bound: LogContext, context?: LogContext): LogContext | undefined {
     const merged = { ...bound, ...context };
     return Object.keys(merged).length ? merged : undefined;

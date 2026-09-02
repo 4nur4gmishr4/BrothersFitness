@@ -27,11 +27,11 @@ export default function MemberReceiptModal({ member, onClose }: MemberReceiptMod
   const receiptId = `BF-REC-${(member.id || "").slice(0, 8).toUpperCase()}`;
 
   const getWhatsAppMessage = () => {
-    return `*BROTHER'S FITNESS — OFFICIAL RECEIPT* 🏋️‍♂️
+    return `*BROTHER'S FITNESS - OFFICIAL RECEIPT* 🏋️‍♂️
 
 🧾 *Receipt No:* ${receiptId}
 👤 *Member Name:* ${member.full_name || "Valued Member"}
-📱 *Mobile:* ${member.mobile || "—"}
+📱 *Mobile:* ${member.mobile || "-"}
 📋 *Plan Tier:* ${member.membership_type || "Standard"}
 📅 *Validity:* ${formatDate(member.membership_start)} to ${formatDate(member.membership_end)}
 💰 *Amount Paid:* ₹${amount.toLocaleString("en-IN")}
@@ -167,7 +167,7 @@ _“Pain is Temporary. Pride is Forever.”_ 💪`;
               </div>
               <div className="min-w-0 flex-1">
                 <p className="text-xs font-bold text-hi truncate">{member.full_name}</p>
-                <p className="text-[11px] text-mid truncate">📞 {member.mobile || "—"}</p>
+                <p className="text-[11px] text-mid truncate">📞 {member.mobile || "-"}</p>
                 <p className="text-[10px] text-low font-mono">{receiptId}</p>
               </div>
             </div>

@@ -69,7 +69,7 @@ describe('AI Provider Stack', () => {
 
         await expect(generateTextWithFallback({ prompt: 'Hello' }))
             .rejects.toThrow(/No AI provider configured/);
-        // Must not walk the stack pointlessly — the openai SDK is never touched.
+        // Must not walk the stack pointlessly - the openai SDK is never touched.
         expect(mockCreate).not.toHaveBeenCalled();
     });
 

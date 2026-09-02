@@ -8,7 +8,7 @@ import { retryableQuery, isTransientError } from '@/lib/retry';
 // Replaces the old trust-a-client-header model: identity now comes from a
 // verified Supabase session token, and credit deduction is atomic server-side.
 
-// Re-export so existing imports (incl. tests) keep working — single source
+// Re-export so existing imports (incl. tests) keep working - single source
 // of truth lives in lib/config.ts.
 export { istToday };
 
@@ -33,7 +33,7 @@ export async function verifyUserToken(
     }
 
     const supabase = getServiceSupabase();
-    // auth.getUser is an idempotent read — safe to retry on transient failures.
+    // auth.getUser is an idempotent read - safe to retry on transient failures.
     const { data, error } = await retryableQuery(() => supabase.auth.getUser(token));
     if (error || !data?.user) {
         return NextResponse.json(
@@ -140,7 +140,7 @@ export async function spendUserCredit(
     });
 
     if (!error && typeof data === 'number') {
-        if (data < 0) {
+        if (data <= 0) {
             return NextResponse.json(
                 { error: `Daily AI credits used up (0/${MAX_DAILY_CREDITS}). They reset at 5:30 AM IST.` },
                 { status: 429 }

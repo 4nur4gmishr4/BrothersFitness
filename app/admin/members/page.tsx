@@ -85,7 +85,7 @@ type ViewMode = "table" | "card";
 
 function initials(name: string | null): string {
   const parts = String(name || "").trim().split(/\s+/);
-  if (!parts[0]) return "—";
+  if (!parts[0]) return "-";
   const a = parts[0][0];
   const b = parts[1]?.[0];
   return `${a}${b || ""}`.toUpperCase();
@@ -115,7 +115,7 @@ function countIncompleteFields(m: GymMember): number {
 
 function csvSafeCell(val: unknown): string {
   const s = String(val ?? "").replace(/"/g, '""');
-  // Tab goes OUTSIDE the quotes: \t"content" — breaks formula parsing while
+  // Tab goes OUTSIDE the quotes: \t"content" - breaks formula parsing while
   // keeping the value properly double-quoted for CSV parsers.
   return /^[=+\-@\t\r\n]/.test(s) ? `\t"${s}"` : `"${s}"`;
 }
@@ -496,7 +496,7 @@ function AdminMembersPageInner() {
           value={<CountUp to={counts.expiring} />}
           sublabel={
             expiringSummaryCounts.todayCount > 0
-              ? `${expiringSummaryCounts.todayCount} ending today — urgent`
+              ? `${expiringSummaryCounts.todayCount} ending today - urgent`
               : "Next 7 days"
           }
           variant="warning"
@@ -998,7 +998,7 @@ function MembersTableView({
                         className="text-sm text-hi truncate font-semibold hover:text-accent text-left transition-colors cursor-pointer block max-w-full"
                         title="Click to edit member"
                       >
-                        {m.full_name || <span className="text-faint">—</span>}
+                        {m.full_name || <span className="text-faint">-</span>}
                       </button>
                       <div className="flex items-center gap-2 text-xs text-low flex-wrap font-medium">
                         {m.mobile ? (
@@ -1010,7 +1010,7 @@ function MembersTableView({
                             📞 {m.mobile}
                           </a>
                         ) : (
-                          <span className="text-faint">📞 —</span>
+                          <span className="text-faint">📞 -</span>
                         )}
                         {hasIncompleteProfile(m) && (
                           <span className="text-status-warning uppercase tracking-wider text-[11px] font-semibold flex items-center gap-0.5">
@@ -1024,7 +1024,7 @@ function MembersTableView({
                 </td>
                 <td className="px-3 py-3 hairline-b align-middle hidden lg:table-cell">
                   <div className="text-sm text-hi whitespace-nowrap font-medium">
-                    {m.membership_type || "—"}
+                    {m.membership_type || "-"}
                   </div>
                   <div className="text-xs text-low font-medium tabular-nums">
                     ₹{getPlanPrice(m.membership_type).toLocaleString("en-IN")}
@@ -1223,7 +1223,7 @@ function MembersCardView({
                       className="text-sm font-semibold text-hi truncate leading-snug hover:text-accent text-left transition-colors cursor-pointer block max-w-full"
                       title="Click to edit member"
                     >
-                      {m.full_name || "—"}
+                      {m.full_name || "-"}
                     </button>
                     <a
                       href={`tel:${m.mobile || ""}`}
@@ -1252,7 +1252,7 @@ function MembersCardView({
                     Plan Tier
                   </span>
                   <span className="text-hi font-semibold tabular-nums">
-                    {m.membership_type || "—"} · ₹
+                    {m.membership_type || "-"} · ₹
                     {getPlanPrice(m.membership_type).toLocaleString("en-IN")}
                   </span>
                 </div>
@@ -1462,7 +1462,7 @@ function DeleteConfirmDialog({
                   {member.full_name || "Unnamed member"}
                 </div>
                 <div className="text-xs text-low font-medium">
-                  <span className="tabular-nums">{member.mobile || "—"}</span> · {member.membership_type || "No plan"}
+                  <span className="tabular-nums">{member.mobile || "-"}</span> · {member.membership_type || "No plan"}
                 </div>
               </div>
             </div>

@@ -7,7 +7,7 @@ export default function robots(): MetadataRoute.Robots {
     rules: {
       userAgent: '*',
       allow: '/',
-      // Admin panel is restricted to authorized personnel — keep crawlers out.
+      // Admin panel is restricted to authorized personnel - keep crawlers out.
       disallow: ['/admin/'],
     },
     sitemap: `${siteUrl}/sitemap.xml`,

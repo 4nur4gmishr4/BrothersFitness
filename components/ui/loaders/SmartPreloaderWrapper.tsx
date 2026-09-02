@@ -15,7 +15,7 @@ export default function SmartPreloaderWrapper() {
   useEffect(() => {
     const seen = sessionStorage.getItem("brofit_preloader_seen");
     if (seen) {
-      // Already seen — stay hidden (isVisible starts false, nothing to do)
+      // Already seen - stay hidden (isVisible starts false, nothing to do)
       return;
     }
     sessionStorage.setItem("brofit_preloader_seen", "1");

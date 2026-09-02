@@ -4,7 +4,7 @@
 -- Security model:
 --   * users.id = the Supabase auth user id (auth.uid()). The client creates its
 --     own row on sign-in, which RLS allows only when id == auth.uid().
---   * All other rows are invisible/uneditable to the public anon key — no more
+--   * All other rows are invisible/uneditable to the public anon key - no more
 --     SELECT * FROM users exfiltration.
 --   * Credit mutations run through the spend_user_credit() RPC (service-role
 --     only), not through direct table grants.

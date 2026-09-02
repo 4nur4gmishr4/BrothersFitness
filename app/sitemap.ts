@@ -4,11 +4,11 @@ import type { MetadataRoute } from 'next';
 // sitemap always matches the deployment's real domain.
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://brothersfitness.in';
 
-// L42: update this date when page content changes — `new Date()` always
+// L42: update this date when page content changes - `new Date()` always
 // returns "today" at fetch time, giving crawlers no signal about stale pages.
 const LAST_CONTENT_UPDATE = '2025-08-01';
 
-// Public marketing routes only — admin pages are excluded (restricted area).
+// Public marketing routes only - admin pages are excluded (restricted area).
 const routes: { path: string; priority: number; changeFrequency: MetadataRoute.Sitemap[number]['changeFrequency'] }[] = [
   { path: '/', priority: 1.0, changeFrequency: 'weekly' },
   { path: '/pricing', priority: 0.9, changeFrequency: 'monthly' },

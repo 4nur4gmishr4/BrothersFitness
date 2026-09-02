@@ -26,11 +26,11 @@ export default function Hero() {
             className="space-y-3 sm:space-y-4 mb-4 sm:mb-6"
           >
             <h1 className="sr-only">Brother&apos;s Fitness Lakhnadon</h1>
-            <div className="w-full h-[70px] sm:h-[110px] md:h-[140px] lg:h-[170px] -ml-1 sm:-ml-2">
+            <div className="w-full h-[95px] sm:h-[135px] md:h-[175px] lg:h-[220px] -ml-1 sm:-ml-2">
               <ParticleText
                 text="BROTHER'S FITNESS"
                 particleSize={2.4}
-                density={4}
+                density={3.2}
                 color="#ffffff"
                 highlightColor="#E60000"
                 scatter={140}
@@ -41,10 +41,11 @@ export default function Hero() {
                 idleDrift={0.5}
                 trigger="mount"
                 align="left"
-                fontSize="clamp(2.6rem, 8.5vw, 6.5rem)"
-                fontWeight={900}
+                fontSize="clamp(3.5rem, 11.5vw, 8.8rem)"
+                fontWeight={400}
+                fontFamily="'Anton', 'Impact', sans-serif"
                 glow={true}
-                className="w-full h-full"
+                className="w-full h-full font-display"
               />
             </div>
 
@@ -83,7 +84,7 @@ export default function Hero() {
             className="text-sm sm:text-base md:text-lg text-mid max-w-3xl leading-relaxed mb-6 sm:mb-8"
           >
             <BlurText
-              text="Built from the ground up by Coach Aman and Coach Pradeep right here in Lakhnadon. Whether you are lifting your very first dumbbell or pushing for a new personal record, this is your home for real, honest strength. We cut through the noise with certified hands-on guidance, heavy-duty iron, dedicated women's training hours, and a supportive brotherhood — zero admission fees, no confusing fitness myths, and no hidden catches. Just real work, real coaches, and real progress every single day."
+              text="Built from the ground up by Coach Aman and Coach Pradeep right here in Lakhnadon. Whether you are lifting your very first dumbbell or pushing for a new personal record, this is your home for real, honest strength. We cut through the noise with certified hands-on guidance, heavy-duty iron, dedicated women's training hours, and a supportive brotherhood - zero admission fees, no confusing fitness myths, and no hidden catches. Just real work, real coaches, and real progress every single day."
               delay={8}
             />
           </motion.div>

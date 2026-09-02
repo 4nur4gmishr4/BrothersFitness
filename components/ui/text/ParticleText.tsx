@@ -112,9 +112,9 @@ const ParticleText = ({
   idleDrift = 0.5,
   trigger = "mount",
   align = "left",
-  fontSize = "clamp(2.75rem, 9vw, 6.5rem)",
-  fontWeight = 900,
-  fontFamily = "inherit",
+  fontSize = "clamp(3.5rem, 11.5vw, 8.8rem)",
+  fontWeight = 400,
+  fontFamily = "'Anton', 'Impact', sans-serif",
   glow = true,
   className = "",
   style,
@@ -312,7 +312,8 @@ const ParticleText = ({
       if (!offCtx) return;
 
       const content = String(text || " ");
-      const maxTextWidth = width * 0.94;
+      const maxTextWidth = width * 0.96;
+      const maxTextHeight = height * 0.92;
       offCtx.font = font;
       let metrics = offCtx.measureText(content);
       const measuredWidth = Math.max(1, metrics.width);
@@ -336,9 +337,23 @@ const ParticleText = ({
       const descent = Math.ceil(
         metrics.actualBoundingBoxDescent || resolvedSize * 0.22
       );
-      const padding = Math.max(12, Math.ceil(resolvedSize * 0.08));
-      const textWidth = Math.max(1, left + right);
-      const textHeight = Math.max(1, ascent + descent);
+      const padding = Math.max(8, Math.ceil(resolvedSize * 0.05));
+      let textWidth = Math.max(1, left + right);
+      let textHeight = Math.max(1, ascent + descent);
+
+      if (textHeight > maxTextHeight) {
+        resolvedSize = Math.max(
+          18,
+          resolvedSize * (maxTextHeight / textHeight)
+        );
+        font = `${fontWeight} ${resolvedSize}px ${resolvedFamily}`;
+        await waitForFonts(font);
+        if (currentBuild !== buildId) return;
+        offCtx.font = font;
+        metrics = offCtx.measureText(content);
+        textWidth = Math.max(1, Math.ceil(metrics.actualBoundingBoxLeft || 0) + Math.ceil(metrics.actualBoundingBoxRight || metrics.width));
+        textHeight = Math.max(1, Math.ceil(metrics.actualBoundingBoxAscent || resolvedSize * 0.78) + Math.ceil(metrics.actualBoundingBoxDescent || resolvedSize * 0.22));
+      }
 
       offscreen.width = textWidth + padding * 2;
       offscreen.height = textHeight + padding * 2;

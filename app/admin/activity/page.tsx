@@ -42,7 +42,7 @@ const FILTERS = [
 
 function formatTime(iso: string) {
   const d = new Date(iso);
-  if (isNaN(d.getTime())) return "—";
+  if (isNaN(d.getTime())) return "-";
   return d.toLocaleString("en-IN", {
     month: "short",
     day: "numeric",

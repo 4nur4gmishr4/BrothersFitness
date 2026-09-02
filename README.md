@@ -493,18 +493,18 @@ Create a `.env.local` file in the root directory modeled after `.env.local.examp
 
 | Variable | Client / Server | Required | Default | Description |
 |---|---|---|---|---|
-| `NEXT_PUBLIC_SUPABASE_URL` | Client & Server | **Yes** | — | Supabase project HTTPS URL (`https://<project>.supabase.co`). |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Client & Server | **Yes** | — | Supabase public anonymous API key for public client queries. |
-| `SUPABASE_SERVICE_ROLE_KEY` | Server Only | **Yes** | — | Supabase service-role secret key. Bypasses RLS for admin operations and atomic credit spend. |
-| `ADMIN_PASSWORD` | Server Only | **Yes** | — | Master passcode used for administrative authentication and HMAC token signing. |
-| `CRON_SECRET` | Server Only | **Yes** | — | Hex secret used to protect scheduled cron routes (`/api/cron/monthly-revenue`). |
-| `GROQ_API_KEY` | Server Only | *Recommended* | — | API key for Groq Cloud (primary high-speed AI provider). |
-| `MISTRAL_API_KEY` | Server Only | *Optional* | — | API key for Mistral AI (secondary fallback AI provider). |
-| `OPENROUTER_API_KEY` | Server Only | *Optional* | — | API key for OpenRouter (tertiary fallback AI provider). |
-| `COHERE_API_KEY` | Server Only | *Optional* | — | API key for Cohere (quaternary fallback AI provider). |
-| `API_NINJAS_KEY` | Server Only | *Optional* | — | API key for API Ninjas exercise directory proxy. |
-| `UPSTASH_REDIS_REST_URL` | Server Only | *Optional* | — | Upstash Redis REST endpoint for distributed rate limiting & token revocation. |
-| `UPSTASH_REDIS_REST_TOKEN` | Server Only | *Optional* | — | Upstash Redis REST authentication token. |
+| `NEXT_PUBLIC_SUPABASE_URL` | Client & Server | **Yes** | - | Supabase project HTTPS URL (`https://<project>.supabase.co`). |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Client & Server | **Yes** | - | Supabase public anonymous API key for public client queries. |
+| `SUPABASE_SERVICE_ROLE_KEY` | Server Only | **Yes** | - | Supabase service-role secret key. Bypasses RLS for admin operations and atomic credit spend. |
+| `ADMIN_PASSWORD` | Server Only | **Yes** | - | Master passcode used for administrative authentication and HMAC token signing. |
+| `CRON_SECRET` | Server Only | **Yes** | - | Hex secret used to protect scheduled cron routes (`/api/cron/monthly-revenue`). |
+| `GROQ_API_KEY` | Server Only | *Recommended* | - | API key for Groq Cloud (primary high-speed AI provider). |
+| `MISTRAL_API_KEY` | Server Only | *Optional* | - | API key for Mistral AI (secondary fallback AI provider). |
+| `OPENROUTER_API_KEY` | Server Only | *Optional* | - | API key for OpenRouter (tertiary fallback AI provider). |
+| `COHERE_API_KEY` | Server Only | *Optional* | - | API key for Cohere (quaternary fallback AI provider). |
+| `API_NINJAS_KEY` | Server Only | *Optional* | - | API key for API Ninjas exercise directory proxy. |
+| `UPSTASH_REDIS_REST_URL` | Server Only | *Optional* | - | Upstash Redis REST endpoint for distributed rate limiting & token revocation. |
+| `UPSTASH_REDIS_REST_TOKEN` | Server Only | *Optional* | - | Upstash Redis REST authentication token. |
 | `TRUST_PROXY_HEADERS` | Server Only | *Optional* | `false` | Set to `true` when operating behind a reverse proxy (auto-enabled on Vercel). |
 | `MAX_DAILY_CREDITS` | Server Only | *Optional* | `5` | Daily AI credit cap granted to registered trainees. |
 | `NEXT_PUBLIC_SITE_URL` | Client & Server | *Optional* | `https://brothersfitness.in` | Canonical URL used for OpenGraph and PWA metadata. |

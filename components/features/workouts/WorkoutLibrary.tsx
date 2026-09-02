@@ -14,9 +14,9 @@ const IMAGE_BASE =
 
 function resolveExerciseImage(path: string): string {
   if (!path) return "";
-  // Already absolute — leave it alone.
+  // Already absolute - leave it alone.
   if (path.startsWith("http://") || path.startsWith("https://")) return path;
-  // Already has a leading slash — leave it alone.
+  // Already has a leading slash - leave it alone.
   if (path.startsWith("/")) return path;
   return `${IMAGE_BASE}${path}`;
 }

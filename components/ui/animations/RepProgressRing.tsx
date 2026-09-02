@@ -1,4 +1,4 @@
-/** req #11 — rep_ring: circular rep progress. Smooth dash-offset
+/** req #11 - rep_ring: circular rep progress. Smooth dash-offset
  *  transition driven by reps/target. */
 
 export default function RepProgressRing({

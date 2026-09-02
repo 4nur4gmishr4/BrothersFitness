@@ -1,6 +1,6 @@
 "use client";
 
-/** req #13 — slider_bounce: range slider thumb that bounces on commit
+/** req #13 - slider_bounce: range slider thumb that bounces on commit
  *  (mouseup / touchend). Invisible native range handles accessibility
  *  and keyboard; a styled thumb div bounces only on value commit,
  *  not during drag. */
@@ -60,7 +60,7 @@ export default function SliderThumb({
           aria-label={label}
           className="absolute inset-0 w-full opacity-0 cursor-pointer z-10"
         />
-        {/* Visible thumb — remount on commit to trigger bounce */}
+        {/* Visible thumb - remount on commit to trigger bounce */}
         <div
           key={bounceKey}
           className={`absolute w-4 h-4 rounded-full bg-accent border-2 border-surface-canvas pointer-events-none ${

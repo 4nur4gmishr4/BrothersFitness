@@ -405,14 +405,14 @@ export default function AdminDashboardPage() {
             ) : (
               <SectionCard
                 title="Expiring Today"
-                subtitle="Members whose plan ends today — renew or remind"
+                subtitle="Members whose plan ends today - renew or remind"
                 icon={CalendarClock}
                 className="xl:col-span-1"
               >
                 <EmptyState
                   icon={CheckCircle2}
                   title="No plans expire today"
-                  description="Great — all members on track. Check Expiring Soon for the 7-day outlook."
+                  description="Great - all members on track. Check Expiring Soon for the 7-day outlook."
                 />
               </SectionCard>
             )}
@@ -611,7 +611,7 @@ function PlanRev({
 
 function initials(name: string | null): string {
   const parts = String(name || "").trim().split(/\s+/);
-  if (!parts[0]) return "—";
+  if (!parts[0]) return "-";
   const a = parts[0][0];
   const b = parts[1]?.[0];
   return `${a}${b || ""}`.toUpperCase();

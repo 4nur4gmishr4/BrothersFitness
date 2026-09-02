@@ -20,7 +20,7 @@ const themeScript = `(function(){try{var s=localStorage.getItem("brofit_theme");
 
 // Dev-only: next-pwa skips registration in development, but a service worker
 // registered on localhost by an earlier `npm run start` survives and keeps
-// intercepting requests — returning dev chunks as text/plain 404s. Unregister
+// intercepting requests - returning dev chunks as text/plain 404s. Unregister
 // any stale worker so a prod/dev toggle never breaks the dev server.
 const devSwCleanupScript = process.env.NODE_ENV === "development"
   ? `(function(){if("serviceWorker" in navigator){navigator.serviceWorker.getRegistrations().then(function(rs){rs.forEach(function(r){r.unregister();});});}})();`

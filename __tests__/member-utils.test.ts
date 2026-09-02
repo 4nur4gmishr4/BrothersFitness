@@ -119,9 +119,9 @@ describe('member-utils', () => {
             expect(initials('Brofit')).toBe('BR');
         });
 
-        it('returns — for empty or null names', () => {
-            expect(initials(null)).toBe('—');
-            expect(initials('')).toBe('—');
+        it('returns - for empty or null names', () => {
+            expect(initials(null)).toBe('-');
+            expect(initials('')).toBe('-');
         });
     });
 });

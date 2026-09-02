@@ -26,7 +26,7 @@ interface BulkMessageModalProps {
    */
   recipients?: GymMember[];
   /**
-   * Full member list — required so "Active / Expiring / Expired / Birthday"
+   * Full member list - required so "Active / Expiring / Expired / Birthday"
    * filter tabs operate across the entire gym roster, not just the selection.
    */
   allMembers?: GymMember[];
@@ -52,7 +52,7 @@ const MESSAGE_TEMPLATES = {
     icon: Users,
     label: "New Batch Alert 🏋️",
     message:
-      "New training batch starting soon at Brother's Fitness!\n\nEarly morning & evening slots available.\n📍 Limited spots — register now!\n\n- Team Brother's Fitness",
+      "New training batch starting soon at Brother's Fitness!\n\nEarly morning & evening slots available.\n📍 Limited spots - register now!\n\n- Team Brother's Fitness",
   },
   expiry: {
     icon: AlertTriangle,
@@ -161,7 +161,7 @@ export default function BulkMessageModal({
       return;
     }
     try {
-      // Newline-separated — WhatsApp Web bulk entry expects one number per line.
+      // Newline-separated - WhatsApp Web bulk entry expects one number per line.
       await navigator.clipboard.writeText(phoneNumbers.join("\n"));
       setCopied(true);
       toast.success(
@@ -169,7 +169,7 @@ export default function BulkMessageModal({
       );
       setTimeout(() => setCopied(false), 2000);
     } catch {
-      toast.error("Clipboard access denied — please allow clipboard permissions");
+      toast.error("Clipboard access denied - please allow clipboard permissions");
     }
   };
 
@@ -350,7 +350,7 @@ export default function BulkMessageModal({
                         {m.full_name || "Unnamed"}
                       </div>
                       <div className="text-xs text-low truncate font-medium tabular-nums">
-                        {m.mobile || "— no phone"}
+                        {m.mobile || "- no phone"}
                       </div>
                     </div>
                     <button
@@ -367,7 +367,7 @@ export default function BulkMessageModal({
                 ))}
                 {filteredMembers.length > 50 && (
                   <p className="text-xs text-faint text-center pt-3">
-                    +{filteredMembers.length - 50} more — use Copy Numbers for
+                    +{filteredMembers.length - 50} more - use Copy Numbers for
                     the full list
                   </p>
                 )}
