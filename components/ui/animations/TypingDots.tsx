@@ -1,6 +1,6 @@
 /** req #9 — typing_dots: AI waiting indicator — three staggered dots. */
 
-import AnimatedSvgIcon from "@/components/ui/AnimatedSvgIcon";
+import AnimatedSvgIcon from "./AnimatedSvgIcon";
 
 export default function TypingDots({ active = true }: { active?: boolean }) {
   if (!active) return null;

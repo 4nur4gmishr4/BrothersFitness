@@ -1,4 +1,4 @@
-import AnimatedSvgIcon from "@/components/ui/AnimatedSvgIcon";
+import AnimatedSvgIcon from "./AnimatedSvgIcon";
 
 export default function CheckDraw({ size = 24, className = "text-status-success" }: { size?: number; className?: string; }) {
   return (

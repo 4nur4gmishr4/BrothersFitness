@@ -8,9 +8,9 @@ import PageTransition from "@/components/ui/layout/PageTransition";
 import PwaUpdateToast from "@/components/ui/primitives/PwaUpdateToast";
 import { ThemeProvider } from "@/components/ui/providers/ThemeProvider";
 import ThemedToaster from "@/components/ui/primitives/ThemedToaster";
-import { AdminProvider } from "@/lib/auth-context";
+import { AdminProvider } from "@/lib/admin-auth-context";
 import { UserAuthProvider } from "@/lib/user-auth-context";
-import PreloaderGate from "@/components/ui/PreloaderGate";
+import PreloaderGate from "@/components/ui/loaders/PreloaderGate";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 // Runs before first paint to apply the stored theme and prevent a
