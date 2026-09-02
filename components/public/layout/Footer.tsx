@@ -16,10 +16,11 @@ import {
   Quote,
   CreditCard,
   Code2,
+  Instagram,
 } from "lucide-react";
-import { FaInstagram, FaWhatsapp } from "react-icons/fa";
 import { cn } from "@/lib/utils";
 import LiveBeacon from "@/components/ui/primitives/LiveBeacon";
+import { AnimatedWhatsApp } from "@/components/ui/icons";
 
 interface FooterLink {
   name: string;
@@ -78,8 +79,8 @@ const defaultBroFitSections: FooterSection[] = [
     title: "Get In Touch",
     links: [
       { name: "Email Us", href: "mailto:brothersfitnesszone@gmail.com", external: true, icon: Mail },
-      { name: "Gym Instagram", href: "https://www.instagram.com/brothers_fitness_17", external: true, icon: FaInstagram },
-      { name: "Coach WhatsApp", href: "https://wa.me/919131179343", external: true, icon: FaWhatsapp },
+      { name: "Gym Instagram", href: "https://www.instagram.com/brothers_fitness_17", external: true, icon: Instagram },
+      { name: "Coach WhatsApp", href: "https://wa.me/919131179343", external: true, icon: AnimatedWhatsApp },
       { name: "Developer: Anurag Mishra", href: "https://wa.me/919302786886?text=Hi%20Anurag", external: true, icon: Code2 },
       { name: "Developer Email", href: "mailto:anurag.mishra.core@gmail.com", external: true, icon: Mail },
     ],
@@ -153,20 +154,20 @@ export const Footer = (props: Partial<FooterProps>) => {
                 href="https://www.instagram.com/brothers_fitness_17"
                 target="_blank"
                 rel="noreferrer"
-                className="p-2 rounded-md bg-surface-card border border-surface-border text-mid hover:text-[#E1306C] hover:border-[#E1306C]/40 hover:bg-[#E1306C]/10 active:scale-95 transition-all shadow-xs"
+                className="p-2 rounded-md bg-surface-card border border-surface-border text-mid hover:text-[#E1306C] hover:border-[#E1306C]/40 hover:bg-[#E1306C]/10 active:scale-95 transition-all shadow-xs flex items-center justify-center"
                 aria-label="Instagram"
               >
-                <FaInstagram className="w-4 h-4 transition-colors" />
+                <Instagram className="w-4 h-4 transition-colors" />
               </a>
 
               <a
                 href="https://wa.me/919131179343"
                 target="_blank"
                 rel="noreferrer"
-                className="p-2 rounded-md bg-surface-card border border-surface-border text-mid hover:text-[#25D366] hover:border-[#25D366]/40 hover:bg-[#25D366]/10 active:scale-95 transition-all shadow-xs"
+                className="p-2 rounded-md bg-surface-card border border-surface-border text-mid hover:text-[#25D366] hover:border-[#25D366]/40 hover:bg-[#25D366]/10 active:scale-95 transition-all shadow-xs flex items-center justify-center"
                 aria-label="WhatsApp"
               >
-                <FaWhatsapp className="w-4 h-4 transition-colors" />
+                <AnimatedWhatsApp size={16} />
               </a>
             </div>
           </div>
@@ -237,7 +238,6 @@ export const Footer = (props: Partial<FooterProps>) => {
       </div>
     </footer>
   );
-};
+}
 
-export const Footer2 = Footer;
 export default Footer;
