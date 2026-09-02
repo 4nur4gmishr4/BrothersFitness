@@ -47,7 +47,7 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar";
 import { cn } from "@/lib/utils";
-import { useAdmin } from "@/lib/auth-context";
+import { useAdmin } from "@/lib/admin-auth-context";
 
 export type NavItem = {
   label: string;

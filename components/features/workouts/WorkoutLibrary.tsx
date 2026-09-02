@@ -5,17 +5,7 @@ import Image from "next/image";
 import { Search, ChevronLeft, ChevronRight, Dumbbell } from "lucide-react";
 import useSWR from "swr";
 import fuzzysort from "fuzzysort";
-
-interface FreeExercise {
-  id: string;
-  name: string;
-  category: string;
-  primaryMuscles: string[];
-  secondaryMuscles: string[];
-  equipment: string;
-  instructions: string[];
-  images: string[];
-}
+import type { FreeExercise } from "@/lib/fitness-data-service";
 
 // The free-exercise-db JSON ships relative image paths like "3_4_Sit-Up/0.jpg".
 // next/image requires an absolute URL or a leading-slash path, so prefix them.

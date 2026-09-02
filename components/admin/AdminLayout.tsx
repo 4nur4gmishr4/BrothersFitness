@@ -2,7 +2,7 @@
 
 import { useState, useEffect, ReactNode } from "react";
 import { useRouter } from "next/navigation";
-import { useAdmin } from "@/lib/auth-context";
+import { useAdmin } from "@/lib/admin-auth-context";
 import { AdminSidebar } from "@/components/admin/AdminSidebar";
 import { useSidebar } from "@/components/ui/sidebar";
 

@@ -2,7 +2,7 @@
 
 import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useAdmin } from "@/lib/auth-context";
+import { useAdmin } from "@/lib/admin-auth-context";
 import { AdminLoginForm } from "@/components/admin/AdminLoginForm";
 
 function AdminLoginContent() {

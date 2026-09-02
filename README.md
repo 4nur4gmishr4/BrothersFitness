@@ -452,9 +452,9 @@ brofit/
 ├── lib/                         # Core business logic and server utilities
 │   ├── admin-api.ts             # Admin client fetch wrapper & WhatsApp builders
 │   ├── admin-auth.ts            # Server-side requireAdminToken guard
+│   ├── admin-auth-context.tsx   # Admin authentication React context
 │   ├── ai-provider.ts           # 16-model multi-provider fallback engine
 │   ├── auth.ts                  # HMAC-SHA256 token signer & blacklist
-│   ├── auth-context.tsx         # Admin authentication React context
 │   ├── config.ts                # Canonical business rules, plans, prices, constants
 │   ├── credit-service.ts        # Trainee token verification & atomic RPC spend
 │   ├── fitness-data-service.ts  # Free-exercise-db and API Ninjas integrations
