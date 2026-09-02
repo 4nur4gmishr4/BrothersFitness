@@ -130,7 +130,7 @@ export default function ContactForm() {
 
               <div className="flex items-center gap-1.5 text-xs text-mid shrink-0">
                 <Clock className="w-3.5 h-3.5 text-accent" />
-                <span className="font-semibold text-hi">05:00 - 22:00</span>
+                <span className="font-semibold text-hi">6:00 AM – 10:00 PM</span>
               </div>
             </div>
 

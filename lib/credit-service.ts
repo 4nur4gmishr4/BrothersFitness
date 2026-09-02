@@ -140,7 +140,7 @@ export async function spendUserCredit(
     });
 
     if (!error && typeof data === 'number') {
-        if (data <= 0) {
+        if (data < 0) {
             return NextResponse.json(
                 { error: `Daily AI credits used up (0/${MAX_DAILY_CREDITS}). They reset at 5:30 AM IST.` },
                 { status: 429 }

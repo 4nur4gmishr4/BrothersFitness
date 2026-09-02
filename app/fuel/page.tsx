@@ -24,7 +24,7 @@ function FuelSynthesizerContent() {
     const [budget, setBudget] = useState("Standard");
     const [lang, setLang] = useState<"en" | "hi">("en");
 
-    const { user, isLoggedIn, checkCredit, deductCredit, setShowLoginModal, accessToken } = useUserAuth();
+    const { user, isLoggedIn, checkCredit, deductCredit, refreshCredits, setShowLoginModal, accessToken } = useUserAuth();
 
     const [currentWeight, setCurrentWeight] = useState("");
     const [targetWeight, setTargetWeight] = useState("");
@@ -235,9 +235,9 @@ function FuelSynthesizerContent() {
                     <span>{lang === "hi" ? "Aapka diet plan taiyar hai!" : "Your diet plan is ready!"}</span>
                 </span>
             );
-            await deductCredit();
-            // Refresh credit state
-            await checkCredit();
+            const remaining = typeof result._meta?.remaining === 'number' ? result._meta.remaining : undefined;
+            await deductCredit(remaining);
+            refreshCredits().catch(() => {});
 
         } catch (err: unknown) {
             const message = err instanceof Error ? err.message : 'Unknown error';

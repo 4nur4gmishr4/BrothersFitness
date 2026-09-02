@@ -31,7 +31,7 @@ const SUGGESTIONS = {
 };
 
 export default function TacticalChatbot() {
-  const { isLoggedIn, remainingCredits, refreshCredits, accessToken, setShowLoginModal } =
+  const { isLoggedIn, remainingCredits, deductCredit, refreshCredits, accessToken, setShowLoginModal } =
     useUserAuth();
 
   const [isOpen, setIsOpen] = useState(false);
@@ -42,8 +42,16 @@ export default function TacticalChatbot() {
   const [language, setLanguage] = useState<"en" | "hi">("en");
 
   const scrollRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const modalProps = useModalDismiss(() => setIsOpen(false), isOpen);
+
+  useEffect(() => {
+    if (isOpen && !loading) {
+      const timer = setTimeout(() => inputRef.current?.focus(), 150);
+      return () => clearTimeout(timer);
+    }
+  }, [isOpen, loading]);
 
   useEffect(() => {
     const handleNavToggle = (e: Event) => {
@@ -153,6 +161,8 @@ export default function TacticalChatbot() {
           ]);
         }
       } else {
+        const remaining = data.meta?.remaining;
+        setLoading(false);
         setMessages((prev) => [
           ...prev,
           {
@@ -162,7 +172,12 @@ export default function TacticalChatbot() {
               (language === "hi" ? "Koi jawab prapt nahi hua." : "No response received."),
           },
         ]);
-        await refreshCredits();
+        if (typeof remaining === "number") {
+          await deductCredit(remaining);
+        } else {
+          await deductCredit();
+        }
+        refreshCredits().catch(() => {});
       }
     } catch (error: unknown) {
       console.error("Chat Error:", error);
@@ -382,6 +397,7 @@ export default function TacticalChatbot() {
                   className="flex items-center gap-2 bg-surface-canvas rounded-full border border-surface-border px-4 py-2 focus-within:border-accent transition-colors"
                 >
                   <input
+                    ref={inputRef}
                     type="text"
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
