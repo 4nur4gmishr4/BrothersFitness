@@ -7,7 +7,7 @@ import { AdminLayout } from "@/components/admin/AdminLayout";
 /**
  * Route-group shell for all /admin/* pages.
  *
- * The login page MUST bypass AdminLayout — the guard inside AdminLayout
+ * The login page MUST bypass AdminLayout - the guard inside AdminLayout
  * redirects unauthenticated users to /admin/login, which would create an
  * infinite redirect loop if the login page itself were wrapped in the guard.
  *

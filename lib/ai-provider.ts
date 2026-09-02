@@ -36,7 +36,7 @@ function createAbort(timeoutMs: number): { signal: AbortSignal; clear: () => voi
 }
 
 // Production-verified provider types (2026-09-01 diagnostic).
-// Groq and Vercel AI Gateway removed — all models return 404 or empty content.
+// Groq and Vercel AI Gateway removed - all models return 404 or empty content.
 type Provider = "mistral" | "openrouter" | "cohere";
 
 interface ModelConfig {
@@ -46,7 +46,7 @@ interface ModelConfig {
     description?: string;
 }
 
-// Production Model Stack — verified working 2026-09-01, ranked by speed.
+// Production Model Stack - verified working 2026-09-01, ranked by speed.
 // Every model below was live-tested and returned valid responses.
 export const MODEL_STACK: ModelConfig[] = [
     // --- Fast tier (< 600ms) ---
@@ -60,7 +60,7 @@ export const MODEL_STACK: ModelConfig[] = [
     { id: "qwen/qwen-2.5-72b-instruct", provider: "openrouter", name: "Qwen 2.5 72B Instruct (OpenRouter)" },
     { id: "command-r-plus-08-2024", provider: "cohere", name: "Command R+ (Cohere)" },
 
-    // --- Slow tier (1s+) — reliable fallbacks ---
+    // --- Slow tier (1s+) - reliable fallbacks ---
     { id: "mistral-small-latest", provider: "mistral", name: "Mistral Small (Mistral AI)" },
     { id: "mistral-medium-latest", provider: "mistral", name: "Mistral Medium (Mistral AI)" },
     { id: "meta-llama/llama-3.3-70b-instruct", provider: "openrouter", name: "Llama 3.3 70B Instruct (OpenRouter)" },
@@ -112,7 +112,7 @@ const PROVIDER_ENV_KEY: Record<Provider, string> = {
 
 /**
  * Fail fast when NO provider key is configured. Without this, the fallback
- * walk logs a "Skipped (API Key missing)" warning per model — 11 identical
+ * walk logs a "Skipped (API Key missing)" warning per model - 11 identical
  * warns that drown out real errors and cost a full 90s deadline before
  * surfacing a generic failure. A clear, immediate config error is far more
  * actionable for the operator.

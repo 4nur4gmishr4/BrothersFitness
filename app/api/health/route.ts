@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 
-// Never cache the response — uptime monitors must hit a live probe.
+// Never cache the response - uptime monitors must hit a live probe.
 export const dynamic = 'force-dynamic';
 
 /**

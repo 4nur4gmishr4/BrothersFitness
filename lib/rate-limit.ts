@@ -7,7 +7,7 @@
  *
  * If UPSTASH_REDIS_REST_URL / UPSTASH_REDIS_REST_TOKEN are not configured (dev,
  * tests, local-first deployments), we transparently fall back to the in-memory
- * implementation so the app keeps working — with the documented caveat.
+ * implementation so the app keeps working - with the documented caveat.
  */
 import { Redis } from "@upstash/redis";
 import { Ratelimit } from "@upstash/ratelimit";
@@ -83,7 +83,7 @@ export interface RateLimitResult {
 export const UNKNOWN_IP = 'unknown';
 
 // Rate limiting is keyed by identity. With no trustworthy IP there is nothing
-// to key on — every client would collapse into ONE shared `unknown` bucket,
+// to key on - every client would collapse into ONE shared `unknown` bucket,
 // so a single heavy user would lock out the whole site. When identity is
 // unknowable, the correct degradation is to let the request through (rate
 // limiting is anti-abuse, not an auth boundary) and surface a warning so the
@@ -93,7 +93,7 @@ function warnUnknownIp(): void {
     if (warnedUnknownIp) return;
     warnedUnknownIp = true;
     console.warn(
-        '[rate-limit] No trustworthy client IP — rate limiting disabled. ' +
+        '[rate-limit] No trustworthy client IP - rate limiting disabled. ' +
         'Set TRUST_PROXY_HEADERS=true (or VERCEL=1) behind a proxy that sets X-Forwarded-For/X-Real-IP.'
     );
 }
@@ -112,7 +112,7 @@ export async function checkRateLimit(
     identifier: string,
     config: RateLimitConfig
 ): Promise<RateLimitResult> {
-    // Degrade open when there's no trustworthy identity to key on — see
+    // Degrade open when there's no trustworthy identity to key on - see
     // warnUnknownIp. This prevents the shared-`unknown`-bucket lockout (M13).
     if (isUnknownIdentity(identifier)) {
         warnUnknownIp();
@@ -197,7 +197,7 @@ function isTrustedProxy(): boolean {
  *
  * Proxy headers are only read when the app is behind a trusted proxy (see
  * isTrustedProxy); otherwise they are client-spoofable and ignored. When
- * trusted, `x-real-ip` wins, then the LAST value of `x-forwarded-for` — proxies
+ * trusted, `x-real-ip` wins, then the LAST value of `x-forwarded-for` - proxies
  * append the real client IP last, so this defeats spoofing an earlier value.
  */
 export function getClientIp(req: Request): string {

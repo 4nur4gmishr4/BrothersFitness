@@ -7,7 +7,7 @@ import { toast } from "sonner";
  * PWA update prompt. next-pwa registers the service worker automatically
  * (`register: true` in next.config.mjs); this component only reacts to its
  * lifecycle. When a deploy ships a newer bundle, the browser installs a waiting
- * service worker — we surface a "reload to update" toast instead of silently
+ * service worker - we surface a "reload to update" toast instead of silently
  * serving stale cached assets (a real issue on iOS Safari / WebKit, which can
  * keep old Workbox hashes for a long time).
  *
@@ -51,7 +51,7 @@ export default function PwaUpdateToast() {
                     });
                 });
             })
-            .catch(() => { /* Service worker unavailable — ignore */ });
+            .catch(() => { /* Service worker unavailable - ignore */ });
 
         // After SKIP_WAITING the new SW takes over; reload to serve fresh assets.
         const onControllerChange = () => {

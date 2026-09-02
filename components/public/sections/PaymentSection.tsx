@@ -16,7 +16,7 @@ export default function PaymentSection() {
   const [copiedUpi, setCopiedUpi] = useState<string | null>(null);
 
   // History depth the section mounted at. Every forward step calls pushState, so
-  // once the flow finishes we can collapse those entries with history.go(-N) —
+  // once the flow finishes we can collapse those entries with history.go(-N) -
   // otherwise the browser back button later re-enters the wizard from a stale
   // paymentStep on an unrelated page (H7 fix).
   const baseIndexRef = useRef<number>(0);
@@ -107,7 +107,7 @@ export default function PaymentSection() {
   const resetFlow = () => {
     // Collapse every payment entry we pushed since mount, so the browser back
     // button can't re-enter the wizard from a later page. history.go(-N) fires
-    // popstate for each popped entry — suppress those with the reset flag and
+    // popstate for each popped entry - suppress those with the reset flag and
     // clear it on the next tick once the stack has settled.
     const backCount = window.history.length - baseIndexRef.current;
     if (backCount > 0) {
@@ -194,7 +194,7 @@ export default function PaymentSection() {
               <div className="bg-surface-elevated border border-accent/60 rounded-xl p-4 mb-6 text-center">
                 <p className="text-xs text-mid mb-1">Selected Pass</p>
                 <p className="text-2xl font-bold text-accent">
-                  {selectedPlanData?.label} — ₹{selectedPlanData?.price}
+                  {selectedPlanData?.label} - ₹{selectedPlanData?.price}
                 </p>
                 <p className="text-xs text-mid mt-1">{selectedPlanData?.duration}</p>
               </div>

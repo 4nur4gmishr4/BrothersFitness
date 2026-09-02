@@ -7,7 +7,7 @@ export const dynamic = 'force-dynamic';
 
 // Small in-memory cache per muscle group to protect the paid API quota.
 // Serverless instances reset on cold start, so this only de-dupes requests
-// within one warm instance — the entry cap below keeps it from growing
+// within one warm instance - the entry cap below keeps it from growing
 // unboundedly within that window (M8).
 const CACHE_TTL_MS = 10 * 60 * 1000; // 10 minutes
 const MAX_CACHE_ENTRIES = 20;

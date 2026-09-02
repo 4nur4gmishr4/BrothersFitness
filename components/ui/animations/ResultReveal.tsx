@@ -1,4 +1,4 @@
-/** req #14 — result_reveal: calculator result — line expands, number
+/** req #14 - result_reveal: calculator result - line expands, number
  *  fades in. `valueKey` triggers a remount to replay the animation
  *  whenever the result changes. */
 

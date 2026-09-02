@@ -6,7 +6,7 @@ import { logger } from '@/lib/logger';
 
 // All admin routes use the service-role client (bypasses RLS) because the
 // admin tables have no anon/authenticated grants. The HMAC token in
-// `Authorization` is the only gate — enforced by requireAdminToken().
+// `Authorization` is the only gate - enforced by requireAdminToken().
 
 // Helper to log admin activity (fails silently if table doesn't exist)
 async function logActivity(
@@ -28,7 +28,7 @@ async function logActivity(
     }
 }
 
-// Pagination defaults — keep pages small so a growing member table never
+// Pagination defaults - keep pages small so a growing member table never
 // ships the whole dataset to the admin grid in one payload.
 const DEFAULT_PAGE_SIZE = 50;
 const MAX_PAGE_SIZE = 200;
@@ -159,7 +159,7 @@ export async function POST(req: Request) {
             `Let's crush those goals together! 🔥\n\n` +
             `- Team Brother's Fitness`
         );
-        // L47: avoid `91` + `91xxx` = `9191xxx` — use the same country-code
+        // L47: avoid `91` + `91xxx` = `9191xxx` - use the same country-code
         // dedup pattern applied in LeadsInbox (M29).
         const whatsappUrl = data.mobile ? (() => {
             const digits = data.mobile.replace(/\D/g, '');

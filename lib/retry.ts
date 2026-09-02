@@ -2,7 +2,7 @@
  * Retry helper for transient network failures (M4).
  *
  * Only idempotent operations may be retried blindly. Non-idempotent writes
- * (e.g. the credit-spend RPC) must reconcile state before retrying — see
+ * (e.g. the credit-spend RPC) must reconcile state before retrying - see
  * lib/credit-service.ts for the reconciliation pattern.
  */
 
@@ -21,7 +21,7 @@ function errorMessage(error: unknown): string {
 
 /**
  * Classify an error as transient (network/connection/5xx) vs permanent.
- * Permanent errors (4xx, validation) must NOT be retried — retrying masks real
+ * Permanent errors (4xx, validation) must NOT be retried - retrying masks real
  * bugs and wastes provider quota.
  */
 export function isTransientError(error: unknown): boolean {
@@ -29,7 +29,7 @@ export function isTransientError(error: unknown): boolean {
     if (/fetch failed|network|ECONNRESET|ETIMEDOUT|EPIPE|socket hang up|connection reset/i.test(msg)) {
         return true;
     }
-    // PostgREST 5xx (server error) — safe to retry, unlike 4xx.
+    // PostgREST 5xx (server error) - safe to retry, unlike 4xx.
     return /(^|\D)[5]\d{2}(\D|$)/.test(msg);
 }
 

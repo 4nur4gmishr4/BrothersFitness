@@ -62,10 +62,10 @@ export default function AdminSettingsPage() {
         storageUrl: data.storage_url,
       });
       setBackupState("done");
-      toast.success(`Backup downloaded — ${data.total_members} members`);
+      toast.success(`Backup downloaded - ${data.total_members} members`);
     } catch {
       setBackupState("error");
-      toast.error("Backup failed — see console for details");
+      toast.error("Backup failed - see console for details");
     }
   }, []);
 
@@ -93,7 +93,7 @@ export default function AdminSettingsPage() {
         {/* Plan prices */}
         <SectionCard
           title="Membership Plans"
-          subtitle="Canonical plan names and prices. Edit lib/config.ts to change them — changes take effect on next build."
+          subtitle="Canonical plan names and prices. Edit lib/config.ts to change them - changes take effect on next build."
           icon={IndianRupee}
         >
           <div className="-mx-4 sm:-mx-5 overflow-x-auto">
@@ -121,7 +121,7 @@ export default function AdminSettingsPage() {
                       {p.value}
                     </td>
                     <td className="px-4 sm:px-5 py-3 text-sm font-semibold text-hi text-right tabular-nums">
-                      ₹{(PLAN_PRICES as Record<string, number>)[p.value]?.toLocaleString("en-IN") ?? "—"}
+                      ₹{(PLAN_PRICES as Record<string, number>)[p.value]?.toLocaleString("en-IN") ?? "-"}
                     </td>
                   </tr>
                 ))}
@@ -274,7 +274,7 @@ export default function AdminSettingsPage() {
               {
                 ok: false,
                 label: "Read-state stored in localStorage",
-                desc: "Lead read/unread status is tracked in localStorage — device-local only. Not synced across sessions or admins.",
+                desc: "Lead read/unread status is tracked in localStorage - device-local only. Not synced across sessions or admins.",
               },
             ].map((item) => (
               <li key={item.label} className="flex items-start gap-3">

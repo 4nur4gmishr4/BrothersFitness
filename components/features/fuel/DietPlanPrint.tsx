@@ -43,7 +43,7 @@ const DietPlanPrint = forwardRef<HTMLDivElement, DietPlanPrintProps>(({ data, la
             <div className="border-b-4 border-black pb-4 mb-8 flex justify-between items-end">
                 <div>
                     <h1 className="text-4xl font-black uppercase tracking-tighter">Diet Plan</h1>
-                    <p className="text-xs uppercase tracking-widest mt-1">Brother&apos;s Fitness — Personal Nutrition Plan</p>
+                    <p className="text-xs uppercase tracking-widest mt-1">Brother&apos;s Fitness - Personal Nutrition Plan</p>
                 </div>
                 <div className="text-right">
                     <p className="font-bold text-lg">GOAL: {biometrics.goal.toUpperCase().slice(0, 10)}...</p>

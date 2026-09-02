@@ -27,7 +27,7 @@ export async function POST(req: Request) {
         }, null, 2);
 
         // Try to upload to Supabase Storage (fails gracefully if the bucket
-        // is not public / missing — the response data is the download source).
+        // is not public / missing - the response data is the download source).
         let storageUrl = null;
         try {
             const { data: uploadData, error: uploadError } = await getServiceSupabase()

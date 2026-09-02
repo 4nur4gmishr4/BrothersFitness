@@ -243,7 +243,7 @@ export function AdminLoginForm({
                 ) : isSuccess ? (
                   <>
                     <CheckCircle2 className="w-4 h-4 text-status-success" />
-                    Access Granted — Entering...
+                    Access Granted - Entering...
                   </>
                 ) : isBlocked ? (
                   <>

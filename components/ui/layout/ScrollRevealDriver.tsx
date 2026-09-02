@@ -7,7 +7,7 @@ import { resetScrollLock } from "@/lib/scroll-lock";
  * Global scroll-reveal driver. Watches every [data-reveal] element and
  * flips it to .reveal-in once it enters the viewport. Elements above the
  * fold resolve on first paint (observer fires immediately), so there's no
- * flash-then-hide. Respects prefers-reduced-motion at the CSS layer — this
+ * flash-then-hide. Respects prefers-reduced-motion at the CSS layer - this
  * component only toggles the class; the transition is gated by media query.
  *
  * Mount once (inside PageWrapper); it covers all pages it wraps.
@@ -17,7 +17,7 @@ export default function ScrollRevealDriver() {
     if (typeof window === "undefined") return;
     resetScrollLock();
     if (!("IntersectionObserver" in window)) {
-      // No observer support — reveal everything instantly.
+      // No observer support - reveal everything instantly.
       document.querySelectorAll("[data-reveal]").forEach((el) => el.classList.add("reveal-in"));
       return;
     }

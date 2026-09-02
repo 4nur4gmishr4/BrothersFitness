@@ -7,7 +7,7 @@ const MAX_FILE_SIZE_BYTES = 5 * 1024 * 1024; // 5 MB
 const ALLOWED_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/avif', 'image/gif']);
 
 // Map a detected magic-byte signature back to a canonical extension. This is
-// what we trust — NOT the client-supplied File.type/name, which can claim
+// what we trust - NOT the client-supplied File.type/name, which can claim
 // image/jpeg for arbitrary content (M9).
 const EXT_FROM_SIGNATURE: Array<{ ext: string; bytes: number[] }> = [
     { ext: 'jpg', bytes: [0xFF, 0xD8, 0xFF] },                                          // JPEG

@@ -560,7 +560,7 @@ export default function AdminAnalyticsPage() {
                 <div className="flex items-center justify-between mb-3">
                   <div className="text-xs uppercase tracking-wider text-hi font-semibold flex items-center gap-2">
                     <LiveBeacon status="active" size="xs" />
-                    <span>{activeMonthData.label} — Joinings Breakdown</span>
+                    <span>{activeMonthData.label} - Joinings Breakdown</span>
                   </div>
                   <button
                     type="button"
@@ -591,7 +591,7 @@ export default function AdminAnalyticsPage() {
                       <tbody className="divide-y divide-surface-border">
                         {activeMonthData.members.map((m) => (
                           <tr key={m.id} className="hover:bg-surface-elevated/60 transition-colors">
-                            <td className="px-4 py-2.5 text-xs text-hi font-medium">{m.name || "—"}</td>
+                            <td className="px-4 py-2.5 text-xs text-hi font-medium">{m.name || "-"}</td>
                             <td className="px-4 py-2.5 text-xs text-mid hidden sm:table-cell font-medium">
                               {m.plan}
                             </td>

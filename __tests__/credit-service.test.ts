@@ -141,7 +141,7 @@ describe('credit-service', () => {
         });
 
         it('reconciles a transient RPC error as a success when the spend committed', async () => {
-            // RPC response lost to a network blip, but the row shows today's reset —
+            // RPC response lost to a network blip, but the row shows today's reset -
             // the RPC committed, so report success instead of retrying (no double-spend).
             mockSupabase.rpc.mockResolvedValue({ data: null, error: new Error('fetch failed') });
             mockSingle.mockResolvedValue({

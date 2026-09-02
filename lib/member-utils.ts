@@ -40,7 +40,7 @@ export function getMemberStatus(endDateString: string | null): 'active' | 'expir
 
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
-/** DD/Mon/YYYY (e.g. 04/Aug/2026) — or "-" for null/empty. */
+/** DD/Mon/YYYY (e.g. 04/Aug/2026) - or "-" for null/empty. */
 export function formatDate(dateString: string | null): string {
     if (!dateString) return '-';
     const date = parseLocalDate(dateString);
@@ -91,7 +91,7 @@ export function getDaysUntil(dateString: string): number {
 
 /** Extract uppercase initials from a member's full name (e.g. "Aman Shrivastava" -> "AS"). */
 export function initials(name?: string | null): string {
-    if (!name) return '—';
+    if (!name) return '-';
     const parts = name.trim().split(/\s+/);
     if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
     return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();

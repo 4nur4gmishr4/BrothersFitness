@@ -38,7 +38,7 @@ function FuelSynthesizerContent() {
     const mode = useMemo(() => {
         const current = parseFloat(currentWeight);
         const target = parseFloat(targetWeight);
-        // L40: equal weights mean "hold my weight" — defaulting to bulk (the
+        // L40: equal weights mean "hold my weight" - defaulting to bulk (the
         // old behaviour) silently told the AI to gain muscle. Maintain is the
         // least-biased default and matches what the numbers say.
         if (isNaN(current) || isNaN(target) || current === target) {
@@ -175,7 +175,7 @@ function FuelSynthesizerContent() {
             return;
         }
 
-        // Comprehensive validation check (single source of truth — M2)
+        // Comprehensive validation check (single source of truth - M2)
         const validation = validateInputs();
         if (!validation.valid) {
             setError(validation.error);

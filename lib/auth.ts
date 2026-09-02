@@ -13,7 +13,7 @@ const CLOCK_SKEW_MS = 5 * 60 * 1000; // allow for server clock drift on `iat`
 
 // When Redis is configured the revocation set is shared across instances, so a
 // token logged out on one server is rejected by all. Without it (dev/tests)
-// we fall back to the in-process set — correct locally, but on multi-instance
+// we fall back to the in-process set - correct locally, but on multi-instance
 // hosting every instance must have the Upstash env vars.
 const UPSTASH_URL = process.env.UPSTASH_REDIS_REST_URL;
 const UPSTASH_TOKEN = process.env.UPSTASH_REDIS_REST_TOKEN;
@@ -81,7 +81,7 @@ export function generateAdminToken(): string {
  * Check whether a nonce has been revoked. Checks the in-process set first
  * (cheap, always correct when Redis is unset), then the shared Redis set so a
  * revocation made on another instance is honored here too. Redis failures are
- * treated as "not revoked" — verification must not hard-fail on a Redis blip.
+ * treated as "not revoked" - verification must not hard-fail on a Redis blip.
  */
 async function isNonceRevoked(nonce: string): Promise<boolean> {
     if (revokedNonces.has(nonce)) return true;
@@ -144,7 +144,7 @@ export async function revokeAdminToken(token: string): Promise<void> {
 /**
  * TEST-ONLY helper: remove all revocations to reset module state between tests.
  * This wipes the shared Redis blacklist, so it must never be called in a real
- * runtime — the guard throws unless we are under Vitest. We key off Vitest's
+ * runtime - the guard throws unless we are under Vitest. We key off Vitest's
  * own env flag (not NODE_ENV) because CI/dev shells often inherit
  * NODE_ENV=production even while running the test runner.
  */
