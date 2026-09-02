@@ -116,20 +116,11 @@ export async function POST(req: Request) {
           - Meal 4: Lunch (1:00-2:00 PM)
           - Meal 5: Evening Snack (5:00-6:00 PM)
           - Meal 6: Dinner (8:00-9:00 PM)
-      5.  **SHOPPING LIST - CRITICAL**: Generate a COMPLETE A-to-Z shopping list for **15 DAYS**. Include EVERY SINGLE ingredient:
-          - All proteins (eggs, chicken, paneer, dal, soya chunks, fish, etc.)
-          - All grains (rice, wheat flour, oats, bread, etc.)
-          - All vegetables (onion, tomato, spinach, capsicum, carrot, etc.)
-          - All dairy (milk, curd, cheese, butter, ghee)
-          - All fruits (banana, apple, orange, etc.)
-          - All spices (turmeric, cumin, coriander, garam masala, salt, pepper, etc.)
-          - All oils (mustard oil, olive oil, coconut oil, etc.)
-          - Cooking essentials (ginger, garlic, green chilli, lemon, etc.)
-          DO NOT MISS ANY INGREDIENT. Include realistic Indian market prices in INR.
+      5.  **SHOPPING LIST**: Generate a clean 15-day shopping list of essential Indian grocery items (12-16 key items: primary proteins, staples/grains, and core produce). Include realistic Indian market prices in INR.
       6.  **CATEGORIZATION**: Split shopping list into 'Home_Essentials' (Spices, Oil, common staples likely at home) and 'Market_Purchase' (Fresh produce, specific proteins, perishables).
-      7.  **RECIPES**: For each meal, include full recipe instructions, complete ingredient list with quantities, and detailed macros.
+      7.  **RECIPES**: For each meal, include concise recipe instructions, ingredient list with quantities, and detailed macros.
       8.  **TIMELINE**: Calculate realistic "estimated_duration" based on ${rateNum} kg/week rate. Provide total_days and total_weeks.
-      9.  **Summary**: Write a detailed explanation of the plan.
+      9.  **Summary**: Write a clear strategic explanation of the plan.
 
       **STRICT OUTPUT FORMAT**:
       Return ONLY valid JSON. No Markdown. No pre-text. Matches this schema EXACTLY:
@@ -201,7 +192,7 @@ export async function POST(req: Request) {
             systemPrompt: "You are a JSON-only API. You must return valid JSON matching the user's schema. Do not include markdown formatting.",
             jsonMode: true,
             temperature: 0.2, // Lower temperature for consistent JSON
-            timeoutMs: 25_000,      // 25s per provider (diet JSON is large)
+            timeoutMs: 60_000,      // 60s per provider (diet JSON is comprehensive)
             totalTimeoutMs: 120_000, // 2 min total for retries across providers
         }, prompt, log);
 
