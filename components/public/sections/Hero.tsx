@@ -9,7 +9,7 @@ import Link from "next/link";
 import ClickSpark from "@/components/ui/animations/ClickSpark";
 import RotatingText from "@/components/ui/text/RotatingText";
 import BlurText from "@/components/ui/text/BlurText";
-import ParticleText from "@/components/ui/text/ParticleText";
+import StrokeText from "@/components/ui/text/StrokeText";
 
 export default function Hero() {
   return (
@@ -18,7 +18,7 @@ export default function Hero() {
         
         <div className="relative z-10 w-full max-w-[1600px] mx-auto px-4 sm:px-8 md:px-12 lg:px-16">
           
-          {/* Prominent Brand Headline with Interactive Particle Text */}
+          {/* Prominent Brand Headline with Animated Stroke Text */}
           <motion.div
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
@@ -26,24 +26,24 @@ export default function Hero() {
             className="space-y-3 sm:space-y-4 mb-4 sm:mb-6"
           >
             <h1 className="sr-only">Brother&apos;s Fitness Lakhnadon</h1>
-            <div className="w-full h-[95px] sm:h-[135px] md:h-[175px] lg:h-[220px] -ml-1 sm:-ml-2">
-              <ParticleText
+            <div className="w-full h-auto min-h-[70px] sm:min-h-[100px] md:min-h-[130px] lg:min-h-[150px] -ml-1 sm:-ml-2">
+              <StrokeText
                 text="BROTHER'S FITNESS"
-                particleSize={2.4}
-                density={3.2}
-                scatter={140}
-                gatherDuration={1400}
-                stagger={300}
-                pointerRepel={55}
-                repelRadius={110}
-                idleDrift={0.5}
+                highlightWord="FITNESS"
+                highlightColor="#D71921"
+                strokeWidth={2}
+                drawDuration={1.3}
+                fillDelay={0.15}
+                stagger={0.035}
+                ease="power2.out"
                 trigger="mount"
-                align="left"
-                fontSize="clamp(3.5rem, 11.5vw, 8.8rem)"
-                fontWeight={400}
+                fillMode="wipe"
+                fontSize={105}
+                fontWeight={900}
                 fontFamily="'Anton', 'Impact', sans-serif"
-                glow={true}
-                className="w-full h-full font-display"
+                letterSpacing={1.5}
+                align="left"
+                className="w-full font-display"
               />
             </div>
 
@@ -69,7 +69,7 @@ export default function Hero() {
                 splitLevelClassName="overflow-hidden"
                 splitBy="characters"
                 transition={{ type: "spring", damping: 25, stiffness: 300 }}
-                rotationInterval={2400}
+                rotationInterval={3000}
                 auto={true}
                 loop={true}
               />
