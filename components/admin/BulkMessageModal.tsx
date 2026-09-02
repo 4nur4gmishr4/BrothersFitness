@@ -220,7 +220,7 @@ export default function BulkMessageModal({
       <div
         {...modalProps}
         aria-label="Bulk WhatsApp message"
-        className="surface-modal hairline p-4 sm:p-6 w-full max-w-2xl my-auto max-h-[90dvh] overflow-y-auto modal-panel-in flex flex-col rounded-3xl shadow-2xl relative"
+        className="surface-modal border border-surface-border p-4 sm:p-6 w-full max-w-2xl my-auto max-h-[88dvh] overflow-y-auto modal-panel-in flex flex-col rounded-3xl shadow-2xl relative"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}

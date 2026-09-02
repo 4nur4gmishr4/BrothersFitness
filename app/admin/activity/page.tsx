@@ -18,6 +18,7 @@ import {
 import { PageHeader, StatCard, EmptyState, AdminLoader } from "@/components/admin/AdminUI";
 import { adminFetch } from "@/lib/admin-api";
 import CountUp from "@/components/ui/text/CountUp";
+import LiveBeacon from "@/components/ui/primitives/LiveBeacon";
 
 interface LogEntry {
   id: string;
@@ -32,15 +33,17 @@ interface LogEntry {
 }
 
 const FILTERS = [
-  { key: "all", label: "All Events" },
-  { key: "CREATE", label: "Created" },
-  { key: "UPDATE", label: "Updated" },
-  { key: "DELETE", label: "Deleted" },
-  { key: "LOGIN", label: "Logins" },
+  { label: "All Events", key: "all" },
+  { label: "Created", key: "CREATE" },
+  { label: "Updated", key: "UPDATE" },
+  { label: "Deleted", key: "DELETE" },
+  { label: "Auth", key: "AUTH" },
 ];
 
-function formatTime(iso: string): string {
-  return new Date(iso).toLocaleString("en-IN", {
+function formatTime(iso: string) {
+  const d = new Date(iso);
+  if (isNaN(d.getTime())) return "—";
+  return d.toLocaleString("en-IN", {
     month: "short",
     day: "numeric",
     hour: "2-digit",
@@ -48,26 +51,31 @@ function formatTime(iso: string): string {
   });
 }
 
-function getActionStyle(type: string) {
+function getActionStyle(type: string): {
+  icon: typeof Plus;
+  status: "active" | "success" | "alert" | "idle";
+  badge: string;
+  label: string;
+} {
   switch (type) {
     case "CREATE":
       return {
         icon: Plus,
-        dotBg: "bg-emerald-500",
+        status: "active",
         badge: "bg-emerald-500/10 text-emerald-400 border-emerald-500/30",
         label: "CREATED",
       };
     case "UPDATE":
       return {
         icon: Edit2,
-        dotBg: "bg-blue-500",
+        status: "idle",
         badge: "bg-blue-500/10 text-blue-400 border-blue-500/30",
         label: "UPDATED",
       };
     case "DELETE":
       return {
         icon: Trash2,
-        dotBg: "bg-red-500",
+        status: "alert",
         badge: "bg-red-500/10 text-red-400 border-red-500/30",
         label: "DELETED",
       };
@@ -75,15 +83,15 @@ function getActionStyle(type: string) {
     case "LOGOUT":
       return {
         icon: ShieldCheck,
-        dotBg: "bg-emerald-500",
+        status: "success",
         badge: "bg-surface-elevated text-mid border-surface-border",
         label: type,
       };
     default:
       return {
         icon: FileText,
-        dotBg: "bg-zinc-500",
-        badge: "bg-surface-elevated text-mid border-surface-border",
+        status: "idle",
+        badge: "bg-zinc-500/10 text-zinc-400 border-zinc-500/30",
         label: type,
       };
   }
@@ -261,9 +269,9 @@ export default function AdminActivityPage() {
                   return (
                     <div key={log.id} className="relative group">
                       {/* Timeline Node Icon Pin */}
-                      <div
-                        className={`absolute -left-6 sm:-left-8 top-1 w-5 h-5 rounded-full ${style.dotBg} border-4 border-surface-card flex items-center justify-center shadow-md`}
-                      />
+                      <div className="absolute -left-6 sm:-left-8 top-1.5 flex items-center justify-center">
+                        <LiveBeacon status={style.status} size="sm" />
+                      </div>
 
                       {/* Event Row Box */}
                       <div className="rounded-2xl border border-surface-border bg-surface-elevated/40 p-4 hover:border-zinc-400 dark:hover:border-zinc-700 transition-all hover:bg-surface-elevated/70 shadow-sm">

@@ -37,7 +37,7 @@ export function PebbleImageViewer({ image, onClose }: PebbleImageViewerProps) {
   return (
     <Portal>
       <div
-        className="fixed inset-0 h-[100dvh] w-screen z-[200] bg-black/85 backdrop-blur-xl flex items-center justify-center p-4 sm:p-8 animate-in fade-in duration-200"
+        className="fixed inset-0 h-[100dvh] w-screen z-[200] bg-black/85 backdrop-blur-xl flex items-center justify-center p-3.5 sm:p-6 overflow-y-auto overscroll-contain modal-overlay-in"
         onClick={(e) => {
           if (e.target === e.currentTarget) onClose();
         }}
@@ -45,7 +45,7 @@ export function PebbleImageViewer({ image, onClose }: PebbleImageViewerProps) {
         aria-modal="true"
         aria-label={image.name ? `${image.name} photo` : "Full image view"}
       >
-        {/* Top-Right Dedicated Pebble Close Button */}
+        {/* Top-Right Dedicated Close Button */}
         <button
           type="button"
           onClick={onClose}
@@ -56,9 +56,9 @@ export function PebbleImageViewer({ image, onClose }: PebbleImageViewerProps) {
           <X className="w-5 h-5" />
         </button>
 
-        {/* Pebble Shaped Full Image Frame */}
+        {/* Unified Rounded-3xl Full Image Frame */}
         <div
-          className="relative max-w-md w-full max-h-[85vh] aspect-[3/4] sm:aspect-[4/5] rounded-[3rem] overflow-hidden border-2 border-white/20 shadow-2xl bg-zinc-950 flex flex-col items-center justify-center animate-in zoom-in-95 duration-200"
+          className="relative max-w-md w-full my-auto max-h-[85dvh] aspect-[3/4] sm:aspect-[4/5] rounded-3xl overflow-hidden border-2 border-white/20 shadow-2xl bg-zinc-950 flex flex-col items-center justify-center modal-panel-in"
           onClick={(e) => e.stopPropagation()}
         >
           <Image

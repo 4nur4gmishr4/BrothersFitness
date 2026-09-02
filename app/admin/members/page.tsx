@@ -1409,7 +1409,7 @@ function DeleteConfirmDialog({
       >
         <div
           {...modalProps}
-          className="surface-modal hairline w-full max-w-md my-auto rounded-3xl overflow-hidden shadow-2xl modal-panel-in relative"
+          className="surface-modal border border-surface-border w-full max-w-md my-auto rounded-3xl overflow-hidden shadow-2xl modal-panel-in relative"
           onClick={(e) => e.stopPropagation()}
           role="alertdialog"
           aria-labelledby="del-title"

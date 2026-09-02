@@ -26,6 +26,7 @@ import { useAllMembers, useAdminStats } from "@/hooks/use-admin-stats";
 import { getPlanPrice } from "@/lib/config";
 import { parseLocalDate } from "@/lib/member-utils";
 import { cn } from "@/lib/utils";
+import LiveBeacon from "@/components/ui/primitives/LiveBeacon";
 
 const MONTH_NAMES = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
@@ -313,7 +314,7 @@ export default function AdminAnalyticsPage() {
                           : "text-low hover:text-mid"
                       )}
                     >
-                      <span className="w-2 h-2 rounded-full bg-emerald-500" />
+                      <LiveBeacon status="active" size="xs" />
                       <span>Revenue</span>
                     </button>
                     <button
@@ -558,7 +559,7 @@ export default function AdminAnalyticsPage() {
               <div className="mt-6 pt-5 border-t border-surface-border">
                 <div className="flex items-center justify-between mb-3">
                   <div className="text-xs uppercase tracking-wider text-hi font-semibold flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full bg-emerald-500" />
+                    <LiveBeacon status="active" size="xs" />
                     <span>{activeMonthData.label} — Joinings Breakdown</span>
                   </div>
                   <button
@@ -688,15 +689,9 @@ export default function AdminAnalyticsPage() {
                     </div>
                   ))}
                   <div className="flex flex-wrap gap-4 pt-2 text-xs font-medium text-faint border-t border-surface-border">
-                    <span className="flex items-center gap-1.5">
-                      <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" /> Active
-                    </span>
-                    <span className="flex items-center gap-1.5">
-                      <span className="w-2.5 h-2.5 rounded-full bg-amber-500" /> Expiring ≤7d
-                    </span>
-                    <span className="flex items-center gap-1.5">
-                      <span className="w-2.5 h-2.5 rounded-full bg-red-500" /> Expired
-                    </span>
+                    <LiveBeacon status="active" label="Active" size="xs" />
+                    <LiveBeacon status="alert" label="Expiring ≤7d" size="xs" />
+                    <LiveBeacon status="idle" label="Expired" size="xs" />
                   </div>
                 </div>
               )}
