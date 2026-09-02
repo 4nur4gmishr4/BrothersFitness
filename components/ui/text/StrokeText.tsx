@@ -21,7 +21,9 @@ export type StrokeTextTrigger = "mount" | "hover" | "scroll" | "loop";
 export type StrokeTextFillMode = "wipe" | "fade" | "none";
 
 export interface StrokeTextProps {
-  text?: string;
+  text?: string | string[];
+  lines?: string[];
+  lineHeight?: number;
   delay?: number;
   strokeColor?: string;
   fillColor?: string;
@@ -56,6 +58,8 @@ const DEFAULT_TEXT = "BROTHER'S FITNESS";
 
 const StrokeText = ({
   text = DEFAULT_TEXT,
+  lines,
+  lineHeight = 1.26,
   delay = 0,
   strokeColor,
   fillColor,
@@ -101,20 +105,21 @@ const StrokeText = ({
   const rawId = useId();
   const wipeId = `stroke-text-wipe-${rawId.replace(/[^a-zA-Z0-9_-]/g, "")}`;
 
-  const characters = useMemo(() => Array.from(String(text ?? "")), [text]);
+  // Parse lines: supports lines prop, array of strings, or newline-delimited text
+  const parsedLines = useMemo<string[]>(() => {
+    if (lines && lines.length > 0) return lines;
+    if (Array.isArray(text)) return text;
+    if (typeof text === "string") return text.split("\n");
+    return [DEFAULT_TEXT];
+  }, [text, lines]);
 
-  // Determine which character indices belong to the highlight word
-  const highlightIndices = useMemo(() => {
-    const str = String(text ?? "");
-    if (!highlightWord) return new Set<number>();
-    const idx = str.indexOf(highlightWord);
-    if (idx === -1) return new Set<number>();
-    const set = new Set<number>();
-    for (let i = idx; i < idx + highlightWord.length; i++) {
-      set.add(i);
-    }
-    return set;
-  }, [text, highlightWord]);
+  // Determine if a character in a given line belongs to the highlight word
+  const isCharHighlight = (lineText: string, charIndex: number) => {
+    if (!highlightWord) return false;
+    const idx = lineText.indexOf(highlightWord);
+    if (idx === -1) return false;
+    return charIndex >= idx && charIndex < idx + highlightWord.length;
+  };
 
   const dash = Math.max(fontSize * 7, 200);
 
@@ -144,7 +149,7 @@ const StrokeText = ({
       }
       if (!bbox || !bbox.width) return;
 
-      const pad = Math.max(Number(strokeWidth) || 1, fontSize * 0.1);
+      const pad = Math.max(Number(strokeWidth) || 1, fontSize * 0.08);
       const next = {
         x: bbox.x - pad,
         y: bbox.y - pad,
@@ -175,7 +180,7 @@ const StrokeText = ({
     return () => {
       cancelled = true;
     };
-  }, [characters, fontSize, fontWeight, fontFamily, letterSpacing, strokeWidth]);
+  }, [parsedLines, fontSize, fontWeight, fontFamily, letterSpacing, strokeWidth, lineHeight]);
 
   useEffect(() => {
     const root = rootRef.current;
@@ -309,8 +314,6 @@ const StrokeText = ({
       timeline?.kill();
       gsap.killTweensOf(targets);
     };
-    // CRITICAL: Notice activeFillColor, activeStrokeColor, activeHighlightColor are deliberately NOT dependencies here!
-    // Theme toggling must NEVER restart or replay the stroke drawing timeline!
   }, [
     box,
     dash,
@@ -325,7 +328,7 @@ const StrokeText = ({
 
   const viewBox = box
     ? `${box.x} ${box.y} ${box.width} ${box.height}`
-    : `0 ${-fontSize} 720 ${fontSize * 1.3}`;
+    : `0 ${-fontSize} 800 ${fontSize * 2.2}`;
 
   const aspect = align === "left" ? "xMinYMin meet" : "xMidYMin meet";
 
@@ -337,16 +340,10 @@ const StrokeText = ({
       } ${className}`.trim()}
       style={style}
       role="img"
-      aria-label={String(text ?? "")}
+      aria-label={parsedLines.join(" ")}
     >
       <svg
-        className="block w-full"
-        style={{
-          height: box
-            ? `${Math.ceil(box.height)}px`
-            : `${Math.round(fontSize * 1.15)}px`,
-          maxHeight: "100%",
-        }}
+        className="block w-full h-auto overflow-visible"
         viewBox={viewBox}
         preserveAspectRatio={aspect}
         aria-hidden="true"
@@ -377,20 +374,28 @@ const StrokeText = ({
           strokeLinecap="round"
           style={fontStyle}
         >
-          {characters.map((char, index) => {
-            const isHighlight = highlightIndices.has(index);
-            return (
-              <tspan
-                data-stroke-char
-                key={`s-${index}`}
-                stroke={
-                  isHighlight ? activeHighlightStrokeColor : activeStrokeColor
-                }
-              >
-                {char}
-              </tspan>
-            );
-          })}
+          {parsedLines.map((lineText, lineIdx) => (
+            <tspan
+              key={`line-s-${lineIdx}`}
+              x="0"
+              dy={lineIdx === 0 ? "0" : `${lineHeight}em`}
+            >
+              {Array.from(lineText).map((char, charIdx) => {
+                const isHighlight = isCharHighlight(lineText, charIdx);
+                return (
+                  <tspan
+                    data-stroke-char
+                    key={`s-${lineIdx}-${charIdx}`}
+                    stroke={
+                      isHighlight ? activeHighlightStrokeColor : activeStrokeColor
+                    }
+                  >
+                    {char}
+                  </tspan>
+                );
+              })}
+            </tspan>
+          ))}
         </text>
 
         {/* 2. Revealed Fills */}
@@ -402,18 +407,26 @@ const StrokeText = ({
           style={fontStyle}
           clipPath={fillMode === "wipe" && box ? `url(#${wipeId})` : undefined}
         >
-          {characters.map((char, index) => {
-            const isHighlight = highlightIndices.has(index);
-            return (
-              <tspan
-                data-fill-char
-                key={`f-${index}`}
-                fill={isHighlight ? activeHighlightColor : activeFillColor}
-              >
-                {char}
-              </tspan>
-            );
-          })}
+          {parsedLines.map((lineText, lineIdx) => (
+            <tspan
+              key={`line-f-${lineIdx}`}
+              x="0"
+              dy={lineIdx === 0 ? "0" : `${lineHeight}em`}
+            >
+              {Array.from(lineText).map((char, charIdx) => {
+                const isHighlight = isCharHighlight(lineText, charIdx);
+                return (
+                  <tspan
+                    data-fill-char
+                    key={`f-${lineIdx}-${charIdx}`}
+                    fill={isHighlight ? activeHighlightColor : activeFillColor}
+                  >
+                    {char}
+                  </tspan>
+                );
+              })}
+            </tspan>
+          ))}
         </text>
       </svg>
     </span>
