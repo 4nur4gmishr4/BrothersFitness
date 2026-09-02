@@ -189,7 +189,15 @@ export default function TacticalChatbot() {
       {!isOpen && !isNavOpen && (
         <button
           id="tactical-chatbot-button"
-          className="fixed bottom-5 sm:bottom-6 right-5 sm:right-6 z-[120] w-13 h-13 sm:w-14 sm:h-14 rounded-full bg-accent hover:bg-accent-hover text-white shadow-2xl shadow-accent/40 flex items-center justify-center hover:scale-105 active:scale-95 transition-all duration-200 cursor-pointer group relative"
+          style={{
+            position: "fixed",
+            right: "24px",
+            bottom: "24px",
+            left: "auto",
+            top: "auto",
+            zIndex: 120,
+          }}
+          className="w-14 h-14 rounded-full bg-accent hover:bg-accent-hover text-white shadow-2xl shadow-accent/40 flex items-center justify-center hover:scale-105 active:scale-95 transition-all duration-200 cursor-pointer group"
           onClick={() => setIsOpen(true)}
           aria-label="Open Brother's Fitness AI Assistant"
           title="Ask BroFit AI Coach"

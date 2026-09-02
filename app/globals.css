@@ -112,6 +112,16 @@ body {
   -ms-overflow-style: none;
 }
 
+/* Hard-lock floating action buttons permanently to the bottom-right corner */
+#tactical-chatbot-button,
+#tactical-stopwatch-button {
+  position: fixed !important;
+  right: 24px !important;
+  bottom: 24px !important;
+  left: auto !important;
+  top: auto !important;
+  z-index: 120 !important;
+}
 
 @media (prefers-reduced-motion: reduce) {
   html {
