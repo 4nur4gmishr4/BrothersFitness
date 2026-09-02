@@ -68,7 +68,7 @@ export default function LoginModal({ isOpen, onClose, onSuccess }: LoginModalPro
                 onClick={(e) => { if (e.target === e.currentTarget) handleClose(); }}
             >
                 <div
-                    className="relative w-full max-w-sm my-auto surface-modal hairline rounded-3xl overflow-hidden modal-panel-in shadow-2xl"
+                    className="relative w-full max-w-sm my-auto surface-modal border border-surface-border rounded-3xl overflow-hidden modal-panel-in shadow-2xl"
                     onClick={(e) => e.stopPropagation()}
                 >
                     <button

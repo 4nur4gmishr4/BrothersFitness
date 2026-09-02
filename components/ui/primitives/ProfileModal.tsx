@@ -3,7 +3,6 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import {
     X,
-    User,
     Calendar,
     Ruler,
     Scale,
@@ -13,8 +12,6 @@ import {
     Phone,
     Target,
     Utensils,
-    Zap,
-    ShieldCheck
 } from "lucide-react";
 import { MAX_DAILY_CREDITS } from "@/lib/config";
 import { useUserAuth, ProfileUpdateData } from "@/lib/user-auth-context";
@@ -22,6 +19,8 @@ import { useModalDismiss } from "@/hooks/useModalDismiss";
 import Image from "next/image";
 import { Portal } from "@/components/ui/Portal";
 import { toast } from "sonner";
+import LiveBeacon from "@/components/ui/primitives/LiveBeacon";
+import { AnimatedProfile, AnimatedShield, AnimatedSparkles } from "@/components/ui/icons";
 
 interface ProfileModalProps {
     isOpen: boolean;
@@ -164,14 +163,14 @@ export default function ProfileModal({ isOpen, onClose }: ProfileModalProps) {
                 <div
                     {...modalProps}
                     aria-label="Member Profile and Settings"
-                    className="relative w-full max-w-lg my-auto surface-modal hairline rounded-3xl overflow-hidden max-h-[92dvh] flex flex-col modal-panel-in shadow-2xl"
+                    className="relative w-full max-w-lg my-auto surface-modal border border-surface-border rounded-3xl overflow-hidden max-h-[88dvh] flex flex-col modal-panel-in shadow-2xl"
                     onClick={(e) => e.stopPropagation()}
                 >
                     {/* Header */}
                     <div className="bg-surface-card border-b border-surface-border p-4 sm:p-5 flex justify-between items-center sticky top-0 z-10 shrink-0">
                         <div className="flex items-center gap-2.5">
                             <div className="w-8 h-8 rounded-xl bg-accent/10 border border-accent/20 flex items-center justify-center text-accent">
-                                <ShieldCheck className="w-4 h-4" />
+                                <AnimatedShield size={18} />
                             </div>
                             <div>
                                 <h3 className="font-bold text-sm text-hi leading-tight">Member Profile</h3>
@@ -206,7 +205,7 @@ export default function ProfileModal({ isOpen, onClose }: ProfileModalProps) {
                                         {user.full_name?.charAt(0).toUpperCase() || "U"}
                                     </div>
                                 )}
-                                <span className="absolute bottom-0 right-0 w-3.5 h-3.5 rounded-full bg-emerald-500 border-2 border-surface-card" />
+                                <LiveBeacon status="active" size="xs" className="absolute bottom-0 right-0 pointer-events-none" />
                             </div>
 
                             <div className="min-w-0 flex-1">
@@ -214,9 +213,7 @@ export default function ProfileModal({ isOpen, onClose }: ProfileModalProps) {
                                     <h4 className="font-bold text-base text-hi truncate">
                                         {user.full_name || "Valued Member"}
                                     </h4>
-                                    <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 shrink-0">
-                                        Verified
-                                    </span>
+                                    <LiveBeacon status="success" label="Verified" size="xs" />
                                 </div>
                                 <p className="text-xs text-mid truncate mt-0.5">{user.email}</p>
                                 <p className="text-[10px] text-faint mt-1">Google OAuth Connected</p>
@@ -227,7 +224,7 @@ export default function ProfileModal({ isOpen, onClose }: ProfileModalProps) {
                         <div className="surface-card hairline p-4 rounded-2xl space-y-2">
                             <div className="flex justify-between items-center">
                                 <div className="flex items-center gap-1.5 text-xs font-semibold text-hi">
-                                    <Zap className="w-3.5 h-3.5 text-accent" />
+                                    <AnimatedSparkles size={14} className="text-accent" />
                                     <span>Daily AI Synthesizer Credits</span>
                                 </div>
                                 <span className="text-sm font-black text-accent tabular-nums">
@@ -256,7 +253,9 @@ export default function ProfileModal({ isOpen, onClose }: ProfileModalProps) {
                                 <div className="space-y-1">
                                     <label className="text-[11px] font-medium text-mid">Full Name</label>
                                     <div className="relative">
-                                        <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-faint" />
+                                        <div className="absolute left-3 top-1/2 -translate-y-1/2 text-faint">
+                                            <AnimatedProfile size={16} />
+                                        </div>
                                         <input
                                             type="text"
                                             value={fullName}

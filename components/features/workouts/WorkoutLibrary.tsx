@@ -31,12 +31,27 @@ function resolveExerciseImage(path: string): string {
   return `${IMAGE_BASE}${path}`;
 }
 
-const fetcher = () =>
-  fetch("https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/dist/exercises.json")
-    .then((res) => res.json())
-    .catch(() => {
-      throw new Error("Failed to load exercises");
-    });
+const FALLBACK_EXERCISES: FreeExercise[] = [
+  { id: "bench-press", name: "Barbell Bench Press", category: "chest", primaryMuscles: ["chest"], secondaryMuscles: ["triceps", "shoulders"], equipment: "barbell", instructions: ["Lie flat on a bench.", "Lower the bar to mid-chest with control.", "Press up explosively."], images: [] },
+  { id: "incline-db-press", name: "Incline Dumbbell Press", category: "chest", primaryMuscles: ["chest"], secondaryMuscles: ["shoulders"], equipment: "dumbbell", instructions: ["Set bench to 30-45 degrees.", "Press dumbbells upward."], images: [] },
+  { id: "barbell-squat", name: "Barbell Back Squat", category: "legs", primaryMuscles: ["quadriceps"], secondaryMuscles: ["glutes", "hamstrings"], equipment: "barbell", instructions: ["Rest bar across upper traps.", "Squat until thighs parallel floor.", "Drive up through heels."], images: [] },
+  { id: "deadlift", name: "Conventional Deadlift", category: "back", primaryMuscles: ["lower back"], secondaryMuscles: ["hamstrings", "glutes"], equipment: "barbell", instructions: ["Hinge at hips, grip bar shoulder width.", "Pull up keeping spine neutral."], images: [] },
+  { id: "pull-up", name: "Overhand Pull-Up", category: "back", primaryMuscles: ["lats"], secondaryMuscles: ["biceps"], equipment: "body only", instructions: ["Grip bar wider than shoulder width.", "Pull chest to bar."], images: [] },
+  { id: "overhead-press", name: "Standing Overhead Press", category: "shoulders", primaryMuscles: ["shoulders"], secondaryMuscles: ["triceps"], equipment: "barbell", instructions: ["Press barbell overhead in controlled arc."], images: [] },
+  { id: "bicep-curl", name: "Dumbbell Bicep Curl", category: "arms", primaryMuscles: ["biceps"], secondaryMuscles: ["forearms"], equipment: "dumbbell", instructions: ["Curl dumbbells upward while keeping elbows tucked."], images: [] },
+  { id: "tricep-pushdown", name: "Cable Tricep Pushdown", category: "arms", primaryMuscles: ["triceps"], secondaryMuscles: [], equipment: "cable", instructions: ["Extend elbows downward using rope or straight bar."], images: [] }
+];
+
+const fetcher = async (): Promise<FreeExercise[]> => {
+  try {
+    const res = await fetch("https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/dist/exercises.json");
+    if (!res.ok) throw new Error("Network response not ok");
+    const data = await res.json();
+    return Array.isArray(data) && data.length > 0 ? data : FALLBACK_EXERCISES;
+  } catch {
+    return FALLBACK_EXERCISES;
+  }
+};
 
 export default function WorkoutLibrary() {
   const [page, setPage] = useState(1);

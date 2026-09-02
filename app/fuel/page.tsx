@@ -8,6 +8,7 @@ import Navbar from "@/components/public/layout/Navbar";
 import { useUserAuth } from "@/lib/user-auth-context";
 import { MAX_DAILY_CREDITS } from "@/lib/config";
 import type { DietPlan } from "@/lib/fuel-types";
+import { calculateTDEE as computeTDEE } from "@/lib/fitness-calculations";
 import DietResultView from "@/components/features/fuel/DietResultView";
 import CountdownTimer from "@/components/features/fuel/CountdownTimer";
 import LoadingStatus from "@/components/features/fuel/LoadingStatus";
@@ -61,34 +62,16 @@ function FuelSynthesizerContent() {
         verifyCredits();
     }, [isLoggedIn, checkCredit]);
 
-    // Activity level multiplier mapping
-    const getActivityMultiplier = (level: string): number => {
-        const mapping: { [key: string]: number } = {
-            "Sedentary (Office Job)": 1.2,
-            "Light (Exercise 1-3 days)": 1.375,
-            "Moderate (Exercise 3-5 days)": 1.55,
-            "Active (Exercise 6-7 days)": 1.725,
-            "Athlete (2x Training)": 1.9
-        };
-        return mapping[level] || 1.55;
-    };
-
     const calculateTDEE = useCallback((): number | null => {
-        const w = parseFloat(currentWeight);
-        const h = parseFloat(height);
-        const a = parseFloat(age);
-        const act = getActivityMultiplier(activityLevel);
-
-        if (isNaN(w) || isNaN(h) || isNaN(a) || w <= 0 || h <= 0 || a <= 0) {
-            return null;
-        }
-
-        // BMR calculation
-        let bmr = (10 * w) + (6.25 * h) - (5 * a);
-        bmr += gender === "Male" ? 5 : -161;
-
-        // TDEE = BMR * Activity Multiplier
-        return Math.round(bmr * act);
+        return computeTDEE(
+            {
+                weightKg: parseFloat(currentWeight),
+                heightCm: parseFloat(height),
+                ageYears: parseFloat(age),
+                gender,
+            },
+            activityLevel
+        );
     }, [currentWeight, height, age, gender, activityLevel]);
 
     const calculateTargetCalories = useCallback((): number | null => {
