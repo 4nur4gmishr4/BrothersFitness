@@ -1,8 +1,6 @@
 /** req #11 — rep_ring: circular rep progress. Smooth dash-offset
  *  transition driven by reps/target. */
 
-import AnimatedSvgIcon from "./AnimatedSvgIcon";
-
 export default function RepProgressRing({
   reps,
   target,
@@ -30,8 +28,6 @@ export default function RepProgressRing({
       aria-valuemax={target}
       aria-label={`${reps} of ${target} reps`}
     >
-      {/* Background SVG Animation */}
-      <AnimatedSvgIcon src="/animatedsvgs/svg_rep_ring.svg" className="absolute inset-0 w-full h-full opacity-20 pointer-events-none" themeColor="accent" />
       
       <svg width={size} height={size} className="-rotate-90 relative z-10" aria-hidden="true">
         <circle

@@ -1,37 +1,23 @@
-import Image from "next/image";
+import React from "react";
 
 interface AnimatedSvgIconProps {
-  src: string;
+  src?: string;
   className?: string;
   alt?: string;
   themeColor?: "default" | "accent" | "text-hi";
 }
 
 export default function AnimatedSvgIcon({
-  src,
   className = "",
-  alt = "",
   themeColor = "default",
 }: AnimatedSvgIconProps) {
-  // CSS filter formulas
-  const colorFilter = themeColor === "accent"
-    ? "invert(18%) sepia(85%) saturate(4422%) hue-rotate(349deg) brightness(96%) contrast(92%)"
-    : themeColor === "text-hi"
-      ? "invert(1)" // Basic invert, assumes the base SVG is mostly dark/black
-      : "none";
-  
+  const strokeColor = themeColor === "accent" ? "currentColor" : "currentColor";
+
   return (
-    <div 
-      className={`relative inline-flex items-center justify-center ${className} ${themeColor === "text-hi" ? "dark:invert-0 invert" : ""}`}
-      style={{ filter: themeColor === "accent" ? colorFilter : undefined }}
-    >
-      <Image
-        src={src}
-        alt={alt}
-        fill
-        className="object-contain"
-        unoptimized // Required to preserve <animate> tags
-      />
+    <div className={`relative inline-flex items-center justify-center ${className}`}>
+      <svg viewBox="0 0 24 24" fill="none" className="w-full h-full text-accent" stroke={strokeColor} strokeWidth="2">
+        <circle cx="12" cy="12" r="10" strokeDasharray="30 10" className="animate-spin" />
+      </svg>
     </div>
   );
 }

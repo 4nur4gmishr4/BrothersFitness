@@ -20,7 +20,7 @@ function FuelSynthesizerContent() {
     const searchParams = useSearchParams();
 
     const [calories] = useState(searchParams.get("calories") || "");
-    const [dietType, setDietType] = useState("Everything");
+    const [dietType, setDietType] = useState("Vegetarian");
     const [budget, setBudget] = useState("Standard");
     const [lang, setLang] = useState<"en" | "hi">("en");
 
@@ -366,11 +366,12 @@ function FuelSynthesizerContent() {
                                             onChange={(e) => setDietType(e.target.value)}
                                             className="input-field w-full p-4 appearance-none cursor-pointer"
                                         >
-                                            <option value="Everything">Standard (Omnivore)</option>
-                                            <option value="Vegetarian">Vegetarian (No Meat)</option>
-                                            <option value="Vegan">Vegan (Plant Based)</option>
-                                            <option value="Pescatarian">Pescatarian (Fish OK)</option>
-                                            <option value="Keto">Ketogenic (Low Carb)</option>
+                                            <option value="Vegetarian">Pure Vegetarian (No Eggs, No Meat)</option>
+                                            <option value="Eggetarian">Eggetarian (Vegetarian + Eggs)</option>
+                                            <option value="Non-Vegetarian">Non-Vegetarian (Chicken, Fish, Eggs)</option>
+                                            <option value="Vegan">Vegan (100% Plant Based)</option>
+                                            <option value="Jain">Jain (Pure Veg, No Root Veg)</option>
+                                            <option value="Everything">Everything (Standard Omnivore)</option>
                                         </select>
                                     </div>
                                     <div>
