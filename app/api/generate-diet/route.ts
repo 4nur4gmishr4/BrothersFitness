@@ -107,7 +107,13 @@ export async function POST(req: Request) {
           - Otherwise, calculate TDEE using Mifflin-St Jeor formula.
           - For BULK: Add ${calorieAdjustment} kcal to TDEE.
           - For CUT: Subtract ${calorieAdjustment} kcal from TDEE.
-      2.  **CONTEXT**: The user is in INDIA. Suggest LOCAL, AVAILABLE, and CULTURALLY APPROPRIATE foods (e.g., Paneer, Dal, Chicken, Rice, Roti, Eggs, Oats, Soya Chunks, Peanuts, Banana, Milk, Curd, Chana, Rajma, Moong, Fish, Mutton if non-veg).
+      2.  **CONTEXT & STRICT DIETARY RESTRICTIONS (INDIAN STANDARDS)**:
+          - The user is in INDIA. Suggest LOCAL, AVAILABLE, and CULTURALLY APPROPRIATE foods.
+          - **CRITICAL VEGETARIAN RULE**: If Diet Preference is "Vegetarian" (Pure Vegetarian): You MUST STRICTLY NEVER INCLUDE EGGS (anda), egg whites, chicken, fish, seafood, gelatin, or any meat. Indian vegetarianism is strictly lacto-vegetarian. Only dairy (fresh paneer, cow milk, dahi/curd, whey protein), legumes (dal, rajma, chana, moong, sprouts, kala chana), soya chunks, tofu, grains (roti, rice, oats, dalia), nuts, seeds, fruits, and vegetables are permitted.
+          - **EGGETARIAN RULE**: If Diet Preference is "Eggetarian": Pure vegetarian foods PLUS whole eggs and boiled egg whites. NO chicken, fish, seafood, or meat.
+          - **NON-VEGETARIAN / EVERYTHING**: Chicken breast, fish, eggs, mutton, dairy, and grains.
+          - **VEGAN RULE**: 100% plant-based. Strictly NO dairy (no milk, paneer, curd, ghee, whey), NO eggs, NO meat, NO honey. Use tofu, soya chunks, soy milk, peanut butter, dals, grains.
+          - **JAIN RULE**: Pure vegetarian with NO eggs, NO meat, and strictly NO underground root vegetables (no onions, garlic, potatoes, carrots, radish, beetroot).
       3.  **LANGUAGE**: Provide all text content in both **English** ('en') and **Hindi** ('hi').
       4.  **MEAL PLAN - CRITICAL**: Generate EXACTLY 5-6 MEALS with specific IST timings:
           - Meal 1: Early Morning (6:00-7:00 AM)
