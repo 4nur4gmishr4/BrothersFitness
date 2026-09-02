@@ -1,9 +1,11 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef } from "react";
-import { User, Users, Phone, QrCode, Smartphone } from "lucide-react";
+import { User, Users, Phone, QrCode, Smartphone, Copy, Check } from "lucide-react";
 import Image from "next/image";
+import { toast } from "sonner";
 import { AnimatedCheck, AnimatedArrowUp, AnimatedWhatsApp } from "@/components/ui/icons";
+import { OFFICIAL_UPI_IDS, PRIMARY_UPI_ID } from "@/lib/config";
 
 type PaymentStep = "plan" | "details" | "paymentChoice" | "qrCode";
 
@@ -11,6 +13,7 @@ export default function PaymentSection() {
   const [step, setStep] = useState<PaymentStep>("plan");
   const [selectedPlan, setSelectedPlan] = useState<"monthly" | "quarterly" | null>(null);
   const [formData, setFormData] = useState({ name: "", gender: "", mobile: "" });
+  const [copiedUpi, setCopiedUpi] = useState<string | null>(null);
 
   // History depth the section mounted at. Every forward step calls pushState, so
   // once the flow finishes we can collapse those entries with history.go(-N) —
@@ -20,7 +23,6 @@ export default function PaymentSection() {
   const isResettingRef = useRef(false);
 
   const AMAN_WHATSAPP = "919131179343";
-  const UPI_ID = "annushrivastava112@okicici";
   const PAYEE_NAME = "Aman Brother's Fitness";
 
   const plans = [
@@ -90,7 +92,7 @@ export default function PaymentSection() {
     if (!selectedPlanData) return;
     
     // Construct UPI payment URL with standard parameters
-    const upiUrl = `upi://pay?pa=${encodeURIComponent(UPI_ID)}&pn=${encodeURIComponent(PAYEE_NAME)}&am=${selectedPlanData.price}&cu=INR&tn=${encodeURIComponent(`Brother's Fitness ${selectedPlanData.label} - ${formData.name}`)}`;
+    const upiUrl = `upi://pay?pa=${encodeURIComponent(PRIMARY_UPI_ID)}&pn=${encodeURIComponent(PAYEE_NAME)}&am=${selectedPlanData.price}&cu=INR&tn=${encodeURIComponent(`Brother's Fitness ${selectedPlanData.label} - ${formData.name}`)}`;
     
     // Open UPI app directly
     window.location.href = upiUrl;
@@ -367,10 +369,52 @@ export default function PaymentSection() {
                 </div>
               </div>
 
-              {/* UPI ID Fallback */}
-              <div className="bg-surface-soft border border-surface-border rounded-xl p-3.5 mb-6 text-center">
-                <p className="text-xs text-mid mb-1">Or direct UPI ID transfer:</p>
-                <p className="text-sm font-bold text-accent select-all tracking-wider">{UPI_ID}</p>
+              {/* Verified UPI IDs List */}
+              <div className="bg-surface-soft border border-surface-border rounded-xl p-3.5 mb-6 space-y-2.5">
+                <p className="text-xs text-mid font-medium text-center">
+                  Direct transfer accepted to verified UPI IDs:
+                </p>
+                <div className="space-y-1.5">
+                  {OFFICIAL_UPI_IDS.map((upi) => (
+                    <div
+                      key={upi}
+                      className="flex items-center justify-between p-2.5 rounded-lg bg-surface-card border border-surface-border"
+                    >
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-bold text-hi tracking-wider select-all">
+                          {upi}
+                        </span>
+                        {upi === PRIMARY_UPI_ID && (
+                          <span className="text-[10px] font-semibold text-accent bg-accent/10 border border-accent/30 px-1.5 py-0.5 rounded">
+                            Primary
+                          </span>
+                        )}
+                      </div>
+                      <button
+                        onClick={() => {
+                          navigator.clipboard.writeText(upi);
+                          setCopiedUpi(upi);
+                          toast.success(`Copied ${upi} to clipboard`);
+                          setTimeout(() => setCopiedUpi(null), 2000);
+                        }}
+                        className="px-2.5 py-1 text-xs font-medium rounded-md bg-surface-soft border border-surface-border text-mid hover:text-hi hover:border-accent flex items-center gap-1 active:scale-95 transition-all cursor-pointer"
+                        title="Copy UPI ID"
+                      >
+                        {copiedUpi === upi ? (
+                          <>
+                            <Check className="w-3 h-3 text-status-success" />
+                            <span className="text-status-success text-[11px]">Copied</span>
+                          </>
+                        ) : (
+                          <>
+                            <Copy className="w-3 h-3" />
+                            <span className="text-[11px]">Copy</span>
+                          </>
+                        )}
+                      </button>
+                    </div>
+                  ))}
+                </div>
               </div>
 
               {/* Instructions */}

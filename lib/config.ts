@@ -34,6 +34,15 @@ export const CONTACT_INFO = {
 
 export const WHATSAPP_COUNTRY_CODE = '91';
 
+/** Official verified UPI IDs for fee payments and membership receipts */
+export const OFFICIAL_UPI_IDS = [
+    '9131179343@ybl',
+    '9131179343@axl',
+    '9131179343@ibl',
+] as const;
+
+export const PRIMARY_UPI_ID = OFFICIAL_UPI_IDS[0];
+
 /** "Today" as YYYY-MM-DD in India Standard Time (credit day boundary is IST midnight). */
 export function istToday(): string {
     return new Intl.DateTimeFormat('en-CA', {

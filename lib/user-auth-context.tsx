@@ -50,7 +50,7 @@ type UserAuthContextType = {
     updateProfile: (data: ProfileUpdateData) => Promise<{ success: boolean; error?: string }>;
     // Credit actions
     checkCredit: () => Promise<boolean>;
-    deductCredit: () => Promise<boolean>;
+    deductCredit: (remainingCount?: number) => Promise<boolean>;
     refreshCredits: () => Promise<void>;
 };
 
@@ -367,11 +367,16 @@ export function UserAuthProvider({ children }: { children: ReactNode }) {
         return (user.daily_credits ?? 0) > 0;
     }, [user]);
 
-    const deductCredit = useCallback(async (): Promise<boolean> => {
-        if (!user || user.daily_credits <= 0) return false;
-        setUser(prev => prev ? { ...prev, daily_credits: prev.daily_credits - 1 } : null);
+    const deductCredit = useCallback(async (remainingCount?: number): Promise<boolean> => {
+        setUser(prev => {
+            if (!prev) return null;
+            const newCredits = typeof remainingCount === 'number'
+                ? Math.max(0, remainingCount)
+                : Math.max(0, (prev.daily_credits ?? MAX_DAILY_CREDITS) - 1);
+            return { ...prev, daily_credits: newCredits };
+        });
         return true;
-    }, [user]);
+    }, []);
 
     const refreshCredits = useCallback(async (): Promise<void> => {
         if (!user) return;
