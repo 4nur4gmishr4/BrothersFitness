@@ -107,7 +107,7 @@ export default function TacticalStopwatch() {
         <button
           id="tactical-stopwatch-button"
           onClick={() => setIsOpen(true)}
-          className={`fixed bottom-[80px] sm:bottom-[88px] right-5 sm:right-6 z-[120] w-13 h-13 sm:w-14 sm:h-14 rounded-full flex items-center justify-center shadow-2xl transition-all duration-200 cursor-pointer active:scale-95 group relative ${
+          className={`fixed bottom-5 sm:bottom-6 right-5 sm:right-6 z-[120] w-13 h-13 sm:w-14 sm:h-14 rounded-full flex items-center justify-center shadow-2xl transition-all duration-200 cursor-pointer active:scale-95 group relative ${
             isRunning
               ? "bg-accent text-white shadow-accent/40 scale-105"
               : "bg-surface-card/95 backdrop-blur-md border border-surface-border text-hi hover:border-accent hover:text-accent shadow-black/20 hover:scale-105"
