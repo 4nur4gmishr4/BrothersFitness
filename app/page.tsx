@@ -1,7 +1,7 @@
 import Navbar from "@/components/public/layout/Navbar";
 import Hero from "@/components/public/sections/Hero";
 import FeaturesOverview from "@/components/public/sections/FeaturesOverview";
-import InfoSection from "@/components/public/sections/InfoSection";
+import OperatingSchedule from "@/components/public/sections/OperatingSchedule";
 import WorkoutSplits from "@/components/public/sections/WorkoutSplits";
 import Architects from "@/components/public/sections/Architects";
 import ContactForm from "@/components/ui/primitives/ContactForm";
@@ -41,7 +41,7 @@ export default function Home() {
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start w-full">
-            <InfoSection />
+            <OperatingSchedule />
             <WorkoutSplits />
           </div>
         </div>

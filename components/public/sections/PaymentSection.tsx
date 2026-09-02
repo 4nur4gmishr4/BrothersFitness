@@ -1,8 +1,9 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef } from "react";
-import { User, Users, Phone, QrCode, Smartphone, MessageCircle, ExternalLink, CheckCircle } from "lucide-react";
+import { User, Users, Phone, QrCode, Smartphone } from "lucide-react";
 import Image from "next/image";
+import { AnimatedCheck, AnimatedArrowUp, AnimatedWhatsApp } from "@/components/ui/icons";
 
 type PaymentStep = "plan" | "details" | "paymentChoice" | "qrCode";
 
@@ -322,12 +323,12 @@ export default function PaymentSection() {
               </p>
               <button
                 onClick={() => openWhatsApp(true)}
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-xs font-bold bg-[#25D366] text-white hover:brightness-110 active:scale-95 transition-all shadow-sm"
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-xs font-bold bg-[#25D366] text-white hover:brightness-110 active:scale-95 transition-all shadow-sm group"
                 aria-label="Send payment screenshot via WhatsApp"
               >
-                <MessageCircle className="w-4 h-4" />
+                <AnimatedWhatsApp size={16} />
                 Send Receipt via WhatsApp
-                <ExternalLink className="w-3.5 h-3.5" />
+                <AnimatedArrowUp size={14} className="text-white" />
               </button>
             </div>
 
@@ -375,7 +376,7 @@ export default function PaymentSection() {
               {/* Instructions */}
               <div className="bg-surface-soft border border-surface-border rounded-xl p-4 mb-6">
                 <p className="text-xs font-semibold text-hi mb-3 flex items-center gap-2">
-                  <CheckCircle className="w-4 h-4 text-accent" /> Steps to Activate:
+                  <AnimatedCheck size={16} className="text-accent" /> Steps to Activate:
                 </p>
                 <ol className="text-xs text-mid space-y-2 list-decimal list-inside">
                   <li>Scan QR code with GPay, PhonePe, or Paytm</li>
@@ -388,12 +389,12 @@ export default function PaymentSection() {
               {/* WhatsApp Button */}
               <button
                 onClick={() => openWhatsApp(true)}
-                className="w-full py-3.5 px-4 rounded-xl text-xs font-bold bg-[#25D366] text-white hover:brightness-110 active:scale-95 transition-all flex items-center justify-center gap-2 mb-4 shadow-sm"
+                className="w-full py-3.5 px-4 rounded-xl text-xs font-bold bg-[#25D366] text-white hover:brightness-110 active:scale-95 transition-all flex items-center justify-center gap-2 mb-4 shadow-sm group"
                 aria-label="Send payment confirmation via WhatsApp"
               >
-                <MessageCircle className="w-4 h-4" />
+                <AnimatedWhatsApp size={16} />
                 Send Receipt via WhatsApp
-                <ExternalLink className="w-3.5 h-3.5" />
+                <AnimatedArrowUp size={14} className="text-white" />
               </button>
 
               <div className="flex gap-3">

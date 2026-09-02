@@ -54,7 +54,7 @@ const SCHEDULE: ScheduleItem[] = [
   },
 ];
 
-export default function InfoSection() {
+export default function OperatingSchedule() {
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
   const [isGymOpen, setIsGymOpen] = useState<boolean>(false);
 
