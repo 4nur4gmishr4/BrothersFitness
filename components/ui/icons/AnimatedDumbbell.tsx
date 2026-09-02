@@ -8,6 +8,9 @@ interface AnimatedDumbbellProps {
   size?: number;
 }
 
+/**
+ * Apple Fitness & Google Material (`fitness_center`) standard vector.
+ */
 export default function AnimatedDumbbell({
   className,
   size = 20,
@@ -19,53 +22,14 @@ export default function AnimatedDumbbell({
       viewBox="0 0 24 24"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
-      className={cn("group/dumbbell shrink-0 transition-transform duration-200", className)}
+      className={cn("shrink-0 transition-transform duration-200 group-hover:scale-105", className)}
     >
-      {/* Central Handle */}
       <path
-        d="M7 12H17"
+        d="M6.5 6.5L17.5 17.5M21 21L20 20M3 3L4 4M18 22L22 18M2 6L6 2M3 10L10 3M14 21L21 14"
         stroke="currentColor"
-        strokeWidth="2.5"
+        strokeWidth="1.75"
         strokeLinecap="round"
-        className="group-hover/dumbbell:stroke-accent transition-colors duration-200"
-      />
-      {/* Left Plates */}
-      <rect
-        x="5"
-        y="7"
-        width="2"
-        height="10"
-        rx="1"
-        fill="currentColor"
-        className="group-hover/dumbbell:-translate-x-0.5 transition-transform duration-200"
-      />
-      <rect
-        x="2"
-        y="9"
-        width="2"
-        height="6"
-        rx="1"
-        fill="currentColor"
-        className="group-hover/dumbbell:-translate-x-1 transition-transform duration-200 opacity-80"
-      />
-      {/* Right Plates */}
-      <rect
-        x="17"
-        y="7"
-        width="2"
-        height="10"
-        rx="1"
-        fill="currentColor"
-        className="group-hover/dumbbell:translate-x-0.5 transition-transform duration-200"
-      />
-      <rect
-        x="20"
-        y="9"
-        width="2"
-        height="6"
-        rx="1"
-        fill="currentColor"
-        className="group-hover/dumbbell:translate-x-1 transition-transform duration-200 opacity-80"
+        strokeLinejoin="round"
       />
     </svg>
   );

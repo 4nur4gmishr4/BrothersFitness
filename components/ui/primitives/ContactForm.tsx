@@ -118,10 +118,7 @@ export default function ContactForm() {
             {/* Map Top Status Bar */}
             <div className="p-4 sm:p-5 bg-surface-card border-b border-surface-border flex items-center justify-between gap-3">
               <div className="flex items-center gap-2 min-w-0">
-                <span className="relative flex h-2.5 w-2.5 shrink-0">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-status-success opacity-75" />
-                  <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-status-success" />
-                </span>
+                <span className="w-2.5 h-2.5 rounded-full bg-status-success shrink-0" />
                 <div className="truncate">
                   <span className="text-xs font-bold text-hi block truncate">Lakhnadon Branch Open</span>
                   <span className="text-[11px] text-mid truncate block">Open Today &bull; Closes 10:00 PM</span>

@@ -54,38 +54,18 @@ export default function LiveBeacon({
   label,
   size = "sm",
   className,
-  pulse = true,
 }: LiveBeaconProps) {
   const currentSize = SIZE_MAP[size];
   const currentStatus = STATUS_MAP[status];
 
   const indicator = (
-    <span className={cn("relative inline-flex items-center justify-center shrink-0", currentSize.ring)}>
-      {/* Outer Harmonic Wave */}
-      {pulse && (
-        <span
-          className={cn(
-            "absolute inset-0 rounded-full animate-beacon-wave pointer-events-none",
-            currentStatus.wave
-          )}
-        />
+    <span
+      className={cn(
+        "inline-flex rounded-full shrink-0",
+        currentSize.core,
+        currentStatus.core
       )}
-      {/* Middle Precision Ring */}
-      <span
-        className={cn(
-          "absolute inset-0.5 rounded-full border shadow-xs transition-colors duration-300",
-          currentStatus.ring
-        )}
-      />
-      {/* Center Emissive Core */}
-      <span
-        className={cn(
-          "relative rounded-full shadow-sm transition-transform duration-200",
-          currentSize.core,
-          currentStatus.core
-        )}
-      />
-    </span>
+    />
   );
 
   if (!label) {

@@ -9,10 +9,12 @@ interface AnimatedClockProps {
   ticking?: boolean;
 }
 
+/**
+ * Apple SF Symbols (`clock`) & Google Material (`schedule`) standard vector.
+ */
 export default function AnimatedClock({
   className,
   size = 20,
-  ticking = true,
 }: AnimatedClockProps) {
   return (
     <svg
@@ -21,34 +23,22 @@ export default function AnimatedClock({
       viewBox="0 0 24 24"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
-      className={cn("group/clock shrink-0 transition-transform duration-200", className)}
+      className={cn("shrink-0 transition-transform duration-200 group-hover:scale-105", className)}
     >
-      {/* Clock Dial Rim */}
       <circle
         cx="12"
         cy="12"
-        r="9.5"
+        r="9.25"
         stroke="currentColor"
         strokeWidth="1.75"
-        className="group-hover/clock:stroke-accent transition-colors duration-200"
       />
-      {/* Hour Hand */}
       <path
-        d="M12 12L12 7"
+        d="M12 6.5V12L15.75 14.25"
         stroke="currentColor"
-        strokeWidth="2"
+        strokeWidth="1.75"
         strokeLinecap="round"
+        strokeLinejoin="round"
       />
-      {/* Minute Hand with Optional Micro-Rotation */}
-      <path
-        d="M12 12L15.5 14"
-        stroke="currentColor"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        className={cn(ticking && "animate-clock-tick")}
-      />
-      {/* Center Pivot Point */}
-      <circle cx="12" cy="12" r="1.25" fill="currentColor" />
     </svg>
   );
 }

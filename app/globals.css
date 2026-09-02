@@ -1153,28 +1153,8 @@ body::-webkit-scrollbar-track {
 }
 
 /* ============================================================
-   LiveBeacon & Minimalist Kinetic Icon Animations
+   Minimalist Standard Icon Animations
    ============================================================ */
-
-@keyframes beacon-wave {
-  0% {
-    transform: scale(0.85);
-    opacity: 0.9;
-  }
-  50% {
-    transform: scale(1.65);
-    opacity: 0.25;
-  }
-  100% {
-    transform: scale(2.1);
-    opacity: 0;
-  }
-}
-
-.animate-beacon-wave {
-  animation: beacon-wave 2.2s cubic-bezier(0.24, 0, 0.38, 1) infinite;
-  will-change: transform, opacity;
-}
 
 @keyframes icon-tilt-shift {
   0%, 100% { transform: rotate(0deg); }
