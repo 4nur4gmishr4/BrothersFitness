@@ -6,6 +6,7 @@ import dynamic from "next/dynamic";
 import ResultReveal from "@/components/ui/animations/ResultReveal";
 import SliderThumb from "@/components/ui/animations/SliderThumb";
 import RepProgressRing from "@/components/ui/animations/RepProgressRing";
+import { calculateBMI, calculateTDEE, calculate1RM } from "@/lib/fitness-calculations";
 
 const ShareMissionReport = dynamic(() => import("@/components/features/gamification/ShareMissionReport"), { ssr: false });
 
@@ -68,11 +69,7 @@ function BMICalculator() {
   const resultRef = useRef<HTMLDivElement>(null);
 
   const calculate = () => {
-    const h = parseFloat(height) / 100;
-    const w = parseFloat(weight);
-    if (h && w) {
-      setResult(parseFloat((w / (h * h)).toFixed(1)));
-    }
+    setResult(calculateBMI(parseFloat(weight), parseFloat(height)));
   };
 
   return (
@@ -122,16 +119,17 @@ function TDEECalculator() {
   const resultRef = useRef<HTMLDivElement>(null);
 
   const calculate = () => {
-    const w = parseFloat(weight);
-    const h = parseFloat(height);
-    const a = parseFloat(age);
-    const act = parseFloat(activity);
-
-    if (w && h && a) {
-      let bmr = 10 * w + 6.25 * h - 5 * a;
-      bmr += gender === "male" ? 5 : -161;
-      setResult(Math.round(bmr * act));
-    }
+    setResult(
+      calculateTDEE(
+        {
+          weightKg: parseFloat(weight),
+          heightCm: parseFloat(height),
+          ageYears: parseFloat(age),
+          gender: gender === "male" ? "Male" : "Female",
+        },
+        activity
+      )
+    );
   };
 
   return (
@@ -234,10 +232,7 @@ function OneRepMaxCalculator() {
   const resultRef = useRef<HTMLDivElement>(null);
 
   const calculate = () => {
-    const w = parseFloat(lift);
-    if (w) {
-      setResult(Math.round(w * (1 + reps / 30)));
-    }
+    setResult(calculate1RM(parseFloat(lift), reps));
   };
 
   return (
