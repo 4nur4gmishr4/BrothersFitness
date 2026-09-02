@@ -31,16 +31,17 @@ export default function Hero() {
                 text="BROTHER'S FITNESS"
                 highlightWord="FITNESS"
                 highlightColor="#D71921"
-                strokeWidth={1.6}
-                drawDuration={1.4}
-                fillDelay={0.15}
-                stagger={0.04}
+                strokeWidth={1.8}
+                drawDuration={1.3}
+                fillDelay={0.12}
+                stagger={0.035}
                 ease="power2.out"
                 trigger="mount"
                 fillMode="wipe"
-                fontSize={110}
+                fontSize={98}
                 fontWeight={800}
-                letterSpacing={-2}
+                fontFamily="var(--font-syne), 'Syne', sans-serif"
+                letterSpacing={0}
                 align="left"
                 className="w-full"
               />
