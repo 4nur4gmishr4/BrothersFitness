@@ -9,25 +9,43 @@ import Link from "next/link";
 import ClickSpark from "@/components/ui/animations/ClickSpark";
 import RotatingText from "@/components/ui/text/RotatingText";
 import BlurText from "@/components/ui/text/BlurText";
-
+import ParticleText from "@/components/ui/text/ParticleText";
 
 export default function Hero() {
   return (
     <ClickSpark sparkColor="rgba(215, 25, 33, 0.75)" sparkCount={7} sparkRadius={18}>
-      <section className="relative flex flex-col justify-start overflow-hidden pt-4 pb-10 sm:pt-8 sm:pb-14 lg:pt-12 lg:pb-16 bg-surface-canvas text-hi select-none">
+      <section className="relative flex flex-col justify-start overflow-hidden pt-4 pb-10 sm:pt-8 sm:pb-14 lg:pt-12 lg:pb-16 bg-surface-canvas text-hi">
         
         <div className="relative z-10 w-full max-w-[1600px] mx-auto px-4 sm:px-8 md:px-12 lg:px-16">
           
-          {/* Prominent Brand Headline (Moved Upper) */}
+          {/* Prominent Brand Headline with Interactive Particle Text */}
           <motion.div
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4 }}
             className="space-y-3 sm:space-y-4 mb-4 sm:mb-6"
           >
-            <h1 className="text-5xl sm:text-7xl md:text-8xl lg:text-9xl font-bold tracking-tight text-hi leading-[0.95]">
-              BROTHER&apos;S <span className="text-accent">FITNESS</span>
-            </h1>
+            <h1 className="sr-only">Brother&apos;s Fitness Lakhnadon</h1>
+            <div className="w-full h-[70px] sm:h-[110px] md:h-[140px] lg:h-[170px] -ml-1 sm:-ml-2">
+              <ParticleText
+                text="BROTHER'S FITNESS"
+                particleSize={2.4}
+                density={4}
+                color="#ffffff"
+                highlightColor="#D71921"
+                scatter={140}
+                gatherDuration={1400}
+                stagger={300}
+                pointerRepel={50}
+                repelRadius={110}
+                idleDrift={0.5}
+                trigger="hover"
+                fontSize="clamp(2.6rem, 8.5vw, 6.5rem)"
+                fontWeight={900}
+                glow={true}
+                className="w-full h-full"
+              />
+            </div>
 
             <div className="text-xl sm:text-3xl md:text-4xl font-semibold text-hi/90 tracking-tight leading-snug flex flex-wrap items-center gap-x-2.5">
               <span>Lakhnadon&apos;s Premier Center for</span>
@@ -38,12 +56,23 @@ export default function Hero() {
                   "Women's Batches",
                   "Custom Nutrition",
                 ]}
+                mainClassName="text-accent inline-flex font-bold"
+                staggerFrom="last"
+                initial={{ y: "100%", opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                exit={{ y: "-120%", opacity: 0 }}
+                staggerDuration={0.025}
+                splitLevelClassName="overflow-hidden"
+                splitBy="characters"
+                transition={{ type: "spring", damping: 25, stiffness: 300 }}
                 rotationInterval={2800}
+                auto={true}
+                loop={true}
               />
             </div>
           </motion.div>
 
-          {/* Subtitle: BlurText */}
+          {/* Subtitle: Unique, simple & engaging description */}
           <motion.div
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
@@ -51,8 +80,8 @@ export default function Hero() {
             className="text-sm sm:text-base md:text-lg text-mid max-w-3xl leading-relaxed mb-6 sm:mb-8"
           >
             <BlurText
-              text="Founded by Aman & Pradeep Shrivastava in Lakhnadon, Madhya Pradesh. Built with elite heavy machinery, certified coaching, and dedicated training batches with zero admission fees."
-              delay={16}
+              text="Built from the ground up by Coach Aman and Coach Pradeep right here in Lakhnadon. Whether you are lifting your very first dumbbell or pushing for a new personal record, this is your home for real, honest strength. We cut through the noise with certified hands-on guidance, heavy-duty iron, dedicated women's training hours, and a supportive brotherhood — zero admission fees, no confusing fitness myths, and no hidden catches. Just real work, real coaches, and real progress every single day."
+              delay={8}
             />
           </motion.div>
 
