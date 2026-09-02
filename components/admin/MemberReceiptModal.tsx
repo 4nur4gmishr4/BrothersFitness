@@ -10,6 +10,7 @@ import { useModalDismiss } from "@/hooks/useModalDismiss";
 import { openWhatsApp } from "@/lib/admin-api";
 import { Portal } from "@/components/ui/Portal";
 import type { GymMember } from "@/lib/supabase";
+import LiveBeacon from "@/components/ui/primitives/LiveBeacon";
 
 interface MemberReceiptModalProps {
   member: GymMember;
@@ -97,7 +98,7 @@ _“Pain is Temporary. Pride is Forever.”_ 💪`;
         <div
           {...modalProps}
           aria-label="Membership receipt"
-          className="surface-modal hairline p-4 sm:p-6 max-w-md w-full my-auto rounded-3xl overflow-y-auto max-h-[92dvh] modal-panel-in relative shadow-2xl"
+          className="surface-modal border border-surface-border p-4 sm:p-6 max-w-md w-full my-auto rounded-3xl overflow-y-auto max-h-[88dvh] modal-panel-in relative shadow-2xl"
           onClick={(e) => e.stopPropagation()}
         >
           {/* Top Header Controls */}
@@ -144,9 +145,7 @@ _“Pain is Temporary. Pride is Forever.”_ 💪`;
                 </div>
               </div>
               <div className="text-right">
-                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-500 border border-emerald-500/20">
-                  PAID
-                </span>
+                <LiveBeacon status="success" label="PAID" size="xs" />
                 <p className="text-[9px] text-low mt-0.5">{formatTodayIST()}</p>
               </div>
             </div>
