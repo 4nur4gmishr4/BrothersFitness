@@ -19,7 +19,7 @@ import { todayIST, parseLocalDate } from "@/lib/member-utils";
 import type { GymMember } from "@/lib/supabase";
 import imageCompression from "browser-image-compression";
 import PebbleImageViewer, { PebbleImage } from "@/components/admin/PebbleImageViewer";
-import { Portal } from "@/components/ui/Portal";
+import { Portal } from "@/components/ui/primitives/Portal";
 
 interface MemberFormModalProps {
   open: boolean;

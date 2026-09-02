@@ -5,7 +5,7 @@ import { X, Loader2 } from "lucide-react";
 import { useUserAuth } from "@/lib/user-auth-context";
 import { useModalDismiss } from "@/hooks/useModalDismiss";
 import Image from "next/image";
-import { Portal } from "@/components/ui/Portal";
+import { Portal } from "./Portal";
 
 interface LoginModalProps {
     isOpen: boolean;

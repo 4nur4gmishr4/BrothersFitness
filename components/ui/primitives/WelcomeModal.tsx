@@ -2,7 +2,7 @@
 
 import { X, Zap, ShieldCheck } from "lucide-react";
 import { useModalDismiss } from "@/hooks/useModalDismiss";
-import { Portal } from "@/components/ui/Portal";
+import { Portal } from "./Portal";
 
 interface WelcomeModalProps {
     isOpen: boolean;

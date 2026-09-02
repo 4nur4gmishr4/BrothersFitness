@@ -46,7 +46,7 @@ import {
 import { getPlanPrice } from "@/lib/config";
 import CountUp from "@/components/ui/text/CountUp";
 import PebbleImageViewer, { PebbleImage } from "@/components/admin/PebbleImageViewer";
-import { Portal } from "@/components/ui/Portal";
+import { Portal } from "@/components/ui/primitives/Portal";
 
 const MemberFormModal = dynamic(
   () => import("@/components/admin/MemberFormModal"),

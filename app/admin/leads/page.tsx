@@ -20,7 +20,7 @@ import { AdminLoader } from "@/components/admin/AdminUI";
 import { adminFetch, openWhatsApp } from "@/lib/admin-api";
 import { formatDate } from "@/lib/member-utils";
 import { cn } from "@/lib/utils";
-import { Portal } from "@/components/ui/Portal";
+import { Portal } from "@/components/ui/primitives/Portal";
 
 interface MessageInquiry {
   id: string;
