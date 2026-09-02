@@ -23,6 +23,7 @@ export default function BlurText({
 
   return (
     <span ref={ref} className={`inline-flex flex-wrap ${className}`}>
+      <span className="sr-only">{text}</span>
       {elements.map((item, index) => (
         <motion.span
           key={index}
