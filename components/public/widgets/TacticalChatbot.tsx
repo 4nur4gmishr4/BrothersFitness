@@ -185,17 +185,17 @@ export default function TacticalChatbot() {
 
   return (
     <>
-      {/* Red Circular Chatbot Button on Right Side */}
+      {/* Red Circular Chatbot Button at Bottom-Right */}
       {!isOpen && !isNavOpen && (
         <button
           id="tactical-chatbot-button"
-          className="fixed right-3.5 sm:right-5 top-[calc(50%+32px)] -translate-y-1/2 z-[120] w-12 h-12 sm:w-13 sm:h-13 rounded-full bg-accent hover:bg-accent-hover text-white shadow-xl shadow-accent/40 flex items-center justify-center hover:scale-105 active:scale-95 transition-all duration-200 cursor-pointer group relative"
+          className="fixed bottom-5 sm:bottom-6 right-5 sm:right-6 z-[120] w-13 h-13 sm:w-14 sm:h-14 rounded-full bg-accent hover:bg-accent-hover text-white shadow-2xl shadow-accent/40 flex items-center justify-center hover:scale-105 active:scale-95 transition-all duration-200 cursor-pointer group relative"
           onClick={() => setIsOpen(true)}
           aria-label="Open Brother's Fitness AI Assistant"
           title="Ask BroFit AI Coach"
         >
-          <AnimatedChat size={22} className="text-white group-hover:scale-110" />
-          <LiveBeacon status="active" size="xs" className="absolute top-1 right-1 pointer-events-none" />
+          <AnimatedChat size={26} className="text-white group-hover:scale-110" />
+          <LiveBeacon status="active" size="xs" className="absolute top-1.5 right-1.5 pointer-events-none" />
           <span className="pointer-events-none absolute right-full mr-3 hidden rounded-xl border border-surface-border bg-surface-card/95 px-2.5 py-1 text-[11px] font-semibold tracking-wide text-hi shadow-xl backdrop-blur-md transition-all duration-150 group-hover:block whitespace-nowrap">
             Ask AI Coach
           </span>
