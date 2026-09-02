@@ -86,53 +86,9 @@ export function UserAuthProvider({ children }: { children: ReactNode }) {
             session.user.email?.split('@')[0] ||
             'Member';
 
-        let row: Record<string, unknown> | null = null;
-        try {
-            const { data } = await supabase
-                .from('users')
-                .select('*')
-                .eq('id', authId)
-                .single();
-            row = data as Record<string, unknown> | null;
-        } catch {
-            // non-blocking
-        }
-
-        // First sign-in: attempt to create the row in the background.
-        if (!row) {
-            try {
-                const { data: inserted } = await supabase
-                    .from('users')
-                    .insert({
-                        id: authId,
-                        email: session.user.email || null,
-                        full_name: metadataName,
-                        photo_url: metadataPhoto,
-                        daily_credits: MAX_DAILY_CREDITS,
-                        last_credit_reset: istToday(),
-                    })
-                    .select('*')
-                    .single();
-                if (inserted) row = inserted as Record<string, unknown>;
-            } catch {
-                // non-blocking
-            }
-        } else if (!row.photo_url && metadataPhoto) {
-            // Update row with Google OAuth picture if row didn't have one
-            try {
-                await supabase
-                    .from('users')
-                    .update({ photo_url: metadataPhoto })
-                    .eq('id', authId);
-            } catch {
-                // non-blocking
-            }
-        }
-
-        const effectivePhoto = (row?.photo_url as string) || metadataPhoto;
         const today = istToday();
 
-        // Load cached local preferences if available
+        // 1. Read cached local preferences if available
         let localPrefs: Record<string, unknown> = {};
         try {
             if (typeof window !== 'undefined') {
@@ -143,33 +99,74 @@ export function UserAuthProvider({ children }: { children: ReactNode }) {
             // ignore
         }
 
-        const rowId = (row?.id as string) || authId;
-        const rowEmail = (row?.email as string) || session.user.email || null;
-        const rowFullName = (row?.full_name as string) || (localPrefs.full_name as string) || metadataName;
-        const rowPhone = (row?.phone as string) || (metadata.phone as string) || (localPrefs.phone as string) || null;
-        const rowDob = (row?.date_of_birth as string) || (metadata.date_of_birth as string) || (localPrefs.date_of_birth as string) || null;
-        const rowHeight = typeof row?.height_cm === 'number' ? row.height_cm : (typeof metadata.height_cm === 'number' ? metadata.height_cm : (typeof localPrefs.height_cm === 'number' ? localPrefs.height_cm : null));
-        const rowWeight = typeof row?.weight_kg === 'number' ? row.weight_kg : (typeof metadata.weight_kg === 'number' ? metadata.weight_kg : (typeof localPrefs.weight_kg === 'number' ? localPrefs.weight_kg : null));
-        const rowGender = (row?.gender as string) || (metadata.gender as string) || (localPrefs.gender as string) || "Male";
-        const rowCredits = typeof row?.daily_credits === 'number' ? row.daily_credits : MAX_DAILY_CREDITS;
-        const rowReset = (row?.last_credit_reset as string) || today;
-
-        // Set state unconditionally
-        setUser({
-            id: rowId,
-            email: rowEmail,
-            full_name: rowFullName,
-            photo_url: effectivePhoto,
-            phone: rowPhone,
-            date_of_birth: rowDob,
-            height_cm: rowHeight,
-            weight_kg: rowWeight,
-            gender: rowGender,
+        // 2. Set user immediately with session data + cached local preferences (0ms instant paint)
+        const initialUser: UserProfile = {
+            id: authId,
+            email: session.user.email || null,
+            full_name: (localPrefs.full_name as string) || metadataName,
+            photo_url: metadataPhoto,
+            phone: (metadata.phone as string) || (localPrefs.phone as string) || null,
+            date_of_birth: (metadata.date_of_birth as string) || (localPrefs.date_of_birth as string) || null,
+            height_cm: typeof metadata.height_cm === 'number' ? metadata.height_cm : (typeof localPrefs.height_cm === 'number' ? localPrefs.height_cm : null),
+            weight_kg: typeof metadata.weight_kg === 'number' ? metadata.weight_kg : (typeof localPrefs.weight_kg === 'number' ? localPrefs.weight_kg : null),
+            gender: (metadata.gender as string) || (localPrefs.gender as string) || "Male",
             fitness_goal: (metadata.fitness_goal as string) || (localPrefs.fitness_goal as string) || "Muscle Gain",
             diet_preference: (metadata.diet_preference as string) || (localPrefs.diet_preference as string) || "Vegetarian",
-            daily_credits: rowReset === today ? rowCredits : MAX_DAILY_CREDITS,
+            daily_credits: MAX_DAILY_CREDITS,
             last_credit_reset: today,
-        });
+        };
+        setUser(initialUser);
+        setIsLoading(false);
+
+        // 3. Asynchronously fetch / create the public `users` database table row
+        try {
+            const { data: row } = await supabase
+                .from('users')
+                .select('*')
+                .eq('id', authId)
+                .single();
+
+            if (row) {
+                const rowCredits = typeof row.daily_credits === 'number' ? row.daily_credits : MAX_DAILY_CREDITS;
+                const rowReset = row.last_credit_reset || today;
+                setUser(prev => prev ? {
+                    ...prev,
+                    full_name: row.full_name || prev.full_name,
+                    photo_url: row.photo_url || prev.photo_url,
+                    phone: row.phone || prev.phone,
+                    date_of_birth: row.date_of_birth || prev.date_of_birth,
+                    height_cm: typeof row.height_cm === 'number' ? row.height_cm : prev.height_cm,
+                    weight_kg: typeof row.weight_kg === 'number' ? row.weight_kg : prev.weight_kg,
+                    gender: row.gender || prev.gender,
+                    daily_credits: rowReset === today ? rowCredits : MAX_DAILY_CREDITS,
+                    last_credit_reset: today,
+                } : null);
+            } else {
+                // First-time sign in: create initial user record in background
+                const { data: inserted } = await supabase
+                    .from('users')
+                    .insert({
+                        id: authId,
+                        email: session.user.email || null,
+                        full_name: metadataName,
+                        photo_url: metadataPhoto,
+                        daily_credits: MAX_DAILY_CREDITS,
+                        last_credit_reset: today,
+                    })
+                    .select('*')
+                    .single();
+
+                if (inserted) {
+                    setUser(prev => prev ? {
+                        ...prev,
+                        daily_credits: inserted.daily_credits ?? MAX_DAILY_CREDITS,
+                        last_credit_reset: inserted.last_credit_reset ?? today,
+                    } : null);
+                }
+            }
+        } catch {
+            // non-blocking fallback
+        }
     }, []);
 
     // Listen to Supabase auth state & handle OAuth code callbacks
@@ -178,16 +175,15 @@ export function UserAuthProvider({ children }: { children: ReactNode }) {
 
         const initAuth = async () => {
             try {
-                // Check if current URL contains an OAuth code or auth error
+                // 1. Check if current URL contains an OAuth code or auth error
                 if (typeof window !== 'undefined') {
                     const urlParams = new URLSearchParams(window.location.search);
                     const code = urlParams.get('code');
                     const authError = urlParams.get('auth_error');
 
                     if (authError) {
-                        toast.error(`Auth Error: ${authError}`);
-                        const cleanUrl = window.location.pathname;
-                        window.history.replaceState({}, document.title, cleanUrl);
+                        toast.error(`Auth Error: ${decodeURIComponent(authError)}`);
+                        window.history.replaceState({}, document.title, window.location.pathname);
                     } else if (code) {
                         try {
                             const { data: exchangeData, error: exchangeErr } = await supabase.auth.exchangeCodeForSession(code);
@@ -195,14 +191,15 @@ export function UserAuthProvider({ children }: { children: ReactNode }) {
                                 await loadUserFromSession(exchangeData.session);
                                 toast.success("Signed in with Google successfully!");
                             }
-                            const cleanUrl = window.location.pathname;
-                            window.history.replaceState({}, document.title, cleanUrl);
                         } catch (err) {
-                            console.warn("Client exchange code note:", err);
+                            console.warn("Client code exchange notice:", err);
+                        } finally {
+                            window.history.replaceState({}, document.title, window.location.pathname);
                         }
                     }
                 }
 
+                // 2. Fetch existing session from Supabase client
                 const { data: { session } } = await supabase.auth.getSession();
                 if (session?.user && isMounted) {
                     await loadUserFromSession(session);

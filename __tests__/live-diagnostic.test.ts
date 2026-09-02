@@ -1,6 +1,24 @@
 import { describe, it, expect } from "vitest";
 import { generateTextWithFallback } from "@/lib/ai-provider";
 import { GenerateDietSchema, DietResponseSchema, ChatSchema } from "@/lib/validation";
+import fs from "fs";
+import path from "path";
+
+try {
+  const envPath = path.resolve(process.cwd(), ".env.local");
+  if (fs.existsSync(envPath)) {
+    const lines = fs.readFileSync(envPath, "utf-8").split("\n");
+    for (const line of lines) {
+      const trimmed = line.trim();
+      if (trimmed && !trimmed.startsWith("#") && trimmed.includes("=")) {
+        const [k, ...v] = trimmed.split("=");
+        process.env[k.trim()] = v.join("=").trim();
+      }
+    }
+  }
+} catch {
+  // ignore
+}
 
 describe("Live AI & Diet & Chatbot Verification", () => {
   it("validates diet input and output schema structures", () => {
@@ -81,4 +99,48 @@ describe("Live AI & Diet & Chatbot Verification", () => {
     expect(response.text.length).toBeGreaterThan(0);
     console.log("Live AI response generated successfully:", response.text, "using:", response.modelUsed);
   }, 20000);
+
+  it("verifies the live Supabase Auth & Users DB pipeline", async () => {
+    const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+    const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+    if (!url || !anonKey) {
+      console.log("No Supabase URL/keys found, skipping live auth test");
+      return;
+    }
+
+    const { createClient } = await import("@supabase/supabase-js");
+    const anonClient = createClient(url, anonKey);
+
+    // 1. Verify OAuth redirect URL generation
+    const { data: oauthData, error: oauthErr } = await anonClient.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: 'http://localhost:3000/auth/callback',
+      }
+    });
+
+    expect(oauthErr).toBeNull();
+    expect(oauthData?.url).toBeDefined();
+    if (oauthData?.url) {
+      expect(oauthData.url).toContain("supabase.co/auth/v1/authorize");
+      console.log("Google OAuth endpoint verified:", oauthData.url.slice(0, 70) + "...");
+    }
+
+    // 2. Verify admin client can query auth and users table
+    if (serviceKey) {
+      const adminClient = createClient(url, serviceKey);
+      const { data: authUsers, error: authUsersErr } = await adminClient.auth.admin.listUsers();
+      expect(authUsersErr).toBeNull();
+      console.log(`Auth users registered in Supabase: ${authUsers?.users?.length || 0}`);
+
+      const { data: usersData, error: usersErr } = await adminClient
+        .from('users')
+        .select('*')
+        .limit(5);
+      expect(usersErr).toBeNull();
+      console.log(`Users database records found: ${usersData?.length || 0}`);
+    }
+  });
 });
