@@ -1,3 +1,5 @@
+import { istToday } from '@/lib/config';
+
 /**
  * Shared date/status helpers for the admin members UI. Single source of truth
  * so the members page and its extracted components agree on "today" (IST) and
@@ -18,14 +20,7 @@ export function parseLocalDate(dateStr: string | null | undefined): Date | null 
 }
 
 /** "Today" as YYYY-MM-DD in India Standard Time (5:30 AM reset). */
-export function todayIST(): string {
-    return new Intl.DateTimeFormat('en-CA', {
-        timeZone: 'Asia/Kolkata',
-        year: 'numeric',
-        month: '2-digit',
-        day: '2-digit',
-    }).format(new Date());
-}
+export const todayIST = istToday;
 
 /** Categorise a membership by its end date relative to today. */
 export function getMemberStatus(endDateString: string | null): 'active' | 'expiring' | 'expired' {
