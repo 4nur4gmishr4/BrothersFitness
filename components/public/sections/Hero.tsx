@@ -31,8 +31,6 @@ export default function Hero() {
                 text="BROTHER'S FITNESS"
                 particleSize={2.4}
                 density={3.2}
-                color="#ffffff"
-                highlightColor="#E60000"
                 scatter={140}
                 gatherDuration={1400}
                 stagger={300}
@@ -49,43 +47,45 @@ export default function Hero() {
               />
             </div>
 
-            <div className="text-lg sm:text-2xl md:text-3xl font-semibold text-hi/90 tracking-tight leading-snug flex flex-wrap items-center gap-2.5 sm:gap-3">
+            <div className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-semibold text-hi/90 tracking-tight leading-snug flex flex-wrap items-center gap-x-2.5 sm:gap-x-3">
               <span className="text-mid font-medium">Lakhnadon&apos;s Premier Center for</span>
-              <span className="inline-flex items-center px-3 sm:px-4 py-1 sm:py-1.5 rounded-xl bg-accent/10 border border-accent/30 text-accent font-bold shadow-xs">
-                <RotatingText
-                  texts={[
-                    "Strength Training",
-                    "Personal Coaching",
-                    "Women's Batches",
-                    "Custom Nutrition",
-                  ]}
-                  mainClassName="inline-flex text-accent font-bold"
-                  staggerFrom="last"
-                  initial={{ y: "100%", opacity: 0 }}
-                  animate={{ y: 0, opacity: 1 }}
-                  exit={{ y: "-120%", opacity: 0 }}
-                  staggerDuration={0.025}
-                  splitLevelClassName="overflow-hidden"
-                  splitBy="characters"
-                  transition={{ type: "spring", damping: 25, stiffness: 300 }}
-                  rotationInterval={2800}
-                  auto={true}
-                  loop={true}
-                />
-              </span>
+              <RotatingText
+                texts={[
+                  "Strength Training",
+                  "Personal Coaching",
+                  "Dedicated Women's Batches",
+                  "Custom Nutrition Plans",
+                  "Heavy Iron Powerlifting",
+                  "Fat Loss & Conditioning",
+                  "Functional Athletics",
+                  "Muscle Building",
+                ]}
+                mainClassName="text-accent inline-flex font-bold tracking-tight"
+                staggerFrom="last"
+                initial={{ y: "100%", opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                exit={{ y: "-120%", opacity: 0 }}
+                staggerDuration={0.025}
+                splitLevelClassName="overflow-hidden"
+                splitBy="characters"
+                transition={{ type: "spring", damping: 25, stiffness: 300 }}
+                rotationInterval={2400}
+                auto={true}
+                loop={true}
+              />
             </div>
           </motion.div>
 
-          {/* Subtitle: Unique, simple & engaging description */}
+          {/* Subtitle: Unique, simple & engaging description with slow cinematic reveal */}
           <motion.div
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, delay: 0.1 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
             className="text-sm sm:text-base md:text-lg text-mid max-w-3xl leading-relaxed mb-6 sm:mb-8"
           >
             <BlurText
-              text="Built from the ground up by Coach Aman and Coach Pradeep right here in Lakhnadon. Whether you are lifting your very first dumbbell or pushing for a new personal record, this is your home for real, honest strength. We cut through the noise with certified hands-on guidance, heavy-duty iron, dedicated women's training hours, and a supportive brotherhood - zero admission fees, no confusing fitness myths, and no hidden catches. Just real work, real coaches, and real progress every single day."
-              delay={8}
+              text="Built from the ground up by Coach Aman and Coach Pradeep right here in Lakhnadon. Whether you are lifting your very first dumbbell or pushing for a new personal record, this is your home for real, honest strength. We cut through the noise with certified hands-on guidance, heavy-duty iron, dedicated women's training hours, and a supportive brotherhood, zero admission fees, no confusing fitness myths, and no hidden catches. Just real work, real coaches, and real progress every single day."
+              delay={32}
             />
           </motion.div>
 
