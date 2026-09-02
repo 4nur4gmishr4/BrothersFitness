@@ -10,32 +10,6 @@ import ClickSpark from "@/components/ui/animations/ClickSpark";
 import RotatingText from "@/components/ui/text/RotatingText";
 import BlurText from "@/components/ui/text/BlurText";
 
-const FACILITY_HIGHLIGHTS = [
-  {
-    num: "01",
-    label: "MACHINERY",
-    title: "Heavy Calibrated Iron",
-    desc: "Elite plate-loaded & cable bio-mechanics",
-  },
-  {
-    num: "02",
-    label: "TIMINGS",
-    title: "5:30 AM – 10:00 PM",
-    desc: "Structured morning & evening shifts",
-  },
-  {
-    num: "03",
-    label: "BATCH PRIVACY",
-    title: "Dedicated Women's Hours",
-    desc: "11:30 AM – 1:30 PM exclusive training",
-  },
-  {
-    num: "04",
-    label: "MEMBERSHIP",
-    title: "₹0 Admission Fee",
-    desc: "Zero hidden costs, transparent plans",
-  },
-];
 
 export default function Hero() {
   return (
@@ -87,7 +61,7 @@ export default function Hero() {
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4, delay: 0.2 }}
-            className="flex flex-wrap items-center gap-3 sm:gap-5 mb-8 sm:mb-10"
+            className="flex flex-wrap items-center gap-3 sm:gap-5"
           >
             <a
               href="#splits"
@@ -105,32 +79,6 @@ export default function Hero() {
               <Clock className="w-4 h-4 text-accent" />
               <span>View Operating Hours</span>
             </Link>
-          </motion.div>
-
-          {/* Lakhnadon Athletic Facility Intelligence Grid */}
-          <motion.div
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, delay: 0.25 }}
-            className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 w-full"
-          >
-            {FACILITY_HIGHLIGHTS.map((item) => (
-              <div
-                key={item.num}
-                className="p-4 sm:p-5 rounded-2xl bg-surface-card/80 border border-surface-border hover:border-accent/40 transition-colors text-left space-y-1.5 shadow-xs"
-              >
-                <div className="flex items-center justify-between">
-                  <span className="text-[10px] font-mono font-bold tracking-widest text-accent uppercase">
-                    {item.label}
-                  </span>
-                  <span className="text-[10px] font-mono text-mid/60">{item.num}</span>
-                </div>
-                <p className="text-xs sm:text-sm font-bold text-hi leading-tight">
-                  {item.title}
-                </p>
-                <p className="text-[11px] text-mid leading-normal">{item.desc}</p>
-              </div>
-            ))}
           </motion.div>
 
         </div>
