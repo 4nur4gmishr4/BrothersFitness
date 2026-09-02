@@ -174,7 +174,7 @@ const quotes = {
     "Don't exercise to lose weight, exercise to eat cake.",
     "Gluten free? I'm glutton free.",
     "Summer bodies are made in winter.",
-    "I don't sweat, I sparkle."
+    "I don't sweat, I shine."
   ]
 };
 

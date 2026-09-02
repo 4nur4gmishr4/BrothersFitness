@@ -3,7 +3,6 @@
 import { useState, useRef } from "react";
 import { Activity, Flame, Dumbbell } from "lucide-react";
 import dynamic from "next/dynamic";
-import CalculatorGears from "@/components/ui/animations/CalculatorGears";
 import ResultReveal from "@/components/ui/animations/ResultReveal";
 import SliderThumb from "@/components/ui/animations/SliderThumb";
 import RepProgressRing from "@/components/ui/animations/RepProgressRing";
@@ -66,18 +65,13 @@ function BMICalculator() {
   const [height, setHeight] = useState("");
   const [weight, setWeight] = useState("");
   const [result, setResult] = useState<number | null>(null);
-  const [isComputing, setIsComputing] = useState(false);
   const resultRef = useRef<HTMLDivElement>(null);
 
-  const calculate = async () => {
+  const calculate = () => {
     const h = parseFloat(height) / 100;
     const w = parseFloat(weight);
     if (h && w) {
-      setIsComputing(true);
-      // Brief delay so the gears read as "computing"
-      await new Promise((resolve) => setTimeout(resolve, 500));
       setResult(parseFloat((w / (h * h)).toFixed(1)));
-      setIsComputing(false);
     }
   };
 
@@ -88,15 +82,8 @@ function BMICalculator() {
       <InputGroup label="Height (cm)" value={height} onChange={setHeight} placeholder="170" />
       <InputGroup label="Weight (kg)" value={weight} onChange={setWeight} placeholder="70" />
 
-      <button onClick={calculate} disabled={isComputing} className="btn-primary w-full">
-        {isComputing ? (
-          <span className="inline-flex items-center justify-center gap-3">
-            <CalculatorGears size={20} />
-            <span>Calculating...</span>
-          </span>
-        ) : (
-          "Calculate BMI"
-        )}
+      <button onClick={calculate} className="btn-primary w-full">
+        Calculate BMI
       </button>
 
       {result !== null && (
@@ -132,23 +119,18 @@ function TDEECalculator() {
   const [age, setAge] = useState("");
   const [activity, setActivity] = useState("1.55");
   const [result, setResult] = useState<number | null>(null);
-  const [isComputing, setIsComputing] = useState(false);
   const resultRef = useRef<HTMLDivElement>(null);
 
-  const calculate = async () => {
+  const calculate = () => {
     const w = parseFloat(weight);
     const h = parseFloat(height);
     const a = parseFloat(age);
     const act = parseFloat(activity);
 
     if (w && h && a) {
-      setIsComputing(true);
-      // Brief delay so the gears read as "computing"
-      await new Promise((resolve) => setTimeout(resolve, 500));
       let bmr = 10 * w + 6.25 * h - 5 * a;
       bmr += gender === "male" ? 5 : -161;
       setResult(Math.round(bmr * act));
-      setIsComputing(false);
     }
   };
 
@@ -198,15 +180,8 @@ function TDEECalculator() {
         </select>
       </div>
 
-      <button onClick={calculate} disabled={isComputing} className="btn-primary w-full">
-        {isComputing ? (
-          <span className="inline-flex items-center justify-center gap-3">
-            <CalculatorGears size={20} />
-            <span>Calculating...</span>
-          </span>
-        ) : (
-          "Calculate TDEE"
-        )}
+      <button onClick={calculate} className="btn-primary w-full">
+        Calculate TDEE
       </button>
 
       {result !== null && (
@@ -220,27 +195,27 @@ function TDEECalculator() {
               <p className="label-text text-faint mt-2">KCALS/DAY TO MAINTAIN WEIGHT</p>
             </div>
 
-            <div className="grid md:grid-cols-2 gap-6">
-              {/* Weight Gain */}
-              <div className="space-y-4">
-                <h4 className="label-text text-status-success text-center">Weight Gain Calories</h4>
-                <CalorieCard label="Mild Gain" value={result + 275} sublabel="+0.25 KG/WEEK" color="text-status-success" />
-                <CalorieCard label="Weight Gain" value={result + 550} sublabel="+0.5 KG/WEEK" color="text-status-success" />
-                <CalorieCard label="Aggressive Gain" value={result + 1100} sublabel="+1 KG/WEEK" color="text-accent" />
-              </div>
-
-              {/* Weight Loss */}
-              <div className="space-y-4">
-                <h4 className="label-text text-accent text-center">Weight Loss Calories</h4>
-                <CalorieCard label="Mild Loss" value={result - 275} sublabel="-0.25 KG/WEEK" color="text-accent" />
-                <CalorieCard label="Weight Loss" value={result - 550} sublabel="-0.5 KG/WEEK" color="text-accent" />
-                <CalorieCard label="Aggressive Loss" value={result - 1100} sublabel="-1 KG/WEEK" color="text-status-danger" />
-              </div>
+            {/* Split Goals */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <CalorieCard
+                label="Weight Loss"
+                value={result - 500}
+                sublabel="-0.5 kg / week"
+                color="text-accent"
+              />
+              <CalorieCard
+                label="Maintenance"
+                value={result}
+                sublabel="Current Weight"
+                color="text-hi"
+              />
+              <CalorieCard
+                label="Muscle Gain"
+                value={result + 300}
+                sublabel="+0.25 kg / week"
+                color="text-hi"
+              />
             </div>
-
-            <p className="text-xs text-low text-center">
-              ⚠️ Aggressive weight changes should be monitored by a healthcare professional
-            </p>
           </div>
           <div className="flex justify-center mt-6">
             <ShareMissionReport targetRef={resultRef} filename="tdee-report" />
@@ -256,17 +231,12 @@ function OneRepMaxCalculator() {
   const [lift, setLift] = useState("");
   const [reps, setReps] = useState(5);
   const [result, setResult] = useState<number | null>(null);
-  const [isComputing, setIsComputing] = useState(false);
   const resultRef = useRef<HTMLDivElement>(null);
 
-  const calculate = async () => {
+  const calculate = () => {
     const w = parseFloat(lift);
     if (w) {
-      setIsComputing(true);
-      // Brief delay so the gears read as "computing"
-      await new Promise((resolve) => setTimeout(resolve, 500));
       setResult(Math.round(w * (1 + reps / 30)));
-      setIsComputing(false);
     }
   };
 
@@ -289,15 +259,8 @@ function OneRepMaxCalculator() {
         <p className="text-xs text-faint uppercase tracking-wider font-medium">Reps drive the strength estimate</p>
       </div>
 
-      <button onClick={calculate} disabled={isComputing} className="btn-primary w-full">
-        {isComputing ? (
-          <span className="inline-flex items-center justify-center gap-3">
-            <CalculatorGears size={20} />
-            <span>Calculating...</span>
-          </span>
-        ) : (
-          "Calculate 1RM"
-        )}
+      <button onClick={calculate} className="btn-primary w-full">
+        Calculate 1RM
       </button>
 
       {result !== null && (
