@@ -31,7 +31,7 @@ export default function ContactForm() {
           </div>
 
           <div className="text-left md:text-right border-l-2 md:border-l-0 md:border-r-2 border-surface-border pl-4 md:pl-0 md:pr-4">
-            <p className="text-sm font-medium text-hi">Lakhnadon &bull; Seoni Road</p>
+            <p className="text-sm font-medium text-hi">Near Civil Court &bull; Lakhnadon</p>
             <p className="text-xs text-mid">Call us, message on WhatsApp, or see our gym on map</p>
           </div>
         </div>
@@ -187,13 +187,13 @@ export default function ContactForm() {
                 <div>
                   <span className="text-xs font-bold text-hi block">Brother&apos;s Fitness Lakhnadon</span>
                   <span className="text-[11px] text-mid block">
-                    Near Civil Court, Seoni Road, Lakhnadon, MP 480886 &bull; brothersfitnesszone@gmail.com
+                    Near Civil Court, Lakhnadon, MP 480886 &bull; brothersfitnesszone@gmail.com
                   </span>
                 </div>
               </div>
 
               <a
-                href="https://www.google.com/maps?q=22.59907,79.61161"
+                href="https://maps.app.goo.gl/hd468i34pgukvZYX8"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="px-4 py-2 text-xs font-bold text-hi bg-surface-soft border border-surface-border hover:border-accent hover:text-accent rounded-full active:scale-95 transition-all flex items-center justify-center gap-1.5 shrink-0 shadow-xs group"
