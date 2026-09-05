@@ -63,7 +63,7 @@ export type NavGroup = {
 
 export const ADMIN_NAV_GROUPS: NavGroup[] = [
   {
-    title: "Management",
+    title: "Gym Actions",
     items: [
       {
         label: "Members",
@@ -89,7 +89,7 @@ export const ADMIN_NAV_GROUPS: NavGroup[] = [
     ],
   },
   {
-    title: "System & Logs",
+    title: "System & History",
     items: [
       {
         label: "Activity Logs",
@@ -102,7 +102,7 @@ export const ADMIN_NAV_GROUPS: NavGroup[] = [
         href: "/admin/settings",
       },
       {
-        label: "Live Site",
+        label: "Open Main Website",
         icon: ExternalLink,
         href: "/",
         external: true,

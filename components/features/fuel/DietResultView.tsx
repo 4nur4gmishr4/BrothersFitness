@@ -118,10 +118,10 @@ export default function DietResultView({
   };
 
   const modeBadge = {
-    bulk: { label: "Muscle Gain Protocol", color: "text-status-warning bg-status-warning/10 border-status-warning/30" },
-    cut: { label: "Fat Shred Protocol", color: "text-status-danger bg-status-danger/10 border-status-danger/30" },
-    maintain: { label: "Performance Maintenance", color: "text-status-success bg-status-success/10 border-status-success/30" },
-  }[mode] || { label: "Nutrition Protocol", color: "text-accent bg-accent/10 border-accent/30" };
+    bulk: { label: "Build Muscle Plan", color: "text-status-warning bg-status-warning/10 border-status-warning/30" },
+    cut: { label: "Lose Weight Plan", color: "text-status-danger bg-status-danger/10 border-status-danger/30" },
+    maintain: { label: "Stay Fit & Maintain Weight", color: "text-status-success bg-status-success/10 border-status-success/30" },
+  }[mode] || { label: "Custom Food Plan", color: "text-accent bg-accent/10 border-accent/30" };
 
   return (
     <div className="space-y-6 select-none animate-fade-in">
@@ -178,7 +178,7 @@ export default function DietResultView({
         <div>
           <div className="flex items-center gap-2 text-accent text-xs font-bold uppercase tracking-widest mb-2">
             <Sparkles className="w-4 h-4" />
-            <span>Personalized Nutrition Strategy</span>
+            <span>Your Custom Food Plan</span>
           </div>
           <p className="text-sm sm:text-base text-hi leading-relaxed font-normal">
             &ldquo;{data.summary[lang]}&rdquo;

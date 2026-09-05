@@ -121,7 +121,7 @@ export default function WorkoutLibrary() {
   if (isLoading && !allExercises) {
     return (
       <div className="flex items-center justify-center py-20 text-accent text-xs tracking-wider animate-pulse font-semibold">
-        LOADING WORKOUT DATABASE...
+        LOADING EXERCISES...
       </div>
     );
   }
@@ -129,7 +129,7 @@ export default function WorkoutLibrary() {
   if (error) {
     return (
       <div className="text-center p-10 surface-card hairline border-status-danger text-status-danger text-xs font-semibold">
-        FAILED TO LOAD EXERCISES. RETRY REQUIRED.
+        COULD NOT LOAD EXERCISES. PLEASE TRY AGAIN.
       </div>
     );
   }
@@ -161,7 +161,7 @@ export default function WorkoutLibrary() {
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-low z-10 pointer-events-none" />
           <input
             type="text"
-            placeholder="Search exercises by name or equipment..."
+            placeholder="Search by exercise name or equipment..."
             value={search}
             onChange={(e) => {
               setSearch(e.target.value);

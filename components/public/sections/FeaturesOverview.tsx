@@ -76,16 +76,16 @@ export default function FeaturesOverview() {
         <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-8 md:mb-10 gap-4">
           <div>
             <p className="text-xs font-semibold tracking-widest text-accent uppercase mb-2">
-              GYM AMENITIES
+              WHAT WE OFFER
             </p>
             <h2 className="heading-display text-4xl md:text-5xl lg:text-6xl text-hi leading-[0.95] tracking-tight uppercase">
-              FACILITIES &amp; <span className="text-accent">FEATURES</span>
+              EVERYTHING IN OUR <span className="text-accent">GYM</span>
             </h2>
           </div>
           
           <div className="text-left md:text-right border-l-2 md:border-l-0 md:border-r-2 border-surface-border pl-4 md:pl-0 md:pr-4">
-            <p className="text-sm font-medium text-hi">6 Dedicated Training Zones</p>
-            <p className="text-xs text-mid">Heavy iron, cardio line &amp; customized nutrition</p>
+            <p className="text-sm font-medium text-hi">6 Great Workout Areas</p>
+            <p className="text-xs text-mid">Weights, running machines, and healthy food plans</p>
           </div>
         </div>
 

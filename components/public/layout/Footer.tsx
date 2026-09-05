@@ -17,6 +17,7 @@ import {
   CreditCard,
   Code2,
   Instagram,
+  Github,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { AnimatedWhatsApp } from "@/components/ui/icons";
@@ -50,37 +51,40 @@ export interface FooterProps {
 
 const defaultBroFitSections: FooterSection[] = [
   {
-    title: "Training",
+    title: "Workouts & Food",
     links: [
-      { name: "Workouts", href: "/workouts", icon: Dumbbell },
+      { name: "All Workouts", href: "/workouts", icon: Dumbbell },
       { name: "Meal Planner", href: "/fuel", icon: Flame },
-      { name: "Calculators", href: "/calculators", icon: Calculator },
+      { name: "Body Calculators", href: "/calculators", icon: Calculator },
+      { name: "Awards & Badges", href: "/trophy-room", icon: Trophy },
+      { name: "Gym Passes & Prices", href: "/pricing", icon: CreditCard },
+      { name: "Daily Motivation", href: "/quotes", icon: Quote },
     ],
   },
   {
-    title: "Community",
+    title: "Gym Location & Hours",
     links: [
-      { name: "Awards", href: "/trophy-room", icon: Trophy },
-      { name: "Quotes", href: "/quotes", icon: Quote },
-      { name: "Membership Plans", href: "/pricing", icon: CreditCard },
+      { name: "Near Civil Court, Seoni Road", href: "https://maps.google.com/?q=Brothers+Fitness+Lakhnadon", external: true, icon: MapPin },
+      { name: "Mon – Sat: 6:00 AM – 10:00 PM", href: "https://maps.google.com/?q=Brothers+Fitness+Lakhnadon", external: true, icon: Clock },
+      { name: "Women's Batch: 4:30 – 6:30 PM", href: "#timings", icon: Clock },
+      { name: "Sunday: Rest Day (Closed)", href: "#timings", icon: Clock },
     ],
   },
   {
-    title: "Gym Contact",
+    title: "Coaches & Direct Contact",
     links: [
-      { name: "Lakhnadon, MP", href: "https://maps.google.com/?q=Brothers+Fitness+Lakhnadon", external: true, icon: MapPin },
-      { name: "Aman: 91311 79343", href: "tel:+919131179343", external: true, icon: Phone },
-      { name: "Pradeep: 91312 72754", href: "tel:+919131272754", external: true, icon: Phone },
-      { name: "Mon-Sat: 6 AM – 10 PM", href: "#", icon: Clock },
-    ],
-  },
-  {
-    title: "Get In Touch",
-    links: [
-      { name: "Email Us", href: "mailto:brothersfitnesszone@gmail.com", external: true, icon: Mail },
+      { name: "Coach Aman: 91311 79343", href: "tel:+919131179343", external: true, icon: Phone },
+      { name: "Coach Pradeep: 91312 72754", href: "tel:+919131272754", external: true, icon: Phone },
+      { name: "Gym Email", href: "mailto:brothersfitnesszone@gmail.com", external: true, icon: Mail },
       { name: "Gym Instagram", href: "https://www.instagram.com/brothers_fitness_17", external: true, icon: Instagram },
-      { name: "Coach WhatsApp", href: "https://wa.me/919131179343", external: true, icon: AnimatedWhatsApp },
-      { name: "Developer: Anurag Mishra", href: "https://wa.me/919302786886?text=Hi%20Anurag", external: true, icon: Code2 },
+    ],
+  },
+  {
+    title: "Developer & Engineering",
+    links: [
+      { name: "Anurag Mishra (Lead Dev)", href: "https://github.com/4nur4gmishr4", external: true, icon: Code2 },
+      { name: "GitHub Source Code", href: "https://github.com/4nur4gmishr4/BrothersFitness", external: true, icon: Github },
+      { name: "WhatsApp Developer", href: "https://wa.me/919302786886?text=Hi%20Anurag", external: true, icon: AnimatedWhatsApp },
       { name: "Developer Email", href: "mailto:anurag.mishra.core@gmail.com", external: true, icon: Mail },
     ],
   },
@@ -94,7 +98,7 @@ const defaultProps: FooterProps = {
     title: "Brother's Fitness",
   },
   description:
-    "Modern gym workouts, personalized meal plans, and easy fitness tools for Brother's Fitness in Lakhnadon.",
+    "Easy gym workouts, custom meal plans, and simple fitness tools for Brother's Fitness in Lakhnadon.",
   sections: defaultBroFitSections,
   copyright: `© ${new Date().getFullYear()} BROTHER'S FITNESS • ALL RIGHTS RESERVED`,
 };
@@ -214,8 +218,69 @@ export const Footer = (props: Partial<FooterProps>) => {
 
         </div>
 
+        {/* Bottom Quick Action Dock: Center-aligned, simple, unique & tactile */}
+        <div className="mt-10 pt-6 border-t border-surface-border/70 flex flex-col items-center justify-center gap-3">
+          <div className="inline-flex items-center gap-2 sm:gap-3 p-1.5 rounded-2xl bg-surface-card border border-surface-border shadow-xs overflow-x-auto max-w-full">
+            <a
+              href="tel:+919131179343"
+              className="px-3 py-2 rounded-xl bg-surface-soft border border-surface-border text-mid hover:text-[#007AFF] hover:border-[#007AFF]/40 hover:bg-[#007AFF]/10 active:scale-95 transition-all flex items-center gap-1.5 text-xs font-semibold shadow-xs shrink-0"
+              title="Call Gym (+91 91311 79343)"
+              aria-label="Call Gym"
+            >
+              <Phone className="w-3.5 h-3.5" />
+              <span>Call</span>
+            </a>
+
+            <a
+              href="https://wa.me/919131179343"
+              target="_blank"
+              rel="noreferrer"
+              className="px-3 py-2 rounded-xl bg-surface-soft border border-surface-border text-mid hover:text-[#25D366] hover:border-[#25D366]/40 hover:bg-[#25D366]/10 active:scale-95 transition-all flex items-center gap-1.5 text-xs font-semibold shadow-xs shrink-0"
+              title="WhatsApp Gym (+91 91311 79343)"
+              aria-label="WhatsApp Gym"
+            >
+              <AnimatedWhatsApp size={14} />
+              <span>WhatsApp</span>
+            </a>
+
+            <a
+              href="https://www.instagram.com/brothers_fitness_17"
+              target="_blank"
+              rel="noreferrer"
+              className="px-3 py-2 rounded-xl bg-surface-soft border border-surface-border text-mid hover:text-[#E1306C] hover:border-[#E1306C]/40 hover:bg-[#E1306C]/10 active:scale-95 transition-all flex items-center gap-1.5 text-xs font-semibold shadow-xs shrink-0"
+              title="Gym Instagram (@brothers_fitness_17)"
+              aria-label="Gym Instagram"
+            >
+              <Instagram className="w-3.5 h-3.5" />
+              <span>Instagram</span>
+            </a>
+
+            <a
+              href="https://github.com/4nur4gmishr4/BrothersFitness"
+              target="_blank"
+              rel="noreferrer"
+              className="px-3 py-2 rounded-xl bg-surface-soft border border-surface-border text-mid hover:text-hi hover:border-hi/40 hover:bg-surface-elevated active:scale-95 transition-all flex items-center gap-1.5 text-xs font-semibold shadow-xs shrink-0"
+              title="GitHub Code Repository"
+              aria-label="GitHub Repository"
+            >
+              <Github className="w-3.5 h-3.5" />
+              <span>GitHub</span>
+            </a>
+
+            <a
+              href="mailto:brothersfitnesszone@gmail.com"
+              className="px-3 py-2 rounded-xl bg-surface-soft border border-surface-border text-mid hover:text-accent hover:border-accent/40 hover:bg-accent/10 active:scale-95 transition-all flex items-center gap-1.5 text-xs font-semibold shadow-xs shrink-0"
+              title="Email Gym (brothersfitnesszone@gmail.com)"
+              aria-label="Email Gym"
+            >
+              <Mail className="w-3.5 h-3.5" />
+              <span>Mail</span>
+            </a>
+          </div>
+        </div>
+
         {/* Bottom Sub-strip */}
-        <div className="mt-12 pt-6 border-t border-surface-border flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-mid">
+        <div className="mt-6 pt-4 border-t border-surface-border/50 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-mid">
           <p className="flex items-center gap-2">
             <span>{copyright}</span>
           </p>

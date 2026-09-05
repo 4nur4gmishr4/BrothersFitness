@@ -9,6 +9,8 @@ import {
   Clock,
   Navigation,
   CheckCircle2,
+  Mail,
+  Instagram,
 } from "lucide-react";
 import { toast } from "sonner";
 import { AnimatedPhone, AnimatedWhatsApp } from "@/components/ui/icons";
@@ -21,16 +23,16 @@ export default function ContactForm() {
         <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-8 md:mb-10 gap-4">
           <div>
             <p className="text-xs font-semibold tracking-widest text-accent uppercase mb-2">
-              HEADQUARTERS &amp; INQUIRIES
+              GYM LOCATION &amp; CONTACT US
             </p>
             <h2 className="heading-display text-4xl md:text-5xl lg:text-6xl text-hi leading-[0.95] tracking-tight uppercase">
-              FIND US &amp; <span className="text-accent">CONNECT</span>
+              VISIT US &amp; <span className="text-accent">GET IN TOUCH</span>
             </h2>
           </div>
 
           <div className="text-left md:text-right border-l-2 md:border-l-0 md:border-r-2 border-surface-border pl-4 md:pl-0 md:pr-4">
-            <p className="text-sm font-medium text-hi">Lakhnadon Branch &bull; Seoni Road</p>
-            <p className="text-xs text-mid">Instant WhatsApp inquiries, phone calls &amp; direct GPS navigation</p>
+            <p className="text-sm font-medium text-hi">Lakhnadon &bull; Seoni Road</p>
+            <p className="text-xs text-mid">Call us, message on WhatsApp, or see our gym on map</p>
           </div>
         </div>
 
@@ -41,9 +43,9 @@ export default function ContactForm() {
             <div>
               <div className="flex items-center justify-between mb-4">
                 <span className="text-xs font-bold uppercase tracking-widest text-accent">
-                  Direct Coach Access
+                  Talk To Our Coaches
                 </span>
-                <span className="text-[11px] font-semibold text-mid">Avg response: &lt;15 mins</span>
+                <span className="text-[11px] font-semibold text-mid">Quick reply in 15 minutes</span>
               </div>
 
               {/* Coach Cards */}
@@ -52,27 +54,45 @@ export default function ContactForm() {
                 <div className="p-3.5 rounded-xl bg-surface-soft border border-surface-border flex flex-col justify-between hover:border-accent/40 transition-all duration-150">
                   <div className="mb-3">
                     <span className="text-xs font-bold text-hi block">Aman Shrivastava</span>
-                    <span className="text-[11px] text-mid">Head Coach &bull; CSCS</span>
+                    <span className="text-[11px] text-mid">Head Coach &bull; Founder</span>
                     <span className="text-[11px] font-medium text-hi mt-1 block">+91 91311 79343</span>
                   </div>
-                  <div className="flex items-center gap-2 pt-2 border-t border-surface-border/60">
+                  <div className="grid grid-cols-4 gap-1.5 pt-2 border-t border-surface-border/60">
                     <a
                       href="tel:+919131179343"
-                      className="flex-1 py-1.5 px-2 text-xs font-semibold bg-surface-card border border-surface-border text-hi hover:text-accent hover:border-accent/50 rounded-lg active:scale-95 transition-all flex items-center justify-center gap-1.5 shadow-xs"
-                      title="Call Aman"
+                      className="py-1.5 px-1 text-xs font-semibold bg-surface-card border border-surface-border text-hi hover:text-[#007AFF] hover:border-[#007AFF]/50 rounded-lg active:scale-95 transition-all flex items-center justify-center shadow-xs"
+                      title="Call Aman (+91 91311 79343)"
+                      aria-label="Call Aman"
                     >
-                      <AnimatedPhone size={13} />
-                      <span>Call</span>
+                      <AnimatedPhone size={14} />
                     </a>
                     <a
                       href="https://wa.me/919131179343?text=Hi%20Aman,%20I%20want%20to%20inquire%20about%20Brother's%20Fitness%20membership!"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex-1 py-1.5 px-2 text-xs font-semibold bg-[#25D366]/10 border border-[#25D366]/30 text-[#25D366] hover:bg-[#25D366]/20 rounded-lg active:scale-95 transition-all flex items-center justify-center gap-1.5 shadow-xs"
+                      className="py-1.5 px-1 text-xs font-semibold bg-[#25D366]/10 border border-[#25D366]/30 text-[#25D366] hover:bg-[#25D366]/20 rounded-lg active:scale-95 transition-all flex items-center justify-center shadow-xs"
                       title="WhatsApp Aman"
+                      aria-label="WhatsApp Aman"
                     >
-                      <AnimatedWhatsApp size={13} />
-                      <span>WhatsApp</span>
+                      <AnimatedWhatsApp size={14} />
+                    </a>
+                    <a
+                      href="https://www.instagram.com/aman_shrivastavaaa72"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="py-1.5 px-1 text-xs font-semibold bg-[#E1306C]/10 border border-[#E1306C]/30 text-[#E1306C] hover:bg-[#E1306C]/20 rounded-lg active:scale-95 transition-all flex items-center justify-center shadow-xs"
+                      title="Aman on Instagram"
+                      aria-label="Aman Instagram"
+                    >
+                      <Instagram className="w-3.5 h-3.5" />
+                    </a>
+                    <a
+                      href="mailto:brothersfitnesszone@gmail.com?subject=Message%20for%20Coach%20Aman"
+                      className="py-1.5 px-1 text-xs font-semibold bg-accent/10 border border-accent/30 text-accent hover:bg-accent/20 rounded-lg active:scale-95 transition-all flex items-center justify-center shadow-xs"
+                      title="Email Coach Aman"
+                      aria-label="Email Aman"
+                    >
+                      <Mail className="w-3.5 h-3.5" />
                     </a>
                   </div>
                 </div>
@@ -81,27 +101,45 @@ export default function ContactForm() {
                 <div className="p-3.5 rounded-xl bg-surface-soft border border-surface-border flex flex-col justify-between hover:border-accent/40 transition-all duration-150">
                   <div className="mb-3">
                     <span className="text-xs font-bold text-hi block">Pradeep Shrivastava</span>
-                    <span className="text-[11px] text-mid">Senior Trainer &bull; Strength</span>
+                    <span className="text-[11px] text-mid">Senior Trainer &bull; Co-Founder</span>
                     <span className="text-[11px] font-medium text-hi mt-1 block">+91 91312 72754</span>
                   </div>
-                  <div className="flex items-center gap-2 pt-2 border-t border-surface-border/60">
+                  <div className="grid grid-cols-4 gap-1.5 pt-2 border-t border-surface-border/60">
                     <a
                       href="tel:+919131272754"
-                      className="flex-1 py-1.5 px-2 text-xs font-semibold bg-surface-card border border-surface-border text-hi hover:text-accent hover:border-accent/50 rounded-lg active:scale-95 transition-all flex items-center justify-center gap-1.5 shadow-xs"
-                      title="Call Pradeep"
+                      className="py-1.5 px-1 text-xs font-semibold bg-surface-card border border-surface-border text-hi hover:text-[#007AFF] hover:border-[#007AFF]/50 rounded-lg active:scale-95 transition-all flex items-center justify-center shadow-xs"
+                      title="Call Pradeep (+91 91312 72754)"
+                      aria-label="Call Pradeep"
                     >
-                      <AnimatedPhone size={13} />
-                      <span>Call</span>
+                      <AnimatedPhone size={14} />
                     </a>
                     <a
                       href="https://wa.me/919131272754?text=Hi%20Pradeep,%20I%20want%20to%20inquire%20about%20training%20at%20Brother's%20Fitness!"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex-1 py-1.5 px-2 text-xs font-semibold bg-[#25D366]/10 border border-[#25D366]/30 text-[#25D366] hover:bg-[#25D366]/20 rounded-lg active:scale-95 transition-all flex items-center justify-center gap-1.5 shadow-xs"
+                      className="py-1.5 px-1 text-xs font-semibold bg-[#25D366]/10 border border-[#25D366]/30 text-[#25D366] hover:bg-[#25D366]/20 rounded-lg active:scale-95 transition-all flex items-center justify-center shadow-xs"
                       title="WhatsApp Pradeep"
+                      aria-label="WhatsApp Pradeep"
                     >
-                      <AnimatedWhatsApp size={13} />
-                      <span>WhatsApp</span>
+                      <AnimatedWhatsApp size={14} />
+                    </a>
+                    <a
+                      href="https://www.instagram.com/brothers_fitness_17"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="py-1.5 px-1 text-xs font-semibold bg-[#E1306C]/10 border border-[#E1306C]/30 text-[#E1306C] hover:bg-[#E1306C]/20 rounded-lg active:scale-95 transition-all flex items-center justify-center shadow-xs"
+                      title="Gym & Trainer Instagram"
+                      aria-label="Trainer Instagram"
+                    >
+                      <Instagram className="w-3.5 h-3.5" />
+                    </a>
+                    <a
+                      href="mailto:brothersfitnesszone@gmail.com?subject=Message%20for%20Coach%20Pradeep"
+                      className="py-1.5 px-1 text-xs font-semibold bg-accent/10 border border-accent/30 text-accent hover:bg-accent/20 rounded-lg active:scale-95 transition-all flex items-center justify-center shadow-xs"
+                      title="Email Coach Pradeep"
+                      aria-label="Email Pradeep"
+                    >
+                      <Mail className="w-3.5 h-3.5" />
                     </a>
                   </div>
                 </div>
@@ -120,13 +158,13 @@ export default function ContactForm() {
                 <span className="w-2.5 h-2.5 rounded-full bg-status-success shrink-0" />
                 <div className="truncate">
                   <span className="text-xs font-bold text-hi block truncate">Lakhnadon Branch Open</span>
-                  <span className="text-[11px] text-mid truncate block">Open Today &bull; Closes 10:00 PM</span>
+                  <span className="text-[11px] text-mid truncate block">Mon–Sat 6:00 AM – 10:00 PM &bull; Sun Closed</span>
                 </div>
               </div>
 
               <div className="flex items-center gap-1.5 text-xs text-mid shrink-0">
                 <Clock className="w-3.5 h-3.5 text-accent" />
-                <span className="font-semibold text-hi">6:00 AM – 10:00 PM</span>
+                <span className="font-semibold text-hi">Women: 4:30 – 6:30 PM</span>
               </div>
             </div>
 
@@ -147,9 +185,9 @@ export default function ContactForm() {
               <div className="flex items-start gap-2.5 min-w-0">
                 <MapPin className="w-4 h-4 text-accent shrink-0 mt-0.5" />
                 <div>
-                  <span className="text-xs font-bold text-hi block">Brother&apos;s Fitness Gymnasium</span>
+                  <span className="text-xs font-bold text-hi block">Brother&apos;s Fitness Lakhnadon</span>
                   <span className="text-[11px] text-mid block">
-                    Near Civil Court, Seoni Road, Lakhnadon, MP 480886
+                    Near Civil Court, Seoni Road, Lakhnadon, MP 480886 &bull; brothersfitnesszone@gmail.com
                   </span>
                 </div>
               </div>
@@ -196,11 +234,11 @@ function ContactFormLogic() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to send message");
 
-      toast.success("Inquiry sent successfully! Coach Aman will get in touch shortly.");
+      toast.success("Message sent! Coach Aman will reply shortly.");
       setSubmitted(true);
       setFormData({ name: "", email: "", phone: "", message: "" });
     } catch (err: unknown) {
-      toast.error((err as Error).message || "Failed to send inquiry. Please try again or WhatsApp directly.");
+      toast.error((err as Error).message || "Could not send message. Please try again or message on WhatsApp.");
     } finally {
       setLoading(false);
     }
@@ -210,15 +248,15 @@ function ContactFormLogic() {
     return (
       <div className="p-5 rounded-xl bg-surface-soft border border-status-success/30 text-center space-y-2 animate-fade-in">
         <CheckCircle2 className="w-6 h-6 text-status-success mx-auto" />
-        <h4 className="font-bold text-sm text-hi">Inquiry Received</h4>
+        <h4 className="font-bold text-sm text-hi">Message Sent!</h4>
         <p className="text-xs text-mid leading-relaxed">
-          Thank you for reaching out. We will review your inquiry and message you on WhatsApp or call you shortly.
+          Thank you! We will message you on WhatsApp or call you shortly.
         </p>
         <button
           onClick={() => setSubmitted(false)}
           className="text-xs font-semibold text-accent hover:underline pt-2 inline-block"
         >
-          Send another inquiry
+          Send another message
         </button>
       </div>
     );
@@ -228,9 +266,9 @@ function ContactFormLogic() {
     <form onSubmit={handleSubmit} className="space-y-3 pt-4 border-t border-surface-border/70">
       <div className="flex items-center justify-between mb-1">
         <span className="text-xs font-bold uppercase tracking-widest text-hi">
-          Send a Direct Message
+          Send Us A Message
         </span>
-        <span className="text-[10px] text-mid uppercase tracking-wide">All fields secure</span>
+        <span className="text-[10px] text-mid uppercase tracking-wide">Your info is safe</span>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
@@ -266,7 +304,7 @@ function ContactFormLogic() {
         onChange={(e) => setFormData({ ...formData, message: e.target.value })}
         rows={3}
         className="w-full px-3.5 py-2.5 text-xs rounded-xl bg-surface-soft border border-surface-border text-hi placeholder:text-mid/60 focus:outline-none focus:border-accent transition-colors resize-none"
-        placeholder="What is your fitness goal or membership question? *"
+        placeholder="Ask your question or tell us what you need *"
       />
 
       <button
@@ -277,11 +315,11 @@ function ContactFormLogic() {
         {loading ? (
           <>
             <Loader2 className="w-3.5 h-3.5 animate-spin" />
-            <span>Sending Inquiry...</span>
+            <span>Sending Message...</span>
           </>
         ) : (
           <>
-            <span>Submit Inquiry</span>
+            <span>Send Message</span>
             <Send className="w-3.5 h-3.5" />
           </>
         )}

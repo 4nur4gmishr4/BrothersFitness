@@ -156,8 +156,8 @@ export default function AdminActivityPage() {
   return (
     <div className="p-4 sm:p-6 lg:p-8 max-w-[1600px] w-full mx-auto space-y-6">
       <PageHeader
-        title="Activity Audit Log"
-        subtitle="Clean immutable chronological record of all member registrations, modifications, and security events."
+        title="Activity Log"
+        subtitle="Clean history of all member signups, edits, and staff actions."
         icon={Clock}
         actions={
           <button
@@ -172,18 +172,18 @@ export default function AdminActivityPage() {
       />
 
       {loading ? (
-        <AdminLoader text="Loading audit stream…" />
+        <AdminLoader text="Loading recent activity…" />
       ) : error ? (
         <div className="rounded-2xl border border-red-500/30 bg-red-500/5 p-6 text-center shadow-sm">
           <AlertCircle className="w-10 h-10 text-red-500 mx-auto mb-3" />
-          <div className="font-semibold text-lg text-red-500 mb-1">Failed to load audit logs</div>
+          <div className="font-semibold text-lg text-red-500 mb-1">Failed to load activity log</div>
           <div className="text-sm text-zinc-400 mb-4">{error}</div>
           <button
             type="button"
             onClick={fetchLogs}
             className="px-4 py-2 rounded-xl border border-surface-border bg-surface-card text-xs font-medium text-hi"
           >
-            Retry
+            Try Again
           </button>
         </div>
       ) : (
@@ -193,14 +193,14 @@ export default function AdminActivityPage() {
             <StatCard
               label="Total Events"
               value={<CountUp to={logs.length} />}
-              sublabel="All recorded actions"
+              sublabel="All actions done"
               icon={FileText}
               variant="info"
             />
             <StatCard
               label="Member Creates"
               value={<CountUp to={counts.CREATE || 0} />}
-              sublabel="New registrations"
+              sublabel="New members added"
               icon={Plus}
               variant="success"
               onClick={() => setActionFilter("CREATE")}
@@ -208,7 +208,7 @@ export default function AdminActivityPage() {
             <StatCard
               label="Profile Updates"
               value={<CountUp to={counts.UPDATE || 0} />}
-              sublabel="Plan & detail edits"
+              sublabel="Changes to member info"
               icon={Edit2}
               variant="accent"
               onClick={() => setActionFilter("UPDATE")}
@@ -216,7 +216,7 @@ export default function AdminActivityPage() {
             <StatCard
               label="Deletions"
               value={<CountUp to={counts.DELETE || 0} />}
-              sublabel="Removed records"
+              sublabel="Deleted members"
               icon={Trash2}
               variant="danger"
               onClick={() => setActionFilter("DELETE")}

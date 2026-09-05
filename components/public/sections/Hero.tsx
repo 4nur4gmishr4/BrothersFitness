@@ -52,16 +52,16 @@ export default function Hero() {
             </div>
 
             <div className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-semibold text-hi/90 tracking-tight leading-snug flex flex-wrap items-center gap-x-2.5 sm:gap-x-3">
-              <span className="text-mid font-medium">Lakhnadon&apos;s Premier Center for</span>
+              <span className="text-mid font-medium">Lakhnadon&apos;s Best Place for</span>
               <RotatingText
                 texts={[
                   "Strength Training",
                   "Personal Coaching",
                   "Dedicated Women's Batches",
-                  "Custom Nutrition Plans",
-                  "Heavy Iron Powerlifting",
-                  "Fat Loss & Conditioning",
-                  "Functional Athletics",
+                  "Healthy Food Plans",
+                  "Heavy Iron Lifting",
+                  "Losing Fat & Getting Fit",
+                  "Staying Fit & Active",
                   "Muscle Building",
                 ]}
                 rotationInterval={3000}
@@ -113,7 +113,7 @@ export default function Hero() {
               className="inline-flex items-center justify-center gap-2 px-5 sm:px-8 py-3.5 sm:py-4 text-sm sm:text-base font-medium text-hi bg-surface-card border border-surface-border hover:bg-surface-elevated hover:border-surface-border/90 rounded-full active:scale-[0.97] transition-all duration-150 shadow-sm"
             >
               <Clock className="w-4 h-4 text-accent" />
-              <span>View Operating Hours</span>
+              <span>Check Gym Timings</span>
             </Link>
           </motion.div>
 

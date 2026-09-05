@@ -432,7 +432,7 @@ function AdminMembersPageInner() {
     <div className="p-4 sm:p-6 lg:p-8 max-w-[1600px] w-full mx-auto">
       <PageHeader
         title="Members"
-        subtitle={`Manage ${counts.total} gym members. Register new joiners, renew plans, send receipts, and fix incomplete profiles.`}
+        subtitle={`See and manage all ${counts.total} gym members. Add new people, renew plans, send bills, and fill missing details.`}
         icon={Users}
         actions={
           <>
@@ -450,11 +450,11 @@ function AdminMembersPageInner() {
               type="button"
               onClick={handleExport}
               className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-surface-border bg-surface-card hover:bg-surface-elevated text-xs font-medium text-mid hover:text-hi transition-colors shadow-sm disabled:opacity-50"
-              title="Export filtered members as CSV"
+              title="Download filtered members list"
               disabled={filtered.length === 0}
             >
               <FileDown className="w-3.5 h-3.5 text-low" />
-              <span className="hidden sm:inline">Export CSV</span>
+              <span className="hidden sm:inline">Download List</span>
             </button>
             <button
               type="button"
@@ -462,7 +462,7 @@ function AdminMembersPageInner() {
               className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-accent hover:bg-accent-hover text-white text-xs font-semibold tracking-wide transition-all shadow-md active:scale-95"
             >
               <UserPlus className="w-3.5 h-3.5" />
-              <span>Register Member</span>
+              <span>+ Add Member</span>
             </button>
           </>
         }

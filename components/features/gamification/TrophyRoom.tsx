@@ -292,10 +292,10 @@ export default function TrophyRoom(props: { isModal?: boolean; isPage?: boolean;
       <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-10 md:mb-14 gap-6 pb-8 border-b border-surface-border/70">
         <div>
           <span className="text-xs uppercase tracking-widest text-accent mb-2 block font-semibold">
-            FITNESS AWARDS &amp; ACHIEVEMENTS
+            FITNESS AWARDS &amp; BADGES
           </span>
           <h1 className="heading-display text-4xl sm:text-6xl md:text-7xl text-hi leading-[0.95] tracking-tight uppercase">
-            MEMBER <span className="text-accent">AWARDS</span>
+            AWARDS &amp; <span className="text-accent">TROPHIES</span>
           </h1>
         </div>
 

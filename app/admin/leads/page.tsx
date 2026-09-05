@@ -218,14 +218,14 @@ export default function AdminMessagesPage() {
         <div className="flex-1 flex items-center justify-center p-6 text-center">
           <div className="max-w-md p-6 rounded-2xl bg-white dark:bg-[#17212b] border border-[#dfe1e5] dark:border-[#232e3c] space-y-4 shadow-lg">
             <AlertCircle className="w-10 h-10 text-red-500 mx-auto" />
-            <div className="text-zinc-900 dark:text-white font-semibold">Failed to load messages</div>
+            <div className="text-zinc-900 dark:text-white font-semibold">Could not load messages</div>
             <div className="text-xs text-[#707579] dark:text-[#708499]">{error}</div>
             <button
               type="button"
               onClick={fetchMessages}
               className="px-4 py-2 rounded-xl bg-[#3390ec] hover:bg-[#2b7dd1] dark:bg-[#2481cc] dark:hover:bg-[#2074b8] text-white text-xs font-semibold transition-colors shadow-sm"
             >
-              Retry Connection
+              Try Again
             </button>
           </div>
         </div>
@@ -344,7 +344,7 @@ export default function AdminMessagesPage() {
                                 : "text-[#707579] dark:text-[#708499]"
                             )}
                           >
-                            {item.message || "Contact Form Inquiry"}
+                            {item.message || "Website Message"}
                           </p>
 
                           {/* Unread Badge Pill */}
@@ -405,7 +405,7 @@ export default function AdminMessagesPage() {
                     <a
                       href={`tel:${selected.phone}`}
                       className="p-2 rounded-full hover:bg-[#f1f3f4] dark:hover:bg-[#242f3d] text-[#707579] dark:text-[#708499] hover:text-[#000000] dark:hover:text-white transition-colors"
-                      title="Call customer"
+                      title="Call person"
                     >
                       <Phone className="w-4 h-4" />
                     </a>
@@ -414,7 +414,7 @@ export default function AdminMessagesPage() {
                       type="button"
                       onClick={() => setDeletingId(selected.id)}
                       className="p-2 rounded-full hover:bg-red-50 dark:hover:bg-red-950/30 text-[#707579] dark:text-[#708499] hover:text-red-500 transition-colors"
-                      title="Delete conversation"
+                      title="Delete message"
                     >
                       <Trash2 className="w-4 h-4" />
                     </button>

@@ -261,14 +261,14 @@ function FuelSynthesizerContent() {
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-10 md:mb-14 gap-6 pb-8 border-b border-surface-border/70">
                     <div>
                         <span className="text-xs uppercase tracking-widest text-accent mb-2 block font-semibold">
-                            PERSONALIZED NUTRITION &amp; MEAL PLANNER
+                            CUSTOM FOOD &amp; MEAL PLANNER
                         </span>
                         <h1 className="heading-display text-4xl sm:text-6xl md:text-7xl text-hi leading-[0.95] tracking-tight uppercase">
-                            DIET &amp; <span className="text-accent">NUTRITION</span>
+                            FOOD &amp; <span className="text-accent">MEAL PLANS</span>
                         </h1>
                         {user && (
                             <div className="mt-3 flex items-center gap-2">
-                                <span className="text-xs text-mid font-medium">Daily AI Generation Credits:</span>
+                                <span className="text-xs text-mid font-medium">Daily Plan Making Credits:</span>
                                 <span className={`text-xs font-bold tabular-nums ${user.daily_credits > 0 ? "text-hi" : "text-status-danger"}`}>
                                     {user.daily_credits}/{MAX_DAILY_CREDITS} CREDITS
                                 </span>
@@ -278,8 +278,8 @@ function FuelSynthesizerContent() {
 
                     <div className="flex items-center gap-6">
                         <div className="text-left md:text-right border-l-2 md:border-l-0 md:border-r-2 border-surface-border pl-4 md:pl-0 md:pr-4">
-                            <p className="text-sm font-medium text-hi">Targeted Meal Plans</p>
-                            <p className="text-xs text-mid">Calorie targets, macro breakdown &amp; grocery lists</p>
+                            <p className="text-sm font-medium text-hi">Easy Meal Plans</p>
+                            <p className="text-xs text-mid">Calorie targets, food breakdown &amp; grocery lists</p>
                         </div>
                     </div>
                 </div>
@@ -318,16 +318,16 @@ function FuelSynthesizerContent() {
 
                             {/* Weight Goal & Calorie Calculation Section */}
                             <div className="hairline-t pt-6 mt-6">
-                                <h3 className="label-text text-accent text-sm uppercase tracking-widest mb-4">Goal & Calorie Target</h3>
+                                <h3 className="label-text text-accent text-sm uppercase tracking-widest mb-4">Your Goal &amp; Calories</h3>
 
                                 <div className="max-w-md">
                                     {/* Rate Selection */}
-                                    <label className="block text-xs label-text text-faint uppercase tracking-widest mb-3">Rate of Change (per week) <span className="text-accent">*</span></label>
+                                    <label className="block text-xs label-text text-faint uppercase tracking-widest mb-3">How Fast To Change (per week) <span className="text-accent">*</span></label>
                                     <div className="space-y-2">
                                         {[
                                             { value: "0.25", label: "0.25 kg/week (Slow & Steady)" },
                                             { value: "0.5", label: "0.5 kg/week (Recommended)" },
-                                            { value: "1", label: "1 kg/week (Aggressive)" }
+                                            { value: "1", label: "1 kg/week (Fast & Hard)" }
                                         ].map((option) => (
                                             <label key={option.value} className="flex items-center gap-3 cursor-pointer group">
                                                 <input
@@ -352,11 +352,11 @@ function FuelSynthesizerContent() {
                                     <div>
                                         <label className="block label-text text-xs text-faint uppercase tracking-widest mb-2">Activity Level <span className="text-accent">*</span></label>
                                         <select value={activityLevel} onChange={(e) => setActivityLevel(e.target.value)} className="input-field w-full p-4">
-                                            <option>Sedentary (Office Job)</option>
-                                            <option>Light (Exercise 1-3 days)</option>
-                                            <option>Moderate (Exercise 3-5 days)</option>
-                                            <option>Active (Exercise 6-7 days)</option>
-                                            <option>Athlete (2x Training)</option>
+                                            <option>Sitting mostly (No workout)</option>
+                                            <option>Light (Exercise 1-3 days a week)</option>
+                                            <option>Moderate (Exercise 3-5 days a week)</option>
+                                            <option>Active (Exercise 6-7 days a week)</option>
+                                            <option>Very Active (Work out 2 times a day)</option>
                                         </select>
                                     </div>
                                     <div>
@@ -371,7 +371,7 @@ function FuelSynthesizerContent() {
                                             <option value="Non-Vegetarian">Non-Vegetarian (Chicken, Fish, Eggs)</option>
                                             <option value="Vegan">Vegan (100% Plant Based)</option>
                                             <option value="Jain">Jain (Pure Veg, No Root Veg)</option>
-                                            <option value="Everything">Everything (Standard Omnivore)</option>
+                                            <option value="Everything">Everything (All Foods - Veg &amp; Non-Veg)</option>
                                         </select>
                                     </div>
                                     <div>

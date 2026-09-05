@@ -20,7 +20,7 @@ export default function Diagnostics() {
         <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-10 md:mb-14 gap-6 pb-8 border-b border-surface-border/70">
           <div>
             <span className="text-xs uppercase tracking-widest text-accent mb-2 block font-semibold">
-              FITNESS TOOLS &amp; CALCULATORS
+              BODY &amp; FITNESS CALCULATORS
             </span>
             <h1 className="heading-display text-4xl sm:text-6xl md:text-7xl text-hi leading-[0.95] tracking-tight uppercase">
               FITNESS <span className="text-accent">CALCULATORS</span>
@@ -29,7 +29,7 @@ export default function Diagnostics() {
 
           <div className="text-left md:text-right border-l-2 md:border-l-0 md:border-r-2 border-surface-border pl-4 md:pl-0 md:pr-4">
             <p className="text-sm font-medium text-hi">Easy Body Calculators</p>
-            <p className="text-xs text-mid">Check your BMI, daily calorie needs &amp; lift strength</p>
+            <p className="text-xs text-mid">Check your BMI, daily calories needed &amp; lifting power</p>
           </div>
         </div>
 
@@ -38,7 +38,7 @@ export default function Diagnostics() {
           {[
             { id: "bmi", label: "BMI", icon: <Activity className="w-4 h-4" /> },
             { id: "tdee", label: "Daily Calories", icon: <Flame className="w-4 h-4" /> },
-            { id: "1rm", label: "Max Strength", icon: <Dumbbell className="w-4 h-4" /> },
+            { id: "1rm", label: "Max Lifting Power", icon: <Dumbbell className="w-4 h-4" /> },
           ].map((tab) => (
             <button
               key={tab.id}
@@ -170,11 +170,11 @@ function TDEECalculator() {
           onChange={(e) => setActivity(e.target.value)}
           className="input-field"
         >
-          <option value="1.2">Sedentary (Office Job)</option>
-          <option value="1.375">Light (Exercise 1-3 days)</option>
-          <option value="1.55">Moderate (Exercise 3-5 days)</option>
-          <option value="1.725">Active (Exercise 6-7 days)</option>
-          <option value="1.9">Athlete (2x Training)</option>
+          <option value="1.2">Sitting mostly (No workout)</option>
+          <option value="1.375">Light (Exercise 1-3 days a week)</option>
+          <option value="1.55">Moderate (Exercise 3-5 days a week)</option>
+          <option value="1.725">Active (Exercise 6-7 days a week)</option>
+          <option value="1.9">Very Active (Work out 2 times a day)</option>
         </select>
       </div>
 
@@ -190,7 +190,7 @@ function TDEECalculator() {
             <div className="text-center p-6 surface-card hairline border-accent">
               <p className="label-text text-mid mb-2">Maintenance Calories</p>
               <p className="text-stat-lg font-display text-hi">{result}</p>
-              <p className="label-text text-faint mt-2">KCALS/DAY TO MAINTAIN WEIGHT</p>
+              <p className="label-text text-faint mt-2">CALORIES PER DAY TO STAY SAME WEIGHT</p>
             </div>
 
             {/* Split Goals */}
@@ -237,7 +237,7 @@ function OneRepMaxCalculator() {
 
   return (
     <div className="surface-card hairline p-8 space-y-6">
-      <h3 className="heading-display text-2xl text-hi">ONE-REP MAX (1RM) ESTIMATOR</h3>
+      <h3 className="heading-display text-2xl text-hi">HEAVIEST LIFT (1RM) CALCULATOR</h3>
 
       <InputGroup label="Weight Lifted (kg)" value={lift} onChange={setLift} placeholder="100" />
 
@@ -251,7 +251,7 @@ function OneRepMaxCalculator() {
             <RepProgressRing reps={reps} target={20} />
           </div>
         </div>
-        <p className="text-xs text-faint uppercase tracking-wider font-medium">Reps drive the strength estimate</p>
+        <p className="text-xs text-faint uppercase tracking-wider font-medium">Number of times you lifted the weight</p>
       </div>
 
       <button onClick={calculate} className="btn-primary w-full">
@@ -262,9 +262,9 @@ function OneRepMaxCalculator() {
         <ResultReveal valueKey={result}>
           <div className="surface-elevated hairline p-8" ref={resultRef}>
           <div className="text-center mb-6">
-            <p className="label-text text-mid mb-2">ESTIMATED 1RM</p>
+            <p className="label-text text-mid mb-2">YOUR HEAVIEST 1-REP LIFT</p>
             <p className="text-stat-lg font-display text-accent">{result}kg</p>
-            <p className="label-text text-faint mt-2">MAX EFFORT</p>
+            <p className="label-text text-faint mt-2">MAX POWER</p>
           </div>
 
           <div className="grid grid-cols-3 gap-4">
@@ -273,11 +273,11 @@ function OneRepMaxCalculator() {
               <p className="heading-section text-xl text-hi">{Math.round(result * 0.9)}kg</p>
             </div>
             <div className="surface-card hairline p-4 text-center">
-              <p className="label-text text-mid mb-1">HYPERTROPHY</p>
+              <p className="label-text text-mid mb-1">MUSCLE GAIN</p>
               <p className="heading-section text-xl text-hi">{Math.round(result * 0.75)}kg</p>
             </div>
             <div className="surface-card hairline p-4 text-center">
-              <p className="label-text text-mid mb-1">ENDURANCE</p>
+              <p className="label-text text-mid mb-1">STAMINA</p>
               <p className="heading-section text-xl text-hi">{Math.round(result * 0.6)}kg</p>
             </div>
           </div>

@@ -86,7 +86,7 @@ export default function AdminDashboardPage() {
     <div className="p-4 sm:p-6 lg:p-8 max-w-[1600px] w-full mx-auto space-y-6">
       <PageHeader
         title="Dashboard"
-        subtitle="At-a-glance overview of your gym operations. Monitor memberships, track revenue, and act on time-sensitive alerts."
+        subtitle="Quick view of your gym. See all members, check money earned, and see plans ending soon."
         icon={LayoutDashboard}
         actions={
           <>
@@ -94,29 +94,29 @@ export default function AdminDashboardPage() {
               type="button"
               onClick={quickExport}
               className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-surface-border bg-surface-card hover:bg-surface-elevated text-xs font-medium text-mid hover:text-hi transition-colors shadow-sm"
-              title="Export all members as CSV"
+              title="Download all members list"
             >
               <FileDown className="w-3.5 h-3.5 text-low" />
-              <span>Export CSV</span>
+              <span>Download List</span>
             </button>
             <Link
               href="/admin/members?new=1"
               className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-accent hover:bg-accent-hover text-white text-xs font-semibold tracking-wide transition-all shadow-md active:scale-95"
             >
               <UserPlus className="w-3.5 h-3.5" />
-              <span>Register Member</span>
+              <span>+ Add Member</span>
             </Link>
           </>
         }
       />
 
       {loading ? (
-        <AdminLoader text="Syncing operations data…" />
+        <AdminLoader text="Loading gym data…" />
       ) : error ? (
         <div className="rounded-2xl border border-status-danger/30 bg-status-danger/5 p-6 text-center shadow-sm">
           <AlertCircle className="w-10 h-10 text-status-danger mx-auto mb-3" />
           <div className="font-semibold text-lg text-status-danger mb-1">
-            Failed to load dashboard
+            Could not load gym data
           </div>
           <div className="text-sm text-mid mb-4">{error}</div>
           <button
@@ -124,7 +124,7 @@ export default function AdminDashboardPage() {
             onClick={refresh}
             className="px-4 py-2 rounded-xl border border-surface-border bg-surface-card hover:bg-surface-elevated text-xs font-medium text-hi transition-colors"
           >
-            Retry
+            Try Again
           </button>
         </div>
       ) : (
@@ -134,7 +134,7 @@ export default function AdminDashboardPage() {
             <StatCard
               label="Total Members"
               value={<CountUp to={stats.total} />}
-              sublabel="Registered to date"
+              sublabel="All members joined"
               icon={Users}
               variant="info"
               onClick={() => router.push("/admin/members")}
@@ -149,7 +149,7 @@ export default function AdminDashboardPage() {
             <StatCard
               label="Expiring Soon"
               value={<CountUp to={stats.expiring} />}
-              sublabel="Within next 7 days"
+              sublabel="Ending in next 7 days"
               icon={AlertTriangle}
               variant="warning"
               onClick={() => router.push("/admin/members?filter=expiring")}
@@ -157,7 +157,7 @@ export default function AdminDashboardPage() {
             <StatCard
               label="Expired Plans"
               value={<CountUp to={stats.expired} />}
-              sublabel="Past renewal date"
+              sublabel="Plan has ended"
               icon={AlertCircle}
               variant="danger"
               onClick={() => router.push("/admin/members?filter=expired")}
@@ -177,13 +177,13 @@ export default function AdminDashboardPage() {
                     </div>
                     <div>
                       <div className="uppercase tracking-wider text-[11px] font-semibold text-faint">
-                        Estimated Membership Revenue
+                        Total Gym Money Earned
                       </div>
                       <div className="mt-1 font-bold tracking-tight text-3xl sm:text-4xl text-hi leading-none tabular-nums">
                         <CountUp to={stats.revenue.total} prefix="₹" />
                       </div>
                       <div className="mt-1.5 text-xs text-mid">
-                        Active + expiring plans combined
+                        From all active and ending plans
                       </div>
                       {(stats.growth.thisMonth !== 0 ||
                         stats.growth.lastMonth !== 0) && (

@@ -73,18 +73,18 @@ export default function AdminSettingsPage() {
     <div className="p-4 sm:p-6 lg:p-8 max-w-[1600px] w-full mx-auto">
       <PageHeader
         title="Settings"
-        subtitle="System info, membership plan reference, data backup, and security overview."
+        subtitle="Gym info, member plan prices, safe data backup, and system safety."
         icon={Settings}
       />
 
       <div className="space-y-6">
         {/* Gym info */}
-        <SectionCard title="Gym Profile" subtitle="Read-only business constants configured in lib/config.ts" icon={Info}>
+        <SectionCard title="Gym Profile" subtitle="Basic gym settings saved in your system" icon={Info}>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             <InfoRow label="Gym name" value={GYM_NAME} />
             <InfoRow label="WhatsApp country code" value={`+${WHATSAPP_COUNTRY_CODE}`} />
             <InfoRow
-              label="Admin session TTL"
+              label="Admin login lasts for"
               value="24 hours"
             />
           </div>
@@ -93,7 +93,7 @@ export default function AdminSettingsPage() {
         {/* Plan prices */}
         <SectionCard
           title="Membership Plans"
-          subtitle="Canonical plan names and prices. Edit lib/config.ts to change them - changes take effect on next build."
+          subtitle="All gym pass types and their prices."
           icon={IndianRupee}
         >
           <div className="-mx-4 sm:-mx-5 overflow-x-auto">
@@ -137,7 +137,7 @@ export default function AdminSettingsPage() {
         {/* Backup */}
         <SectionCard
           title="Database Backup"
-          subtitle="Download a full JSON snapshot of all member records. Also attempts to store a copy in the Supabase 'backups' bucket."
+          subtitle="Download a safe copy of all your member details to your computer."
           icon={Database}
           action={
             <button

@@ -13,7 +13,7 @@ const coaches = [
   {
     name: "Aman Shrivastava",
     role: "Founder & Head Coach",
-    specialization: "Strength & Conditioning",
+    specialization: "Strength & Muscle Building",
     src: "/assets/aman.jpeg",
     phone: "+919131179343",
     instagram: "https://www.instagram.com/aman_shrivastavaaa72",
@@ -22,7 +22,7 @@ const coaches = [
   {
     name: "Pradeep Shrivastava",
     role: "Co-Founder & Senior Trainer",
-    specialization: "Functional Fitness & HIIT",
+    specialization: "Fast Fat Burn & Daily Fitness",
     src: "/assets/pradeep.jpeg",
     phone: "+919131272754",
     instagram: "https://www.instagram.com/brothers_fitness_17",
@@ -42,13 +42,13 @@ export default function Architects() {
               MEET THE COACHES
             </p>
             <h2 className="heading-display text-4xl md:text-5xl lg:text-6xl text-hi leading-[0.95] tracking-tight uppercase">
-              COACHES & <span className="text-accent">LEADERSHIP</span>
+              MEET OUR GYM <span className="text-accent">COACHES</span>
             </h2>
           </div>
           
           <div className="text-left md:text-right border-l-2 md:border-l-0 md:border-r-2 border-surface-border pl-4 md:pl-0 md:pr-4">
-            <p className="text-sm font-medium text-hi">Expert Personal Coaching</p>
-            <p className="text-xs text-mid">Guiding your strength, nutrition, and transformation</p>
+            <p className="text-sm font-medium text-hi">Friendly &amp; Helpful Gym Trainers</p>
+            <p className="text-xs text-mid">Helping you get strong, eat healthy, and stay fit</p>
           </div>
         </div>
 

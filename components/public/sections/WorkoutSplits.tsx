@@ -39,8 +39,8 @@ const SPLIT_OPTIONS: SplitOption[] = [
       { day: "Monday", focus: "Upper Body (Strength)" },
       { day: "Tuesday", focus: "Lower Body (Strength)" },
       { day: "Wednesday", focus: "Rest", isRest: true },
-      { day: "Thursday", focus: "Upper Body (Hypertrophy)" },
-      { day: "Friday", focus: "Lower Body (Hypertrophy)" },
+      { day: "Thursday", focus: "Upper Body (Building Muscle)" },
+      { day: "Friday", focus: "Lower Body (Building Muscle)" },
       { day: "Saturday", focus: "Rest", isRest: true },
       { day: "Sunday", focus: "Rest", isRest: true },
     ],
@@ -81,10 +81,10 @@ export default function WorkoutSplits() {
         <div className="flex items-center justify-between mb-3 px-1">
           <div>
             <h2 className="text-xl font-bold tracking-tight text-hi">
-              Workout Splits
+              Workout Plans
             </h2>
             <p className="text-xs text-mid mt-0.5">
-              Weekly training routines
+              Easy exercise schedule for every day
             </p>
           </div>
           <span className="text-xs font-medium text-accent">

@@ -28,7 +28,7 @@ const SCHEDULE: ScheduleItem[] = [
   {
     id: "women",
     name: "Women's Batch",
-    category: "Exclusive female training",
+    category: "Girls & Women only",
     time: "4:30 PM – 6:30 PM",
     startHour: 16,
     startMin: 30,
@@ -48,7 +48,7 @@ const SCHEDULE: ScheduleItem[] = [
   {
     id: "sunday",
     name: "Sunday",
-    category: "Weekly maintenance",
+    category: "Rest Day & Cleaning",
     time: "Closed",
     isClosed: true,
   },
@@ -94,7 +94,7 @@ export default function OperatingSchedule() {
         <div className="flex items-center justify-between mb-3 px-1">
           <div>
             <h2 className="text-xl font-bold tracking-tight text-hi">
-              Hours
+              Gym Timings
             </h2>
             <p className="text-xs text-mid mt-0.5">
               Brother&apos;s Fitness, Lakhnadon
