@@ -52,35 +52,39 @@ const defaultBroFitSections: FooterSection[] = [
   {
     title: "Workouts & Food",
     links: [
-      { name: "All Workouts", href: "/workouts", icon: Dumbbell },
+      { name: "Workout Vault", href: "/workouts", icon: Dumbbell },
       { name: "Meal Planner", href: "/fuel", icon: Flame },
-      { name: "Body Calculators", href: "/calculators", icon: Calculator },
-      { name: "Awards & Badges", href: "/trophy-room", icon: Trophy },
-      { name: "Gym Passes & Prices", href: "/pricing", icon: CreditCard },
-      { name: "Daily Motivation", href: "/quotes", icon: Quote },
+      { name: "Fitness Calculators", href: "/calculators", icon: Calculator },
+      { name: "Trophy Room", href: "/trophy-room", icon: Trophy },
+      { name: "Gym Passes", href: "/pricing", icon: CreditCard },
+      { name: "Daily Quotes", href: "/quotes", icon: Quote },
     ],
   },
   {
-    title: "Gym Location & Hours",
+    title: "Location & Hours",
     links: [
-      { name: "Near Civil Court, Lakhnadon", href: "https://maps.app.goo.gl/hd468i34pgukvZYX8", external: true, icon: MapPin },
-      { name: "Mon – Sat: 6:00 AM – 10:00 PM", href: "https://maps.app.goo.gl/hd468i34pgukvZYX8", external: true, icon: Clock },
-      { name: "Women's Batch: 4:30 – 6:30 PM", href: "#timings", icon: Clock },
-      { name: "Sunday: Rest Day (Closed)", href: "#timings", icon: Clock },
+      { name: "Near Petrol Pump", href: "https://maps.app.goo.gl/hd468i34pgukvZYX8", external: true, icon: MapPin },
+      { name: "Lakhnadon City", href: "https://maps.app.goo.gl/hd468i34pgukvZYX8", external: true, icon: MapPin },
+      { name: "Open 6AM – 10PM", href: "#timings", icon: Clock },
+      { name: "Women Only Batch", href: "#timings", icon: Clock },
+      { name: "Sunday Rest Day", href: "#timings", icon: Clock },
+      { name: "Get Map Directions", href: "https://maps.app.goo.gl/hd468i34pgukvZYX8", external: true, icon: ExternalLink },
     ],
   },
   {
-    title: "Gym Contact & Trainers",
+    title: "Gym Contacts",
     links: [
-      { name: "Aman: 91311 79343", href: "tel:+919131179343", external: true, icon: Phone },
-      { name: "Pradeep: 91312 72754", href: "tel:+919131272754", external: true, icon: Phone },
-      { name: "Gym Email", href: "mailto:brothersfitnesszone@gmail.com", external: true, icon: Mail },
+      { name: "Call Aman", href: "tel:+919131179343", external: true, icon: Phone },
+      { name: "Call Pradeep", href: "tel:+919131272754", external: true, icon: Phone },
+      { name: "Gym WhatsApp", href: "https://wa.me/919131179343", external: true, icon: AnimatedWhatsApp },
       { name: "Gym Instagram", href: "https://www.instagram.com/brothers_fitness_17", external: true, icon: Instagram },
+      { name: "Gym Email", href: "mailto:brothersfitnesszone@gmail.com", external: true, icon: Mail },
     ],
   },
   {
     title: "Developer",
     links: [
+      { name: "Anurag Mishra", href: "https://github.com/4nur4gmishr4", external: true, icon: Github },
       { name: "Call", href: "tel:+919302786886", external: true, icon: Phone },
       { name: "WhatsApp", href: "https://wa.me/919302786886?text=Hi%20Anurag", external: true, icon: AnimatedWhatsApp },
       { name: "Instagram", href: "https://www.instagram.com/4nur4gmishr4", external: true, icon: Instagram },
@@ -245,7 +249,7 @@ export const Footer = (props: Partial<FooterProps>) => {
               rel="noreferrer"
               className="text-faint hover:text-[#8b5cf6] transition-colors"
             >
-              Architect: Anurag Mishra
+              Developer: Anurag Mishra
             </a>
           </div>
         </div>
