@@ -52,7 +52,7 @@ const OFFER_ITEMS: OfferSlide[] = [
 
 export default function MobileOfferCarousel() {
   return (
-    <div className="w-full flex flex-col items-center">
+    <div className="w-full max-w-xl mx-auto flex flex-col items-center">
       {/* High-Converting Customer Attraction Header (Clean, Non-Pulsating, Professional) */}
       <div className="w-full text-center px-4 mb-3.5 space-y-1.5">
 
