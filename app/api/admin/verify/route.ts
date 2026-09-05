@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { cookies } from 'next/headers';
 import { verifyAdminToken, extractBearerToken } from '@/lib/auth';
 import { logger } from '@/lib/logger';
 import { getRequestId, withRequestId } from '@/lib/request-id';
@@ -8,13 +9,22 @@ export async function GET(req: Request) {
     const log = logger.child({ requestId });
     try {
         const authHeader = req.headers.get('Authorization');
-        const token = extractBearerToken(authHeader);
+        let token: string | null | undefined = extractBearerToken(authHeader);
+
+        if (!token) {
+            try {
+                const cookieStore = await cookies();
+                token = cookieStore.get('admin_token')?.value;
+            } catch {
+                // Cookie access fallback
+            }
+        }
 
         if (!token) {
             return withRequestId(
                 NextResponse.json(
-                    { error: 'No token provided' },
-                    { status: 401 }
+                    { valid: false, message: 'No token provided' },
+                    { status: 200 }
                 ),
                 requestId
             );
@@ -33,8 +43,8 @@ export async function GET(req: Request) {
 
         return withRequestId(
             NextResponse.json(
-                { error: 'Invalid token' },
-                { status: 401 }
+                { valid: false, message: 'Invalid token' },
+                { status: 200 }
             ),
             requestId
         );
@@ -42,10 +52,11 @@ export async function GET(req: Request) {
         log.error('Verify error', { error: error instanceof Error ? error.message : 'Unknown' });
         return withRequestId(
             NextResponse.json(
-                { error: 'Verification failed' },
+                { valid: false, error: 'Verification failed' },
                 { status: 500 }
             ),
             requestId
         );
     }
 }
+

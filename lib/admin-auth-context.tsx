@@ -20,9 +20,34 @@ export function AdminProvider({ children }: { children: ReactNode }) {
     useEffect(() => {
         const checkSession = async () => {
             try {
-                const res = await fetch('/api/admin/verify');
+                if (typeof window === 'undefined') {
+                    setIsLoading(false);
+                    return;
+                }
+
+                const token = sessionStorage.getItem('admin_token');
+                const isAdminPath = window.location.pathname.startsWith('/admin');
+
+                // If not on an admin route and has no stored token in session, skip verify fetch
+                if (!token && !isAdminPath) {
+                    setIsAdmin(false);
+                    setIsLoading(false);
+                    return;
+                }
+
+                const headers: Record<string, string> = {};
+                if (token) {
+                    headers['Authorization'] = `Bearer ${token}`;
+                }
+
+                const res = await fetch('/api/admin/verify', {
+                    headers,
+                    credentials: 'include'
+                });
+
                 if (res.ok) {
-                    setIsAdmin(true);
+                    const data = await res.json().catch(() => ({}));
+                    setIsAdmin(Boolean(data.valid));
                 } else {
                     setIsAdmin(false);
                 }

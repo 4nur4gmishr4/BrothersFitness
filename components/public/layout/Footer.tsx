@@ -83,7 +83,7 @@ const defaultBroFitSections: FooterSection[] = [
     title: "Developer & Engineering",
     links: [
       { name: "Anurag Mishra (Lead Dev)", href: "https://github.com/4nur4gmishr4", external: true, icon: Code2 },
-      { name: "GitHub Source Code", href: "https://github.com/4nur4gmishr4/BrothersFitness", external: true, icon: Github },
+      { name: "GitHub Profile", href: "https://github.com/4nur4gmishr4", external: true, icon: Github },
       { name: "WhatsApp Developer", href: "https://wa.me/919302786886?text=Hi%20Anurag", external: true, icon: AnimatedWhatsApp },
       { name: "Developer Email", href: "mailto:anurag.mishra.core@gmail.com", external: true, icon: Mail },
     ],
@@ -152,6 +152,15 @@ export const Footer = (props: Partial<FooterProps>) => {
                 <Dumbbell className="w-3.5 h-3.5" />
                 <span>Join The Gym</span>
               </Link>
+
+              <a
+                href="mailto:brothersfitnesszone@gmail.com"
+                className="p-2 rounded-md bg-surface-card border border-surface-border text-mid hover:text-accent hover:border-accent/40 hover:bg-accent/10 active:scale-95 transition-all shadow-xs flex items-center justify-center"
+                aria-label="Gym Email"
+                title="Email Gym (brothersfitnesszone@gmail.com)"
+              >
+                <Mail className="w-4 h-4 transition-colors" />
+              </a>
 
               <a
                 href="https://www.instagram.com/brothers_fitness_17"
@@ -256,12 +265,12 @@ export const Footer = (props: Partial<FooterProps>) => {
             </a>
 
             <a
-              href="https://github.com/4nur4gmishr4/BrothersFitness"
+              href="https://github.com/4nur4gmishr4"
               target="_blank"
               rel="noreferrer"
               className="px-3 py-2 rounded-xl bg-surface-soft border border-surface-border text-mid hover:text-hi hover:border-hi/40 hover:bg-surface-elevated active:scale-95 transition-all flex items-center gap-1.5 text-xs font-semibold shadow-xs shrink-0"
-              title="GitHub Code Repository"
-              aria-label="GitHub Repository"
+              title="GitHub Profile (Anurag Mishra)"
+              aria-label="GitHub Profile"
             >
               <Github className="w-3.5 h-3.5" />
               <span>GitHub</span>

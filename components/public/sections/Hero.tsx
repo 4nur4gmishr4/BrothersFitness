@@ -10,7 +10,7 @@ import ClickSpark from "@/components/ui/animations/ClickSpark";
 import RotatingText from "@/components/ui/text/RotatingText";
 import BlurText from "@/components/ui/text/BlurText";
 import StrokeText from "@/components/ui/text/StrokeText";
-import TextLoop from "@/components/ui/text/TextLoop";
+import MobileOfferCarousel from "@/components/public/widgets/MobileOfferCarousel";
 
 export default function Hero() {
   return (
@@ -117,29 +117,12 @@ export default function Hero() {
             </Link>
           </motion.div>
 
-          {/* Mobile-Only Quotes TextLoop: Above Facilities & Features with exact curvy wave ribbon in proper Red Color */}
+          {/* Mobile-Only Automatic Carousel: Showcasing Free Gym Trial, Free AI Generator & Workout Library */}
           <div
-            id="mobile-quotes-ticker"
-            className="block sm:hidden mt-6 -mx-4 overflow-hidden py-1"
+            id="mobile-offer-carousel"
+            className="block sm:hidden mt-6 -mx-1 overflow-hidden py-1"
           >
-            <TextLoop
-              text="THE IRON NEVER LIES ✦ BE STRONGER THAN YOUR EXCUSES ✦ PAIN IS TEMPORARY PRIDE IS FOREVER ✦ NOBODY CARES WORK HARDER ✦ LIGHT WEIGHT BABY"
-              shape="arch"
-              speed={90}
-              direction="forward"
-              separator="✦"
-              curviness={90}
-              fontSize={46}
-              fontWeight={800}
-              letterSpacing={2}
-              uppercase={true}
-              color="#ffffff"
-              ribbon={true}
-              ribbonColor="#D71921"
-              ribbonWidth={86}
-              pauseOnHover={true}
-              className="w-full"
-            />
+            <MobileOfferCarousel />
           </div>
 
         </div>
