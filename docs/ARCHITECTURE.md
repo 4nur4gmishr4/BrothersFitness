@@ -84,18 +84,10 @@ brofit/
 - **Access Boundary**: Gated behind `requireAdminToken()` verifying cryptographic signatures and Upstash Redis revocation status. All data operations utilize the server-side `SUPABASE_SERVICE_ROLE_KEY`.
 
 ### Visual Separation of Concerns
-<div align="center">
-  <table>
-    <tr>
-      <th width="50%" align="center"><b>Trainee Experience: Tactical Fuel</b></th>
-      <th width="50%" align="center"><b>Administration: ERP Console</b></th>
-    </tr>
-    <tr>
-      <td align="center"><img src="assets/ios-fuel-preview.svg" alt="Trainee Experience" width="280" /></td>
-      <td align="center"><img src="assets/ios-admin-preview.svg" alt="Admin ERP Console" width="280" /></td>
-    </tr>
-  </table>
-</div>
+
+| **Trainee Experience: Tactical Fuel** | **Administration: ERP Console** |
+| :---: | :---: |
+| [![Trainee Experience](./assets/ios-fuel-preview.svg)](./assets/ios-fuel-preview.svg) | [![Admin ERP Console](./assets/ios-admin-preview.svg)](./assets/ios-admin-preview.svg) |
 
 ---
 

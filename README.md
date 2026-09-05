@@ -2,15 +2,15 @@
 
 <div align="center">
 
-[![Live Website](https://img.shields.io/badge/Live%20Site-brothersfitness.in-FF3B30?style=for-the-badge&logo=google-chrome&logoColor=white)](https://brothersfitness.in)
-[![CI Pipeline](https://img.shields.io/github/actions/workflow/status/4nur4gmishr4/BrothersFitness/ci.yml?branch=main&style=for-the-badge&logo=githubactions&logoColor=white&label=CI%20Status)](https://github.com/4nur4gmishr4/BrothersFitness/actions)
+[![Production Site](https://img.shields.io/badge/Live%20Site-brothersfitness.in-E50914?style=for-the-badge&logo=google-chrome&logoColor=white)](https://brothersfitness.in)
+[![CI Build](https://img.shields.io/badge/CI%20Status-Passing-10B981?style=for-the-badge&logo=githubactions&logoColor=white)](https://github.com/4nur4gmishr4/BrothersFitness/actions)
+[![Vitest Tests](https://img.shields.io/badge/Vitest-130%20Tests%20Passing-10B981?style=for-the-badge&logo=vitest&logoColor=white)](https://github.com/4nur4gmishr4/BrothersFitness/actions)
+[![ESLint](https://img.shields.io/badge/ESLint-0%20Errors-10B981?style=for-the-badge&logo=eslint&logoColor=white)](https://github.com/4nur4gmishr4/BrothersFitness/actions)
 ![Next.js 15](https://img.shields.io/badge/Next.js-15.5-black?style=for-the-badge&logo=next.js&logoColor=white)
 ![React 19](https://img.shields.io/badge/React-19.0-61dafb?style=for-the-badge&logo=react&logoColor=black)
-![TypeScript 5](https://img.shields.io/badge/TypeScript-5.0-3178c6?style=for-the-badge&logo=typescript&logoColor=white)
-![Supabase](https://img.shields.io/badge/Supabase-PostgreSQL%20%26%20Auth-3ecf8e?style=for-the-badge&logo=supabase&logoColor=white)
-![Tailwind CSS](https://img.shields.io/badge/Tailwind-3.4-38bdf8?style=for-the-badge&logo=tailwindcss&logoColor=white)
-![Vitest](https://img.shields.io/badge/Vitest-4.1-fcc72b?style=for-the-badge&logo=vitest&logoColor=black)
-![PWA Ready](https://img.shields.io/badge/PWA-Offline%20Ready-blueviolet?style=for-the-badge&logo=pwa&logoColor=white)
+![TypeScript 5](https://img.shields.io/badge/TypeScript-5.0%20Strict-3178c6?style=for-the-badge&logo=typescript&logoColor=white)
+![Supabase](https://img.shields.io/badge/Supabase-PostgreSQL%2015-3ecf8e?style=for-the-badge&logo=supabase&logoColor=white)
+![PWA Ready](https://img.shields.io/badge/PWA-Installable-blueviolet?style=for-the-badge&logo=pwa&logoColor=white)
 
 **A modern full-stack gym management ERP, tactical fitness companion, and AI-powered nutrition synthesizer engineered for Brother's Fitness (Lakhnadon, Madhya Pradesh, India).**
 
@@ -35,39 +35,12 @@
 
 ### 📱 Mobile Experience & iOS Previews
 
-Designed with a high-contrast tactical red-and-black aesthetic (`#FF3B30` / `#070709`) optimized for OLED mobile displays and Progressive Web App (PWA) installation:
+Designed with a high-contrast tactical red-and-black aesthetic (`#E50914` / `#040406`) optimized for OLED mobile displays and Progressive Web App (PWA) installation:
 
-<div align="center">
-  <table>
-    <tr>
-      <th width="33%" align="center"><b>Admin ERP Console</b></th>
-      <th width="33%" align="center"><b>AI Tactical Fuel Synthesizer</b></th>
-      <th width="33%" align="center"><b>Workout Engine & Timer</b></th>
-    </tr>
-    <tr>
-      <td align="center">
-        <a href="docs/assets/ios-admin-preview.svg">
-          <img src="docs/assets/ios-admin-preview.svg" alt="BroFit Admin ERP iOS Preview" width="280" />
-        </a>
-      </td>
-      <td align="center">
-        <a href="docs/assets/ios-fuel-preview.svg">
-          <img src="docs/assets/ios-fuel-preview.svg" alt="BroFit Tactical Fuel iOS Preview" width="280" />
-        </a>
-      </td>
-      <td align="center">
-        <a href="docs/assets/ios-workout-preview.svg">
-          <img src="docs/assets/ios-workout-preview.svg" alt="BroFit Workout Protocol iOS Preview" width="280" />
-        </a>
-      </td>
-    </tr>
-    <tr>
-      <td align="center"><sub>Member lifecycle, WhatsApp actions, live trainee KPIs, and backup status.</sub></td>
-      <td align="center"><sub>Dynamic macro bars, 6-meal daily protocol, and 1-click PDF download.</sub></td>
-      <td align="center"><sub>Active movement tracker, interactive rest countdown, and muscle filters.</sub></td>
-    </tr>
-  </table>
-</div>
+| **Admin ERP Console** | **AI Tactical Fuel Synthesizer** | **Workout Engine & Timer** |
+| :---: | :---: | :---: |
+| [![BroFit Admin ERP iOS Preview](./docs/assets/ios-admin-preview.svg)](./docs/assets/ios-admin-preview.svg) | [![BroFit Tactical Fuel iOS Preview](./docs/assets/ios-fuel-preview.svg)](./docs/assets/ios-fuel-preview.svg) | [![BroFit Workout Protocol iOS Preview](./docs/assets/ios-workout-preview.svg)](./docs/assets/ios-workout-preview.svg) |
+| <sub>Member lifecycle, WhatsApp actions, live trainee KPIs, and backup status.</sub> | <sub>Dynamic macro bars, 6-meal daily protocol, and 1-click PDF download.</sub> | <sub>Active movement tracker, interactive rest countdown, and muscle filters.</sub> |
 
 ---
 

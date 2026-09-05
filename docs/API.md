@@ -104,7 +104,9 @@ Authorization: Bearer <supabase_user_jwt>
 
 <div align="center">
   <p><sub><b>Mobile UI Rendering of Synthesized Nutrition Response (Full Red/Black iOS Theme)</b></sub></p>
-  <img src="assets/ios-fuel-preview.svg" alt="Rendered Diet Response Interface" width="280" />
+
+[![Rendered Diet Response Interface](./assets/ios-fuel-preview.svg)](./assets/ios-fuel-preview.svg)
+
 </div>
 
 ---

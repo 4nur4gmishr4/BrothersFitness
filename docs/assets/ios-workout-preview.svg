@@ -1,6 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 860" width="100%" height="100%">
   <defs>
-    <!-- Dark & Gym Red Gradients -->
+    <!-- Dark and Gym Red Gradients -->
     <linearGradient id="workoutBg" x1="0%" y1="0%" x2="0%" y2="100%">
       <stop offset="0%" stop-color="#121217" />
       <stop offset="40%" stop-color="#09090C" />
@@ -108,7 +109,7 @@
   <rect x="270" y="110" width="114" height="26" rx="13" fill="#240A0D" stroke="#E50914" stroke-width="1.2" />
   <circle cx="285" cy="123" r="6" fill="#E50914" opacity="0.35" class="pulse-workout" />
   <circle cx="285" cy="123" r="3.5" fill="#FF2424" />
-  <text x="296" y="127" fill="#FECACA" font-family="-apple-system, sans-serif" font-size="10" font-weight="800">PUSH DAY &bull; A</text>
+  <text x="296" y="127" fill="#FECACA" font-family="-apple-system, sans-serif" font-size="10" font-weight="800">PUSH DAY • A</text>
 
   <!-- Hero Active Exercise Card with Rest Timer (Gym Red Glow + Shimmer) -->
   <g>
@@ -117,7 +118,7 @@
     
     <text x="56" y="182" fill="#F87171" font-family="-apple-system, sans-serif" font-size="11" font-weight="800" letter-spacing="1.2">CURRENT ACTIVE EXERCISE</text>
     <text x="56" y="214" fill="#FFFFFF" font-family="-apple-system, sans-serif" font-size="22" font-weight="900">Incline Dumbbell Press</text>
-    <text x="56" y="234" fill="#A1A1AA" font-family="-apple-system, sans-serif" font-size="12">Target: Upper Pectorals &bull; 4 Sets &bull; 8-10 Reps</text>
+    <text x="56" y="234" fill="#A1A1AA" font-family="-apple-system, sans-serif" font-size="12">Target: Upper Pectorals • 4 Sets • 8-10 Reps</text>
 
     <!-- Rest Timer Widget inside Hero Card -->
     <rect x="56" y="252" width="154" height="48" rx="14" fill="#150E12" stroke="#E50914" stroke-width="1.2" stroke-opacity="0.5" />
@@ -157,7 +158,7 @@
   <circle cx="70" cy="445" r="19" fill="#0E281A" stroke="#10B981" stroke-width="1.5" />
   <path d="M 64 445 L 68 449 L 76 441" stroke="#34D399" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" />
   <text x="102" y="438" fill="#FFFFFF" font-family="-apple-system, sans-serif" font-size="14" font-weight="800">Barbell Bench Press</text>
-  <text x="102" y="456" fill="#71717A" font-family="-apple-system, sans-serif" font-size="11">4 Sets &bull; 85 kg &times; 8 reps &bull; Completed</text>
+  <text x="102" y="456" fill="#71717A" font-family="-apple-system, sans-serif" font-size="11">4 Sets • 85 kg × 8 reps • Completed</text>
   <text x="328" y="449" fill="#34D399" font-family="-apple-system, sans-serif" font-size="11" font-weight="800">DONE</text>
 
   <!-- Exercise Item 2: Incline Dumbbell Press (ACTIVE NOW) -->
@@ -165,7 +166,7 @@
   <circle cx="70" cy="525" r="19" fill="#320C10" stroke="#EF4444" stroke-width="1.5" />
   <text x="61" y="530" fill="#FF4D4D" font-family="-apple-system, sans-serif" font-size="13" font-weight="900">E2</text>
   <text x="102" y="518" fill="#FFFFFF" font-family="-apple-system, sans-serif" font-size="14" font-weight="800">Incline Dumbbell Press</text>
-  <text x="102" y="536" fill="#F87171" font-family="-apple-system, sans-serif" font-size="11">Set 3 of 4 &bull; 32 kg / hand</text>
+  <text x="102" y="536" fill="#F87171" font-family="-apple-system, sans-serif" font-size="11">Set 3 of 4 • 32 kg / hand</text>
   <rect x="306" y="513" width="64" height="24" rx="12" fill="#320C10" stroke="#E50914" stroke-width="1.2" />
   <text x="317" y="529" fill="#FECACA" font-family="-apple-system, sans-serif" font-size="10" font-weight="800">ACTIVE</text>
 
@@ -174,7 +175,7 @@
   <circle cx="70" cy="605" r="19" fill="#1C1C24" stroke="#3F3F4E" stroke-width="1.5" />
   <text x="61" y="610" fill="#D4D4D8" font-family="-apple-system, sans-serif" font-size="13" font-weight="900">E3</text>
   <text x="102" y="598" fill="#FFFFFF" font-family="-apple-system, sans-serif" font-size="14" font-weight="800">Cable Chest Flyes</text>
-  <text x="102" y="616" fill="#71717A" font-family="-apple-system, sans-serif" font-size="11">3 Sets &bull; 12-15 Reps &bull; Peak Squeeze</text>
+  <text x="102" y="616" fill="#71717A" font-family="-apple-system, sans-serif" font-size="11">3 Sets • 12-15 Reps • Peak Squeeze</text>
   <text x="330" y="609" fill="#71717A" font-family="-apple-system, sans-serif" font-size="11" font-weight="700">NEXT</text>
 
   <!-- Exercise Item 4: Tricep Rope Pushdowns (Next) -->
@@ -182,7 +183,7 @@
   <circle cx="70" cy="685" r="19" fill="#1C1C24" stroke="#3F3F4E" stroke-width="1.5" />
   <text x="61" y="690" fill="#D4D4D8" font-family="-apple-system, sans-serif" font-size="13" font-weight="900">E4</text>
   <text x="102" y="678" fill="#FFFFFF" font-family="-apple-system, sans-serif" font-size="14" font-weight="800">Tricep Rope Pushdowns</text>
-  <text x="102" y="696" fill="#71717A" font-family="-apple-system, sans-serif" font-size="11">4 Sets &bull; 12 Reps &bull; Isolation</text>
+  <text x="102" y="696" fill="#71717A" font-family="-apple-system, sans-serif" font-size="11">4 Sets • 12 Reps • Isolation</text>
   <text x="330" y="689" fill="#71717A" font-family="-apple-system, sans-serif" font-size="11" font-weight="700">NEXT</text>
 
   <!-- iOS Bottom Tab Bar (Frosted Obsidian) -->
