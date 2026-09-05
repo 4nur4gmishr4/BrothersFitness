@@ -1,0 +1,213 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 720" width="100%" height="100%">
+  <!-- Browser Chrome -->
+  
+    <!-- Top Browser Chrome (38px) -->
+    <rect width="1280" height="38" fill="#141416" />
+    <line x1="0" y1="38" x2="1280" y2="38" stroke="#222226" stroke-width="1" />
+    
+    <!-- Window Controls -->
+    <circle cx="20" cy="19" r="5" fill="#ef4444" />
+    <circle cx="36" cy="19" r="5" fill="#f59e0b" />
+    <circle cx="52" cy="19" r="5" fill="#22c55e" />
+
+    <!-- Navigation Arrows -->
+    <path d="M 76 19 L 83 14 M 76 19 L 83 24" stroke="#71717a" stroke-width="1.5" stroke-linecap="round" fill="none" />
+    <path d="M 94 19 L 87 14 M 94 19 L 87 24" stroke="#3f3f46" stroke-width="1.5" stroke-linecap="round" fill="none" />
+    
+    <!-- URL Address Bar -->
+    <rect x="340" y="7" width="600" height="24" rx="5" fill="#0a0a0c" stroke="#222226" stroke-width="1" />
+    <g transform="translate(352, 12)">
+      <!-- SSL Lock Icon -->
+      <rect x="1" y="5" width="10" height="7" rx="1.5" fill="#22c55e" />
+      <path d="M 3 5 L 3 3 A 3 3 0 0 1 9 3 L 9 5" stroke="#22c55e" stroke-width="1.2" fill="none" />
+    </g>
+    <text x="372" y="23" fill="#e4e4e7" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="11.5" font-weight="500">https://brothersfitness.in/fuel</text>
+  
+
+  <!-- Page Viewport Canvas -->
+  <rect x="0" y="38" width="1280" height="682" fill="#0a0a0a" />
+
+  <!-- Real Site Navbar (h=64px) -->
+  <g transform="translate(0, 38)">
+    <rect width="1280" height="64" fill="#0a0a0a" />
+    <line x1="0" y1="64" x2="1280" y2="64" stroke="#2a2a2a" stroke-width="1" />
+    
+    <text x="48" y="39" fill="#ffffff" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="20" font-weight="900" letter-spacing="-0.5">
+      BROTHER&apos;S <tspan fill="#D71921">FITNESS</tspan>
+    </text>
+
+    <g transform="translate(1012, 14)">
+      <circle cx="18" cy="18" r="18" fill="#1a1a1a" stroke="#2a2a2a" stroke-width="1" />
+      <circle cx="18" cy="18" r="3" fill="#cccccc" />
+      <circle cx="62" cy="18" r="18" fill="#1a1a1a" stroke="#2a2a2a" stroke-width="1" />
+      <circle cx="106" cy="18" r="18" fill="#1a1a1a" stroke="#2a2a2a" stroke-width="1" />
+      <circle cx="150" cy="18" r="18" fill="#D71921" />
+      <text x="150" y="23" fill="#ffffff" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="12" font-weight="700" text-anchor="middle">A</text>
+      <circle cx="194" cy="18" r="18" fill="#1a1a1a" stroke="#2a2a2a" stroke-width="1" />
+    </g>
+  </g>
+
+  <!-- Page Main Container -->
+  <g transform="translate(48, 118)">
+    
+    <!-- Header Title Row -->
+    <text x="0" y="16" fill="#D71921" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="11" font-weight="700" letter-spacing="1">AI NUTRITION SYNTHESIZER</text>
+    <text x="0" y="44" fill="#ffffff" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="26" font-weight="900" letter-spacing="-0.5">
+      TACTICAL FUEL <tspan fill="#D71921">PROTOCOL</tspan>
+    </text>
+
+    <!-- Top Docked Control Bar (Exact DietResultView component) -->
+    <g transform="translate(0, 60)">
+      <rect width="1184" height="48" rx="8" fill="#1a1a1a" stroke="#2a2a2a" stroke-width="1" />
+      
+      <!-- Protocol Badge -->
+      <rect x="16" y="11" width="144" height="26" rx="13" fill="#3A0A0D" stroke="#D71921" stroke-width="0.8" />
+      <text x="88" y="28" fill="#fca5a5" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="10.5" font-weight="700" text-anchor="middle">FAT SHRED PROTOCOL</text>
+
+      <!-- Diet Type Badge -->
+      <rect x="170" y="11" width="86" height="26" rx="13" fill="#121212" stroke="#2a2a2a" stroke-width="1" />
+      <text x="213" y="28" fill="#cccccc" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="11" font-weight="600" text-anchor="middle">Vegetarian</text>
+
+      <!-- Right Controls: Language & Export -->
+      <g transform="translate(934, 9)">
+        <!-- Language Switcher -->
+        <rect width="116" height="30" rx="15" fill="#121212" stroke="#2a2a2a" stroke-width="1" />
+        <rect x="2" y="2" width="56" height="26" rx="13" fill="#D71921" />
+        <text x="30" y="19" fill="#ffffff" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="11" font-weight="700" text-anchor="middle">English</text>
+        <text x="86" y="19" fill="#888888" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="11" font-weight="600" text-anchor="middle">हिन्दी</text>
+
+        <!-- Download PDF Button -->
+        <rect x="126" y="0" width="110" height="30" rx="15" fill="#D71921" />
+        <text x="181" y="20" fill="#ffffff" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="11.5" font-weight="700" text-anchor="middle">Export PDF ↓</text>
+      </g>
+    </g>
+
+    <!-- Strategy Summary & Biometrics Bar -->
+    <g transform="translate(0, 120)">
+      <rect width="1184" height="74" rx="8" fill="#1a1a1a" stroke="#2a2a2a" stroke-width="1" />
+      <text x="16" y="24" fill="#D71921" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="10.5" font-weight="700" letter-spacing="0.5">STRATEGY SUMMARY</text>
+      <text x="16" y="44" fill="#ffffff" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="13.5" font-weight="500">
+        “High-protein deficit protocol designed for rapid fat loss while preserving lean skeletal muscle mass.”
+      </text>
+
+      <!-- Biometrics Pills -->
+      <g transform="translate(680, 16)">
+        <rect width="90" height="22" rx="4" fill="#121212" stroke="#2a2a2a" stroke-width="1" />
+        <text x="45" y="15" fill="#cccccc" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="10.5" font-weight="600" text-anchor="middle">Male, 24 yrs</text>
+
+        <rect x="98" y="0" width="94" height="22" rx="4" fill="#121212" stroke="#2a2a2a" stroke-width="1" />
+        <text x="145" y="15" fill="#cccccc" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="10.5" font-weight="600" text-anchor="middle">Height: 178 cm</text>
+
+        <rect x="200" y="0" width="130" height="22" rx="4" fill="#121212" stroke="#2a2a2a" stroke-width="1" />
+        <text x="265" y="15" fill="#cccccc" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="10.5" font-weight="600" text-anchor="middle">82 kg → 74 kg (Cut)</text>
+
+        <rect x="338" y="0" width="150" height="22" rx="4" fill="#121212" stroke="#2a2a2a" stroke-width="1" />
+        <text x="413" y="15" fill="#D71921" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="10.5" font-weight="700" text-anchor="middle">Rate: 0.5 kg/wk</text>
+      </g>
+    </g>
+
+    <!-- 4 Macro Target Cards (y=206) -->
+    <g transform="translate(0, 206)">
+      <!-- Card 1: Daily Target -->
+      <g transform="translate(0, 0)">
+        <rect width="284" height="88" rx="8" fill="#1a1a1a" stroke="#2a2a2a" stroke-width="1" />
+        <text x="16" y="24" fill="#888888" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="11" font-weight="600">DAILY CALORIC TARGET</text>
+        <text x="16" y="60" fill="#D71921" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="32" font-weight="900">2,150</text>
+        <text x="112" y="58" fill="#888888" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="12" font-weight="600">kcal / day</text>
+      </g>
+
+      <!-- Card 2: Protein -->
+      <g transform="translate(300, 0)">
+        <rect width="284" height="88" rx="8" fill="#1a1a1a" stroke="#2a2a2a" stroke-width="1" />
+        <text x="16" y="24" fill="#888888" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="11" font-weight="600">PROTEIN TARGET</text>
+        <text x="16" y="60" fill="#ffffff" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="32" font-weight="900">165g</text>
+        <text x="96" y="58" fill="#888888" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="12" font-weight="600">31% • 660 kcal</text>
+        <rect x="16" y="72" width="252" height="4" rx="2" fill="#121212" />
+        <rect x="16" y="72" width="190" height="4" rx="2" fill="#D71921" />
+      </g>
+
+      <!-- Card 3: Carbohydrates -->
+      <g transform="translate(600, 0)">
+        <rect width="284" height="88" rx="8" fill="#1a1a1a" stroke="#2a2a2a" stroke-width="1" />
+        <text x="16" y="24" fill="#888888" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="11" font-weight="600">CARBOHYDRATES</text>
+        <text x="16" y="60" fill="#ffffff" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="32" font-weight="900">210g</text>
+        <text x="96" y="58" fill="#888888" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="12" font-weight="600">39% • 840 kcal</text>
+        <rect x="16" y="72" width="252" height="4" rx="2" fill="#121212" />
+        <rect x="16" y="72" width="160" height="4" rx="2" fill="#f59e0b" />
+      </g>
+
+      <!-- Card 4: Healthy Fats -->
+      <g transform="translate(900, 0)">
+        <rect width="284" height="88" rx="8" fill="#1a1a1a" stroke="#2a2a2a" stroke-width="1" />
+        <text x="16" y="24" fill="#888888" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="11" font-weight="600">HEALTHY FATS</text>
+        <text x="16" y="60" fill="#ffffff" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="32" font-weight="900">55g</text>
+        <text x="80" y="58" fill="#888888" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="12" font-weight="600">30% • 495 kcal</text>
+        <rect x="16" y="72" width="252" height="4" rx="2" fill="#121212" />
+        <rect x="16" y="72" width="120" height="4" rx="2" fill="#22c55e" />
+      </g>
+    </g>
+
+    <!-- Daily Meal Plan (6 Meals Protocol) -->
+    <g transform="translate(0, 306)">
+      <rect width="1184" height="248" rx="8" fill="#1a1a1a" stroke="#2a2a2a" stroke-width="1" />
+      
+      <!-- Table Header -->
+      <rect width="1184" height="34" rx="8" fill="#121212" />
+      <line x1="0" y1="34" x2="1184" y2="34" stroke="#2a2a2a" stroke-width="1" />
+      <text x="24" y="22" fill="#888888" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="11" font-weight="700">TIMING &amp; MEAL</text>
+      <text x="240" y="22" fill="#888888" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="11" font-weight="700">PRESCRIBED FOOD ITEMS</text>
+      <text x="740" y="22" fill="#888888" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="11" font-weight="700">MACRONUTRIENTS</text>
+      <text x="1060" y="22" fill="#888888" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="11" font-weight="700">CALORIES</text>
+
+      <!-- Meal 1: Pre-Workout Ignition -->
+      <g transform="translate(0, 34)">
+        <line x1="0" y1="42" x2="1184" y2="42" stroke="#2a2a2a" stroke-width="0.8" />
+        <text x="24" y="22" fill="#D71921" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="11.5" font-weight="700">07:00 AM</text>
+        <text x="96" y="22" fill="#ffffff" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="12" font-weight="600">Pre-Workout Ignition</text>
+        <text x="240" y="22" fill="#cccccc" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="12">Rolled Oats (50g), 1 Scoop Whey Protein, 1 Banana, Water</text>
+        <text x="740" y="22" fill="#888888" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="12">28g P • 52g C • 6g F</text>
+        <text x="1060" y="22" fill="#ffffff" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="12" font-weight="700">380 kcal</text>
+      </g>
+
+      <!-- Meal 2: Post-Workout Recovery -->
+      <g transform="translate(0, 76)">
+        <line x1="0" y1="42" x2="1184" y2="42" stroke="#2a2a2a" stroke-width="0.8" />
+        <text x="24" y="22" fill="#D71921" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="11.5" font-weight="700">09:30 AM</text>
+        <text x="96" y="22" fill="#ffffff" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="12" font-weight="600">Post-Workout Recovery</text>
+        <text x="240" y="22" fill="#cccccc" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="12">Paneer Bhurji (150g) / Tofu, 2 Whole Wheat Toast slices</text>
+        <text x="740" y="22" fill="#888888" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="12">32g P • 45g C • 12g F</text>
+        <text x="1060" y="22" fill="#ffffff" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="12" font-weight="700">440 kcal</text>
+      </g>
+
+      <!-- Meal 3: Tactical Lunch -->
+      <g transform="translate(0, 118)">
+        <line x1="0" y1="42" x2="1184" y2="42" stroke="#2a2a2a" stroke-width="0.8" />
+        <text x="24" y="22" fill="#D71921" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="11.5" font-weight="700">01:30 PM</text>
+        <text x="96" y="22" fill="#ffffff" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="12" font-weight="600">Tactical Lunch</text>
+        <text x="240" y="22" fill="#cccccc" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="12">Yellow Dal Tadka (1 Bowl), Steamed Rice (100g), Curd (100g), Fresh Salad</text>
+        <text x="740" y="22" fill="#888888" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="12">34g P • 68g C • 10g F</text>
+        <text x="1060" y="22" fill="#ffffff" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="12" font-weight="700">520 kcal</text>
+      </g>
+
+      <!-- Meal 4: Mid-Day Fuel -->
+      <g transform="translate(0, 160)">
+        <line x1="0" y1="42" x2="1184" y2="42" stroke="#2a2a2a" stroke-width="0.8" />
+        <text x="24" y="22" fill="#D71921" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="11.5" font-weight="700">05:00 PM</text>
+        <text x="96" y="22" fill="#ffffff" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="12" font-weight="600">Mid-Day Fuel</text>
+        <text x="240" y="22" fill="#cccccc" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="12">Roasted Chana (50g), 10 Almonds, Green Tea or Black Coffee</text>
+        <text x="740" y="22" fill="#888888" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="12">16g P • 24g C • 8g F</text>
+        <text x="1060" y="22" fill="#ffffff" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="12" font-weight="700">260 kcal</text>
+      </g>
+
+      <!-- Meal 5: Dinner Protocol -->
+      <g transform="translate(0, 202)">
+        <text x="24" y="22" fill="#D71921" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="11.5" font-weight="700">08:30 PM</text>
+        <text x="96" y="22" fill="#ffffff" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="12" font-weight="600">Dinner Protocol</text>
+        <text x="240" y="22" fill="#cccccc" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="12">Soya Chunks Curry (60g dry), 2 Multigrain Roti, Cucumber Salad</text>
+        <text x="740" y="22" fill="#888888" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="12">38g P • 48g C • 9g F</text>
+        <text x="1060" y="22" fill="#ffffff" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="12" font-weight="700">550 kcal</text>
+      </g>
+    </g>
+  </g>
+</svg>

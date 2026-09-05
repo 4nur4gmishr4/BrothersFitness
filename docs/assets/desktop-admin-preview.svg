@@ -1,0 +1,294 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 720" width="100%" height="100%">
+  <!-- Browser Chrome -->
+  
+    <!-- Top Browser Chrome (38px) -->
+    <rect width="1280" height="38" fill="#141416" />
+    <line x1="0" y1="38" x2="1280" y2="38" stroke="#222226" stroke-width="1" />
+    
+    <!-- Window Controls -->
+    <circle cx="20" cy="19" r="5" fill="#ef4444" />
+    <circle cx="36" cy="19" r="5" fill="#f59e0b" />
+    <circle cx="52" cy="19" r="5" fill="#22c55e" />
+
+    <!-- Navigation Arrows -->
+    <path d="M 76 19 L 83 14 M 76 19 L 83 24" stroke="#71717a" stroke-width="1.5" stroke-linecap="round" fill="none" />
+    <path d="M 94 19 L 87 14 M 94 19 L 87 24" stroke="#3f3f46" stroke-width="1.5" stroke-linecap="round" fill="none" />
+    
+    <!-- URL Address Bar -->
+    <rect x="340" y="7" width="600" height="24" rx="5" fill="#0a0a0c" stroke="#222226" stroke-width="1" />
+    <g transform="translate(352, 12)">
+      <!-- SSL Lock Icon -->
+      <rect x="1" y="5" width="10" height="7" rx="1.5" fill="#22c55e" />
+      <path d="M 3 5 L 3 3 A 3 3 0 0 1 9 3 L 9 5" stroke="#22c55e" stroke-width="1.2" fill="none" />
+    </g>
+    <text x="372" y="23" fill="#e4e4e7" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="11.5" font-weight="500">https://brothersfitness.in/admin/members</text>
+  
+
+  <!-- Main Viewport Canvas -->
+  <rect x="0" y="38" width="1280" height="682" fill="#0a0a0a" />
+
+  <!-- Left Sidebar Navigation (220px wide) -->
+  <g transform="translate(0, 38)">
+    <rect width="220" height="682" fill="#121212" />
+    <line x1="220" y1="0" x2="220" y2="682" stroke="#2a2a2a" stroke-width="1" />
+
+    <!-- Sidebar Header: Brand & ERP Badge -->
+    <g transform="translate(20, 20)">
+      <text x="0" y="16" fill="#ffffff" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="15" font-weight="900" letter-spacing="-0.3">
+        BROTHER&apos;S <tspan fill="#D71921">FITNESS</tspan>
+      </text>
+      <rect x="0" y="26" width="70" height="18" rx="4" fill="#3A0A0D" stroke="#D71921" stroke-width="0.8" />
+      <text x="35" y="38" fill="#fca5a5" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="9" font-weight="700" text-anchor="middle">ADMIN ERP</text>
+    </g>
+
+    <line x1="20" y1="78" x2="200" y2="78" stroke="#2a2a2a" stroke-width="1" />
+
+    <!-- Group 1: MANAGEMENT -->
+    <g transform="translate(20, 94)">
+      <text x="4" y="10" fill="#5a5a5a" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="10" font-weight="700" letter-spacing="0.5">MANAGEMENT</text>
+
+      <!-- Nav Item 1: Members (ACTIVE) -->
+      <g transform="translate(0, 20)">
+        <rect width="180" height="34" rx="6" fill="#1a1a1a" stroke="#2a2a2a" stroke-width="1" />
+        <line x1="0" y1="6" x2="0" y2="28" stroke="#D71921" stroke-width="3" stroke-linecap="round" />
+        <circle cx="20" cy="17" r="4.5" stroke="#D71921" stroke-width="1.4" fill="none" />
+        <path d="M 12 25 A 6 6 0 0 1 28 25" stroke="#D71921" stroke-width="1.4" fill="none" />
+        <text x="36" y="21" fill="#ffffff" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="12.5" font-weight="600">Members</text>
+      </g>
+
+      <!-- Nav Item 2: Dashboard -->
+      <g transform="translate(0, 60)">
+        <rect x="14" y="10" width="6" height="6" rx="1" stroke="#888888" stroke-width="1.2" fill="none" />
+        <rect x="22" y="10" width="6" height="6" rx="1" stroke="#888888" stroke-width="1.2" fill="none" />
+        <rect x="14" y="18" width="6" height="6" rx="1" stroke="#888888" stroke-width="1.2" fill="none" />
+        <rect x="22" y="18" width="6" height="6" rx="1" stroke="#888888" stroke-width="1.2" fill="none" />
+        <text x="36" y="21" fill="#cccccc" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="12.5" font-weight="500">Dashboard</text>
+      </g>
+
+      <!-- Nav Item 3: Analytics -->
+      <g transform="translate(0, 96)">
+        <line x1="15" y1="24" x2="15" y2="18" stroke="#888888" stroke-width="1.5" stroke-linecap="round" />
+        <line x1="20" y1="24" x2="20" y2="12" stroke="#888888" stroke-width="1.5" stroke-linecap="round" />
+        <line x1="25" y1="24" x2="25" y2="15" stroke="#888888" stroke-width="1.5" stroke-linecap="round" />
+        <text x="36" y="21" fill="#cccccc" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="12.5" font-weight="500">Analytics</text>
+      </g>
+
+      <!-- Nav Item 4: Messages / Leads -->
+      <g transform="translate(0, 132)">
+        <rect x="13" y="12" width="14" height="10" rx="1.5" stroke="#888888" stroke-width="1.2" fill="none" />
+        <path d="M 13 13 L 20 18 L 27 13" stroke="#888888" stroke-width="1.2" fill="none" />
+        <text x="36" y="21" fill="#cccccc" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="12.5" font-weight="500">Messages</text>
+        <rect x="146" y="11" width="22" height="16" rx="8" fill="#D71921" />
+        <text x="157" y="23" fill="#ffffff" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="9.5" font-weight="700" text-anchor="middle">3</text>
+      </g>
+    </g>
+
+    <!-- Group 2: SYSTEM & LOGS -->
+    <g transform="translate(20, 290)">
+      <text x="4" y="10" fill="#5a5a5a" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="10" font-weight="700" letter-spacing="0.5">SYSTEM &amp; LOGS</text>
+
+      <!-- Activity Logs -->
+      <g transform="translate(0, 20)">
+        <circle cx="20" cy="17" r="6" stroke="#888888" stroke-width="1.2" fill="none" />
+        <path d="M 20 14 L 20 17 L 23 17" stroke="#888888" stroke-width="1.2" stroke-linecap="round" fill="none" />
+        <text x="36" y="21" fill="#cccccc" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="12.5" font-weight="500">Activity Logs</text>
+      </g>
+
+      <!-- Settings -->
+      <g transform="translate(0, 56)">
+        <circle cx="20" cy="17" r="3" stroke="#888888" stroke-width="1.2" fill="none" />
+        <circle cx="20" cy="17" r="6" stroke="#888888" stroke-width="1.2" stroke-dasharray="2 2" fill="none" />
+        <text x="36" y="21" fill="#cccccc" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="12.5" font-weight="500">Settings</text>
+      </g>
+    </g>
+
+    <!-- Sidebar Bottom: Admin Session -->
+    <g transform="translate(20, 616)">
+      <line x1="0" y1="0" x2="180" y2="0" stroke="#2a2a2a" stroke-width="1" />
+      <circle cx="16" cy="28" r="14" fill="#1a1a1a" stroke="#2a2a2a" stroke-width="1" />
+      <text x="16" y="32" fill="#D71921" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="11" font-weight="800" text-anchor="middle">CA</text>
+      <text x="38" y="24" fill="#ffffff" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="11.5" font-weight="700">Coach Aman</text>
+      <text x="38" y="38" fill="#22c55e" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="10" font-weight="500">Master Admin • Online</text>
+    </g>
+  </g>
+
+  <!-- Main Content Area (x=220 to 1280) -->
+  <g transform="translate(244, 58)">
+    
+    <!-- Top Action Bar -->
+    <g transform="translate(0, 0)">
+      <!-- Breadcrumb -->
+      <text x="0" y="16" fill="#888888" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="11.5" font-weight="500">Brother&apos;s Fitness / Management / <tspan fill="#ffffff" font-weight="700">Members Directory</tspan></text>
+      
+      <!-- Right Action Controls -->
+      <g transform="translate(560, 0)">
+        <!-- Search Input -->
+        <rect width="240" height="34" rx="6" fill="#1a1a1a" stroke="#2a2a2a" stroke-width="1" />
+        <circle cx="16" cy="17" r="4.5" stroke="#888888" stroke-width="1.2" fill="none" />
+        <line x1="19.5" y1="20.5" x2="24" y2="25" stroke="#888888" stroke-width="1.2" stroke-linecap="round" />
+        <text x="32" y="21" fill="#888888" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="11.5">Search members, phone...</text>
+
+        <!-- Export CSV Button -->
+        <rect x="250" y="0" width="94" height="34" rx="6" fill="#1a1a1a" stroke="#2a2a2a" stroke-width="1" />
+        <text x="264" y="21" fill="#cccccc" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="11.5" font-weight="600">Export CSV</text>
+
+        <!-- + Register Member Button -->
+        <rect x="352" y="0" width="134" height="34" rx="6" fill="#D71921" />
+        <text x="372" y="21" fill="#ffffff" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="12" font-weight="700">+ Add Member</text>
+      </g>
+    </g>
+
+    <!-- 4 KPI Stat Cards Row (y=50) -->
+    <g transform="translate(0, 50)">
+      <!-- KPI 1: Total Trainees -->
+      <g transform="translate(0, 0)">
+        <rect width="234" height="88" rx="8" fill="#1a1a1a" stroke="#2a2a2a" stroke-width="1" />
+        <text x="16" y="24" fill="#888888" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="11" font-weight="600">TOTAL TRAINEES</text>
+        <text x="16" y="58" fill="#ffffff" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="28" font-weight="800">184</text>
+        <text x="16" y="76" fill="#22c55e" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="10.5" font-weight="600">↑ +12 this month</text>
+      </g>
+
+      <!-- KPI 2: Active Memberships -->
+      <g transform="translate(248, 0)">
+        <rect width="234" height="88" rx="8" fill="#1a1a1a" stroke="#2a2a2a" stroke-width="1" />
+        <text x="16" y="24" fill="#888888" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="11" font-weight="600">ACTIVE PLANS</text>
+        <text x="16" y="58" fill="#22c55e" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="28" font-weight="800">162</text>
+        <text x="16" y="76" fill="#888888" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="10.5" font-weight="500">88.0% active retention</text>
+      </g>
+
+      <!-- KPI 3: Expiring Soon -->
+      <g transform="translate(496, 0)">
+        <rect width="234" height="88" rx="8" fill="#1a1a1a" stroke="#2a2a2a" stroke-width="1" />
+        <text x="16" y="24" fill="#888888" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="11" font-weight="600">EXPIRING (≤7 DAYS)</text>
+        <text x="16" y="58" fill="#f59e0b" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="28" font-weight="800">14</text>
+        <text x="16" y="76" fill="#f59e0b" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="10.5" font-weight="600">Action: WhatsApp reminder</text>
+      </g>
+
+      <!-- KPI 4: Monthly Revenue -->
+      <g transform="translate(744, 0)">
+        <rect width="242" height="88" rx="8" fill="#1a1a1a" stroke="#2a2a2a" stroke-width="1" />
+        <text x="16" y="24" fill="#888888" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="11" font-weight="600">MONTHLY REVENUE</text>
+        <text x="16" y="58" fill="#ffffff" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="28" font-weight="800">₹1,42,500</text>
+        <text x="16" y="76" fill="#22c55e" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="10.5" font-weight="600">100% dues collected</text>
+      </g>
+    </g>
+
+    <!-- Real Members Directory Data Table (y=156) -->
+    <g transform="translate(0, 156)">
+      <rect width="986" height="476" rx="8" fill="#1a1a1a" stroke="#2a2a2a" stroke-width="1" />
+      
+      <!-- Table Header Bar -->
+      <rect width="986" height="38" rx="8" fill="#121212" />
+      <line x1="0" y1="38" x2="986" y2="38" stroke="#2a2a2a" stroke-width="1" />
+
+      <text x="24" y="24" fill="#888888" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="11" font-weight="700" letter-spacing="0.5">TRAINEE NAME</text>
+      <text x="220" y="24" fill="#888888" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="11" font-weight="700" letter-spacing="0.5">MOBILE NUMBER</text>
+      <text x="390" y="24" fill="#888888" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="11" font-weight="700" letter-spacing="0.5">SUBSCRIPTION PLAN</text>
+      <text x="590" y="24" fill="#888888" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="11" font-weight="700" letter-spacing="0.5">EXPIRATION DATE</text>
+      <text x="760" y="24" fill="#888888" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="11" font-weight="700" letter-spacing="0.5">STATUS</text>
+      <text x="890" y="24" fill="#888888" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="11" font-weight="700" letter-spacing="0.5">ACTIONS</text>
+
+      <!-- Row 1: Aarav Sharma (ACTIVE) -->
+      <g transform="translate(0, 38)">
+        <line x1="0" y1="54" x2="986" y2="54" stroke="#2a2a2a" stroke-width="0.8" />
+        <circle cx="40" cy="27" r="14" fill="#242424" />
+        <text x="40" y="31" fill="#ffffff" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="10.5" font-weight="700" text-anchor="middle">AS</text>
+        <text x="64" y="26" fill="#ffffff" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="12.5" font-weight="600">Aarav Sharma</text>
+        <text x="64" y="40" fill="#888888" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="10.5">ID: BF-2026-081</text>
+
+        <text x="220" y="32" fill="#cccccc" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="12">+91 98261 45012</text>
+        <text x="390" y="32" fill="#cccccc" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="12">3 Months Strength</text>
+        <text x="590" y="32" fill="#cccccc" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="12">01 Nov 2026</text>
+
+        <!-- Status: ACTIVE -->
+        <rect x="760" y="17" width="68" height="22" rx="11" fill="#052e16" stroke="#22c55e" stroke-width="0.8" />
+        <text x="794" y="32" fill="#22c55e" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="10" font-weight="700" text-anchor="middle">ACTIVE</text>
+
+        <!-- Action: WhatsApp & Receipt -->
+        <text x="890" y="32" fill="#D71921" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="11.5" font-weight="600">Receipt • WA</text>
+      </g>
+
+      <!-- Row 2: Rohan Patel (ACTIVE) -->
+      <g transform="translate(0, 92)">
+        <line x1="0" y1="54" x2="986" y2="54" stroke="#2a2a2a" stroke-width="0.8" />
+        <circle cx="40" cy="27" r="14" fill="#242424" />
+        <text x="40" y="31" fill="#ffffff" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="10.5" font-weight="700" text-anchor="middle">RP</text>
+        <text x="64" y="26" fill="#ffffff" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="12.5" font-weight="600">Rohan Patel</text>
+        <text x="64" y="40" fill="#888888" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="10.5">ID: BF-2026-042</text>
+
+        <text x="220" y="32" fill="#cccccc" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="12">+91 94253 88120</text>
+        <text x="390" y="32" fill="#cccccc" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="12">Annual Pro Pass</text>
+        <text x="590" y="32" fill="#cccccc" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="12">15 Jan 2027</text>
+
+        <rect x="760" y="17" width="68" height="22" rx="11" fill="#052e16" stroke="#22c55e" stroke-width="0.8" />
+        <text x="794" y="32" fill="#22c55e" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="10" font-weight="700" text-anchor="middle">ACTIVE</text>
+
+        <text x="890" y="32" fill="#D71921" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="11.5" font-weight="600">Receipt • WA</text>
+      </g>
+
+      <!-- Row 3: Priya Verma (EXPIRING) -->
+      <g transform="translate(0, 146)">
+        <line x1="0" y1="54" x2="986" y2="54" stroke="#2a2a2a" stroke-width="0.8" />
+        <circle cx="40" cy="27" r="14" fill="#242424" />
+        <text x="40" y="31" fill="#ffffff" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="10.5" font-weight="700" text-anchor="middle">PV</text>
+        <text x="64" y="26" fill="#ffffff" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="12.5" font-weight="600">Priya Verma</text>
+        <text x="64" y="40" fill="#888888" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="10.5">ID: BF-2026-119</text>
+
+        <text x="220" y="32" fill="#cccccc" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="12">+91 97528 90311</text>
+        <text x="390" y="32" fill="#cccccc" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="12">Women&apos;s Batch (1M)</text>
+        <text x="590" y="32" fill="#f59e0b" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="12" font-weight="600">08 Sep 2026 (3d)</text>
+
+        <rect x="760" y="17" width="76" height="22" rx="11" fill="#451a03" stroke="#f59e0b" stroke-width="0.8" />
+        <text x="798" y="32" fill="#f59e0b" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="10" font-weight="700" text-anchor="middle">EXPIRING</text>
+
+        <text x="890" y="32" fill="#f59e0b" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="11.5" font-weight="700">Remind WA</text>
+      </g>
+
+      <!-- Row 4: Vikram Singh (EXPIRED) -->
+      <g transform="translate(0, 200)">
+        <line x1="0" y1="54" x2="986" y2="54" stroke="#2a2a2a" stroke-width="0.8" />
+        <circle cx="40" cy="27" r="14" fill="#242424" />
+        <text x="40" y="31" fill="#ffffff" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="10.5" font-weight="700" text-anchor="middle">VS</text>
+        <text x="64" y="26" fill="#ffffff" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="12.5" font-weight="600">Vikram Singh</text>
+        <text x="64" y="40" fill="#888888" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="10.5">ID: BF-2026-015</text>
+
+        <text x="220" y="32" fill="#cccccc" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="12">+91 91311 77652</text>
+        <text x="390" y="32" fill="#cccccc" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="12">6 Months Hardcore</text>
+        <text x="590" y="32" fill="#ef4444" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="12">20 Aug 2026</text>
+
+        <rect x="760" y="17" width="72" height="22" rx="11" fill="#450a0a" stroke="#ef4444" stroke-width="0.8" />
+        <text x="796" y="32" fill="#ef4444" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="10" font-weight="700" text-anchor="middle">EXPIRED</text>
+
+        <text x="890" y="32" fill="#ef4444" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="11.5" font-weight="700">Renew Now</text>
+      </g>
+
+      <!-- Row 5: Sneha Patel (ACTIVE) -->
+      <g transform="translate(0, 254)">
+        <line x1="0" y1="54" x2="986" y2="54" stroke="#2a2a2a" stroke-width="0.8" />
+        <circle cx="40" cy="27" r="14" fill="#242424" />
+        <text x="40" y="31" fill="#ffffff" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="10.5" font-weight="700" text-anchor="middle">SP</text>
+        <text x="64" y="26" fill="#ffffff" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="12.5" font-weight="600">Sneha Patel</text>
+        <text x="64" y="40" fill="#888888" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="10.5">ID: BF-2026-104</text>
+
+        <text x="220" y="32" fill="#cccccc" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="12">+91 94071 23419</text>
+        <text x="390" y="32" fill="#cccccc" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="12">Women&apos;s Batch (3M)</text>
+        <text x="590" y="32" fill="#cccccc" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="12">10 Nov 2026</text>
+
+        <rect x="760" y="17" width="68" height="22" rx="11" fill="#052e16" stroke="#22c55e" stroke-width="0.8" />
+        <text x="794" y="32" fill="#22c55e" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="10" font-weight="700" text-anchor="middle">ACTIVE</text>
+
+        <text x="890" y="32" fill="#D71921" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="11.5" font-weight="600">Receipt • WA</text>
+      </g>
+
+      <!-- Pagination Footer -->
+      <g transform="translate(24, 388)">
+        <text x="0" y="16" fill="#888888" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="11.5">Showing 1 to 5 of 184 active gym members</text>
+        <rect x="830" y="0" width="40" height="24" rx="4" fill="#121212" stroke="#2a2a2a" stroke-width="1" />
+        <text x="850" y="16" fill="#cccccc" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="11" font-weight="600" text-anchor="middle">Prev</text>
+        <rect x="880" y="0" width="40" height="24" rx="4" fill="#D71921" />
+        <text x="900" y="16" fill="#ffffff" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="11" font-weight="700" text-anchor="middle">Next</text>
+      </g>
+    </g>
+  </g>
+</svg>

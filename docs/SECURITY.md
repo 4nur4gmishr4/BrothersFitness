@@ -163,7 +163,7 @@ const securityHeaders = [
 <div align="center">
   <p><sub><b>Sanitized Administrative Console (Synthetic Placeholders Only)</b></sub></p>
 
-[![Sanitized Admin ERP Console](./assets/ios-admin-preview.svg)](./assets/ios-admin-preview.svg)
+[![Sanitized Admin ERP Console](./assets/desktop-admin-preview.svg)](./assets/desktop-admin-preview.svg)
 
 </div>
 

@@ -1,0 +1,193 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 720" width="100%" height="100%">
+  <!-- Browser Chrome -->
+  
+    <!-- Top Browser Chrome (38px) -->
+    <rect width="1280" height="38" fill="#141416" />
+    <line x1="0" y1="38" x2="1280" y2="38" stroke="#222226" stroke-width="1" />
+    
+    <!-- Window Controls -->
+    <circle cx="20" cy="19" r="5" fill="#ef4444" />
+    <circle cx="36" cy="19" r="5" fill="#f59e0b" />
+    <circle cx="52" cy="19" r="5" fill="#22c55e" />
+
+    <!-- Navigation Arrows -->
+    <path d="M 76 19 L 83 14 M 76 19 L 83 24" stroke="#71717a" stroke-width="1.5" stroke-linecap="round" fill="none" />
+    <path d="M 94 19 L 87 14 M 94 19 L 87 24" stroke="#3f3f46" stroke-width="1.5" stroke-linecap="round" fill="none" />
+    
+    <!-- URL Address Bar -->
+    <rect x="340" y="7" width="600" height="24" rx="5" fill="#0a0a0c" stroke="#222226" stroke-width="1" />
+    <g transform="translate(352, 12)">
+      <!-- SSL Lock Icon -->
+      <rect x="1" y="5" width="10" height="7" rx="1.5" fill="#22c55e" />
+      <path d="M 3 5 L 3 3 A 3 3 0 0 1 9 3 L 9 5" stroke="#22c55e" stroke-width="1.2" fill="none" />
+    </g>
+    <text x="372" y="23" fill="#e4e4e7" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="11.5" font-weight="500">https://brothersfitness.in/workouts</text>
+  
+
+  <!-- Page Viewport Canvas -->
+  <rect x="0" y="38" width="1280" height="682" fill="#0a0a0a" />
+
+  <!-- Real Site Navbar (h=64px) -->
+  <g transform="translate(0, 38)">
+    <rect width="1280" height="64" fill="#0a0a0a" />
+    <line x1="0" y1="64" x2="1280" y2="64" stroke="#2a2a2a" stroke-width="1" />
+    
+    <text x="48" y="39" fill="#ffffff" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="20" font-weight="900" letter-spacing="-0.5">
+      BROTHER&apos;S <tspan fill="#D71921">FITNESS</tspan>
+    </text>
+
+    <g transform="translate(1012, 14)">
+      <circle cx="18" cy="18" r="18" fill="#1a1a1a" stroke="#2a2a2a" stroke-width="1" />
+      <circle cx="62" cy="18" r="18" fill="#1a1a1a" stroke="#2a2a2a" stroke-width="1" />
+      <circle cx="106" cy="18" r="18" fill="#1a1a1a" stroke="#2a2a2a" stroke-width="1" />
+      <circle cx="150" cy="18" r="18" fill="#D71921" />
+      <text x="150" y="23" fill="#ffffff" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="12" font-weight="700" text-anchor="middle">A</text>
+      <circle cx="194" cy="18" r="18" fill="#1a1a1a" stroke="#2a2a2a" stroke-width="1" />
+    </g>
+  </g>
+
+  <!-- Workouts Header Row -->
+  <g transform="translate(48, 122)">
+    <text x="0" y="16" fill="#D71921" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="11" font-weight="700" letter-spacing="1">GYM EXERCISES &amp; GUIDE</text>
+    <text x="0" y="44" fill="#ffffff" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="28" font-weight="900" letter-spacing="-0.5">
+      WORKOUT <tspan fill="#D71921">LIBRARY</tspan>
+    </text>
+
+    <!-- Search Box -->
+    <g transform="translate(0, 64)">
+      <rect width="600" height="42" rx="8" fill="#1a1a1a" stroke="#2a2a2a" stroke-width="1" />
+      <circle cx="20" cy="21" r="5" stroke="#888888" stroke-width="1.3" fill="none" />
+      <line x1="24" y1="25" x2="28" y2="29" stroke="#888888" stroke-width="1.3" stroke-linecap="round" />
+      <text x="40" y="26" fill="#888888" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="12.5">Search 800+ exercises by movement, muscle, equipment...</text>
+    </g>
+
+    <!-- Muscle Group Filter Chips Row -->
+    <g transform="translate(0, 122)">
+      <!-- ALL (Active) -->
+      <rect width="60" height="30" rx="15" fill="#D71921" />
+      <text x="30" y="19" fill="#ffffff" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="11" font-weight="700" text-anchor="middle">ALL</text>
+
+      <!-- CHEST -->
+      <rect x="68" y="0" width="76" height="30" rx="15" fill="#1a1a1a" stroke="#2a2a2a" stroke-width="1" />
+      <text x="106" y="19" fill="#cccccc" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="11" font-weight="600" text-anchor="middle">CHEST</text>
+
+      <!-- BACK -->
+      <rect x="152" y="0" width="72" height="30" rx="15" fill="#1a1a1a" stroke="#2a2a2a" stroke-width="1" />
+      <text x="188" y="19" fill="#cccccc" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="11" font-weight="600" text-anchor="middle">BACK</text>
+
+      <!-- LEGS -->
+      <rect x="232" y="0" width="72" height="30" rx="15" fill="#1a1a1a" stroke="#2a2a2a" stroke-width="1" />
+      <text x="268" y="19" fill="#cccccc" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="11" font-weight="600" text-anchor="middle">LEGS</text>
+
+      <!-- SHOULDERS -->
+      <rect x="312" y="0" width="108" height="30" rx="15" fill="#1a1a1a" stroke="#2a2a2a" stroke-width="1" />
+      <text x="366" y="19" fill="#cccccc" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="11" font-weight="600" text-anchor="middle">SHOULDERS</text>
+
+      <!-- ARMS -->
+      <rect x="428" y="0" width="72" height="30" rx="15" fill="#1a1a1a" stroke="#2a2a2a" stroke-width="1" />
+      <text x="464" y="19" fill="#cccccc" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="11" font-weight="600" text-anchor="middle">ARMS</text>
+
+      <!-- CORE -->
+      <rect x="508" y="0" width="72" height="30" rx="15" fill="#1a1a1a" stroke="#2a2a2a" stroke-width="1" />
+      <text x="544" y="19" fill="#cccccc" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="11" font-weight="600" text-anchor="middle">CORE</text>
+
+      <!-- CARDIO -->
+      <rect x="588" y="0" width="86" height="30" rx="15" fill="#1a1a1a" stroke="#2a2a2a" stroke-width="1" />
+      <text x="631" y="19" fill="#cccccc" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="11" font-weight="600" text-anchor="middle">CARDIO</text>
+    </g>
+
+    <!-- Exercise Grid (6 authentic cards, 3 columns x 2 rows) -->
+    <g transform="translate(0, 172)">
+      <!-- Card 1: Barbell Bench Press -->
+      <g transform="translate(0, 0)">
+        <rect width="380" height="170" rx="10" fill="#1a1a1a" stroke="#2a2a2a" stroke-width="1" />
+        <rect x="16" y="16" width="60" height="20" rx="10" fill="#3A0A0D" stroke="#D71921" stroke-width="0.8" />
+        <text x="46" y="30" fill="#fca5a5" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="9.5" font-weight="700" text-anchor="middle">CHEST</text>
+        <text x="84" y="30" fill="#888888" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="10.5">Barbell • Compound</text>
+
+        <text x="16" y="66" fill="#ffffff" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="16" font-weight="800">Barbell Bench Press</text>
+        <text x="16" y="88" fill="#888888" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="12">Primary: Pectoralis Major</text>
+        <text x="16" y="106" fill="#888888" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="12">Secondary: Anterior Deltoids, Triceps</text>
+
+        <line x1="16" y1="126" x2="364" y2="126" stroke="#2a2a2a" stroke-width="1" />
+        <text x="16" y="148" fill="#D71921" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="11.5" font-weight="700">View 3 Step Guide →</text>
+      </g>
+
+      <!-- Card 2: Conventional Deadlift -->
+      <g transform="translate(400, 0)">
+        <rect width="380" height="170" rx="10" fill="#1a1a1a" stroke="#2a2a2a" stroke-width="1" />
+        <rect x="16" y="16" width="56" height="20" rx="10" fill="#121212" stroke="#2a2a2a" stroke-width="1" />
+        <text x="44" y="30" fill="#cccccc" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="9.5" font-weight="700" text-anchor="middle">BACK</text>
+        <text x="80" y="30" fill="#888888" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="10.5">Barbell • Heavy Iron</text>
+
+        <text x="16" y="66" fill="#ffffff" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="16" font-weight="800">Conventional Deadlift</text>
+        <text x="16" y="88" fill="#888888" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="12">Primary: Erector Spinae, Glutes</text>
+        <text x="16" y="106" fill="#888888" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="12">Secondary: Hamstrings, Lats, Traps</text>
+
+        <line x1="16" y1="126" x2="364" y2="126" stroke="#2a2a2a" stroke-width="1" />
+        <text x="16" y="148" fill="#D71921" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="11.5" font-weight="700">View 4 Step Guide →</text>
+      </g>
+
+      <!-- Card 3: Barbell Back Squat -->
+      <g transform="translate(800, 0)">
+        <rect width="384" height="170" rx="10" fill="#1a1a1a" stroke="#2a2a2a" stroke-width="1" />
+        <rect x="16" y="16" width="54" height="20" rx="10" fill="#121212" stroke="#2a2a2a" stroke-width="1" />
+        <text x="43" y="30" fill="#cccccc" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="9.5" font-weight="700" text-anchor="middle">LEGS</text>
+        <text x="78" y="30" fill="#888888" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="10.5">Barbell • Posterior Chain</text>
+
+        <text x="16" y="66" fill="#ffffff" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="16" font-weight="800">Barbell Back Squat</text>
+        <text x="16" y="88" fill="#888888" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="12">Primary: Quadriceps, Gluteus Maximus</text>
+        <text x="16" y="106" fill="#888888" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="12">Secondary: Adductors, Hamstrings</text>
+
+        <line x1="16" y1="126" x2="368" y2="126" stroke="#2a2a2a" stroke-width="1" />
+        <text x="16" y="148" fill="#D71921" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="11.5" font-weight="700">View 4 Step Guide →</text>
+      </g>
+
+      <!-- Card 4: Standing Overhead Press -->
+      <g transform="translate(0, 186)">
+        <rect width="380" height="170" rx="10" fill="#1a1a1a" stroke="#2a2a2a" stroke-width="1" />
+        <rect x="16" y="16" width="90" height="20" rx="10" fill="#121212" stroke="#2a2a2a" stroke-width="1" />
+        <text x="61" y="30" fill="#cccccc" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="9.5" font-weight="700" text-anchor="middle">SHOULDERS</text>
+        <text x="114" y="30" fill="#888888" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="10.5">Barbell • Overhead</text>
+
+        <text x="16" y="66" fill="#ffffff" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="16" font-weight="800">Standing Overhead Press</text>
+        <text x="16" y="88" fill="#888888" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="12">Primary: Anterior &amp; Lateral Deltoids</text>
+        <text x="16" y="106" fill="#888888" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="12">Secondary: Triceps, Upper Chest</text>
+
+        <line x1="16" y1="126" x2="364" y2="126" stroke="#2a2a2a" stroke-width="1" />
+        <text x="16" y="148" fill="#D71921" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="11.5" font-weight="700">View 3 Step Guide →</text>
+      </g>
+
+      <!-- Card 5: Incline Dumbbell Press -->
+      <g transform="translate(400, 186)">
+        <rect width="380" height="170" rx="10" fill="#1a1a1a" stroke="#2a2a2a" stroke-width="1" />
+        <rect x="16" y="16" width="60" height="20" rx="10" fill="#3A0A0D" stroke="#D71921" stroke-width="0.8" />
+        <text x="46" y="30" fill="#fca5a5" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="9.5" font-weight="700" text-anchor="middle">CHEST</text>
+        <text x="84" y="30" fill="#888888" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="10.5">Dumbbell • Hypertrophy</text>
+
+        <text x="16" y="66" fill="#ffffff" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="16" font-weight="800">Incline Dumbbell Press</text>
+        <text x="16" y="88" fill="#888888" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="12">Primary: Clavicular Pectoral Head</text>
+        <text x="16" y="106" fill="#888888" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="12">Secondary: Anterior Deltoids</text>
+
+        <line x1="16" y1="126" x2="364" y2="126" stroke="#2a2a2a" stroke-width="1" />
+        <text x="16" y="148" fill="#D71921" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="11.5" font-weight="700">View 3 Step Guide →</text>
+      </g>
+
+      <!-- Card 6: Overhand Pull-Up -->
+      <g transform="translate(800, 186)">
+        <rect width="384" height="170" rx="10" fill="#1a1a1a" stroke="#2a2a2a" stroke-width="1" />
+        <rect x="16" y="16" width="56" height="20" rx="10" fill="#121212" stroke="#2a2a2a" stroke-width="1" />
+        <text x="44" y="30" fill="#cccccc" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="9.5" font-weight="700" text-anchor="middle">BACK</text>
+        <text x="80" y="30" fill="#888888" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="10.5">Bodyweight • Calisthenics</text>
+
+        <text x="16" y="66" fill="#ffffff" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="16" font-weight="800">Overhand Pull-Up</text>
+        <text x="16" y="88" fill="#888888" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="12">Primary: Latissimus Dorsi</text>
+        <text x="16" y="106" fill="#888888" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="12">Secondary: Biceps Brachii, Rhomboids</text>
+
+        <line x1="16" y1="126" x2="368" y2="126" stroke="#2a2a2a" stroke-width="1" />
+        <text x="16" y="148" fill="#D71921" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="11.5" font-weight="700">View 3 Step Guide →</text>
+      </g>
+    </g>
+  </g>
+</svg>

@@ -14,7 +14,7 @@
 
 **A modern full-stack gym management ERP, tactical fitness companion, and AI-powered nutrition synthesizer engineered for Brother's Fitness (Lakhnadon, Madhya Pradesh, India).**
 
-[Live Portal](#-live-portal--modules) · [Mobile Previews](#-mobile-experience--ios-previews) · [System Architecture](#-system-architecture) · [Documentation Suite](#-technical-documentation-suite) · [Getting Started](#-getting-started) · [License](#-license--attribution)
+[Live Portal](#-live-portal--modules) · [Interface Previews](#-interface-previews) · [System Architecture](#-system-architecture) · [Documentation Suite](#-technical-documentation-suite) · [Getting Started](#-getting-started) · [License](#-license--attribution)
 
 </div>
 
@@ -33,14 +33,19 @@
 
 ---
 
-### 📱 Mobile Experience & iOS Previews
+### 🖥️ Interface Previews
 
-Designed with a high-contrast tactical red-and-black aesthetic (`#E50914` / `#040406`) optimized for OLED mobile displays and Progressive Web App (PWA) installation:
+Production interfaces capturing the clean, high-contrast dark theme (`#0a0a0a`) and signature gym red (`#D71921`) design system deployed at [brothersfitness.in](https://brothersfitness.in):
 
-| **Admin ERP Console** | **AI Tactical Fuel Synthesizer** | **Workout Engine & Timer** |
-| :---: | :---: | :---: |
-| [![BroFit Admin ERP iOS Preview](./docs/assets/ios-admin-preview.svg)](./docs/assets/ios-admin-preview.svg) | [![BroFit Tactical Fuel iOS Preview](./docs/assets/ios-fuel-preview.svg)](./docs/assets/ios-fuel-preview.svg) | [![BroFit Workout Protocol iOS Preview](./docs/assets/ios-workout-preview.svg)](./docs/assets/ios-workout-preview.svg) |
-| <sub>Member lifecycle, WhatsApp actions, live trainee KPIs, and backup status.</sub> | <sub>Dynamic macro bars, 6-meal daily protocol, and 1-click PDF download.</sub> | <sub>Active movement tracker, interactive rest countdown, and muscle filters.</sub> |
+| **Public Trainee Portal** | **Administrative ERP Console** |
+| :---: | :---: |
+| [![BroFit Public Trainee Portal](./docs/assets/desktop-site-preview.svg)](./docs/assets/desktop-site-preview.svg) | [![BroFit Admin ERP Console](./docs/assets/desktop-admin-preview.svg)](./docs/assets/desktop-admin-preview.svg) |
+| <sub>Landing hero, real-time facility metrics, operating hours, and gym amenities bento grid.</sub> | <sub>Member lifecycle management, WhatsApp actions, attendance status, and KPI analytics.</sub> |
+
+| **AI Tactical Fuel Synthesizer** | **Interactive Workout Engine** |
+| :---: | :---: |
+| [![BroFit Tactical Fuel Protocol](./docs/assets/desktop-fuel-preview.svg)](./docs/assets/desktop-fuel-preview.svg) | [![BroFit Workout Protocol Library](./docs/assets/desktop-workout-preview.svg)](./docs/assets/desktop-workout-preview.svg) |
+| <sub>Mifflin-St Jeor TDEE macro targets, 6-meal daily protocol, and client-side PDF export.</sub> | <sub>800+ exercise movement library, muscle group filter pills, and compound guidance.</sub> |
 
 ---
 

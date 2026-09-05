@@ -87,7 +87,7 @@ brofit/
 
 | **Trainee Experience: Tactical Fuel** | **Administration: ERP Console** |
 | :---: | :---: |
-| [![Trainee Experience](./assets/ios-fuel-preview.svg)](./assets/ios-fuel-preview.svg) | [![Admin ERP Console](./assets/ios-admin-preview.svg)](./assets/ios-admin-preview.svg) |
+| [![Trainee Experience](./assets/desktop-fuel-preview.svg)](./assets/desktop-fuel-preview.svg) | [![Admin ERP Console](./assets/desktop-admin-preview.svg)](./assets/desktop-admin-preview.svg) |
 
 ---
 
