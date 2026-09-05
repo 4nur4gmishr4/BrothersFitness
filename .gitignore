@@ -71,3 +71,8 @@ public/fallback-*.js
 
 # Scratch
 scratch/
+
+# Internal docs and AI-generated audit files
+docs/
+contacts_and_links.txt
+*.audit.md
