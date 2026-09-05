@@ -117,10 +117,10 @@ export default function Hero() {
             </Link>
           </motion.div>
 
-          {/* Mobile-Only Automatic Carousel: Showcasing Free Gym Trial, Free AI Generator & Workout Library */}
+          {/* 3D Billboard Carousel: Showcasing Free Gym Trial, Free AI Generator & Workout Library */}
           <div
-            id="mobile-offer-carousel"
-            className="block sm:hidden mt-8 -ml-2 -mr-4 overflow-hidden py-1 w-[calc(100%+1.5rem)]"
+            id="featured-offer-carousel"
+            className="block mt-8 sm:mt-12 -mx-2 sm:mx-0 overflow-hidden py-1 w-[calc(100%+1rem)] sm:w-full"
           >
             <MobileOfferCarousel />
           </div>
