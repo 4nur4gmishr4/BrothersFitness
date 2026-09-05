@@ -15,6 +15,7 @@ export default function TacticalStopwatch() {
   const [targetTime, setTargetTime] = useState(0);
   const [hasAlerted, setHasAlerted] = useState(false);
   const [isNavOpen, setIsNavOpen] = useState(false);
+  const [isWorkoutImageOpen, setIsWorkoutImageOpen] = useState(false);
 
   const modalProps = useModalDismiss(() => setIsOpen(false), isOpen);
 
@@ -24,8 +25,18 @@ export default function TacticalStopwatch() {
       setIsNavOpen(customEvent.detail?.isOpen ?? false);
     };
 
+    const handleModalOpen = () => setIsWorkoutImageOpen(true);
+    const handleModalClose = () => setIsWorkoutImageOpen(false);
+
     window.addEventListener("brofit-nav-toggle", handleNavToggle);
-    return () => window.removeEventListener("brofit-nav-toggle", handleNavToggle);
+    window.addEventListener("workout-modal-open", handleModalOpen);
+    window.addEventListener("workout-modal-close", handleModalClose);
+
+    return () => {
+      window.removeEventListener("brofit-nav-toggle", handleNavToggle);
+      window.removeEventListener("workout-modal-open", handleModalOpen);
+      window.removeEventListener("workout-modal-close", handleModalClose);
+    };
   }, []);
 
   useEffect(() => {
@@ -113,7 +124,7 @@ export default function TacticalStopwatch() {
   return (
     <>
       {/* Prominent Floating Timer Trigger Button at Bottom-Right */}
-      {!isOpen && !isNavOpen && (
+      {!isOpen && !isNavOpen && !isWorkoutImageOpen && (
         <button
           id="tactical-stopwatch-button"
           onClick={() => setIsOpen(true)}

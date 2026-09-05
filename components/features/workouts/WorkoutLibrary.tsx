@@ -35,6 +35,51 @@ function resolveExerciseImage(path: string): string {
   return `${IMAGE_BASE}${path}`;
 }
 
+export function getExerciseCaption(exercise: FreeExercise, imageIndex: number) {
+  const name = exercise.name;
+  const primary = (exercise.primaryMuscles || [])[0] || "Target Muscle";
+  const allMuscles = (exercise.primaryMuscles || []).join(", ") || primary;
+  const gear = exercise.equipment || "bodyweight";
+  const force = exercise.force || "movement";
+  const steps = exercise.instructions || [];
+
+  const isStart = imageIndex === 0;
+
+  if (isStart) {
+    const setupInstruction = steps[0] || `Set up into proper starting form for ${name} using ${gear}.`;
+    return {
+      title: `${name} — Starting Position & Setup`,
+      shortButtonLabel: `1. Starting Setup`,
+      fullButtonLabel: `1. ${name} Setup`,
+      description: setupInstruction,
+      tag: `${primary.toUpperCase()} • ${gear.toUpperCase()}`,
+      phaseName: "Start Phase",
+    };
+  }
+
+  // Second image / contraction
+  const actionWord =
+    force === "push"
+      ? "Full Extension & Lockout"
+      : force === "pull"
+      ? "Peak Contraction & Squeeze"
+      : "Execution Phase";
+
+  const finishInstruction =
+    steps.length > 1
+      ? steps[steps.length > 2 ? Math.min(steps.length - 1, 2) : 1]
+      : `Execute the full range of motion for ${name}, contracting the ${allMuscles}.`;
+
+  return {
+    title: `${name} — ${actionWord}`,
+    shortButtonLabel: `2. Peak Contraction`,
+    fullButtonLabel: `2. ${name} Finish`,
+    description: finishInstruction,
+    tag: `${primary.toUpperCase()} • ${force.toUpperCase()}`,
+    phaseName: actionWord,
+  };
+}
+
 const FALLBACK_EXERCISES: FreeExercise[] = [
   {
     id: "bench-press",
@@ -319,7 +364,7 @@ export default function WorkoutLibrary() {
     return () => clearTimeout(timer);
   }, [search]);
 
-  // Modal ESC key listener & body lock
+  // Modal ESC key listener, body lock & floating timer visibility toggle
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
@@ -329,14 +374,26 @@ export default function WorkoutLibrary() {
 
     if (selectedExercise) {
       document.body.style.overflow = "hidden";
+      document.body.classList.add("workout-modal-open");
+      if (typeof window !== "undefined") {
+        window.dispatchEvent(new CustomEvent("workout-modal-open"));
+      }
       window.addEventListener("keydown", handleKeyDown);
       setActiveModalImageIndex(0);
     } else {
       document.body.style.overflow = "";
+      document.body.classList.remove("workout-modal-open");
+      if (typeof window !== "undefined") {
+        window.dispatchEvent(new CustomEvent("workout-modal-close"));
+      }
     }
 
     return () => {
       document.body.style.overflow = "";
+      document.body.classList.remove("workout-modal-open");
+      if (typeof window !== "undefined") {
+        window.dispatchEvent(new CustomEvent("workout-modal-close"));
+      }
       window.removeEventListener("keydown", handleKeyDown);
     };
   }, [selectedExercise]);
@@ -974,17 +1031,26 @@ export default function WorkoutLibrary() {
                     {exercise.category || "STRENGTH"}
                   </div>
 
-                  {/* Level Pill in bottom-left */}
-                  {exercise.level && (
-                    <div className="absolute bottom-2.5 left-2.5 px-2 py-0.5 rounded-md bg-black/75 backdrop-blur-md border border-white/10 text-[9px] font-bold uppercase tracking-wider text-hi z-10">
-                      {exercise.level}
-                    </div>
-                  )}
+                  {/* Dynamic Matching Caption Bar on Image */}
+                  <div className="absolute bottom-2 left-2 right-2 flex items-center justify-between pointer-events-none z-10 gap-2">
+                    <span className="px-2 py-0.5 rounded-md bg-black/85 backdrop-blur-md border border-white/15 text-[10px] font-bold uppercase tracking-wider text-white truncate shadow-xs">
+                      {exercise.name}
+                    </span>
+                    {exercise.equipment && (
+                      <span className="px-1.5 py-0.5 rounded-md bg-black/80 backdrop-blur-md border border-white/10 text-[9px] font-semibold uppercase tracking-wider text-accent shrink-0 shadow-xs">
+                        {exercise.equipment}
+                      </span>
+                    )}
+                  </div>
 
-                  {/* Hover overlay hint */}
-                  <div className="absolute inset-0 bg-black/55 opacity-0 group-hover/img:opacity-100 transition-opacity duration-200 flex items-center justify-center gap-2 text-white text-xs font-bold backdrop-blur-[1px] z-10">
-                    <Maximize2 className="w-4 h-4 text-accent" />
-                    <span>View Demonstration &amp; Steps</span>
+                  {/* Hover overlay hint with exact exercise caption */}
+                  <div className="absolute inset-0 bg-black/65 opacity-0 group-hover/img:opacity-100 transition-opacity duration-200 flex flex-col items-center justify-center p-3 text-center text-white text-xs font-bold backdrop-blur-[1px] z-10">
+                    <Maximize2 className="w-5 h-5 text-accent mb-1.5" />
+                    <span className="text-sm font-bold uppercase text-white tracking-wide">{exercise.name}</span>
+                    <span className="text-[11px] text-accent font-medium mt-0.5">
+                      Target: {exercise.primaryMuscles.join(", ")}
+                    </span>
+                    <span className="text-[10px] text-mid font-normal mt-1">Tap to enlarge visual angles &amp; full guide</span>
                   </div>
                 </div>
 
@@ -1190,13 +1256,13 @@ export default function WorkoutLibrary() {
               
               {/* High-Res Visual Demonstration */}
               {selectedExercise.images && selectedExercise.images.length > 0 ? (
-                <div className="space-y-2.5">
+                <div className="space-y-3">
                   <div className="relative w-full aspect-video bg-[#0a0a0c] rounded-xl overflow-hidden border border-surface-border">
                     <Image
                       src={resolveExerciseImage(
                         selectedExercise.images[activeModalImageIndex] || selectedExercise.images[0]
                       )}
-                      alt={selectedExercise.name}
+                      alt={`${selectedExercise.name} - ${getExerciseCaption(selectedExercise, activeModalImageIndex).phaseName}`}
                       fill
                       unoptimized={true}
                       className="object-contain"
@@ -1206,23 +1272,48 @@ export default function WorkoutLibrary() {
 
                   {/* Multiple image angles indicator / selector */}
                   {selectedExercise.images.length > 1 && (
-                    <div className="flex items-center gap-2 justify-center pt-1">
-                      {selectedExercise.images.map((_, imgIdx) => (
-                        <button
-                          key={imgIdx}
-                          type="button"
-                          onClick={() => setActiveModalImageIndex(imgIdx)}
-                          className={`px-3 py-1 rounded-lg text-xs font-bold uppercase transition-all cursor-pointer ${
-                            activeModalImageIndex === imgIdx
-                              ? "bg-accent text-white shadow-xs"
-                              : "bg-surface-canvas border border-surface-border text-mid hover:text-hi"
-                          }`}
-                        >
-                          {imgIdx === 0 ? "Start Position" : imgIdx === 1 ? "Peak Contraction" : `Angle ${imgIdx + 1}`}
-                        </button>
-                      ))}
+                    <div className="flex flex-wrap items-center gap-2 justify-center pt-0.5">
+                      {selectedExercise.images.map((_, imgIdx) => {
+                        const cap = getExerciseCaption(selectedExercise, imgIdx);
+                        return (
+                          <button
+                            key={imgIdx}
+                            type="button"
+                            onClick={() => setActiveModalImageIndex(imgIdx)}
+                            className={`px-3 py-1.5 rounded-lg text-xs font-bold uppercase transition-all cursor-pointer flex items-center gap-1.5 ${
+                              activeModalImageIndex === imgIdx
+                                ? "bg-accent text-white shadow-xs"
+                                : "bg-surface-canvas border border-surface-border text-mid hover:text-hi"
+                            }`}
+                          >
+                            <span className="w-1.5 h-1.5 rounded-full bg-current" />
+                            <span>{cap.shortButtonLabel}</span>
+                          </button>
+                        );
+                      })}
                     </div>
                   )}
+
+                  {/* Exact Dynamic Matching Caption Card */}
+                  {(() => {
+                    const caption = getExerciseCaption(selectedExercise, activeModalImageIndex);
+                    return (
+                      <div className="p-3.5 rounded-xl bg-surface-canvas border border-surface-border/90 space-y-1.5 text-left shadow-xs">
+                        <div className="flex items-center justify-between gap-2 flex-wrap">
+                          <span className="text-xs font-bold text-accent tracking-wide uppercase flex items-center gap-1.5">
+                            <Sparkles className="w-3.5 h-3.5 text-accent shrink-0" />
+                            <span>{caption.title}</span>
+                          </span>
+                          <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-surface-card border border-surface-border text-hi tracking-wider">
+                            {caption.tag}
+                          </span>
+                        </div>
+                        <p className="text-xs text-mid leading-relaxed font-medium">
+                          {caption.description}
+                        </p>
+                      </div>
+                    );
+                  })()}
                 </div>
               ) : (
                 <div className="w-full aspect-video bg-surface-canvas rounded-xl flex items-center justify-center border border-surface-border text-mid">

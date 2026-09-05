@@ -57,7 +57,46 @@ export default function TacticalChatbot() {
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
+  const [viewportHeight, setViewportHeight] = useState<number | null>(null);
+
   const modalProps = useModalDismiss(() => setIsOpen(false), isOpen);
+
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = "hidden";
+      document.body.style.overscrollBehavior = "none";
+    } else {
+      document.body.style.overflow = "";
+      document.body.style.overscrollBehavior = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+      document.body.style.overscrollBehavior = "";
+    };
+  }, [isOpen]);
+
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const handleViewportChange = () => {
+      if (typeof window !== "undefined" && window.visualViewport) {
+        setViewportHeight(window.visualViewport.height);
+      }
+    };
+
+    if (typeof window !== "undefined" && window.visualViewport) {
+      setViewportHeight(window.visualViewport.height);
+      window.visualViewport.addEventListener("resize", handleViewportChange);
+      window.visualViewport.addEventListener("scroll", handleViewportChange);
+    }
+
+    return () => {
+      if (typeof window !== "undefined" && window.visualViewport) {
+        window.visualViewport.removeEventListener("resize", handleViewportChange);
+        window.visualViewport.removeEventListener("scroll", handleViewportChange);
+      }
+    };
+  }, [isOpen]);
 
   useEffect(() => {
     if (isOpen && !loading) {
@@ -241,11 +280,17 @@ export default function TacticalChatbot() {
       {/* Tactical AI Chatbot Modal */}
       {isOpen && (
         <Portal>
-          <div className="fixed inset-0 h-[100dvh] w-full z-[250] flex items-center justify-center p-3.5 sm:p-4 overflow-y-auto overscroll-contain scrollbar-hide bg-black/80 backdrop-blur-sm modal-overlay-in">
+          <div
+            className="fixed inset-x-0 bottom-0 top-auto sm:inset-0 w-full z-[250] flex flex-col justify-end sm:justify-center sm:items-center p-0 sm:p-4 bg-black/80 backdrop-blur-sm modal-overlay-in"
+            style={{
+              height: viewportHeight ? `${viewportHeight}px` : "100dvh",
+              maxHeight: viewportHeight ? `${viewportHeight}px` : "100dvh",
+            }}
+          >
             <div
               {...modalProps}
               aria-label="Brother's Fitness AI Assistant"
-              className="relative w-full max-w-[440px] h-[85dvh] max-h-[640px] my-auto surface-modal rounded-3xl border border-surface-border shadow-2xl flex flex-col overflow-hidden modal-panel-in"
+              className="relative w-full max-w-[440px] h-full sm:h-[85dvh] sm:max-h-[640px] surface-modal rounded-t-3xl sm:rounded-3xl border-t sm:border border-surface-border shadow-2xl flex flex-col overflow-hidden modal-panel-in"
             >
               {/* iOS Header */}
               <div className="p-4 bg-surface-card border-b border-surface-border flex justify-between items-center shrink-0">
@@ -412,6 +457,7 @@ export default function TacticalChatbot() {
                   <input
                     ref={inputRef}
                     type="text"
+                    inputMode="text"
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
                     placeholder={
@@ -419,7 +465,7 @@ export default function TacticalChatbot() {
                         ? "Apna sawal yahan likhein..."
                         : "Type your fitness question..."
                     }
-                    className="flex-1 bg-transparent text-xs text-hi placeholder:text-low focus:outline-none font-medium"
+                    className="flex-1 bg-transparent text-base sm:text-xs text-hi placeholder:text-low focus:outline-none font-medium"
                     disabled={loading}
                   />
                   <button

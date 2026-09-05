@@ -1912,4 +1912,11 @@ body.mobile-menu-open #tactical-chatbot { display: none !important; }
   animation: sheet-slide-out-bottom 260ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
+/* Disappear floating timer icon when workout exercise image view is open */
+body.workout-modal-open #tactical-stopwatch-button {
+  display: none !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
 
