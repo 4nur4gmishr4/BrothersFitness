@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import {
   X,
   Save,
@@ -14,7 +14,8 @@ import {
 import { toast } from "sonner";
 import Image from "next/image";
 import { useModalDismiss } from "@/hooks/useModalDismiss";
-import { PLAN_PRICES, MEMBERSHIP_PLAN_DETAILS } from "@/lib/config";
+import { PLAN_PRICES, MEMBERSHIP_PLAN_DETAILS, PLAN_DURATION_DAYS } from "@/lib/config";
+import { adminFetch } from "@/lib/admin-api";
 import { todayIST, parseLocalDate } from "@/lib/member-utils";
 import type { GymMember } from "@/lib/supabase";
 import imageCompression from "browser-image-compression";
@@ -93,24 +94,7 @@ export default function MemberFormModal({
     if (formData.membership_start && formData.membership_type && (!formData.membership_end || !member)) {
       const start = parseLocalDate(formData.membership_start);
       if (start) {
-        let daysToAdd = 30;
-        switch (formData.membership_type) {
-          case "15 Days":
-            daysToAdd = 15;
-            break;
-          case "1 Month":
-          case "Monthly":
-            daysToAdd = 30;
-            break;
-          case "3 Months":
-          case "Quarterly":
-            daysToAdd = 90;
-            break;
-          case "6 Months":
-          case "Half-Yearly":
-            daysToAdd = 180;
-            break;
-        }
+        const daysToAdd = PLAN_DURATION_DAYS[formData.membership_type as keyof typeof PLAN_DURATION_DAYS] || 30;
 
         start.setDate(start.getDate() + daysToAdd);
         const endStr = `${start.getFullYear()}-${String(start.getMonth() + 1).padStart(2, "0")}-${String(
@@ -129,7 +113,7 @@ export default function MemberFormModal({
 
   if (!open) return null;
 
-  const handlePhotoCapture = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handlePhotoCapture = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
       setPhotoFile(file);
@@ -139,9 +123,9 @@ export default function MemberFormModal({
       };
       reader.readAsDataURL(file);
     }
-  };
+  }, []);
 
-  const uploadPhoto = async (memberId: string): Promise<string> => {
+  const uploadPhoto = useCallback(async (memberId: string): Promise<string> => {
     if (!photoFile) throw new Error("Photo upload failed");
 
     const options = {
@@ -155,10 +139,8 @@ export default function MemberFormModal({
     form.append("file", compressedFile);
     form.append("memberId", memberId);
 
-    const token = sessionStorage.getItem("admin_token");
-    const res = await fetch("/api/admin/upload", {
+    const res = await adminFetch("/api/admin/upload", {
       method: "POST",
-      headers: { Authorization: `Bearer ${token}` },
       body: form,
     });
     const data = await res.json();
@@ -167,52 +149,39 @@ export default function MemberFormModal({
       throw new Error(data.error || "Photo upload failed");
     }
     return data.url;
-  };
+  }, [photoFile]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
     if (isSubmitting) return;
     setIsSubmitting(true);
 
     try {
-      const token = sessionStorage.getItem("admin_token");
-
       if (member) {
         let photoUrl = member.photo_url || null;
         if (photoFile) {
           photoUrl = await uploadPhoto(member.id);
         }
 
-        const res = await fetch("/api/admin/members", {
+        const res = await adminFetch("/api/admin/members", {
           method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
           body: JSON.stringify({ id: member.id, ...formData, photo_url: photoUrl }),
         });
         if (!res.ok) throw new Error("Failed to save member");
       } else {
-        const res = await fetch("/api/admin/members", {
+        const res = await adminFetch("/api/admin/members", {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({ ...formData, photo_url: null }),
+          body: JSON.stringify(formData),
         });
-        if (!res.ok) throw new Error("Failed to save member");
+        if (!res.ok) throw new Error("Failed to create member");
 
-        const { member: created } = await res.json();
-        if (photoFile) {
+        const data = await res.json();
+        const created = data.member;
+        if (photoFile && created?.id) {
           const photoUrl = await uploadPhoto(created.id);
-          await fetch("/api/admin/members", {
+          await adminFetch("/api/admin/members", {
             method: "PUT",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${token}`,
-            },
-            body: JSON.stringify({ id: created.id, photo_url: photoUrl }),
+            body: JSON.stringify({ id: created.id, ...formData, photo_url: photoUrl }),
           });
         }
       }
@@ -226,7 +195,7 @@ export default function MemberFormModal({
     } finally {
       setIsSubmitting(false);
     }
-  };
+  }, [formData, isSubmitting, member, onClose, onSaved, photoFile, uploadPhoto]);
 
   return (
     <Portal>

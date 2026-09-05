@@ -18,7 +18,6 @@ import {
   Users,
 } from "lucide-react";
 import { useTheme } from "@/components/ui/providers/ThemeProvider";
-import { preloadAdminData } from "@/hooks/use-admin-stats";
 
 import {
   Breadcrumb,
@@ -146,29 +145,14 @@ export interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
   unreadLeads?: number;
 }
 
-const ALL_ADMIN_ROUTES = [
-  "/admin/members",
-  "/admin/dashboard",
-  "/admin/analytics",
-  "/admin/activity",
-  "/admin/leads",
-  "/admin/settings",
-];
+
 
 export const AppSidebar = ({ unreadLeads = 0, ...props }: AppSidebarProps) => {
   const pathname = usePathname();
   const { logout } = useAdmin();
   const router = useRouter();
 
-  // Proactively warm up routes and member cache in parallel on mount for 0ms transitions
-  React.useEffect(() => {
-    try {
-      preloadAdminData();
-      ALL_ADMIN_ROUTES.forEach((r) => {
-        router.prefetch(r);
-      });
-    } catch {}
-  }, [router]);
+  // Removed aggressive preloading to avoid OOM issues
 
   return (
     <Sidebar collapsible="icon" className="border-r border-surface-border bg-surface-card" {...props}>
