@@ -28,10 +28,11 @@ export default function Hero() {
           >
             <h1 className="sr-only">Brother&apos;s Fitness Lakhnadon</h1>
             {/* Prominent Brand Headline: BROTHER'S on Line 1, FITNESS on Line 2 with Left Alignment & Unified Scale */}
-            <div className="w-full max-w-full -ml-1 sm:-ml-2 mb-3 sm:mb-1">
+            <div className="w-[88%] sm:w-full max-w-full -ml-1 sm:-ml-2 mb-3 sm:mb-1">
               <StrokeText
                 lines={["BROTHER'S", "FITNESS"]}
                 lineHeight={1.26}
+                mobileFontSize={124}
                 highlightWord="FITNESS"
                 highlightColor="#D71921"
                 strokeWidth={1.8}
@@ -123,7 +124,7 @@ export default function Hero() {
           >
             <TextLoop
               text="THE IRON NEVER LIES ✦ BE STRONGER THAN YOUR EXCUSES ✦ PAIN IS TEMPORARY PRIDE IS FOREVER ✦ NOBODY CARES WORK HARDER ✦ LIGHT WEIGHT BABY"
-              shape="wave"
+              shape="arch"
               speed={90}
               direction="forward"
               separator="✦"
