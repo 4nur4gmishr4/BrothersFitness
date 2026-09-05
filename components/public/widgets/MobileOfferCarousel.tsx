@@ -55,13 +55,6 @@ export default function MobileOfferCarousel() {
     <div className="w-full flex flex-col items-center">
       {/* High-Converting Customer Attraction Header (Clean, Non-Pulsating, Professional) */}
       <div className="w-full text-center px-4 mb-3.5 space-y-1.5">
-        <div className="inline-flex items-center justify-center gap-2 px-3 py-1 rounded-full bg-surface-card/90 border border-surface-border text-mid text-[11px] font-semibold tracking-wide shadow-xs">
-          <span className="text-accent font-bold">100% Free</span>
-          <span className="text-surface-border">•</span>
-          <span>Zero Obligation</span>
-          <span className="text-surface-border">•</span>
-          <span>No Joining Fee</span>
-        </div>
 
         <h2 className="font-display text-2xl uppercase tracking-wider text-hi">
           START FOR <span className="text-accent">FREE</span> TODAY
