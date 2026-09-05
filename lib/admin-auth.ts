@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { cookies } from 'next/headers';
 import { verifyAdminToken, extractBearerToken } from '@/lib/auth';
 
 /**
@@ -11,7 +12,12 @@ import { verifyAdminToken, extractBearerToken } from '@/lib/auth';
  * one-line `await`.
  */
 export async function requireAdminToken(req: Request): Promise<string | NextResponse> {
-    const token = extractBearerToken(req.headers.get('Authorization'));
+    const cookieStore = await cookies();
+    let token = cookieStore.get('admin_token')?.value;
+    
+    if (!token) {
+        token = extractBearerToken(req.headers.get('Authorization')) || undefined;
+    }
     if (!token || !(await verifyAdminToken(token))) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }

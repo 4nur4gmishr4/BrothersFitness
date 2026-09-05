@@ -22,6 +22,8 @@ CREATE TABLE IF NOT EXISTS public.app_settings (
     value INTEGER NOT NULL
 );
 ALTER TABLE public.app_settings ENABLE ROW LEVEL SECURITY;
+REVOKE ALL ON public.app_settings FROM anon;
+REVOKE ALL ON public.app_settings FROM authenticated;
 
 INSERT INTO public.app_settings (key, value)
 VALUES ('max_daily_credits', 5)
