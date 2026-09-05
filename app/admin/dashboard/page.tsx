@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import PebbleImageViewer, { PebbleImage } from "@/components/admin/PebbleImageViewer";
+import MemberPhotoModal, { MemberPhotoImage } from "@/components/admin/MemberPhotoModal";
 import {
   LayoutDashboard,
   Users,
@@ -43,7 +43,7 @@ export default function AdminDashboardPage() {
   const router = useRouter();
   const { members, loading, error, refresh } = useAllMembers();
   const stats = useAdminStats(members);
-  const [viewingImage, setViewingImage] = useState<PebbleImage | null>(null);
+  const [viewingImage, setViewingImage] = useState<MemberPhotoImage | null>(null);
 
   const quickExport = () => {
     const headers = [
@@ -577,7 +577,7 @@ export default function AdminDashboardPage() {
           )}
         </div>
       )}
-      <PebbleImageViewer
+      <MemberPhotoModal
         image={viewingImage}
         onClose={() => setViewingImage(null)}
       />

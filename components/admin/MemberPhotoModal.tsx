@@ -6,18 +6,20 @@ import { X } from "lucide-react";
 import { Portal } from "@/components/ui/primitives/Portal";
 import { lockScroll, unlockScroll } from "@/lib/scroll-lock";
 
-export interface PebbleImage {
+export interface MemberPhotoImage {
   url: string;
   name?: string | null;
   subtitle?: string | null;
 }
 
-interface PebbleImageViewerProps {
-  image: PebbleImage | null;
+export type PebbleImage = MemberPhotoImage;
+
+interface MemberPhotoModalProps {
+  image: MemberPhotoImage | null;
   onClose: () => void;
 }
 
-export function PebbleImageViewer({ image, onClose }: PebbleImageViewerProps) {
+export function MemberPhotoModal({ image, onClose }: MemberPhotoModalProps) {
   useEffect(() => {
     if (!image) return;
     lockScroll();
@@ -97,4 +99,5 @@ export function PebbleImageViewer({ image, onClose }: PebbleImageViewerProps) {
   );
 }
 
-export default PebbleImageViewer;
+export const PebbleImageViewer = MemberPhotoModal;
+export default MemberPhotoModal;

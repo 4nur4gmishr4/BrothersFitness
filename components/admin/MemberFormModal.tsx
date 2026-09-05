@@ -19,7 +19,7 @@ import { adminFetch } from "@/lib/admin-api";
 import { todayIST, parseLocalDate } from "@/lib/member-utils";
 import type { GymMember } from "@/lib/supabase";
 import imageCompression from "browser-image-compression";
-import PebbleImageViewer, { PebbleImage } from "@/components/admin/PebbleImageViewer";
+import MemberPhotoModal, { MemberPhotoImage } from "@/components/admin/MemberPhotoModal";
 import { Portal } from "@/components/ui/primitives/Portal";
 
 interface MemberFormModalProps {
@@ -59,7 +59,7 @@ export default function MemberFormModal({
   const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isManualEndDate, setIsManualEndDate] = useState(false);
-  const [viewingPebble, setViewingPebble] = useState<PebbleImage | null>(null);
+  const [viewingPhoto, setViewingPhoto] = useState<MemberPhotoImage | null>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
   const galleryInputRef = useRef<HTMLInputElement>(null);
 
@@ -250,14 +250,14 @@ export default function MemberFormModal({
               }`}
               onClick={() => {
                 if (photoPreview) {
-                  setViewingPebble({
+                  setViewingPhoto({
                     url: photoPreview,
                     name: formData.full_name || "Member Photo Preview",
                     subtitle: formData.membership_type || "Member",
                   });
                 }
               }}
-              title={photoPreview ? "Click to view full pebble photo" : undefined}
+              title={photoPreview ? "Click to view full photo" : undefined}
             >
               {photoPreview ? (
                 <Image src={photoPreview} alt="Preview" fill className="object-cover group-hover/form-photo:scale-105 transition-transform duration-200" sizes="112px" />
@@ -503,9 +503,9 @@ export default function MemberFormModal({
           </button>
         </div>
       </form>
-      <PebbleImageViewer
-        image={viewingPebble}
-        onClose={() => setViewingPebble(null)}
+      <MemberPhotoModal
+        image={viewingPhoto}
+        onClose={() => setViewingPhoto(null)}
       />
     </div>
   </Portal>

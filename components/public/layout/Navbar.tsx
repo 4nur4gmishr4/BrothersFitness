@@ -377,7 +377,7 @@ export default function Navbar() {
                       {/* 01 Aman Shrivastava */}
                       <div className="group w-full pb-3 border-b border-surface-border/60 flex items-center justify-between gap-3 text-left transition-colors">
                         <div className="flex items-center gap-3 sm:gap-4 min-w-0 pr-2">
-                          {/* Pebble Shaped Image Avatar */}
+                          {/* Rounded Profile Avatar */}
                           <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-[18px] sm:rounded-[22px] overflow-hidden border border-surface-border bg-surface-soft shrink-0 shadow-sm relative group-hover:border-accent group-hover:scale-105 transition-all duration-200">
                             <Image
                               src="/assets/aman.jpeg"
@@ -434,7 +434,7 @@ export default function Navbar() {
                       {/* 02 Pradeep Shrivastava */}
                       <div className="group w-full flex items-center justify-between gap-3 text-left transition-colors">
                         <div className="flex items-center gap-3 sm:gap-4 min-w-0 pr-2">
-                          {/* Pebble Shaped Image Avatar */}
+                          {/* Rounded Profile Avatar */}
                           <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-[18px] sm:rounded-[22px] overflow-hidden border border-surface-border bg-surface-soft shrink-0 shadow-sm relative group-hover:border-accent group-hover:scale-105 transition-all duration-200">
                             <Image
                               src="/assets/pradeep.jpeg"
@@ -501,7 +501,7 @@ export default function Navbar() {
 
                     <div className="group w-full flex items-center justify-between gap-3 text-left transition-colors">
                       <div className="flex items-center gap-3 sm:gap-4 min-w-0 pr-2">
-                        {/* Pebble Shaped Image Avatar */}
+                        {/* Rounded Profile Avatar */}
                         <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-[18px] sm:rounded-[22px] overflow-hidden border border-surface-border bg-surface-soft shrink-0 shadow-sm relative group-hover:border-accent group-hover:scale-105 transition-all duration-200">
                           <Image
                             src="https://github.com/4nur4gmishr4.png"

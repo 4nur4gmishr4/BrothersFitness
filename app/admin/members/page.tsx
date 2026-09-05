@@ -45,7 +45,7 @@ import {
 } from "@/lib/admin-api";
 import { getPlanPrice } from "@/lib/config";
 import CountUp from "@/components/ui/text/CountUp";
-import PebbleImageViewer, { PebbleImage } from "@/components/admin/PebbleImageViewer";
+import MemberPhotoModal, { MemberPhotoImage } from "@/components/admin/MemberPhotoModal";
 import { Portal } from "@/components/ui/primitives/Portal";
 
 const MemberFormModal = dynamic(
@@ -149,7 +149,7 @@ function AdminMembersPageInner() {
   const [isDeleting, setIsDeleting] = useState(false);
   const [filterOpen, setFilterOpen] = useState(false);
   const [sortOpen, setSortOpen] = useState(false);
-  const [viewingImage, setViewingImage] = useState<PebbleImage | null>(null);
+  const [viewingImage, setViewingImage] = useState<MemberPhotoImage | null>(null);
   const handledParamRef = useRef<string | null>(null);
 
   // Read URL params to deep-link: ?new=1, ?edit=id, ?renew=id, ?filter=expiring
@@ -856,7 +856,7 @@ function AdminMembersPageInner() {
           isDeleting={isDeleting}
         />
       )}
-      <PebbleImageViewer
+      <MemberPhotoModal
         image={viewingImage}
         onClose={() => setViewingImage(null)}
       />
@@ -901,7 +901,7 @@ function MembersTableView({
   onRenew: (m: GymMember) => void;
   onReceipt: (m: GymMember) => void;
   onDelete: (m: GymMember) => void;
-  onViewImage?: (img: PebbleImage) => void;
+  onViewImage?: (img: MemberPhotoImage) => void;
 }) {
   const allChecked =
     members.length > 0 && members.every((m) => selectedIds.has(m.id));
@@ -1156,7 +1156,7 @@ function MembersCardView({
   onRenew: (m: GymMember) => void;
   onReceipt: (m: GymMember) => void;
   onDelete: (m: GymMember) => void;
-  onViewImage?: (img: PebbleImage) => void;
+  onViewImage?: (img: MemberPhotoImage) => void;
 }) {
   return (
     <div className="grid gap-3.5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
