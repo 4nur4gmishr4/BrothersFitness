@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect, useMemo, useCallback } from "react";
-import { useRouter } from "next/navigation";
+import { useMemo, useCallback } from "react";
+import useSWR, { preload } from "swr";
 import type { GymMember } from "@/lib/supabase";
 import { getMemberStatus, parseLocalDate } from "@/lib/member-utils";
 import { PLAN_PRICES } from "@/lib/config";
@@ -62,83 +62,45 @@ export type AdminDashboardStats = MemberStatusCount & {
   };
 };
 
-// In-memory module cache for instant zero-delay route switching between admin tabs
-let memoryMembersCache: GymMember[] | null = null;
-let memoryFetchPromise: Promise<GymMember[] | null> | null = null;
-
-export async function preloadAdminData(): Promise<GymMember[] | null> {
-  if (memoryMembersCache) return memoryMembersCache;
-  if (memoryFetchPromise) return memoryFetchPromise;
-  memoryFetchPromise = (async () => {
-    try {
-      const res = await adminFetch("/api/admin/members", { cache: "no-store" });
-      if (!res.ok) return null;
-      const data = await res.json();
-      memoryMembersCache = data.members || [];
-      return memoryMembersCache;
-    } catch {
-      return null;
-    } finally {
-      memoryFetchPromise = null;
+const fetcher = async (url: string) => {
+  const res = await adminFetch(url, { cache: "no-store" });
+  if (res.status === 401 || res.status === 403) {
+    if (typeof window !== "undefined") {
+      sessionStorage.removeItem("admin_token");
+      window.location.href = "/admin/login";
     }
-  })();
-  return memoryFetchPromise;
+    throw new Error("Unauthorized");
+  }
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  const data = await res.json();
+  return data.members || [];
+};
+
+export function preloadAdminData() {
+  if (typeof window !== "undefined") {
+    preload("/api/admin/members", fetcher);
+  }
 }
 
 export function useAllMembers() {
-  const router = useRouter();
-  const [members, setMembersState] = useState<GymMember[]>(() => memoryMembersCache || []);
-  const [loading, setLoading] = useState<boolean>(() => !memoryMembersCache);
-  const [error, setError] = useState<string | null>(null);
-
-  const setMembers = useCallback(
-    (updater: GymMember[] | ((prev: GymMember[]) => GymMember[])) => {
-      setMembersState((prev) => {
-        const next = typeof updater === "function" ? updater(prev) : updater;
-        memoryMembersCache = next;
-        return next;
-      });
-    },
-    []
-  );
+  const { data, error, mutate, isLoading } = useSWR<GymMember[]>("/api/admin/members", fetcher, {
+    revalidateOnFocus: false,
+  });
 
   const refresh = useCallback(
-    async (isSilent?: boolean | unknown) => {
-      const silent = typeof isSilent === "boolean" ? isSilent : false;
-      try {
-        if (!silent && !memoryMembersCache) {
-          setLoading(true);
-        }
-        setError(null);
-        const res = await adminFetch("/api/admin/members", {
-          cache: "no-store",
-        });
-        if (res.status === 401 || res.status === 403) {
-          sessionStorage.removeItem("admin_token");
-          router.replace("/admin/login");
-          return;
-        }
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const data = await res.json();
-        const list = data.members || [];
-        memoryMembersCache = list;
-        setMembersState(list);
-      } catch (err: unknown) {
-        const msg = err instanceof Error ? err.message : "Failed to load members";
-        setError(msg);
-      } finally {
-        setLoading(false);
-      }
+    () => {
+      mutate();
     },
-    [router]
+    [mutate]
   );
 
-  useEffect(() => {
-    // If cached data is present, revalidate silently in the background (0ms UI render!)
-    refresh(!!memoryMembersCache);
-  }, [refresh]);
-
-  return { members, loading, error, refresh, setMembers };
+  return {
+    members: data || [],
+    loading: isLoading,
+    error: error?.message || null,
+    refresh,
+    setMembers: mutate,
+  };
 }
 
 export function computeAdminStats(members: GymMember[]): AdminDashboardStats {
