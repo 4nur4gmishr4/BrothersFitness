@@ -505,7 +505,11 @@ brofit/
 │   ├── public/                  # Public website sections (Hero, Navbar, Footer)
 │   └── ui/                      # Base primitives, providers, and modals
 ├── docs/
-│   └── bug-audit.md             # Codebase audit findings and fix registry
+│   ├── API.md                   # Complete REST route specs and request/response payloads
+│   ├── ARCHITECTURE.md          # System topology, separation of concerns, and pipelines
+│   ├── DATABASE.md              # PostgreSQL schema, RLS matrix, and atomic RPC functions
+│   ├── DEPLOYMENT.md            # Vercel, Supabase, Upstash Redis provisioning manual
+│   └── SECURITY.md              # Zero-trust auth, timing-safe checks, anti-abuse defenses
 ├── hooks/                       # Custom React hooks (useAdminStats, useModalDismiss)
 ├── lib/                         # Core business logic and server utilities
 │   ├── admin-api.ts             # Admin client fetch wrapper & WhatsApp builders
@@ -542,6 +546,19 @@ brofit/
 ├── tsconfig.json                # TypeScript compiler configuration
 └── vitest.config.ts             # Vitest test configuration & coverage rules
 ```
+
+---
+
+## 🏛️ Key Engineering Decisions & Architectural Trade-offs
+
+| Engineering Decision | Chosen Solution | Alternative Evaluated | Rationale & Trade-offs |
+| :--- | :--- | :--- | :--- |
+| **Database & Auth Engine** | **Supabase (PostgreSQL 15)** | Firebase Firestore / MongoDB | Relational integrity is paramount for member lifecycles, billing dates, and transactions. PostgreSQL provides native Row Level Security (RLS) and atomic ACID stored procedures (`spend_user_credit`). |
+| **Admin Authentication** | **Stateless HMAC-SHA256 + Redis Revocation** | Stateful Server Sessions (Express/Session) | Works seamlessly across serverless edge lambdas without sticky sessions. Token nonces are verified against an Upstash Redis blacklist upon logout, combining stateless horizontal scale with instantaneous revocation. |
+| **Rate Limiting** | **Upstash Redis Sliding-Window** | Memory-only limiter | Serverless instances on Vercel spin up and down unpredictably. A distributed Redis window ensures login and contact form brute-force limits (5/15m) are strictly enforced across all serverless regions. |
+| **Diet Synthesis Engine** | **16-Model Cascade Across 5 Providers** | Single OpenAI API model | Eliminates single-point-of-failure outages and upstream 429 rate limits. Each call enforces an 8s strict timeout before cascading to the next provider, validated at runtime with Zod schemas. |
+| **Member Photo Storage** | **Supabase Storage + Magic-Byte Sniffing** | Base64 strings in DB | Storing images directly in PostgreSQL balloons DB size. Uploading compressed WebP/JPEG binaries (<500KB) to Supabase Storage with magic-byte MIME sniffing prevents client spoofing while keeping DB queries instant. |
+
 
 ---
 
