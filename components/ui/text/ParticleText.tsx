@@ -25,7 +25,6 @@ export interface ParticleTextProps {
   style?: CSSProperties;
 }
 
-type Rgb = { r: number; g: number; b: number };
 type Target = { x: number; y: number; alpha: number; isHighlight?: boolean };
 type Particle = {
   x: number;
@@ -41,24 +40,6 @@ type Particle = {
   delay: number;
   isHighlight?: boolean;
 };
-
-const hexToRgb = (hex: string): Rgb | null => {
-  const clean = hex.replace("#", "").trim();
-  if (!/^[0-9a-fA-F]{6}$/.test(clean)) return null;
-  return {
-    r: parseInt(clean.slice(0, 2), 16),
-    g: parseInt(clean.slice(2, 4), 16),
-    b: parseInt(clean.slice(4, 6), 16),
-  };
-};
-
-const mixRgb = (from: Rgb, to: Rgb, amount: number): Rgb => ({
-  r: Math.round(from.r + (to.r - from.r) * amount),
-  g: Math.round(from.g + (to.g - from.g) * amount),
-  b: Math.round(from.b + (to.b - from.b) * amount),
-});
-
-const rgbToCss = (rgb: Rgb): string => `rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`;
 
 const clamp = (value: number, min: number, max: number): number =>
   Math.min(Math.max(value, min), max);

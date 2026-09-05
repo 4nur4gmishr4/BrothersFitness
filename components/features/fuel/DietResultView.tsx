@@ -2,7 +2,6 @@
 
 import React, { useRef, useState, useMemo } from "react";
 import {
-  Globe,
   Utensils,
   ShoppingCart,
   IndianRupee,
@@ -11,7 +10,6 @@ import {
   RefreshCw,
   Download,
   Calendar,
-  Flame,
   ChevronDown,
   ChevronUp,
   Check,

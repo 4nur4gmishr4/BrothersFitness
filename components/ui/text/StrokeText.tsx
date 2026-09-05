@@ -334,6 +334,7 @@ const StrokeText = ({
     dash,
     drawDuration,
     fillDelay,
+    delay,
     stagger,
     ease,
     trigger,

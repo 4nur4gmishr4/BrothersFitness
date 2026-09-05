@@ -1,4 +1,4 @@
-﻿import { FlatCompat } from '@eslint/eslintrc';
+import { FlatCompat } from '@eslint/eslintrc';
 import js from '@eslint/js';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -22,7 +22,8 @@ const eslintConfig = [
       "public/sw.js",
       "public/swe-worker-*.js",
       "public/workbox-*.js",
-      "coverage/**"
+      "coverage/**",
+      "scratch/**"
     ]
   }
 ];

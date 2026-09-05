@@ -6,7 +6,6 @@ import {
   Send,
   Loader2,
   ExternalLink,
-  Phone,
   Clock,
   Navigation,
   CheckCircle2,

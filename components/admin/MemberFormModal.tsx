@@ -111,8 +111,6 @@ export default function MemberFormModal({
 
   const modalProps = useModalDismiss(onClose);
 
-  if (!open) return null;
-
   const handlePhotoCapture = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -196,6 +194,8 @@ export default function MemberFormModal({
       setIsSubmitting(false);
     }
   }, [formData, isSubmitting, member, onClose, onSaved, photoFile, uploadPhoto]);
+
+  if (!open) return null;
 
   return (
     <Portal>
