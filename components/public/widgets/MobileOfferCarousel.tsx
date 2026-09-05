@@ -8,56 +8,60 @@ import Carousel, { type CarouselItem } from "@/components/ui/carousel/Carousel";
 
 interface OfferSlide extends CarouselItem {
   tag: string;
+  sub: string;
   image: string;
   href: string;
   ctaText: string;
-  badgeColor?: string;
 }
 
 const OFFER_ITEMS: OfferSlide[] = [
   {
     id: "trial-pass",
-    title: "3 Days Free Trial Pass",
-    description: "Try Brother's Fitness in Lakhnadon completely free. No fees, full iron floor access, and coach guidance.",
-    tag: "100% Free Pass",
-    image: "/assets/banner-free-trial.jpg",
+    title: "Free Trial",
+    sub: "3 Days",
+    description: "3 Days Free",
+    tag: "VIP Pass",
+    image: "/assets/offer-free-trial.webp",
     href: "#splits",
-    ctaText: "Claim Free Trial",
-    icon: <Sparkles className="w-3.5 h-3.5 text-accent" />,
+    ctaText: "Claim",
+    icon: <Sparkles className="w-3 h-3 text-accent" />,
   },
   {
     id: "ai-fuel",
-    title: "Free AI Meal & Diet Maker",
-    description: "Make custom desi high-protein diet charts and workout plans in 30 seconds for your exact fitness goal.",
-    tag: "Free AI Tool",
-    image: "/assets/banner-ai-fuel.jpg",
+    title: "Smart Fuel",
+    sub: "Meal Plan",
+    description: "AI Diet",
+    tag: "AI Diet",
+    image: "/assets/offer-ai-fuel.webp",
     href: "/fuel",
-    ctaText: "Start AI Generator",
-    icon: <Flame className="w-3.5 h-3.5 text-accent" />,
+    ctaText: "Create",
+    icon: <Flame className="w-3 h-3 text-accent" />,
   },
   {
     id: "workout-library",
-    title: "1,300+ Exercise Library",
-    description: "Learn correct lifting form, targeted muscles, and easy step-by-step instructions for every exercise.",
-    tag: "Free Exercise Vault",
-    image: "/assets/banner-workout-vault.jpg",
+    title: "Workout Vault",
+    sub: "1,300+ Guides",
+    description: "All Exercises",
+    tag: "Library",
+    image: "/assets/offer-workout-vault.webp",
     href: "/workouts",
-    ctaText: "Explore Exercises",
-    icon: <Dumbbell className="w-3.5 h-3.5 text-accent" />,
+    ctaText: "Explore",
+    icon: <Dumbbell className="w-3 h-3 text-accent" />,
   },
 ];
 
 export default function MobileOfferCarousel() {
   return (
     <div className="w-full">
-      <div className="flex items-center justify-between px-2 mb-2">
+      {/* Sleek Minimal Header */}
+      <div className="flex items-center justify-between px-3 mb-2">
         <div className="flex items-center gap-2">
-          <span className="w-2 h-2 rounded-full bg-accent animate-pulse" />
+          <span className="w-1.5 h-1.5 rounded-full bg-accent animate-pulse" />
           <span className="text-[11px] font-bold uppercase tracking-widest text-accent">
-            Free Gym Perks &amp; Tools
+            Free Gym Perks
           </span>
         </div>
-        <span className="text-[10px] text-faint font-medium">Swipe cards</span>
+        <span className="text-[10px] text-faint font-medium">Swipe</span>
       </div>
 
       <Carousel
@@ -73,11 +77,11 @@ export default function MobileOfferCarousel() {
           const offer = item as OfferSlide;
           return (
             <div
-              className="w-full rounded-2xl bg-surface-card border border-surface-border/90 overflow-hidden shadow-lg flex flex-col group transition-all"
+              className="w-full rounded-2xl bg-surface-card border border-surface-border/90 overflow-hidden shadow-xl flex flex-col group transition-all"
               style={{ width: itemWidth }}
             >
-              {/* Banner Visual */}
-              <div className="relative w-full aspect-[16/9] bg-surface-canvas overflow-hidden">
+              {/* Minimalist 3D Illustration Banner */}
+              <div className="relative w-full aspect-[16/9] bg-[#0c0c0e] overflow-hidden">
                 <Image
                   src={offer.image}
                   alt={offer.title}
@@ -86,35 +90,33 @@ export default function MobileOfferCarousel() {
                   className="object-cover group-hover:scale-105 transition-transform duration-500"
                   sizes="350px"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-surface-card via-black/30 to-black/50" />
+                <div className="absolute inset-0 bg-gradient-to-t from-surface-card via-transparent to-transparent opacity-80" />
 
-                {/* Tag Badge */}
-                <div className="absolute top-2.5 left-2.5 flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-black/80 backdrop-blur-md border border-accent/40 text-[10px] font-bold text-accent uppercase tracking-wider shadow-sm">
+                {/* Minimalist Tag Pill */}
+                <div className="absolute top-3 left-3 flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-black/70 backdrop-blur-md border border-white/10 text-[10px] font-bold text-accent uppercase tracking-wider shadow-sm">
                   {offer.icon}
                   <span>{offer.tag}</span>
                 </div>
               </div>
 
-              {/* Text & CTA */}
-              <div className="p-4 flex flex-col justify-between flex-grow">
+              {/* Spacious 1-2 Word Text Bar & Action */}
+              <div className="p-3.5 px-4 flex items-center justify-between gap-3 bg-surface-card">
                 <div>
-                  <h3 className="font-display text-lg uppercase tracking-wide text-hi line-clamp-1">
+                  <h3 className="font-display text-base uppercase tracking-wide text-hi leading-tight">
                     {offer.title}
                   </h3>
-                  <p className="mt-1 text-xs text-mid leading-relaxed line-clamp-2">
-                    {offer.description}
+                  <p className="text-[11px] text-mid font-medium tracking-wide">
+                    {offer.sub}
                   </p>
                 </div>
 
-                <div className="mt-3 pt-3 border-t border-surface-border/50">
-                  <Link
-                    href={offer.href}
-                    className="w-full inline-flex items-center justify-between px-3.5 py-2 rounded-xl bg-accent text-white text-xs font-bold uppercase tracking-wider hover:brightness-110 active:scale-[0.98] transition-all shadow-sm"
-                  >
-                    <span>{offer.ctaText}</span>
-                    <ArrowUpRight className="w-4 h-4" />
-                  </Link>
-                </div>
+                <Link
+                  href={offer.href}
+                  className="inline-flex items-center gap-1 px-3.5 py-1.5 rounded-full bg-accent text-white text-xs font-bold uppercase tracking-wider hover:brightness-110 active:scale-95 transition-all shadow-sm shrink-0"
+                >
+                  <span>{offer.ctaText}</span>
+                  <ArrowUpRight className="w-3.5 h-3.5" />
+                </Link>
               </div>
             </div>
           );
