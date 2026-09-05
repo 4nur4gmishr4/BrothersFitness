@@ -115,7 +115,7 @@ function CarouselItemWrapper({
 
 export default function Carousel({
   items = [],
-  baseWidth = 320,
+  baseWidth = 0,
   autoplay = false,
   autoplayDelay = 3500,
   pauseOnHover = true,
@@ -124,8 +124,29 @@ export default function Carousel({
   className = "",
   renderItem,
 }: CarouselProps) {
-  const containerPadding = 12;
-  const itemWidth = Math.max(260, baseWidth - containerPadding * 2);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [containerWidth, setContainerWidth] = useState<number>(0);
+
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    const updateSize = () => {
+      if (el) {
+        setContainerWidth(el.clientWidth);
+      }
+    };
+    updateSize();
+    const ro = new ResizeObserver(updateSize);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+
+  const effectiveWidth = containerWidth > 0 ? containerWidth : (baseWidth || 360);
+  const containerPadding = 8;
+  const itemWidth = Math.max(
+    260,
+    baseWidth > 0 ? Math.min(baseWidth, effectiveWidth - containerPadding * 2) : effectiveWidth - containerPadding * 2
+  );
   const trackItemOffset = itemWidth + GAP;
 
   const itemsForRender = useMemo(() => {
@@ -138,8 +159,6 @@ export default function Carousel({
   const [isHovered, setIsHovered] = useState<boolean>(false);
   const [isJumping, setIsJumping] = useState<boolean>(false);
   const [isAnimating, setIsAnimating] = useState<boolean>(false);
-
-  const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (pauseOnHover && containerRef.current) {
@@ -259,11 +278,10 @@ export default function Carousel({
   return (
     <div
       ref={containerRef}
-      className={`relative overflow-hidden p-3 select-none ${className}`}
+      className={`relative w-full overflow-hidden px-1 py-2 select-none mx-auto ${className}`}
       style={{
         width: "100%",
-        maxWidth: `${baseWidth}px`,
-        margin: "0 auto",
+        maxWidth: baseWidth > 0 ? `${baseWidth}px` : "100%",
       }}
     >
       <motion.div

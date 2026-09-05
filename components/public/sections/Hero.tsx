@@ -120,7 +120,7 @@ export default function Hero() {
           {/* Mobile-Only Automatic Carousel: Showcasing Free Gym Trial, Free AI Generator & Workout Library */}
           <div
             id="mobile-offer-carousel"
-            className="block sm:hidden mt-6 -mx-1 overflow-hidden py-1"
+            className="block sm:hidden mt-8 -ml-2 -mr-4 overflow-hidden py-1 w-[calc(100%+1.5rem)]"
           >
             <MobileOfferCarousel />
           </div>
