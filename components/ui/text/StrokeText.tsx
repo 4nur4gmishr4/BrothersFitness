@@ -25,6 +25,7 @@ export interface StrokeTextProps {
   lines?: string[];
   lineHeight?: number;
   delay?: number;
+  mobileScaleX?: number;
   strokeColor?: string;
   fillColor?: string;
   highlightWord?: string;
@@ -38,6 +39,7 @@ export interface StrokeTextProps {
   trigger?: StrokeTextTrigger;
   fillMode?: StrokeTextFillMode;
   fontSize?: number;
+  mobileFontSize?: number;
   fontWeight?: number | string;
   fontFamily?: string;
   letterSpacing?: number;
@@ -61,6 +63,7 @@ const StrokeText = ({
   lines,
   lineHeight = 1.26,
   delay = 0,
+  mobileScaleX = 1,
   strokeColor,
   fillColor,
   highlightWord = "FITNESS",
@@ -74,6 +77,7 @@ const StrokeText = ({
   trigger = "mount",
   fillMode = "wipe",
   fontSize = 100,
+  mobileFontSize,
   fontWeight = 800,
   fontFamily = "var(--font-syne), 'Syne', sans-serif",
   letterSpacing = 0,
@@ -86,6 +90,17 @@ const StrokeText = ({
   const strokeTextRef = useRef<SVGTextElement | null>(null);
   const wipeRectRef = useRef<SVGRectElement | null>(null);
   const hasMountedAnimRef = useRef(false);
+
+  const [isMobile, setIsMobile] = useState(false);
+  useEffect(() => {
+    const check = () => setIsMobile(typeof window !== "undefined" && window.innerWidth < 640);
+    check();
+    window.addEventListener("resize", check);
+    return () => window.removeEventListener("resize", check);
+  }, []);
+
+  const effectiveFontSize = isMobile && mobileFontSize ? mobileFontSize : fontSize;
+  const scaleXVal = isMobile && mobileScaleX ? mobileScaleX : 1;
 
   const { resolvedTheme } = useTheme();
 
@@ -121,16 +136,16 @@ const StrokeText = ({
     return charIndex >= idx && charIndex < idx + highlightWord.length;
   };
 
-  const dash = Math.max(fontSize * 7, 200);
+  const dash = Math.max(effectiveFontSize * 7, 200);
 
   const fontStyle = useMemo<CSSProperties>(
     () => ({
-      fontSize: `${fontSize}px`,
+      fontSize: `${effectiveFontSize}px`,
       fontWeight,
       fontFamily,
       letterSpacing: `${letterSpacing}px`,
     }),
-    [fontSize, fontWeight, fontFamily, letterSpacing]
+    [effectiveFontSize, fontWeight, fontFamily, letterSpacing]
   );
 
   useLayoutEffect(() => {
@@ -149,11 +164,11 @@ const StrokeText = ({
       }
       if (!bbox || !bbox.width) return;
 
-      const pad = Math.max(Number(strokeWidth) || 1, fontSize * 0.08);
+      const pad = Math.max(Number(strokeWidth) || 1, effectiveFontSize * 0.08);
       const next = {
         x: bbox.x - pad,
         y: bbox.y - pad,
-        width: bbox.width + pad * 2,
+        width: (bbox.width * scaleXVal) + pad * 2,
         height: bbox.height + pad * 2,
       };
 
@@ -180,7 +195,7 @@ const StrokeText = ({
     return () => {
       cancelled = true;
     };
-  }, [parsedLines, fontSize, fontWeight, fontFamily, letterSpacing, strokeWidth, lineHeight]);
+  }, [parsedLines, effectiveFontSize, fontWeight, fontFamily, letterSpacing, strokeWidth, lineHeight, scaleXVal]);
 
   useEffect(() => {
     const root = rootRef.current;
@@ -368,6 +383,7 @@ const StrokeText = ({
           className="select-none"
           x="0"
           y="0"
+          transform={scaleXVal !== 1 ? `scale(${scaleXVal}, 1)` : undefined}
           fill="none"
           strokeWidth={strokeWidth}
           strokeLinejoin="round"
@@ -403,6 +419,7 @@ const StrokeText = ({
           className="select-none"
           x="0"
           y="0"
+          transform={scaleXVal !== 1 ? `scale(${scaleXVal}, 1)` : undefined}
           stroke="none"
           style={fontStyle}
           clipPath={fillMode === "wipe" && box ? `url(#${wipeId})` : undefined}

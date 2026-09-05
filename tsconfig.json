@@ -26,7 +26,11 @@
         "./*"
       ]
     },
-    "target": "ES2017"
+    "target": "ES2022",
+    "forceConsistentCasingInFileNames": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true
   },
   "include": [
     "next-env.d.ts",
