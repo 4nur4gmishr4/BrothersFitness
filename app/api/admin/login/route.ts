@@ -97,6 +97,7 @@ export async function POST(req: Request) {
 
         const res = NextResponse.json({
             success: true,
+            token,
             message: 'Welcome back'
         });
 

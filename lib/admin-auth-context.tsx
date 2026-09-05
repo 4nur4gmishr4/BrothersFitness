@@ -7,6 +7,7 @@ type AdminContextType = {
     isLoading: boolean;
     login: (password: string) => Promise<boolean>;
     logout: () => Promise<void>;
+    establishSession: (token?: string) => void;
 };
 
 const AdminContext = createContext<AdminContextType | undefined>(undefined);
@@ -59,8 +60,17 @@ export function AdminProvider({ children }: { children: ReactNode }) {
         setIsAdmin(false);
     };
 
+    const establishSession = (token?: string) => {
+        if (token && typeof window !== 'undefined') {
+            try {
+                sessionStorage.setItem('admin_token', token);
+            } catch { /* storage restricted */ }
+        }
+        setIsAdmin(true);
+    };
+
     return (
-        <AdminContext.Provider value={{ isAdmin, isLoading, login, logout }}>
+        <AdminContext.Provider value={{ isAdmin, isLoading, login, logout, establishSession }}>
             {children}
         </AdminContext.Provider>
     );

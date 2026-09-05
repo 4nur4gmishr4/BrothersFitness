@@ -73,13 +73,13 @@ function AdminLoginContent() {
         return;
       }
 
-      if (res.status === 401 || !res.ok || !data.token) {
+      if (res.status === 401 || !res.ok) {
         setError(data.error || "Incorrect password. Access denied.");
         setSubmitState("idle");
         return;
       }
 
-      if (data.token) {
+      if (data.token || data.success || res.ok) {
         establishSession(data.token);
         setSubmitState("success");
         await new Promise((r) => setTimeout(r, 600));

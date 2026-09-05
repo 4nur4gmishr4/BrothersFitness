@@ -394,7 +394,7 @@ function AdminMembersPageInner() {
         body: JSON.stringify({ id: deletingId }),
       });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      setMembers((prev) => prev.filter((m) => m.id !== deletingId));
+      setMembers((prev = []) => prev.filter((m) => m.id !== deletingId));
       setSelectedIds((prev) => {
         const n = new Set(prev);
         n.delete(deletingId);

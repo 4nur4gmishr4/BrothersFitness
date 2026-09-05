@@ -12,8 +12,13 @@ import { verifyAdminToken, extractBearerToken } from '@/lib/auth';
  * one-line `await`.
  */
 export async function requireAdminToken(req: Request): Promise<string | NextResponse> {
-    const cookieStore = await cookies();
-    let token = cookieStore.get('admin_token')?.value;
+    let token: string | undefined;
+    try {
+        const cookieStore = await cookies();
+        token = cookieStore.get('admin_token')?.value;
+    } catch {
+        // cookies() called outside Next.js request context (e.g. unit tests)
+    }
     
     if (!token) {
         token = extractBearerToken(req.headers.get('Authorization')) || undefined;
