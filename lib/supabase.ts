@@ -9,7 +9,10 @@ export const getSupabase = (): SupabaseClient => {
     if (!supabaseClient) {
         const url = process.env.NEXT_PUBLIC_SUPABASE_URL || supabaseUrl;
         const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || supabaseAnonKey;
-        supabaseClient = createClient(url || 'https://placeholder.supabase.co', key || 'placeholder', {
+        if (!url || !key || url.includes('placeholder')) {
+            throw new Error('Missing Supabase credentials in environment variables');
+        }
+        supabaseClient = createClient(url, key, {
             auth: {
                 persistSession: true,
                 autoRefreshToken: true,

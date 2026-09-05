@@ -6,14 +6,7 @@ export async function adminFetch(
   input: string | URL | Request,
   init: RequestInit = {}
 ): Promise<Response> {
-  const token =
-    (typeof window !== "undefined" && window.sessionStorage.getItem("admin_token")) ||
-    null;
-
   const headers = new Headers(init.headers || {});
-  if (token) {
-    headers.set("Authorization", `Bearer ${token}`);
-  }
   if (
     init.body &&
     !(init.body instanceof FormData) &&

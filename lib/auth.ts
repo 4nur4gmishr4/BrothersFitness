@@ -86,13 +86,12 @@ export function generateAdminToken(): string {
 async function isNonceRevoked(nonce: string): Promise<boolean> {
     if (revokedNonces.has(nonce)) return true;
     const redis = getRedis();
-    if (!redis) return false;
-    try {
-        const revoked = await redis.sismember(REVOKED_SET_KEY, nonce);
-        return revoked === 1;
-    } catch {
-        return false;
+    if (!redis) {
+        if (process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'test') return false;
+        throw new Error('CRITICAL: Redis is required in production for token revocation checks.');
     }
+    const revoked = await redis.sismember(REVOKED_SET_KEY, nonce);
+    return revoked === 1;
 }
 
 export async function verifyAdminToken(token: string): Promise<boolean> {
@@ -130,15 +129,12 @@ export async function revokeAdminToken(token: string): Promise<void> {
 
     revokedNonces.add(payload.n);
     const redis = getRedis();
-    if (redis) {
-        try {
-            await redis.sadd(REVOKED_SET_KEY, payload.n);
-            // Revocation only needs to last as long as the token's own TTL.
-            await redis.expire(REVOKED_SET_KEY, Math.ceil(TOKEN_TTL_MS / 1000));
-        } catch {
-            // Local revocation already applied; Redis write is best-effort.
-        }
+    if (!redis) {
+        if (process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'test') return;
+        throw new Error('CRITICAL: Redis is required in production for token revocation.');
     }
+    await redis.sadd(REVOKED_SET_KEY, payload.n);
+    await redis.expire(REVOKED_SET_KEY, Math.ceil(TOKEN_TTL_MS / 1000));
 }
 
 /**
