@@ -43,7 +43,16 @@ export default function Navbar() {
   const router = useRouter();
 
   useEffect(() => {
-    const handleScroll = () => setIsScrolled(window.scrollY > 15);
+    let ticking = false;
+    const handleScroll = () => {
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          setIsScrolled(window.scrollY > 15);
+          ticking = false;
+        });
+        ticking = true;
+      }
+    };
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
@@ -189,7 +198,6 @@ export default function Navbar() {
                           fill
                           sizes="40px"
                           className="object-cover"
-                          unoptimized
                         />
                       ) : isLoggedIn ? (
                         <div className="w-full h-full rounded-full bg-accent text-white flex items-center justify-center font-bold text-xs uppercase">
@@ -269,7 +277,6 @@ export default function Navbar() {
                               fill
                               sizes="44px"
                               className="object-cover"
-                              unoptimized
                             />
                           ) : (
                             <div className="w-full h-full bg-accent text-white flex items-center justify-center font-bold text-sm">
@@ -317,7 +324,7 @@ export default function Navbar() {
                     ALL PAGES
                   </span>
 
-                  <div className="space-y-2">
+                  <nav className="space-y-2" aria-label="Main Navigation">
                     {navLinks.map((item) => {
                       const isActive = pathname === item.id;
                       return (
@@ -351,7 +358,7 @@ export default function Navbar() {
                         </button>
                       );
                     })}
-                  </div>
+                  </nav>
                 </div>
 
                 {/* Right Column: People & Direct Access with Coaches + Separate System Architect */}
@@ -501,7 +508,6 @@ export default function Navbar() {
                             alt="Anurag Mishra"
                             width={56}
                             height={56}
-                            unoptimized
                             className="w-full h-full object-cover"
                           />
                         </div>
