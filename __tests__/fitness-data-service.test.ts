@@ -68,8 +68,8 @@ describe('fitness-data-service', () => {
             const mockFetch = vi.fn().mockResolvedValue(okJson({ exercises: [] }));
             vi.stubGlobal('fetch', mockFetch);
 
-            await fetchApiNinjasExercises('chest press');
-            expect(mockFetch).toHaveBeenCalledWith('/api/exercises/ninjas?muscle=chest%20press');
+            await fetchApiNinjasExercises('biceps');
+            expect(mockFetch).toHaveBeenCalledWith('/api/exercises/ninjas?muscle=biceps');
         });
 
         it('returns [] on error or non-ok response', async () => {
@@ -81,4 +81,34 @@ describe('fitness-data-service', () => {
             expect(await fetchApiNinjasExercises()).toEqual([]);
         });
     });
+
+    describe('getExerciseCaption', () => {
+        it('generates exact tailored captions for starting and peak contraction phases', async () => {
+            const { getExerciseCaption } = await import('@/components/features/workouts/WorkoutLibrary');
+            const sampleExercise = {
+                id: 'barbell-bench-press',
+                name: 'Barbell Bench Press',
+                category: 'strength',
+                primaryMuscles: ['chest'],
+                equipment: 'barbell',
+                force: 'push',
+                instructions: [
+                    'Lie flat on your back on a sturdy flat bench.',
+                    'Press the bar upward explosively by engaging your chest until arms are locked out.'
+                ],
+                images: ['Barbell_Bench_Press_-_Medium_Grip/0.jpg', 'Barbell_Bench_Press_-_Medium_Grip/1.jpg']
+            };
+
+            const startCap = getExerciseCaption(sampleExercise, 0);
+            expect(startCap.title).toBe('Barbell Bench Press — Starting Position & Setup');
+            expect(startCap.description).toBe('Lie flat on your back on a sturdy flat bench.');
+            expect(startCap.tag).toBe('CHEST • BARBELL');
+
+            const peakCap = getExerciseCaption(sampleExercise, 1);
+            expect(peakCap.title).toBe('Barbell Bench Press — Full Extension & Lockout');
+            expect(peakCap.description).toBe('Press the bar upward explosively by engaging your chest until arms are locked out.');
+            expect(peakCap.tag).toBe('CHEST • PUSH');
+        });
+    });
 });
+
