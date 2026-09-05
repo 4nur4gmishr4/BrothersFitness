@@ -95,14 +95,20 @@ export async function POST(req: Request) {
             log.warn('Failed to log admin login', { error: logError instanceof Error ? logError.message : 'Unknown' });
         }
 
-        return withRequestId(
-            NextResponse.json({
-                success: true,
-                token,
-                message: 'Welcome back'
-            }),
-            requestId
-        );
+        const res = NextResponse.json({
+            success: true,
+            message: 'Welcome back'
+        });
+
+        res.cookies.set('admin_token', token, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'strict',
+            path: '/', // Allow across the app
+            maxAge: 24 * 60 * 60 // 1 day
+        });
+
+        return withRequestId(res, requestId);
     } catch (error) {
         log.error('Login error', { error: error instanceof Error ? error.message : 'Unknown' });
         return withRequestId(

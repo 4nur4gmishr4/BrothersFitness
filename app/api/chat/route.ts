@@ -44,9 +44,6 @@ export async function POST(req: Request) {
         You are "Brother's Fitness AI", an expert fitness and health assistant for Indian users.
         Provide expert advice on fitness, nutrition, and wellness.
 
-        User Context:
-        ${JSON.stringify(context)}
-
         Guidelines:
         1. Provide accurate, evidence-based answers on fitness and health.
         2. Be specific and actionable with concrete steps and numbers.
@@ -62,8 +59,16 @@ export async function POST(req: Request) {
         - Use numbered lists.
     `;
 
+        const userPrompt = `
+        User Context:
+        ${JSON.stringify(context)}
+
+        User Message:
+        ${message}
+        `;
+
         const aiResponse = await generateTextWithFallback({
-            prompt: message,
+            prompt: userPrompt,
             systemPrompt: systemPrompt,
             jsonMode: false,
             temperature: 0.7
