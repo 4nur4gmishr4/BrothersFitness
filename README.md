@@ -33,6 +33,50 @@
 
 ---
 
+### 📚 Technical Documentation Index
+
+| Guide | Scope & Contents |
+| :--- | :--- |
+| 📐 [**System Architecture**](docs/ARCHITECTURE.md) | High-level topology, separation of concerns, request pipeline, and service boundaries. |
+| ⚡ [**API Route Reference**](docs/API.md) | REST endpoints, authentication headers, and full JSON request/response payloads. |
+| 🗄️ [**Database & Security**](docs/DATABASE.md) | PostgreSQL schema, Row Level Security (RLS) policies, and atomic credit RPC functions. |
+| 🛡️ [**Security Architecture**](docs/SECURITY.md) | Zero-trust authentication, timing-attack mitigation, magic-byte validation, and bot defense. |
+| 🚢 [**Deployment Guide**](docs/DEPLOYMENT.md) | Production setup for Vercel, Supabase PostgreSQL, and Upstash Redis. |
+
+---
+
+### 🖥️ Interface Previews *(Sanitized Data)*
+
+```
+┌────────────────────────────────────────────────────────────────────────────────────────┐
+│ BROTHER'S FITNESS • ADMINISTRATIVE ERP                          [👤 Admin] [🚪 Logout] │
+├───────────────────┬────────────────────────────────────────────────────────────────────┤
+│ 📊 Dashboard      │ 🔍 Search members by name, mobile, or plan...      [+ Register New]│
+│ 👥 Members (184)  ├────────────────────────────────────────────────────────────────────┤
+│ 📥 Leads CRM (6)  │ PHOTO   NAME            PLAN        STATUS   EXPIRES       ACTIONS │
+│ 📈 Analytics      │ [📷]    Aarav Sharma    Quarterly   ACTIVE   18 Oct 2026   [Edit]  │
+│ 📜 Audit Trail    │ [📷]    Rohan Patel     Monthly     ACTIVE   02 Oct 2026   [Edit]  │
+│ ⚙️ Settings       │ [📷]    Priya Verma     6 Months    EXPIRING 10 Sep 2026   [Renew] │
+└───────────────────┴────────────────────────────────────────────────────────────────────┘
+```
+
+```
+┌────────────────────────────────────────────────────────────────────────────────────────┐
+│ BROFIT TACTICAL FUEL • AI NUTRITION PROTOCOL                   [📄 Download PDF] [🇮🇳 HI]│
+├────────────────────────────────────────────────────────────────────────────────────────┤
+│ TARGET: HYPERTROPHY / BULK  •  CALORIES: 2,850 kcal  •  PROTEIN: 160g  •  CARBS: 360g │
+├────────────────────────────────────────────────────────────────────────────────────────┤
+│ MEAL 1 (08:30 AM) : High-Protein Paneer Oatmeal (32g P / 85g C)                        │
+│ MEAL 2 (11:30 AM) : Sprouted Moong Salad & Roasted Almonds (18g P / 42g C)             │
+│ MEAL 3 (02:00 PM) : Brown Rice, Double Dal, Soya Chunks & Curd (42g P / 110g C)        │
+│ MEAL 4 (05:30 PM) : Pre-Workout Banana Peanut Butter Toast (14g P / 45g C)             │
+│ MEAL 5 (08:30 PM) : Post-Workout Grilled Paneer/Tofu Rice Bowl (38g P / 65g C)         │
+│ MEAL 6 (10:30 PM) : Warm Turmeric Milk & Mixed Walnuts (16g P / 18g C)                 │
+└────────────────────────────────────────────────────────────────────────────────────────┘
+```
+
+---
+
 ## 📖 Overview
 
 **BroFit** is a high-performance web platform and administrative ERP engineered for gym operations, member lifecycle management, and tactical trainee support. Built on Next.js 15 App Router, React 19, TypeScript, and Supabase (PostgreSQL), the platform unifies client-facing diagnostic calculators and bilingual AI workout/diet generators with an administrative control suite.
