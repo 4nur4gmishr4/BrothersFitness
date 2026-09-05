@@ -20,14 +20,6 @@ function istDateKey(d: Date): string {
     }).format(d);
 }
 
-/** Parse a 'YYYY-MM-DD' (or full ISO) value as an IST date-only millisecond value. */
-function dateOnlyMs(value: string): number {
-    const key = value.slice(0, 10);
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(key)) return NaN;
-    // Parse as midnight IST, then convert to UTC ms
-    const [y, m, d] = key.split('-').map(Number);
-    return Date.UTC(y, m - 1, d) + 5.5 * 60 * 60 * 1000; // IST offset in ms
-}
 
 export async function GET(req: Request) {
     const requestId = getRequestId(req);
@@ -59,45 +51,35 @@ export async function GET(req: Request) {
         const lastMonthStr = new Date(prevMonthStart)
             .toLocaleString('en', { month: 'long', year: 'numeric', timeZone: 'UTC' });
 
-        // Fetch all members via the service client (bypasses RLS like the admin routes).
-        // Idempotent read → safe to retry on transient network failures.
-        // Select only needed columns to reduce payload.
-        const { data: rawMembers, error } = await retryableQuery(() =>
-            getServiceSupabase().from('gym_members').select('membership_start,membership_end,membership_type')
-        );
+        const prevMonthStartStr = new Date(prevMonthStart).toISOString().slice(0, 10);
+        const prevMonthEndStr = new Date(prevMonthEnd).toISOString().slice(0, 10);
 
+        const [{ count: totalMembers, error: errTotal }, { count: activeMembers, error: errActive }, { data: rawMembers, error }] = await Promise.all([
+            getServiceSupabase().from('gym_members').select('*', { count: 'exact', head: true }),
+            getServiceSupabase().from('gym_members').select('*', { count: 'exact', head: true }).gte('membership_end', todayKey),
+            retryableQuery(() => getServiceSupabase().from('gym_members')
+                .select('membership_type')
+                .gte('membership_start', prevMonthStartStr)
+                .lte('membership_start', prevMonthEndStr))
+        ]);
+
+        if (errTotal) throw errTotal;
+        if (errActive) throw errActive;
         if (error) throw error;
 
-        const members = (rawMembers || []) as GymMember[];
-
-        // Last month's new members (date-only compare, TZ-safe)
-        const lastMonthMembers = (members || []).filter((m: GymMember) => {
-            if (!m.membership_start) return false;
-            const start = dateOnlyMs(m.membership_start);
-            if (Number.isNaN(start)) return false;
-            return start >= prevMonthStart && start <= prevMonthEnd;
-        });
+        const lastMonthMembers = (rawMembers || []) as Partial<GymMember>[];
 
         // Revenue calculation
-        const revenue = lastMonthMembers.reduce((sum: number, m: GymMember) => {
+        const revenue = lastMonthMembers.reduce((sum: number, m: Partial<GymMember>) => {
             return sum + getPlanPrice(m.membership_type);
         }, 0);
 
         // Plan breakdown
         const planBreakdown: Record<string, number> = {};
-        lastMonthMembers.forEach((m: GymMember) => {
+        lastMonthMembers.forEach((m: Partial<GymMember>) => {
             const plan = m.membership_type || 'Monthly';
             planBreakdown[plan] = (planBreakdown[plan] || 0) + 1;
         });
-
-        // Active members: still within their membership through today (date-only)
-        const todayMs = dateOnlyMs(todayKey);
-        const activeMembers = (members || []).filter((m: GymMember) => {
-            if (!m.membership_end) return false; // null/undefined → unknown/expired
-            const end = dateOnlyMs(m.membership_end);
-            if (Number.isNaN(end)) return false;
-            return end >= todayMs;
-        }).length;
 
         // Build report
         const report = {
@@ -106,8 +88,8 @@ export async function GET(req: Request) {
             summary: {
                 newMembers: lastMonthMembers.length,
                 totalRevenue: revenue,
-                activeMembers,
-                totalMembers: members?.length || 0
+                activeMembers: activeMembers || 0,
+                totalMembers: totalMembers || 0
             },
             planBreakdown,
             topPlans: Object.entries(planBreakdown)

@@ -39,11 +39,16 @@ export async function POST(req: Request) {
                 });
 
             if (!uploadError && uploadData) {
-                const { data: urlData } = getServiceSupabase()
+                const { data: urlData, error: signError } = await getServiceSupabase()
                     .storage
                     .from('backups')
-                    .getPublicUrl(filename);
-                storageUrl = urlData.publicUrl;
+                    .createSignedUrl(filename, 60 * 5);
+                
+                if (signError) {
+                    logger.warn('Failed to sign backup url', { error: signError.message });
+                } else if (urlData) {
+                    storageUrl = urlData.signedUrl;
+                }
             } else if (uploadError) {
                 logger.warn('Storage upload error', { error: uploadError.message });
             }

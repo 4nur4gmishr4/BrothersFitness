@@ -82,24 +82,9 @@ export async function POST(req: Request) {
             : parseFloat(String(weightChangeRate));
         const calorieAdjustment = Math.round(rateNum * 1100);
 
-        const prompt = `
+        const systemPrompt = `
       You are an expert fitness nutritionist for "Brother's Fitness", optimizing for an **Indian User**.
-
-      **User Biometrics**
-      - Gender: ${gender}
-      - Age: ${age} years
-      - Height: ${height} cm
-      - Current Weight: ${currentWeight} kg
-      - Target Weight: ${targetWeight} kg
-      - Activity Level: ${activityLevel}
-      - Weight Change Rate: ${rateNum} kg/week
-
-      **Parameters**
-      - Daily Calorie Target: ${calories ? calories + " kcal" : "Calculate TDEE"}
-      - Calorie Adjustment: ${calorieAdjustment} kcal/day
-      - Diet Preference: ${dietType}
-      - Budget: ${budget}
-      - Primary Objective: ${goal_description}
+      You must return valid JSON matching the user's schema. Do not include markdown formatting.
 
       **Instructions**:
       1.  **CALORIE CALCULATION**:
@@ -190,17 +175,33 @@ export async function POST(req: Request) {
       }
     `;
 
+        const userPrompt = `
+      **User Biometrics and Parameters**
+      - Gender: ${gender}
+      - Age: ${age} years
+      - Height: ${height} cm
+      - Current Weight: ${currentWeight} kg
+      - Target Weight: ${targetWeight} kg
+      - Activity Level: ${activityLevel}
+      - Weight Change Rate: ${rateNum} kg/week
+      - Daily Calorie Target: ${calories ? calories + " kcal" : "Calculate TDEE"}
+      - Calorie Adjustment: ${calorieAdjustment} kcal/day
+      - Diet Preference: ${dietType}
+      - Budget: ${budget}
+      - Primary Objective: ${goal_description}
+    `;
+
         // 3. Generate + parse the JSON (with a single retry on malformed output).
         // Diet plans are large JSON payloads (~2000 tokens) so we need longer
         // timeouts than the default chat config.
         const json = await requestDietJson({
-            prompt,
-            systemPrompt: "You are a JSON-only API. You must return valid JSON matching the user's schema. Do not include markdown formatting.",
+            prompt: userPrompt,
+            systemPrompt: systemPrompt,
             jsonMode: true,
             temperature: 0.2, // Lower temperature for consistent JSON
             timeoutMs: 60_000,      // 60s per provider (diet JSON is comprehensive)
             totalTimeoutMs: 120_000, // 2 min total for retries across providers
-        }, prompt, log);
+        }, userPrompt, log);
 
         // 4. Validate the structure; do NOT pass structurally invalid AI output
         // through to the client.
