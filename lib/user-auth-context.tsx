@@ -287,8 +287,9 @@ export function UserAuthProvider({ children }: { children: ReactNode }) {
     }, []);
 
     const updateProfile = useCallback(async (data: ProfileUpdateData): Promise<{ success: boolean; error?: string }> => {
+        let timeoutId: NodeJS.Timeout | ReturnType<typeof setTimeout>;
         const timeoutPromise = new Promise<{ success: boolean; error: string }>((_, reject) => {
-            setTimeout(() => reject(new Error('Update timed out after 7 seconds')), 7000);
+            timeoutId = setTimeout(() => reject(new Error('Update timed out after 7 seconds')), 7000);
         });
 
         const updateOperation = async () => {
@@ -359,6 +360,8 @@ export function UserAuthProvider({ children }: { children: ReactNode }) {
         } catch (error: unknown) {
             const message = error instanceof Error ? error.message : 'Update failed';
             return { success: false, error: message };
+        } finally {
+            clearTimeout(timeoutId!);
         }
     }, [user]);
 

@@ -11,6 +11,16 @@ export const PLAN_PRICES = {
     '15 Days': 350
 } as const;
 
+export const PLAN_DURATION_DAYS = {
+    '15 Days': 15,
+    '1 Month': 30,
+    'Monthly': 30,
+    '3 Months': 90,
+    'Quarterly': 90,
+    '6 Months': 180,
+    'Half-Yearly': 180,
+} as const;
+
 /**
  * Get price for a plan, defaulting to Monthly if not found
  */

@@ -151,50 +151,6 @@ export async function spendUserCredit(
 
     if (error) console.error('Credit deduction failed:', error);
 
-    // If RPC function is not found in database schema, fallback to direct atomic table update
-    const errObj = error as { code?: string; message?: string } | null;
-    const isRpcNotFound =
-        errObj?.code === 'PGRST202' ||
-        (typeof errObj?.message === 'string' && errObj.message.includes('spend_user_credit'));
-
-    if (isRpcNotFound) {
-        try {
-            const today = istToday();
-            const { data: userRow } = await retryableQuery(() =>
-                supabase
-                    .from('users')
-                    .select('daily_credits, last_credit_reset')
-                    .eq('id', userId)
-                    .single()
-            );
-
-            if (userRow) {
-                const isNewDay = userRow.last_credit_reset !== today;
-                const currentCredits = isNewDay ? MAX_DAILY_CREDITS : (userRow.daily_credits ?? MAX_DAILY_CREDITS);
-
-                if (currentCredits <= 0) {
-                    return NextResponse.json(
-                        { error: `Daily AI credits used up (0/${MAX_DAILY_CREDITS}). They reset at 5:30 AM IST.` },
-                        { status: 429 }
-                    );
-                }
-
-                const remaining = Math.max(0, currentCredits - 1);
-                await supabase
-                    .from('users')
-                    .update({
-                        daily_credits: remaining,
-                        last_credit_reset: today,
-                    })
-                    .eq('id', userId);
-
-                return { remaining };
-            }
-        } catch (fallbackErr) {
-            console.error('Direct credit deduction fallback failed:', fallbackErr);
-        }
-    }
-
     // Ambiguous outcome (network error): reconcile instead of retrying the RPC.
     if (isTransientError(error)) {
         const reconciled = await retryableQuery(() =>

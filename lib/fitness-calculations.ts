@@ -10,6 +10,10 @@ export interface BMRParams {
   gender: "Male" | "Female" | string;
 }
 
+function isValidPositiveNumber(val: unknown): boolean {
+  return typeof val === 'number' && !Number.isNaN(val) && val > 0;
+}
+
 export const ACTIVITY_MULTIPLIERS: Record<string, number> = {
   "Sedentary (Office Job)": 1.2,
   "Light (Exercise 1-3 days)": 1.375,
@@ -28,12 +32,9 @@ export const ACTIVITY_MULTIPLIERS: Record<string, number> = {
  */
 export function calculateBMR({ weightKg, heightCm, ageYears, gender }: BMRParams): number | null {
   if (
-    isNaN(weightKg) ||
-    isNaN(heightCm) ||
-    isNaN(ageYears) ||
-    weightKg <= 0 ||
-    heightCm <= 0 ||
-    ageYears <= 0
+    !isValidPositiveNumber(weightKg) ||
+    !isValidPositiveNumber(heightCm) ||
+    !isValidPositiveNumber(ageYears)
   ) {
     return null;
   }
@@ -61,7 +62,7 @@ export function calculateTDEE(
  * Calculates Body Mass Index (BMI).
  */
 export function calculateBMI(weightKg: number, heightCm: number): number | null {
-  if (isNaN(weightKg) || isNaN(heightCm) || weightKg <= 0 || heightCm <= 0) {
+  if (!isValidPositiveNumber(weightKg) || !isValidPositiveNumber(heightCm)) {
     return null;
   }
   const heightM = heightCm / 100;
@@ -81,7 +82,7 @@ export function getBMICategory(bmi: number): { label: BMICategory; color: string
  * Calculates One-Rep Max (1RM) using the Epley formula.
  */
 export function calculate1RM(weightKg: number, reps: number): number | null {
-  if (isNaN(weightKg) || isNaN(reps) || weightKg <= 0 || reps <= 0) {
+  if (!isValidPositiveNumber(weightKg) || !isValidPositiveNumber(reps)) {
     return null;
   }
   if (reps === 1) return weightKg;

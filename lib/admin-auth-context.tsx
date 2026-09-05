@@ -6,7 +6,6 @@ type AdminContextType = {
     isAdmin: boolean;
     isLoading: boolean;
     login: (password: string) => Promise<boolean>;
-    establishSession: (token: string) => void;
     logout: () => Promise<void>;
 };
 
@@ -20,31 +19,20 @@ export function AdminProvider({ children }: { children: ReactNode }) {
     useEffect(() => {
         const checkSession = async () => {
             try {
-                // Use sessionStorage instead of localStorage so auth is required every browser session
-                const token = sessionStorage.getItem('admin_token');
-                if (token) {
-                    const res = await fetch('/api/admin/verify', {
-                        headers: { 'Authorization': `Bearer ${token}` }
-                    });
-                    if (res.ok) {
-                        setIsAdmin(true);
-                    } else {
-                        sessionStorage.removeItem('admin_token');
-                    }
+                const res = await fetch('/api/admin/verify');
+                if (res.ok) {
+                    setIsAdmin(true);
+                } else {
+                    setIsAdmin(false);
                 }
             } catch {
-                sessionStorage.removeItem('admin_token');
+                setIsAdmin(false);
             } finally {
                 setIsLoading(false);
             }
         };
         checkSession();
     }, []);
-
-    const establishSession = (token: string) => {
-        sessionStorage.setItem('admin_token', token);
-        setIsAdmin(true);
-    };
 
     const login = async (password: string): Promise<boolean> => {
         try {
@@ -55,8 +43,7 @@ export function AdminProvider({ children }: { children: ReactNode }) {
             });
 
             if (res.ok) {
-                const { token } = await res.json();
-                establishSession(token);
+                setIsAdmin(true);
                 return true;
             }
             return false;
@@ -66,22 +53,14 @@ export function AdminProvider({ children }: { children: ReactNode }) {
     };
 
     const logout = async () => {
-        // Revoke the token server-side before clearing it locally.
-        const token = sessionStorage.getItem('admin_token');
-        if (token) {
-            try {
-                await fetch('/api/admin/logout', {
-                    method: 'POST',
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
-            } catch { /* revocation is best-effort */ }
-        }
-        sessionStorage.removeItem('admin_token');
+        try {
+            await fetch('/api/admin/logout', { method: 'POST' });
+        } catch { /* revocation is best-effort */ }
         setIsAdmin(false);
     };
 
     return (
-        <AdminContext.Provider value={{ isAdmin, isLoading, login, establishSession, logout }}>
+        <AdminContext.Provider value={{ isAdmin, isLoading, login, logout }}>
             {children}
         </AdminContext.Provider>
     );
