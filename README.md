@@ -2,13 +2,14 @@
 
 <div align="center">
 
-![BroFit Banner](https://img.shields.io/badge/BroFit-Gym%20Management%20%26%20AI%20Nutrition-red?style=for-the-badge&logo=gym&logoColor=white)
+[![Live Website](https://img.shields.io/badge/Live%20Site-brothersfitness.in-FF5722?style=for-the-badge&logo=google-chrome&logoColor=white)](https://brothersfitness.in)
+[![CI Pipeline](https://img.shields.io/github/actions/workflow/status/4nur4gmishr4/BrothersFitness/ci.yml?branch=main&style=for-the-badge&logo=githubactions&logoColor=white&label=CI%20Status)](https://github.com/4nur4gmishr4/BrothersFitness/actions)
 ![Next.js 15](https://img.shields.io/badge/Next.js-15.5-black?style=for-the-badge&logo=next.js&logoColor=white)
 ![React 19](https://img.shields.io/badge/React-19.0-61dafb?style=for-the-badge&logo=react&logoColor=black)
 ![TypeScript 5](https://img.shields.io/badge/TypeScript-5.0-3178c6?style=for-the-badge&logo=typescript&logoColor=white)
 ![Supabase](https://img.shields.io/badge/Supabase-PostgreSQL%20%26%20Auth-3ecf8e?style=for-the-badge&logo=supabase&logoColor=white)
 ![Tailwind CSS](https://img.shields.io/badge/Tailwind-3.4-38bdf8?style=for-the-badge&logo=tailwindcss&logoColor=white)
-![Vitest](https://img.shields.io/badge/Vitest-4.0-fcc72b?style=for-the-badge&logo=vitest&logoColor=black)
+![Vitest](https://img.shields.io/badge/Vitest-4.1-fcc72b?style=for-the-badge&logo=vitest&logoColor=black)
 ![PWA Ready](https://img.shields.io/badge/PWA-Offline%20Ready-blueviolet?style=for-the-badge&logo=pwa&logoColor=white)
 
 **A full-stack gym management ERP, tactical fitness companion, and AI-powered nutrition synthesizer built for Brother's Fitness (Lakhnadon, Madhya Pradesh, India).**
@@ -16,6 +17,19 @@
 [Live Features](#-system-features--modules) · [Architecture](#-system-architecture) · [Database & RLS](#-database-schema--security-model) · [Environment Variables](#-environment-variables) · [Installation & Setup](#-getting-started) · [API Reference](#-api-routes-reference) · [Security Model](#-security--anti-abuse-hardening)
 
 </div>
+
+---
+
+### 🌐 Live Portal & Modules
+
+| Module | Route | Live Access | Capabilities |
+| :--- | :--- | :--- | :--- |
+| 🏋️ **Public Trainee Portal** | `/` | [brothersfitness.in](https://brothersfitness.in) | Landing page, real-time trainee metrics, and membership onboarding |
+| 🥗 **Nutrition Synthesizer** | `/fuel` | [brothersfitness.in/fuel](https://brothersfitness.in/fuel) | Mifflin-St Jeor TDEE diet generator with bilingual English/Hindi PDF exports |
+| 🏃 **Interactive Exercise Library** | `/workouts` | [brothersfitness.in/workouts](https://brothersfitness.in/workouts) | 800+ exercise directory with animated guides, muscle filters, and rest timers |
+| 🧮 **Diagnostic Calculators** | `/calculators` | [brothersfitness.in/calculators](https://brothersfitness.in/calculators) | Body Mass Index (BMI), Total Daily Energy Expenditure (TDEE), and 1-Rep Max (1RM) |
+| 🏆 **Trophy Room & Streaks** | `/trophy-room` | [brothersfitness.in/trophy-room](https://brothersfitness.in/trophy-room) | Trainee engagement streaks, gamification medals, and motivation quote explorer |
+| 🛡️ **Administrative Console** | `/admin/login` | [brothersfitness.in/admin/login](https://brothersfitness.in/admin/login) | Member CRUD, digital receipts, leads CRM, revenue analytics, and database backups |
 
 ---
 
