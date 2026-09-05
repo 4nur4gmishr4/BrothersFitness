@@ -1,152 +1,214 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 860" width="100%" height="100%">
   <defs>
-    <!-- Background Gradients -->
-    <linearGradient id="workoutBodyGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-      <stop offset="0%" stop-color="#141418" />
-      <stop offset="100%" stop-color="#070709" />
+    <!-- Dark & Gym Red Gradients -->
+    <linearGradient id="workoutBg" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#121217" />
+      <stop offset="40%" stop-color="#09090C" />
+      <stop offset="100%" stop-color="#040406" />
     </linearGradient>
 
-    <linearGradient id="workoutRedGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#FF3B30" />
-      <stop offset="100%" stop-color="#B91C1C" />
+    <linearGradient id="workoutGymRed" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FF2424" />
+      <stop offset="50%" stop-color="#E50914" />
+      <stop offset="100%" stop-color="#990000" />
     </linearGradient>
 
-    <linearGradient id="workoutCardGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#241215" />
-      <stop offset="100%" stop-color="#120F11" />
+    <linearGradient id="workoutCardBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#280C0F" />
+      <stop offset="60%" stop-color="#160A0D" />
+      <stop offset="100%" stop-color="#0E0709" />
     </linearGradient>
 
-    <linearGradient id="workoutBorderGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#EF4444" stop-opacity="0.45" />
-      <stop offset="100%" stop-color="#EF4444" stop-opacity="0.08" />
+    <linearGradient id="workoutShimmer" x1="-100%" y1="0%" x2="200%" y2="0%">
+      <stop offset="0%" stop-color="#E50914" stop-opacity="0.1" />
+      <stop offset="50%" stop-color="#FF4D4D" stop-opacity="0.55" />
+      <stop offset="100%" stop-color="#E50914" stop-opacity="0.1" />
+      <animate attributeName="x1" from="-100%" to="100%" dur="3.5s" repeatCount="indefinite" />
+      <animate attributeName="x2" from="0%" to="200%" dur="3.5s" repeatCount="indefinite" />
     </linearGradient>
 
-    <filter id="workoutRedGlow" x="-20%" y="-20%" width="140%" height="140%">
-      <feDropShadow dx="0" dy="8" stdDeviation="14" flood-color="#EF4444" flood-opacity="0.25" />
+    <linearGradient id="workoutBorderGlowGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FF2424" stop-opacity="0.85" />
+      <stop offset="50%" stop-color="#E50914" stop-opacity="0.35" />
+      <stop offset="100%" stop-color="#B30006" stop-opacity="0.1" />
+    </linearGradient>
+
+    <!-- Filters for Neon Glow -->
+    <filter id="neonWorkoutRed" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="0" stdDeviation="6" flood-color="#FF1E27" flood-opacity="0.65" />
+      <feDropShadow dx="0" dy="6" stdDeviation="16" flood-color="#E50914" flood-opacity="0.35" />
     </filter>
 
     <filter id="phoneShadowWorkout" x="-10%" y="-10%" width="120%" height="120%">
-      <feDropShadow dx="0" dy="16" stdDeviation="24" flood-color="#000000" flood-opacity="0.8" />
+      <feDropShadow dx="0" dy="20" stdDeviation="28" flood-color="#000000" flood-opacity="0.9" />
     </filter>
+
+    <style>
+      @keyframes timerRotate {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+      }
+      @keyframes borderGlowPulseWorkout {
+        0%, 100% { stroke-opacity: 0.4; }
+        50% { stroke-opacity: 0.95; }
+      }
+      @keyframes radarPingWorkout {
+        0% { r: 3.5px; opacity: 1; }
+        70% { r: 10px; opacity: 0; }
+        100% { r: 10px; opacity: 0; }
+      }
+      @keyframes islandWaveWorkout {
+        0%, 100% { height: 6px; y: 41px; }
+        50% { height: 14px; y: 37px; }
+      }
+      .pulse-workout { animation: radarPingWorkout 2.2s cubic-bezier(0, 0.2, 0.8, 1) infinite; }
+      .border-pulse-workout { animation: borderGlowPulseWorkout 2.8s ease-in-out infinite; }
+      .wave-workout-1 { animation: islandWaveWorkout 1.2s ease-in-out infinite; }
+      .wave-workout-2 { animation: islandWaveWorkout 1.2s ease-in-out 0.3s infinite; }
+      .wave-workout-3 { animation: islandWaveWorkout 1.2s ease-in-out 0.6s infinite; }
+      .timer-spin { transform-origin: 75px 283px; animation: timerRotate 12s linear infinite; }
+    </style>
   </defs>
 
-  <!-- Outer Phone Body -->
-  <rect x="10" y="10" width="400" height="840" rx="52" fill="#1C1C20" stroke="#2E2E36" stroke-width="3" filter="url(#phoneShadowWorkout)" />
+  <!-- Outer Phone Body (Apple iPhone Titanium Frame) -->
+  <rect x="10" y="10" width="400" height="840" rx="52" fill="#18181D" stroke="#2D2D38" stroke-width="3.5" filter="url(#phoneShadowWorkout)" />
+  <rect x="12" y="12" width="396" height="836" rx="50" fill="none" stroke="#000000" stroke-width="2" />
   
-  <!-- Screen Area -->
-  <rect x="16" y="16" width="388" height="828" rx="46" fill="url(#workoutBodyGrad)" />
+  <!-- OLED Screen Display Area -->
+  <rect x="16" y="16" width="388" height="828" rx="46" fill="url(#workoutBg)" />
 
-  <!-- iOS Dynamic Island -->
-  <rect x="150" y="27" width="120" height="34" rx="17" fill="#000000" />
-  <circle cx="248" cy="44" r="5.5" fill="#181820" />
-  <circle cx="248" cy="44" r="2.5" fill="#0A0A10" />
+  <!-- iOS Dynamic Island Container -->
+  <rect x="144" y="27" width="132" height="34" rx="17" fill="#000000" />
+  <!-- Camera lens cutout -->
+  <circle cx="254" cy="44" r="5.5" fill="#14141A" />
+  <circle cx="254" cy="44" r="2.5" fill="#07070A" />
+  <!-- Live Timer / Workout Indicator in Island -->
+  <rect x="160" y="41" width="3" height="6" rx="1.5" fill="#E50914" class="wave-workout-1" />
+  <rect x="166" y="38" width="3" height="12" rx="1.5" fill="#FF3B30" class="wave-workout-2" />
+  <rect x="172" y="40" width="3" height="8" rx="1.5" fill="#E50914" class="wave-workout-3" />
+  <text x="182" y="48" fill="#FCA5A5" font-family="-apple-system, BlinkMacSystemFont, 'SF Pro Text', sans-serif" font-size="10" font-weight="700" letter-spacing="0.4">PUSH 01:15</text>
 
-  <!-- Status Bar -->
+  <!-- iOS Status Bar -->
   <text x="44" y="49" fill="#FFFFFF" font-family="-apple-system, BlinkMacSystemFont, 'SF Pro Text', sans-serif" font-size="14" font-weight="600" letter-spacing="-0.3">9:41</text>
-  <path d="M 346 40 L 350 44 L 354 37 L 358 44 L 362 33" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" fill="none" />
-  <rect x="368" y="38" width="22" height="11" rx="3.5" fill="none" stroke="#FFFFFF" stroke-width="1.8" />
-  <rect x="370" y="40" width="15" height="7" rx="2" fill="#FFFFFF" />
+  <!-- Cellular Signal -->
+  <rect x="340" y="43" width="3" height="5" rx="1" fill="#FFFFFF" />
+  <rect x="345" y="40" width="3" height="8" rx="1" fill="#FFFFFF" />
+  <rect x="350" y="37" width="3" height="11" rx="1" fill="#FFFFFF" />
+  <rect x="355" y="34" width="3" height="14" rx="1" fill="#FFFFFF" />
+  <!-- Battery Indicator -->
+  <rect x="366" y="38" width="23" height="11" rx="3.5" fill="none" stroke="#FFFFFF" stroke-width="1.8" />
+  <rect x="368" y="40" width="16" height="7" rx="2" fill="#34D399" />
+  <path d="M 390 42 C 390.8 42.5, 390.8 44.5, 390 45" stroke="#FFFFFF" stroke-width="1.5" stroke-linecap="round" fill="none" />
 
   <!-- Top App Navigation Bar -->
-  <text x="36" y="104" fill="#A1A1AA" font-family="-apple-system, sans-serif" font-size="11" font-weight="700" letter-spacing="1.2">TACTICAL TRAINING</text>
-  <text x="36" y="132" fill="#FFFFFF" font-family="-apple-system, sans-serif" font-size="24" font-weight="800" letter-spacing="-0.5">Workout Protocol</text>
+  <text x="36" y="102" fill="#EF4444" font-family="-apple-system, sans-serif" font-size="11" font-weight="800" letter-spacing="1.4">TACTICAL TRAINING ENGINE</text>
+  <text x="36" y="130" fill="#FFFFFF" font-family="-apple-system, sans-serif" font-size="24" font-weight="900" letter-spacing="-0.6">Workout Protocol</text>
   
-  <!-- Active Split Pill -->
-  <rect x="272" y="112" width="112" height="24" rx="12" fill="#2A1416" stroke="#EF4444" stroke-width="1" />
-  <circle cx="286" cy="124" r="3.5" fill="#EF4444" />
-  <text x="296" y="128" fill="#FCA5A5" font-family="-apple-system, sans-serif" font-size="10" font-weight="700">PUSH DAY &bull; A</text>
+  <!-- Active Split Pill with Radar Ping -->
+  <rect x="270" y="110" width="114" height="26" rx="13" fill="#240A0D" stroke="#E50914" stroke-width="1.2" />
+  <circle cx="285" cy="123" r="6" fill="#E50914" opacity="0.35" class="pulse-workout" />
+  <circle cx="285" cy="123" r="3.5" fill="#FF2424" />
+  <text x="296" y="127" fill="#FECACA" font-family="-apple-system, sans-serif" font-size="10" font-weight="800">PUSH DAY &bull; A</text>
 
-  <!-- Hero Active Exercise Card with Rest Timer -->
-  <rect x="36" y="156" width="348" height="162" rx="24" fill="url(#workoutCardGrad)" stroke="url(#workoutBorderGrad)" stroke-width="1.5" filter="url(#workoutRedGlow)" />
-  
-  <text x="56" y="184" fill="#F87171" font-family="-apple-system, sans-serif" font-size="11" font-weight="700" letter-spacing="1">CURRENT MOVEMENT</text>
-  <text x="56" y="214" fill="#FFFFFF" font-family="-apple-system, sans-serif" font-size="22" font-weight="800">Incline Dumbbell Press</text>
-  <text x="56" y="234" fill="#A1A1AA" font-family="-apple-system, sans-serif" font-size="12">Target: Upper Pectorals &bull; 4 Sets &bull; 8-10 Reps</text>
+  <!-- Hero Active Exercise Card with Rest Timer (Gym Red Glow + Shimmer) -->
+  <g>
+    <rect x="36" y="152" width="348" height="166" rx="26" fill="url(#workoutCardBg)" stroke="url(#workoutBorderGlowGrad)" stroke-width="1.6" filter="url(#neonWorkoutRed)" class="border-pulse-workout" />
+    <rect x="36" y="152" width="348" height="166" rx="26" fill="url(#workoutShimmer)" opacity="0.12" />
+    
+    <text x="56" y="182" fill="#F87171" font-family="-apple-system, sans-serif" font-size="11" font-weight="800" letter-spacing="1.2">CURRENT ACTIVE EXERCISE</text>
+    <text x="56" y="214" fill="#FFFFFF" font-family="-apple-system, sans-serif" font-size="22" font-weight="900">Incline Dumbbell Press</text>
+    <text x="56" y="234" fill="#A1A1AA" font-family="-apple-system, sans-serif" font-size="12">Target: Upper Pectorals &bull; 4 Sets &bull; 8-10 Reps</text>
 
-  <!-- Rest Timer Widget inside Hero Card -->
-  <rect x="56" y="252" width="150" height="46" rx="14" fill="#181316" stroke="#EF4444" stroke-width="1" stroke-opacity="0.4" />
-  <text x="70" y="272" fill="#A1A1AA" font-family="-apple-system, sans-serif" font-size="10" font-weight="600">REST COUNTDOWN</text>
-  <text x="70" y="291" fill="#FFFFFF" font-family="-apple-system, sans-serif" font-size="16" font-weight="800">01 : 15</text>
+    <!-- Rest Timer Widget inside Hero Card -->
+    <rect x="56" y="252" width="154" height="48" rx="14" fill="#150E12" stroke="#E50914" stroke-width="1.2" stroke-opacity="0.5" />
+    <!-- Spinning Timer Indicator Ring -->
+    <circle cx="75" cy="276" r="10" stroke="#2B161B" stroke-width="2.5" fill="none" />
+    <circle cx="75" cy="276" r="10" stroke="#E50914" stroke-width="2.5" stroke-dasharray="24 16" fill="none" class="timer-spin" />
+    <text x="96" y="268" fill="#A1A1AA" font-family="-apple-system, sans-serif" font-size="9" font-weight="700" letter-spacing="0.5">REST TIMER</text>
+    <text x="96" y="289" fill="#FFFFFF" font-family="-apple-system, sans-serif" font-size="17" font-weight="900">01 : 15</text>
 
-  <rect x="218" y="252" width="146" height="46" rx="14" fill="url(#workoutRedGrad)" />
-  <text x="242" y="280" fill="#FFFFFF" font-family="-apple-system, sans-serif" font-size="13" font-weight="700">Complete Set</text>
+    <!-- Action Button: Complete Set -->
+    <rect x="220" y="252" width="144" height="48" rx="14" fill="url(#workoutGymRed)" />
+    <text x="244" y="281" fill="#FFFFFF" font-family="-apple-system, sans-serif" font-size="13" font-weight="800">Complete Set</text>
+  </g>
 
-  <!-- Muscle Filter Chips -->
-  <rect x="36" y="332" width="70" height="32" rx="16" fill="url(#workoutRedGrad)" />
-  <text x="52" y="353" fill="#FFFFFF" font-family="-apple-system, sans-serif" font-size="11" font-weight="700">Chest</text>
+  <!-- Muscle Taxonomy Filter Chips -->
+  <rect x="36" y="332" width="72" height="32" rx="16" fill="url(#workoutGymRed)" />
+  <text x="53" y="352" fill="#FFFFFF" font-family="-apple-system, sans-serif" font-size="11" font-weight="800">Chest</text>
 
-  <rect x="114" y="332" width="78" height="32" rx="16" fill="#1C1C22" stroke="#2E2E36" stroke-width="1" />
-  <text x="128" y="353" fill="#A1A1AA" font-family="-apple-system, sans-serif" font-size="11" font-weight="600">Shoulders</text>
+  <rect x="116" y="332" width="78" height="32" rx="16" fill="#181820" stroke="#2E2E3C" stroke-width="1" />
+  <text x="130" y="352" fill="#A1A1AA" font-family="-apple-system, sans-serif" font-size="11" font-weight="600">Shoulders</text>
 
-  <rect x="200" y="332" width="74" height="32" rx="16" fill="#1C1C22" stroke="#2E2E36" stroke-width="1" />
-  <text x="216" y="353" fill="#A1A1AA" font-family="-apple-system, sans-serif" font-size="11" font-weight="600">Triceps</text>
+  <rect x="202" y="332" width="74" height="32" rx="16" fill="#181820" stroke="#2E2E3C" stroke-width="1" />
+  <text x="218" y="352" fill="#A1A1AA" font-family="-apple-system, sans-serif" font-size="11" font-weight="600">Triceps</text>
 
-  <rect x="282" y="332" width="62" height="32" rx="16" fill="#1C1C22" stroke="#2E2E36" stroke-width="1" />
-  <text x="296" y="353" fill="#A1A1AA" font-family="-apple-system, sans-serif" font-size="11" font-weight="600">Back</text>
+  <rect x="284" y="332" width="62" height="32" rx="16" fill="#181820" stroke="#2E2E3C" stroke-width="1" />
+  <text x="298" y="352" fill="#A1A1AA" font-family="-apple-system, sans-serif" font-size="11" font-weight="600">Back</text>
 
-  <rect x="352" y="332" width="32" height="32" rx="16" fill="#1C1C22" stroke="#2E2E36" stroke-width="1" />
-  <text x="363" y="353" fill="#A1A1AA" font-family="-apple-system, sans-serif" font-size="11" font-weight="600">&gt;</text>
+  <rect x="354" y="332" width="30" height="32" rx="15" fill="#181820" stroke="#2E2E3C" stroke-width="1" />
+  <text x="364" y="352" fill="#71717A" font-family="-apple-system, sans-serif" font-size="11" font-weight="700">&gt;</text>
 
   <!-- Section Header: Routine Exercises -->
-  <text x="36" y="394" fill="#FFFFFF" font-family="-apple-system, sans-serif" font-size="16" font-weight="700">Today&apos;s Protocol Queue</text>
-  <text x="312" y="394" fill="#EF4444" font-family="-apple-system, sans-serif" font-size="12" font-weight="600">4 of 6 done</text>
+  <text x="36" y="394" fill="#FFFFFF" font-family="-apple-system, sans-serif" font-size="16" font-weight="800">Today&apos;s Protocol Queue</text>
+  <text x="312" y="394" fill="#EF4444" font-family="-apple-system, sans-serif" font-size="12" font-weight="700">4 of 6 done</text>
 
-  <!-- Exercise Item 1 -->
-  <rect x="36" y="410" width="348" height="70" rx="18" fill="#16161B" stroke="#27272F" stroke-width="1" />
-  <circle cx="70" cy="445" r="19" fill="#1A261E" stroke="#10B981" stroke-width="1.5" />
-  <path d="M 64 445 L 68 449 L 76 441" stroke="#34D399" stroke-width="2" fill="none" stroke-linecap="round" />
-  <text x="102" y="438" fill="#FFFFFF" font-family="-apple-system, sans-serif" font-size="14" font-weight="700">Barbell Bench Press</text>
+  <!-- Exercise Item 1: Barbell Bench Press (Completed) -->
+  <rect x="36" y="410" width="348" height="70" rx="18" fill="#131318" stroke="#242430" stroke-width="1.2" />
+  <circle cx="70" cy="445" r="19" fill="#0E281A" stroke="#10B981" stroke-width="1.5" />
+  <path d="M 64 445 L 68 449 L 76 441" stroke="#34D399" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" />
+  <text x="102" y="438" fill="#FFFFFF" font-family="-apple-system, sans-serif" font-size="14" font-weight="800">Barbell Bench Press</text>
   <text x="102" y="456" fill="#71717A" font-family="-apple-system, sans-serif" font-size="11">4 Sets &bull; 85 kg &times; 8 reps &bull; Completed</text>
-  <text x="328" y="449" fill="#34D399" font-family="-apple-system, sans-serif" font-size="11" font-weight="700">DONE</text>
+  <text x="328" y="449" fill="#34D399" font-family="-apple-system, sans-serif" font-size="11" font-weight="800">DONE</text>
 
-  <!-- Exercise Item 2 (Active) -->
-  <rect x="36" y="492" width="348" height="70" rx="18" fill="#1C1417" stroke="#EF4444" stroke-width="1.2" />
-  <circle cx="70" cy="527" r="19" fill="#36171B" stroke="#EF4444" stroke-width="1.5" />
-  <text x="64" y="532" fill="#EF4444" font-family="-apple-system, sans-serif" font-size="13" font-weight="800">E2</text>
-  <text x="102" y="520" fill="#FFFFFF" font-family="-apple-system, sans-serif" font-size="14" font-weight="700">Incline Dumbbell Press</text>
-  <text x="102" y="538" fill="#F87171" font-family="-apple-system, sans-serif" font-size="11">Set 3 of 4 &bull; 32 kg / hand</text>
-  <text x="326" y="531" fill="#FCA5A5" font-family="-apple-system, sans-serif" font-size="11" font-weight="700">ACTIVE</text>
+  <!-- Exercise Item 2: Incline Dumbbell Press (ACTIVE NOW) -->
+  <rect x="36" y="490" width="348" height="70" rx="18" fill="#191215" stroke="#E50914" stroke-width="1.4" />
+  <circle cx="70" cy="525" r="19" fill="#320C10" stroke="#EF4444" stroke-width="1.5" />
+  <text x="61" y="530" fill="#FF4D4D" font-family="-apple-system, sans-serif" font-size="13" font-weight="900">E2</text>
+  <text x="102" y="518" fill="#FFFFFF" font-family="-apple-system, sans-serif" font-size="14" font-weight="800">Incline Dumbbell Press</text>
+  <text x="102" y="536" fill="#F87171" font-family="-apple-system, sans-serif" font-size="11">Set 3 of 4 &bull; 32 kg / hand</text>
+  <rect x="306" y="513" width="64" height="24" rx="12" fill="#320C10" stroke="#E50914" stroke-width="1.2" />
+  <text x="317" y="529" fill="#FECACA" font-family="-apple-system, sans-serif" font-size="10" font-weight="800">ACTIVE</text>
 
-  <!-- Exercise Item 3 -->
-  <rect x="36" y="574" width="348" height="70" rx="18" fill="#16161B" stroke="#27272F" stroke-width="1" />
-  <circle cx="70" cy="609" r="19" fill="#201F25" stroke="#3F3F46" stroke-width="1.5" />
-  <text x="64" y="614" fill="#A1A1AA" font-family="-apple-system, sans-serif" font-size="13" font-weight="800">E3</text>
-  <text x="102" y="602" fill="#FFFFFF" font-family="-apple-system, sans-serif" font-size="14" font-weight="700">Cable Chest Flyes</text>
-  <text x="102" y="620" fill="#71717A" font-family="-apple-system, sans-serif" font-size="11">3 Sets &bull; 12-15 Reps &bull; Peak Squeeze</text>
-  <text x="330" y="613" fill="#71717A" font-family="-apple-system, sans-serif" font-size="11" font-weight="700">NEXT</text>
+  <!-- Exercise Item 3: Cable Chest Flyes (Next) -->
+  <rect x="36" y="570" width="348" height="70" rx="18" fill="#131318" stroke="#242430" stroke-width="1.2" />
+  <circle cx="70" cy="605" r="19" fill="#1C1C24" stroke="#3F3F4E" stroke-width="1.5" />
+  <text x="61" y="610" fill="#D4D4D8" font-family="-apple-system, sans-serif" font-size="13" font-weight="900">E3</text>
+  <text x="102" y="598" fill="#FFFFFF" font-family="-apple-system, sans-serif" font-size="14" font-weight="800">Cable Chest Flyes</text>
+  <text x="102" y="616" fill="#71717A" font-family="-apple-system, sans-serif" font-size="11">3 Sets &bull; 12-15 Reps &bull; Peak Squeeze</text>
+  <text x="330" y="609" fill="#71717A" font-family="-apple-system, sans-serif" font-size="11" font-weight="700">NEXT</text>
 
-  <!-- Exercise Item 4 -->
-  <rect x="36" y="656" width="348" height="70" rx="18" fill="#16161B" stroke="#27272F" stroke-width="1" />
-  <circle cx="70" cy="691" r="19" fill="#201F25" stroke="#3F3F46" stroke-width="1.5" />
-  <text x="64" y="696" fill="#A1A1AA" font-family="-apple-system, sans-serif" font-size="13" font-weight="800">E4</text>
-  <text x="102" y="684" fill="#FFFFFF" font-family="-apple-system, sans-serif" font-size="14" font-weight="700">Tricep Rope Pushdowns</text>
-  <text x="102" y="702" fill="#71717A" font-family="-apple-system, sans-serif" font-size="11">4 Sets &bull; 12 Reps &bull; Isolation</text>
-  <text x="330" y="695" fill="#71717A" font-family="-apple-system, sans-serif" font-size="11" font-weight="700">NEXT</text>
+  <!-- Exercise Item 4: Tricep Rope Pushdowns (Next) -->
+  <rect x="36" y="650" width="348" height="70" rx="18" fill="#131318" stroke="#242430" stroke-width="1.2" />
+  <circle cx="70" cy="685" r="19" fill="#1C1C24" stroke="#3F3F4E" stroke-width="1.5" />
+  <text x="61" y="690" fill="#D4D4D8" font-family="-apple-system, sans-serif" font-size="13" font-weight="900">E4</text>
+  <text x="102" y="678" fill="#FFFFFF" font-family="-apple-system, sans-serif" font-size="14" font-weight="800">Tricep Rope Pushdowns</text>
+  <text x="102" y="696" fill="#71717A" font-family="-apple-system, sans-serif" font-size="11">4 Sets &bull; 12 Reps &bull; Isolation</text>
+  <text x="330" y="689" fill="#71717A" font-family="-apple-system, sans-serif" font-size="11" font-weight="700">NEXT</text>
 
-  <!-- iOS Bottom Tab Bar -->
-  <rect x="16" y="736" width="388" height="108" rx="0" fill="#101014" stroke="#22222A" stroke-width="1" />
+  <!-- iOS Bottom Tab Bar (Frosted Obsidian) -->
+  <rect x="16" y="736" width="388" height="108" rx="0" fill="#0C0C10" stroke="#1E1E28" stroke-width="1" />
   
-  <!-- Tab 1: Workouts (Active in Red) -->
-  <circle cx="72" cy="764" r="12" fill="#3B1518" />
-  <path d="M 68 764 L 72 760 L 76 764 L 76 768 L 68 768 Z" fill="#EF4444" />
-  <text x="50" y="784" fill="#EF4444" font-family="-apple-system, sans-serif" font-size="10" font-weight="700">Workouts</text>
+  <!-- Tab 1: Workouts (Active in Gym Red) -->
+  <circle cx="72" cy="764" r="14" fill="#320C10" />
+  <path d="M 68 764 L 72 760 L 76 764 L 76 768 L 68 768 Z" fill="#E50914" />
+  <text x="48" y="785" fill="#E50914" font-family="-apple-system, sans-serif" font-size="10" font-weight="800">Workouts</text>
 
   <!-- Tab 2: Fuel -->
-  <circle cx="152" cy="764" r="8" fill="none" stroke="#71717A" stroke-width="1.5" />
-  <text x="142" y="784" fill="#71717A" font-family="-apple-system, sans-serif" font-size="10" font-weight="500">Fuel</text>
+  <circle cx="152" cy="764" r="7" fill="none" stroke="#71717A" stroke-width="1.5" />
+  <text x="142" y="785" fill="#71717A" font-family="-apple-system, sans-serif" font-size="10" font-weight="600">Fuel</text>
 
   <!-- Tab 3: Progress -->
   <rect x="226" y="758" width="16" height="12" rx="2" fill="none" stroke="#71717A" stroke-width="1.5" />
-  <text x="212" y="784" fill="#71717A" font-family="-apple-system, sans-serif" font-size="10" font-weight="500">Progress</text>
+  <text x="212" y="785" fill="#71717A" font-family="-apple-system, sans-serif" font-size="10" font-weight="600">Progress</text>
 
   <!-- Tab 4: Hydration -->
-  <circle cx="308" cy="764" r="7" fill="none" stroke="#71717A" stroke-width="1.5" />
-  <text x="290" y="784" fill="#71717A" font-family="-apple-system, sans-serif" font-size="10" font-weight="500">Hydration</text>
+  <circle cx="308" cy="764" r="6" fill="none" stroke="#71717A" stroke-width="1.5" />
+  <text x="289" y="785" fill="#71717A" font-family="-apple-system, sans-serif" font-size="10" font-weight="600">Hydration</text>
 
   <!-- Tab 5: Profile -->
-  <circle cx="366" cy="764" r="7" fill="none" stroke="#71717A" stroke-width="1.5" />
-  <text x="350" y="784" fill="#71717A" font-family="-apple-system, sans-serif" font-size="10" font-weight="500">Coach</text>
+  <circle cx="366" cy="764" r="6" fill="none" stroke="#71717A" stroke-width="1.5" />
+  <text x="350" y="785" fill="#71717A" font-family="-apple-system, sans-serif" font-size="10" font-weight="600">Coach</text>
 
-  <!-- iOS Home Bar Indicator -->
-  <rect x="140" y="828" width="140" height="4.5" rx="2.25" fill="#FFFFFF" opacity="0.8" />
+  <!-- iOS Home Indicator Bar -->
+  <rect x="140" y="828" width="140" height="4.5" rx="2.25" fill="#FFFFFF" opacity="0.75" />
 </svg>
