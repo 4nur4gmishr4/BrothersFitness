@@ -1,0 +1,155 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 860" width="100%" height="100%">
+  <defs>
+    <!-- Background Gradients -->
+    <linearGradient id="fuelBodyGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#141418" />
+      <stop offset="100%" stop-color="#070709" />
+    </linearGradient>
+
+    <linearGradient id="fuelRedGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FF3B30" />
+      <stop offset="100%" stop-color="#B91C1C" />
+    </linearGradient>
+
+    <linearGradient id="fuelCardGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#261215" />
+      <stop offset="100%" stop-color="#140F11" />
+    </linearGradient>
+
+    <linearGradient id="fuelBorderGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#EF4444" stop-opacity="0.45" />
+      <stop offset="100%" stop-color="#EF4444" stop-opacity="0.08" />
+    </linearGradient>
+
+    <filter id="fuelRedGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="8" stdDeviation="14" flood-color="#EF4444" flood-opacity="0.25" />
+    </filter>
+
+    <filter id="phoneShadowFuel" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="16" stdDeviation="24" flood-color="#000000" flood-opacity="0.8" />
+    </filter>
+  </defs>
+
+  <!-- Outer Phone Body -->
+  <rect x="10" y="10" width="400" height="840" rx="52" fill="#1C1C20" stroke="#2E2E36" stroke-width="3" filter="url(#phoneShadowFuel)" />
+  
+  <!-- Screen Area -->
+  <rect x="16" y="16" width="388" height="828" rx="46" fill="url(#fuelBodyGrad)" />
+
+  <!-- iOS Dynamic Island -->
+  <rect x="150" y="27" width="120" height="34" rx="17" fill="#000000" />
+  <circle cx="248" cy="44" r="5.5" fill="#181820" />
+  <circle cx="248" cy="44" r="2.5" fill="#0A0A10" />
+
+  <!-- Status Bar -->
+  <text x="44" y="49" fill="#FFFFFF" font-family="-apple-system, BlinkMacSystemFont, 'SF Pro Text', sans-serif" font-size="14" font-weight="600" letter-spacing="-0.3">9:41</text>
+  <path d="M 346 40 L 350 44 L 354 37 L 358 44 L 362 33" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" fill="none" />
+  <rect x="368" y="38" width="22" height="11" rx="3.5" fill="none" stroke="#FFFFFF" stroke-width="1.8" />
+  <rect x="370" y="40" width="15" height="7" rx="2" fill="#FFFFFF" />
+
+  <!-- Top App Navigation Bar -->
+  <text x="36" y="104" fill="#A1A1AA" font-family="-apple-system, sans-serif" font-size="11" font-weight="700" letter-spacing="1.2">AI NUTRITION ENGINE</text>
+  <text x="36" y="132" fill="#FFFFFF" font-family="-apple-system, sans-serif" font-size="24" font-weight="800" letter-spacing="-0.5">Tactical Fuel Plan</text>
+  
+  <!-- Badge: Protocol Active -->
+  <rect x="286" y="112" width="98" height="24" rx="12" fill="#2A1416" stroke="#EF4444" stroke-width="1" />
+  <circle cx="300" cy="124" r="3.5" fill="#EF4444" />
+  <text x="310" y="128" fill="#FCA5A5" font-family="-apple-system, sans-serif" font-size="10" font-weight="700">BULK 3.0</text>
+
+  <!-- Hero Calorie & Macro Target Card -->
+  <rect x="36" y="156" width="348" height="152" rx="24" fill="url(#fuelCardGrad)" stroke="url(#fuelBorderGrad)" stroke-width="1.5" filter="url(#fuelRedGlow)" />
+  
+  <text x="56" y="184" fill="#F87171" font-family="-apple-system, sans-serif" font-size="11" font-weight="700" letter-spacing="1">DAILY ENERGY TARGET</text>
+  <text x="56" y="226" fill="#FFFFFF" font-family="-apple-system, sans-serif" font-size="36" font-weight="900">2,850</text>
+  <text x="168" y="216" fill="#A1A1AA" font-family="-apple-system, sans-serif" font-size="14" font-weight="600">kcal / day</text>
+
+  <!-- Macro Progress Bars inside Hero Card -->
+  <!-- Protein -->
+  <text x="56" y="254" fill="#E4E4E7" font-family="-apple-system, sans-serif" font-size="11" font-weight="600">Protein (175g / 180g)</text>
+  <rect x="56" y="260" width="140" height="6" rx="3" fill="#27272F" />
+  <rect x="56" y="260" width="134" height="6" rx="3" fill="#EF4444" />
+
+  <!-- Carbs -->
+  <text x="216" y="254" fill="#E4E4E7" font-family="-apple-system, sans-serif" font-size="11" font-weight="600">Carbs (330g / 350g)</text>
+  <rect x="216" y="260" width="148" height="6" rx="3" fill="#27272F" />
+  <rect x="216" y="260" width="138" height="6" rx="3" fill="#DC2626" />
+
+  <!-- Fats -->
+  <text x="56" y="284" fill="#E4E4E7" font-family="-apple-system, sans-serif" font-size="11" font-weight="600">Fats (68g / 70g)</text>
+  <rect x="56" y="290" width="308" height="6" rx="3" fill="#27272F" />
+  <rect x="56" y="290" width="298" height="6" rx="3" fill="#B91C1C" />
+
+  <!-- Action Row: PDF Export & AI Recalibrate -->
+  <rect x="36" y="324" width="168" height="42" rx="14" fill="url(#fuelRedGrad)" />
+  <text x="64" y="350" fill="#FFFFFF" font-family="-apple-system, sans-serif" font-size="12" font-weight="700">Download PDF</text>
+
+  <rect x="216" y="324" width="168" height="42" rx="14" fill="#1E1E24" stroke="#2E2E38" stroke-width="1" />
+  <text x="248" y="350" fill="#E4E4E7" font-family="-apple-system, sans-serif" font-size="12" font-weight="600">Regenerate AI</text>
+
+  <!-- Section Header: Today's Protocol Timeline -->
+  <text x="36" y="402" fill="#FFFFFF" font-family="-apple-system, sans-serif" font-size="16" font-weight="700">Meal Protocols</text>
+  <text x="316" y="402" fill="#EF4444" font-family="-apple-system, sans-serif" font-size="12" font-weight="600">Swap Item</text>
+
+  <!-- Meal Row 1: Pre-Workout -->
+  <rect x="36" y="418" width="348" height="74" rx="18" fill="#16161B" stroke="#27272F" stroke-width="1" />
+  <circle cx="70" cy="455" r="19" fill="#2E1B1D" stroke="#EF4444" stroke-width="1.5" />
+  <text x="63" y="460" fill="#EF4444" font-family="-apple-system, sans-serif" font-size="13" font-weight="800">M1</text>
+  <text x="102" y="445" fill="#FFFFFF" font-family="-apple-system, sans-serif" font-size="14" font-weight="700">Pre-Workout Fuel</text>
+  <text x="102" y="463" fill="#71717A" font-family="-apple-system, sans-serif" font-size="11">Rolled Oats, Whey Isolate, Banana &bull; 620 kcal</text>
+  <text x="102" y="479" fill="#F87171" font-family="-apple-system, sans-serif" font-size="10" font-weight="600">42g Protein &bull; 85g Carbs</text>
+  <rect x="304" y="443" width="66" height="24" rx="12" fill="#14281E" stroke="#10B981" stroke-width="1" />
+  <text x="315" y="459" fill="#34D399" font-family="-apple-system, sans-serif" font-size="10" font-weight="700">EATEN</text>
+
+  <!-- Meal Row 2: Post-Workout -->
+  <rect x="36" y="504" width="348" height="74" rx="18" fill="#191518" stroke="#EF4444" stroke-width="1.2" stroke-opacity="0.7" />
+  <circle cx="70" cy="541" r="19" fill="#3A171B" stroke="#EF4444" stroke-width="1.5" />
+  <text x="63" y="546" fill="#EF4444" font-family="-apple-system, sans-serif" font-size="13" font-weight="800">M2</text>
+  <text x="102" y="531" fill="#FFFFFF" font-family="-apple-system, sans-serif" font-size="14" font-weight="700">Post-Workout Anabolic Bowl</text>
+  <text x="102" y="549" fill="#A1A1AA" font-family="-apple-system, sans-serif" font-size="11">Soya Chunks / Paneer, Rice, Curd &bull; 780 kcal</text>
+  <text x="102" y="565" fill="#F87171" font-family="-apple-system, sans-serif" font-size="10" font-weight="600">54g Protein &bull; 92g Carbs</text>
+  <rect x="304" y="529" width="66" height="24" rx="12" fill="#2E1B1D" stroke="#EF4444" stroke-width="1" />
+  <text x="314" y="545" fill="#FCA5A5" font-family="-apple-system, sans-serif" font-size="10" font-weight="700">NOW</text>
+
+  <!-- Meal Row 3: Evening Recovery -->
+  <rect x="36" y="590" width="348" height="74" rx="18" fill="#16161B" stroke="#27272F" stroke-width="1" />
+  <circle cx="70" cy="627" r="19" fill="#201F25" stroke="#3F3F46" stroke-width="1.5" />
+  <text x="63" y="632" fill="#A1A1AA" font-family="-apple-system, sans-serif" font-size="13" font-weight="800">M3</text>
+  <text x="102" y="617" fill="#FFFFFF" font-family="-apple-system, sans-serif" font-size="14" font-weight="700">Sustained Evening Meal</text>
+  <text x="102" y="635" fill="#71717A" font-family="-apple-system, sans-serif" font-size="11">Multigrain Roti, Dal Tadka, Salad &bull; 650 kcal</text>
+  <text x="102" y="651" fill="#F87171" font-family="-apple-system, sans-serif" font-size="10" font-weight="600">38g Protein &bull; 78g Carbs</text>
+  <rect x="304" y="615" width="66" height="24" rx="12" fill="#1C1C22" stroke="#3F3F46" stroke-width="1" />
+  <text x="316" y="631" fill="#A1A1AA" font-family="-apple-system, sans-serif" font-size="10" font-weight="700">NEXT</text>
+
+  <!-- Micro Hydration Tracker -->
+  <rect x="36" y="676" width="348" height="48" rx="16" fill="#14141A" stroke="#27272F" stroke-width="1" />
+  <text x="56" y="705" fill="#FFFFFF" font-family="-apple-system, sans-serif" font-size="12" font-weight="700">Water Target: 3.2L / 4.0L</text>
+  <rect x="236" y="694" width="132" height="6" rx="3" fill="#20202A" />
+  <rect x="236" y="694" width="105" height="6" rx="3" fill="#EF4444" />
+
+  <!-- iOS Bottom Tab Bar -->
+  <rect x="16" y="736" width="388" height="108" rx="0" fill="#101014" stroke="#22222A" stroke-width="1" />
+  
+  <!-- Tab 1: Workouts -->
+  <circle cx="72" cy="764" r="8" fill="none" stroke="#71717A" stroke-width="1.5" />
+  <text x="50" y="784" fill="#71717A" font-family="-apple-system, sans-serif" font-size="10" font-weight="500">Workouts</text>
+
+  <!-- Tab 2: Fuel (Active in Red) -->
+  <circle cx="152" cy="764" r="12" fill="#3B1518" />
+  <path d="M 148 765 L 152 759 L 156 765 Z" fill="#EF4444" />
+  <text x="142" y="784" fill="#EF4444" font-family="-apple-system, sans-serif" font-size="10" font-weight="700">Fuel</text>
+
+  <!-- Tab 3: Analytics -->
+  <rect x="226" y="758" width="16" height="12" rx="2" fill="none" stroke="#71717A" stroke-width="1.5" />
+  <text x="212" y="784" fill="#71717A" font-family="-apple-system, sans-serif" font-size="10" font-weight="500">Progress</text>
+
+  <!-- Tab 4: Hydration -->
+  <circle cx="308" cy="764" r="7" fill="none" stroke="#71717A" stroke-width="1.5" />
+  <text x="290" y="784" fill="#71717A" font-family="-apple-system, sans-serif" font-size="10" font-weight="500">Hydration</text>
+
+  <!-- Tab 5: Profile -->
+  <circle cx="366" cy="764" r="7" fill="none" stroke="#71717A" stroke-width="1.5" />
+  <text x="350" y="784" fill="#71717A" font-family="-apple-system, sans-serif" font-size="10" font-weight="500">Coach</text>
+
+  <!-- iOS Home Bar Indicator -->
+  <rect x="140" y="828" width="140" height="4.5" rx="2.25" fill="#FFFFFF" opacity="0.8" />
+</svg>

@@ -1,85 +1,199 @@
-# System Architecture
+# System Architecture & Technical Topology
 
-This document provides an in-depth technical overview of the architecture, component topology, and data flow of **BroFit** (Brother's Fitness ERP & Trainee Portal).
+This document provides the definitive architectural blueprint, subsystem specifications, data pipelines, and engineering decisions behind **BroFit** (Brother's Fitness ERP & Trainee Portal).
 
 ---
 
-## 1. Architectural Topology
+## 1. System Topology
 
-BroFit is architected as a modern serverless web platform on **Next.js 15 App Router** backed by **Supabase PostgreSQL** and **Upstash Redis**.
+BroFit is structured as a decoupled, multi-tier serverless system deployed on Next.js 15 App Router, Supabase PostgreSQL, and Upstash Redis:
 
 ```
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                             CLIENT LAYER                                    │
-├───────────────────────────────────────┬─────────────────────────────────────┤
-│        PUBLIC & TRAINEE PORTAL        │          ADMINISTRATION ERP         │
-│ • Next.js 15 Static / Dynamic Pages   │ • Protected Console (/admin/*)      │
-│ • Google OAuth Trainee Session        │ • Passcode Authentication           │
-│ • PWA Offline Cache (Workbox)         │ • Stateless Signed HMAC Token       │
-│ • Diet Synthesizer, 1RM/TDEE Tools    │ • Member CRUD, Leads, Backups, CSV  │
-└───────────────────┬───────────────────┴──────────────────┬──────────────────┘
-                    │                                      │
-                    ▼                                      ▼
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                         NEXT.JS 15 RUNTIME (SERVER)                         │
-├─────────────────────────────────────────────────────────────────────────────┤
-│ [Middleware & Edge Routing]                                                 │
-│ • Security Headers (CSP, Frame-Options, XSS, Referrer)                      │
-│ • Trusted Proxy IP Extraction (x-real-ip / x-forwarded-for)                 │
-│                                                                             │
-│ [Route Handlers]                                                            │
-│ • Public: /api/chat, /api/generate-diet, /api/contact, /api/health          │
-│ • Admin: requireAdminToken() Guard -> /api/admin/*                          │
-│ • Cron: /api/cron/monthly-revenue (Protected by timingSafeEqual CRON_SECRET)│
-└───────────────────┬───────────────────┬──────────────────┬──────────────────┘
-                    │                   │                  │
-                    ▼                   ▼                  ▼
-┌───────────────────────┐ ┌──────────────────────┐ ┌──────────────────────────┐
-│  SUPABASE POSTGRESQL  │ │    UPSTASH REDIS     │ │     AI CASCADE STACK     │
-├───────────────────────┤ ├──────────────────────┤ ├──────────────────────────┤
-│ • public.users (RLS)  │ │ • Sliding-Window     │ │ 1. Groq (Llama 3.3 70B)  │
-│ • public.gym_members  │ │   Rate Limiting      │ │ 2. Mistral AI            │
-│ • contact_submissions │ │ • Admin Nonce        │ │ 3. OpenRouter            │
-│ • admin_activity_logs │ │   Revocation Set     │ │ 4. Cohere                │
-│ • app_settings        │ │   (24h TTL)          │ │ 5. Vercel AI             │
-│ • RPC: spend_credit() │ └──────────────────────┘ └──────────────────────────┘
-│ • Storage: Photos     │
-└───────────────────────┘
+┌──────────────────────────────────────────────────────────────────────────────────────────────────┐
+│                                       BROFIT SYSTEM TOPOLOGY                                     │
+├──────────────────────────────────────────────────────────────────────────────────────────────────┤
+│                                                                                                  │
+│   PUBLIC TRAINEES (Web / PWA)                        ADMINISTRATORS (Management Console)         │
+│   • Google OAuth Sign-In                             • Passcode Authentication (Master Secret)   │
+│   • Trainee Profile & AI Credits                     • HMAC-SHA256 Bearer Token (24h TTL)        │
+│   • Diet Synthesizer & Chatbot                       • Member CRUD, Leads CRM, Audit, Backups    │
+│                  │                                                      │                        │
+│                  ▼                                                      ▼                        │
+│   ┌──────────────────────────────────────────────────────────────────────────────────────────┐   │
+│   │                               NEXT.JS 15 APP ROUTER RUNTIME                              │   │
+│   │                                                                                          │   │
+│   │   [PUBLIC & TRAINEE API ROUTES]               [ADMIN PROTECTED ROUTES (/api/admin/*)]    │   │
+│   │   • /api/chat        • /api/contact           • requireAdminToken() Guard                │   │
+│   │   • /api/generate-diet                        • /api/admin/login     • /api/admin/backup │   │
+│   │   • /api/exercises/ninjas                     • /api/admin/members   • /api/admin/upload │   │
+│   │   • /api/public/member-count                  • /api/admin/leads     • /api/admin/logout │   │
+│   │   • /api/rate-limit-status                    • /api/admin/activity-logs                 │   │
+│   │   • /api/health                               • /api/admin/verify                        │   │
+│   │                                                                                          │   │
+│   │   [CRON ROUTE]                                                                           │   │
+│   │   • /api/cron/monthly-revenue (Protected by CRON_SECRET & timingSafeEqual)                │   │
+│   └───────────────┬──────────────────────────┬───────────────────────────────┬───────────────┘   │
+│                   │                          │                               │                   │
+│                   ▼                          ▼                               ▼                   │
+│   ┌───────────────────────────────┐ ┌───────────────────────────────┐ ┌──────────────────────┐  │
+│   │       SUPABASE POSTGRES       │ │      UPSTASH REDIS / MEM      │ │  AI FALLBACK ENGINE  │  │
+│   │ • public.users (RLS)          │ │ • Sliding-Window Rate Limit   │ │ 1. Groq (Llama 3.3)  │  │
+│   │ • public.gym_members          │ │ • Admin Revocation Blacklist  │ │ 2. Mistral AI        │  │
+│   │ • public.contact_submissions  │ │   (brofit:admin:revoked-      │ │ 3. OpenRouter        │  │
+│   │ • public.admin_activity_logs  │ │    nonces set)                │ │ 4. Cohere            │  │
+│   │ • public.app_settings         │ │                               │ │ 5. Vercel AI         │  │
+│   │ • Storage: member-photos,     │ │                               │ │ (8s call timeout /   │  │
+│   │   backups                     │ │                               │ │  60s total deadline) │  │
+│   │ • RPC: spend_user_credit()    │ │                               │ │                      │  │
+│   │ • RPC: reset_daily_credits()  │ │                               │ │                      │  │
+│   └───────────────────────────────┘ └───────────────────────────────┘ └──────────────────────┘  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## 2. Separation of Concerns: Main App vs. Admin ERP
+## 2. Separation of Concerns: Trainee Portal vs. Admin ERP
 
-The codebase maintains strict modular segregation between public trainee experiences and internal gym administration:
+The codebase maintains strict isolation between client-facing fitness tools and administrative gym operations:
 
-### A. Trainee Application Layer (`app/*`, `components/features/*`, `components/public/*`)
-- **Routing**: Client routes (`/`, `/fuel`, `/workouts`, `/calculators`, `/pricing`, `/quotes`, `/trophy-room`).
-- **Authentication**: Managed via Supabase Google OAuth (`user-auth-context.tsx`). Trainees cannot view or modify administrative records.
-- **Credit Metering**: Governed by an Indian Standard Time (IST) quota system resetting at 5:30 AM UTC (midnight IST).
-- **Client Storage**: Profile preferences, exercise bookmarks, and daily streak counters stored safely in trainee `localStorage`.
+```
+brofit/
+├── app/
+│   ├── (public & trainee routes)    # /, /fuel, /workouts, /calculators, /pricing, /quotes
+│   ├── admin/                       # /admin/dashboard, /admin/members, /admin/leads, etc.
+│   └── api/
+│       ├── (trainee & public APIs)  # /api/chat, /api/generate-diet, /api/contact
+│       └── admin/                   # /api/admin/members, /api/admin/backup, /api/admin/upload
+├── components/
+│   ├── features/ & public/          # Trainee UI (Diet builder, workout stopwatch, hero)
+│   └── admin/                       # Admin UI (Member modals, receipts, analytics charts)
+└── lib/
+    ├── credit-service.ts            # Trainee credit management
+    └── admin-auth.ts                # Admin token verification guard
+```
 
-### B. Gym Administration ERP Layer (`app/admin/*`, `app/api/admin/*`, `components/admin/*`)
-- **Routing**: Completely isolated sub-tree under `/admin/*` (`/admin/dashboard`, `/admin/members`, `/admin/leads`, `/admin/analytics`, `/admin/activity`, `/admin/settings`).
-- **Authentication Guard**: `AdminLayout.tsx` enforces `useAdmin()` hook checking server-side `/api/admin/verify`.
-- **API Guard**: `requireAdminToken()` validates the stateless signed HMAC token and verifies against the Redis revocation set.
-- **Client Storage**: Admin token stored strictly in ephemeral `sessionStorage` (automatically purged when browser tab is closed).
+### A. Trainee Application Layer
+- **Target Audience**: Gym members, prospective trainees, and fitness enthusiasts.
+- **Client State**: Local state managed via React hooks; persistence via browser `localStorage` (gamification streaks, diagnostic history, exercise bookmarks).
+- **Access Boundary**: Unauthenticated public visitors or authenticated trainees via Google OAuth. Read/write capabilities strictly bound to user's personal UUID through Supabase Row Level Security.
+
+### B. Gym Administration ERP Layer
+- **Target Audience**: Gym owners, floor managers, and front-desk personnel.
+- **Client State**: Server-synchronized via SWR; session credentials scoped exclusively to browser `sessionStorage`.
+- **Access Boundary**: Gated behind `requireAdminToken()` verifying cryptographic signatures and Upstash Redis revocation status. All data operations utilize the server-side `SUPABASE_SERVICE_ROLE_KEY`.
+
+### Visual Separation of Concerns
+<div align="center">
+  <table>
+    <tr>
+      <th width="50%" align="center"><b>Trainee Experience: Tactical Fuel</b></th>
+      <th width="50%" align="center"><b>Administration: ERP Console</b></th>
+    </tr>
+    <tr>
+      <td align="center"><img src="assets/ios-fuel-preview.svg" alt="Trainee Experience" width="280" /></td>
+      <td align="center"><img src="assets/ios-admin-preview.svg" alt="Admin ERP Console" width="280" /></td>
+    </tr>
+  </table>
+</div>
 
 ---
 
-## 3. Data Flow Pipelines
+## 3. Subsystem Architecture
+
+### 1. Multi-Provider AI Fallback Cascade (`lib/ai-provider.ts`)
+To achieve zero downtime and eliminate vendor lock-in or rate-limit lockouts, all AI generation tasks route through a 16-model cascade spanning 5 independent providers:
+
+```mermaid
+flowchart LR
+    Start([User AI Request]) --> P1{Groq Key Configured?}
+    P1 -- Yes --> G1[Llama 3.3 70B Versatile]
+    G1 -- Fail / 8s Timeout --> G2[Llama 3.1 8B Instant]
+    G2 -- Fail --> G3[Mixtral 8x7B]
+    P1 -- No / Exhausted --> P2{Mistral Key Configured?}
+    P2 -- Yes --> M1[Mistral Small Latest]
+    M1 -- Fail / 8s Timeout --> M2[Mistral Large]
+    M2 -- Fail --> M3[Codestral]
+    P2 -- No / Exhausted --> P3{OpenRouter Key Configured?}
+    P3 -- Yes --> O1[OpenRouter Free Tier Models]
+    P3 -- No / Exhausted --> P4{Cohere Key Configured?}
+    P4 -- Yes --> C1[Command R Plus / Command R]
+    P4 -- No / Exhausted --> P5{Vercel AI SDK?}
+    P5 -- Yes --> V1[Vercel Gateway Models]
+    V1 -- Success --> Done([Return Normalized Text])
+    G1 -- Success --> Done
+    G2 -- Success --> Done
+    G3 -- Success --> Done
+    M1 -- Success --> Done
+    M2 -- Success --> Done
+    M3 -- Success --> Done
+    O1 -- Success --> Done
+    C1 -- Success --> Done
+    P5 -- No / All Failed --> Err([Throw 503 / Friendly Error])
+```
+
+- **Per-Model Execution Timeout**: 8,000 ms strict deadline per attempt using `AbortController` to abort stalled serverless invocations.
+- **Global Cascade Deadline**: 60,000 ms ceiling across all attempts.
+- **Fail-Fast Provider Bypass**: Providers without valid API keys configured in environment variables are skipped instantaneously with zero HTTP overhead.
+- **Structured Schema Validation**: Raw model outputs are validated against Zod schemas (`DietResponseSchema`), automatically extracting JSON payloads from markdown code blocks (` ```json ... ``` `).
+
+### 2. Quota & Credit Management Engine (`lib/credit-service.ts`)
+Trainee interactions are governed by an Indian Standard Time (IST) quota system resetting daily at midnight IST (5:30 AM UTC):
+
+```
+┌──────────────────────────────────────────────────────────────────────────────────────────────────┐
+│                                      IST CREDIT SPEND CYCLE                                      │
+├──────────────────────────────────────────────────────────────────────────────────────────────────┤
+│                                                                                                  │
+│   1. Request Arrives at /api/generate-diet or /api/chat with Bearer User JWT                     │
+│   2. Server validates token via supabase.auth.getUser() -> obtains userId                        │
+│   3. Fetch current user state from public.users:                                                 │
+│      • If last_credit_reset < istToday() -> Display credits as MAX_DAILY_CREDITS (default 5)     │
+│      • Else -> Display remaining stored daily_credits                                            │
+│   4. Server invokes Supabase RPC: spend_user_credit(p_uid, p_max)                                │
+│      • Stored Procedure executes atomically inside PostgreSQL transaction:                       │
+│        - If last_credit_reset != CURRENT_DATE AT TIME ZONE 'Asia/Kolkata':                       │
+│            daily_credits := p_max - 1, last_credit_reset := IST Today                            │
+│        - Else if daily_credits > 0:                                                              │
+│            daily_credits := daily_credits - 1                                                    │
+│        - Else:                                                                                   │
+│            RAISE EXCEPTION 'INSUFFICIENT_CREDITS' (returns 402)                                  │
+│   5. Transient Network Failure Reconciliation:                                                   │
+│      • If RPC call drops, server re-verifies balance before retrying to prevent double-deduction.│
+│   6. Background Cron Reset:                                                                      │
+│      • Scheduled reset_daily_credits() procedure runs at 5:30 AM IST (Midnight IST boundary)    │
+│        reading cap dynamically from public.app_settings.max_daily_credits.                       │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## 4. Key Engineering Decisions & Architectural Trade-offs
+
+| Decision | Chosen Solution | Alternative Evaluated | Rationale & Trade-offs |
+| :--- | :--- | :--- | :--- |
+| **Database & Auth Engine** | **Supabase (PostgreSQL 15)** | Firebase Firestore / MongoDB | Relational consistency is mandatory for member lifecycles, billing dates, and transactions. PostgreSQL provides native Row Level Security (RLS) and ACID transactions via stored procedures (`spend_user_credit`). |
+| **Admin Authentication** | **Stateless HMAC-SHA256 + Redis Revocation** | Stateful Server Sessions (Express/Session) | Works seamlessly across serverless edge lambdas without sticky sessions. Token nonces are checked against an Upstash Redis blacklist upon logout, combining stateless horizontal scale with instantaneous revocation. |
+| **Rate Limiting** | **Upstash Redis Sliding-Window** | Memory-only limiter | Serverless instances on Vercel spin up and down unpredictably. A distributed Redis window ensures login and contact form brute-force limits (5/15m) are strictly enforced across all serverless regions. |
+| **Diet Synthesis Engine** | **16-Model Cascade Across 5 Providers** | Single OpenAI API model | Eliminates single-point-of-failure outages and upstream 429 rate limits. Each call enforces an 8s strict timeout before cascading to the next provider, validated at runtime with Zod schemas. |
+| **Member Photo Storage** | **Supabase Storage + Magic-Byte Sniffing** | Base64 strings in DB | Storing images directly in PostgreSQL balloons DB size. Uploading compressed WebP/JPEG binaries (<500KB) to Supabase Storage with magic-byte MIME sniffing prevents client spoofing while keeping DB queries instant. |
+
+---
+
+## 5. End-to-End Data Pipelines
 
 ### A. Diet Synthesis Pipeline
-1. Trainee submits physical biometrics (Age, Gender, Weight, Target, Activity, Dietary preference).
-2. Client requests `POST /api/generate-diet` with Bearer Trainee JWT.
+1. Trainee inputs physical metrics (Age, Gender, Height, Weight, Activity, Dietary preference, Budget) on `/fuel`.
+2. Browser sends `POST /api/generate-diet` with the user's Supabase JWT.
 3. Server executes atomic stored procedure `spend_user_credit(userId, 5)` in PostgreSQL.
-4. Server invokes `generateDietPlan()` executing the 16-model AI fallback cascade with an 8-second timeout per model.
-5. The synthesized JSON protocol is validated against `DietResponseSchema` via Zod.
-6. The client renders bilingual macro breakdown with instant client-side PDF export via `jsPDF` and `html2canvas`.
+4. Server invokes `generateDietPlan()` triggering the multi-provider cascade.
+5. Synthesized JSON is validated via `DietResponseSchema` in Zod.
+6. Client renders full macro breakdown, meal timing, and 15-day grocery checklist with bilingual (Hindi/English) toggling and client-side PDF export via `jsPDF` and `html2canvas`.
 
 ### B. Member Lifecycle Pipeline
-1. Administrator creates/renews member profile via `MemberFormModal.tsx`.
-2. Photo is compressed in a Web Worker using `browser-image-compression` (< 500 KB, max 1200px).
-3. Photo binary is verified on the server via magic-byte signatures (JPEG, PNG, WebP) and uploaded to Supabase `member-photos`.
-4. Stored member record updates expiry date based on canonical `PLAN_DURATION_DAYS` mapping.
-5. Action is recorded in `admin_activity_logs` with admin timestamp and client IP.
+1. Administrator creates or renews a member profile via `MemberFormModal.tsx`.
+2. Trainee photo is compressed locally in a Web Worker (< 500 KB, max 1200px) using `browser-image-compression`.
+3. Server route `/api/admin/upload` validates magic-byte image signatures and stores the binary in Supabase `member-photos` bucket.
+4. Member database record is updated in `public.gym_members` with calculated expiration dates.
+5. An immutable audit record is appended to `public.admin_activity_logs`.

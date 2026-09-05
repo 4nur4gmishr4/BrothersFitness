@@ -1,65 +1,92 @@
 # Deployment & Operations Guide
 
-Step-by-step manual for provisioning, deploying, and maintaining BroFit in production environments.
+This document provides the definitive guide for provisioning infrastructure, configuring environment secrets, executing database migrations, and deploying **BroFit** to production.
 
 ---
 
 ## 1. Hosting Architecture Overview
 
-- **Web Framework & Compute**: Vercel (Next.js 15 Serverless Functions & Edge Network)
-- **Database & Object Storage**: Supabase (Managed PostgreSQL 15 & Storage Buckets)
-- **Rate Limiting & Cache**: Upstash Redis (Serverless REST API)
-- **Domain & SSL**: Custom DNS configured for `https://brothersfitness.in`
+| Component | Provider | Configuration |
+| :--- | :--- | :--- |
+| **Edge Network & Serverless Runtime** | [Vercel](https://vercel.com) | Next.js 15 App Router, Node.js 20.x, multi-region edge caching |
+| **Relational Database & Object Storage** | [Supabase](https://supabase.com) | PostgreSQL 15, Row Level Security, S3-compatible Storage Buckets |
+| **Distributed Rate Limiting & Blacklist** | [Upstash](https://upstash.com) | Serverless Redis REST API with sliding-window algorithm |
+| **Custom Domain & TLS** | DNS Provider / Vercel | Production root: `https://brothersfitness.in` |
 
 ---
 
 ## 2. Environment Variables Provisioning
 
-Configure the following variables in the **Vercel Project Settings**:
+Configure the following environment variables in the **Vercel Project Settings** (`Production` and `Preview` environments):
 
 ```bash
-# Supabase
-NEXT_PUBLIC_SUPABASE_URL=https://<your-project>.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=<your-anon-key>
-SUPABASE_SERVICE_ROLE_KEY=<your-service-role-key>
+# ==============================================================================
+# 1. SUPABASE INFRASTRUCTURE
+# ==============================================================================
+NEXT_PUBLIC_SUPABASE_URL=https://<your-project-ref>.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+SUPABASE_SERVICE_ROLE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 
-# Admin & Cron Secrets
+# ==============================================================================
+# 2. SECURITY & AUTHENTICATION SECRETS
+# ==============================================================================
+# Master passcode used for administrative ERP authentication & HMAC signing
 ADMIN_PASSWORD=<generate-with-openssl-rand-base64-32>
+
+# Secret token used by automated cron triggers to authorize monthly analytics
 CRON_SECRET=<generate-with-openssl-rand-hex-32>
 
-# AI Fallback Providers
-GROQ_API_KEY=<your-groq-api-key>
-MISTRAL_API_KEY=<your-mistral-api-key>
-OPENROUTER_API_KEY=<your-openrouter-api-key>
-COHERE_API_KEY=<your-cohere-api-key>
+# ==============================================================================
+# 3. MULTI-PROVIDER AI CASCADE
+# ==============================================================================
+GROQ_API_KEY=gsk_...
+MISTRAL_API_KEY=...
+OPENROUTER_API_KEY=sk-or-v1-...
+COHERE_API_KEY=...
+API_NINJAS_KEY=...
 
-# Upstash Redis
-UPSTASH_REDIS_REST_URL=https://<your-redis>.upstash.io
-UPSTASH_REDIS_REST_TOKEN=<your-upstash-token>
+# ==============================================================================
+# 4. UPSTASH REDIS (DISTRIBUTED RATE LIMITING & TOKEN REVOCATION)
+# ==============================================================================
+UPSTASH_REDIS_REST_URL=https://<your-redis-instance>.upstash.io
+UPSTASH_REDIS_REST_TOKEN=...
 
-# Site URL & Reverse Proxy
+# ==============================================================================
+# 5. RUNTIME & NETWORK PROXY
+# ==============================================================================
 NEXT_PUBLIC_SITE_URL=https://brothersfitness.in
 TRUST_PROXY_HEADERS=true
+MAX_DAILY_CREDITS=5
 ```
 
 ---
 
 ## 3. Database Migration Sequence
 
-Execute SQL migrations in the Supabase SQL Editor in chronological sequence:
-1. `supabase/migrations/supabase-schema.sql`: Base tables (`users`), RLS policies, and `spend_user_credit` RPC.
-2. `supabase/migrations/2026-08-01-admin-tables.sql`: Administration tables (`gym_members`, `contact_submissions`, `admin_activity_logs`).
-3. `supabase/migrations/2026-08-02-configurable-credits.sql`: Configuration parameters and daily credit reset procedures.
+Execute the SQL migration scripts located in `supabase/migrations/` in chronological order via the **Supabase SQL Editor**:
 
-Create required Supabase Storage buckets:
-- `member-photos`: Public read access for avatar display.
-- `backups`: Private administrative storage for database JSON exports.
+1. **`supabase/migrations/supabase-schema.sql`**:
+   - Creates the `public.users` table.
+   - Sets up user row synchronization and `spend_user_credit` stored procedure.
+   - Establishes base Row Level Security (RLS).
+2. **`supabase/migrations/2026-08-01-admin-tables.sql`**:
+   - Provisions `public.gym_members`, `public.contact_submissions`, and `public.admin_activity_logs`.
+   - Creates indexes on search and expiry columns.
+   - Enforces zero-direct-access RLS policies.
+3. **`supabase/migrations/2026-08-02-configurable-credits.sql`**:
+   - Provisions `public.app_settings` for dynamic runtime parameters.
+   - Installs `reset_daily_credits` procedure.
+
+### Storage Bucket Setup
+Create the required Supabase Storage buckets via the Supabase Dashboard:
+- **`member-photos`**: Set to **Public** visibility (for avatar display).
+- **`backups`**: Set to **Private** visibility (for encrypted database JSON snapshots).
 
 ---
 
-## 4. Scheduled Jobs (Cron)
+## 4. Scheduled Jobs (Vercel Cron)
 
-Set up a Vercel Cron Job targeting `/api/cron/monthly-revenue` to run at the close of every calendar month:
+BroFit schedules automated monthly financial reconciliations via `vercel.json`:
 
 ```json
 {
@@ -72,4 +99,22 @@ Set up a Vercel Cron Job targeting `/api/cron/monthly-revenue` to run at the clo
 }
 ```
 
-The endpoint validates requests using the `Authorization: Bearer <CRON_SECRET>` header via `timingSafeEqual`.
+The server validates every cron invocation against `CRON_SECRET` using `crypto.timingSafeEqual`.
+
+---
+
+## 5. Progressive Web App (PWA) Deployment
+
+- Configured through `@ducanh2912/next-pwa` in `next.config.mjs`.
+- Service worker updates use `skipWaiting: false` to ensure seamless user updates without chunk caching mismatches.
+- Static offline caching rules cover icons, logos, and critical shell scripts.
+
+---
+
+## 6. Post-Deployment Verification Checklist
+
+1. **Liveness Probe**: Verify `GET https://brothersfitness.in/api/health` returns `200 OK`.
+2. **Member Count Endpoint**: Verify `GET https://brothersfitness.in/api/public/member-count` returns live member count and quarterly trends.
+3. **Admin Authentication**: Navigate to `https://brothersfitness.in/admin/login`, enter master password, and verify redirection to `/admin/dashboard`.
+4. **AI Generation**: Navigate to `https://brothersfitness.in/fuel`, generate a sample diet, verify 6 meals render, and verify PDF export triggers.
+5. **Rate Limiter Test**: Send rapid requests to `/api/admin/login` and verify HTTP 429 lockout activates after 5 attempts.

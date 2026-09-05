@@ -1,0 +1,141 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 860" width="100%" height="100%">
+  <defs>
+    <!-- Background Gradients -->
+    <linearGradient id="bodyGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#141418" />
+      <stop offset="100%" stop-color="#070709" />
+    </linearGradient>
+
+    <linearGradient id="redAccentGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FF3B30" />
+      <stop offset="100%" stop-color="#B91C1C" />
+    </linearGradient>
+
+    <linearGradient id="redGlowCard" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#241214" />
+      <stop offset="100%" stop-color="#141012" />
+    </linearGradient>
+
+    <linearGradient id="cardBorderGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#EF4444" stop-opacity="0.4" />
+      <stop offset="100%" stop-color="#EF4444" stop-opacity="0.05" />
+    </linearGradient>
+
+    <filter id="redDropGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="8" stdDeviation="12" flood-color="#EF4444" flood-opacity="0.25" />
+    </filter>
+
+    <filter id="phoneShadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="16" stdDeviation="24" flood-color="#000000" flood-opacity="0.8" />
+    </filter>
+  </defs>
+
+  <!-- Outer Phone Body -->
+  <rect x="10" y="10" width="400" height="840" rx="52" fill="#1C1C20" stroke="#2E2E36" stroke-width="3" filter="url(#phoneShadow)" />
+  
+  <!-- Screen Area -->
+  <rect x="16" y="16" width="388" height="828" rx="46" fill="url(#bodyGrad)" />
+
+  <!-- iOS Dynamic Island -->
+  <rect x="150" y="27" width="120" height="34" rx="17" fill="#000000" />
+  <circle cx="248" cy="44" r="5.5" fill="#181820" />
+  <circle cx="248" cy="44" r="2.5" fill="#0A0A10" />
+
+  <!-- Status Bar Text & Icons -->
+  <text x="44" y="49" fill="#FFFFFF" font-family="-apple-system, BlinkMacSystemFont, 'SF Pro Text', sans-serif" font-size="14" font-weight="600" letter-spacing="-0.3">9:41</text>
+  <path d="M 346 40 L 350 44 L 354 37 L 358 44 L 362 33" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" fill="none" />
+  <rect x="368" y="38" width="22" height="11" rx="3.5" fill="none" stroke="#FFFFFF" stroke-width="1.8" />
+  <rect x="370" y="40" width="15" height="7" rx="2" fill="#FFFFFF" />
+
+  <!-- Top App Navigation Bar -->
+  <text x="36" y="104" fill="#A1A1AA" font-family="-apple-system, sans-serif" font-size="11" font-weight="700" letter-spacing="1.2">ADMIN CONSOLE</text>
+  <text x="36" y="132" fill="#FFFFFF" font-family="-apple-system, sans-serif" font-size="24" font-weight="800" letter-spacing="-0.5">Brother's Fitness</text>
+  
+  <!-- Live Badge -->
+  <rect x="294" y="112" width="90" height="24" rx="12" fill="#2A1416" stroke="#EF4444" stroke-width="1" />
+  <circle cx="308" cy="124" r="3.5" fill="#EF4444" />
+  <text x="318" y="128" fill="#FCA5A5" font-family="-apple-system, sans-serif" font-size="10" font-weight="700">ONLINE</text>
+
+  <!-- Hero KPI Card: Active Members -->
+  <rect x="36" y="156" width="348" height="136" rx="24" fill="url(#redGlowCard)" stroke="url(#cardBorderGrad)" stroke-width="1.5" filter="url(#redDropGlow)" />
+  
+  <text x="56" y="186" fill="#F87171" font-family="-apple-system, sans-serif" font-size="11" font-weight="700" letter-spacing="1">ACTIVE TRAINEES</text>
+  <text x="56" y="232" fill="#FFFFFF" font-family="-apple-system, sans-serif" font-size="40" font-weight="900">184</text>
+  <text x="138" y="222" fill="#34D399" font-family="-apple-system, sans-serif" font-size="13" font-weight="600">+12 this mo</text>
+  
+  <path d="M 230 236 C 255 220, 275 240, 295 210 C 315 180, 340 215, 360 195" fill="none" stroke="url(#redAccentGrad)" stroke-width="3" stroke-linecap="round" />
+
+  <!-- Action Buttons Row -->
+  <rect x="36" y="308" width="108" height="42" rx="14" fill="url(#redAccentGrad)" />
+  <text x="54" y="334" fill="#FFFFFF" font-family="-apple-system, sans-serif" font-size="12" font-weight="700">+ Member</text>
+
+  <rect x="156" y="308" width="108" height="42" rx="14" fill="#1E1E24" stroke="#2E2E38" stroke-width="1" />
+  <text x="178" y="334" fill="#E4E4E7" font-family="-apple-system, sans-serif" font-size="12" font-weight="600">WhatsApp</text>
+
+  <rect x="276" y="308" width="108" height="42" rx="14" fill="#1E1E24" stroke="#2E2E38" stroke-width="1" />
+  <text x="298" y="334" fill="#E4E4E7" font-family="-apple-system, sans-serif" font-size="12" font-weight="600">CSV Export</text>
+
+  <!-- Section Header: Recent Members -->
+  <text x="36" y="388" fill="#FFFFFF" font-family="-apple-system, sans-serif" font-size="16" font-weight="700">Member Directory</text>
+  <text x="330" y="388" fill="#EF4444" font-family="-apple-system, sans-serif" font-size="12" font-weight="600">See all</text>
+
+  <!-- Member Row 1 -->
+  <rect x="36" y="404" width="348" height="68" rx="18" fill="#16161B" stroke="#27272F" stroke-width="1" />
+  <circle cx="70" cy="438" r="19" fill="#2E1B1D" stroke="#EF4444" stroke-width="1.5" />
+  <text x="64" y="443" fill="#EF4444" font-family="-apple-system, sans-serif" font-size="13" font-weight="800">AS</text>
+  <text x="102" y="432" fill="#FFFFFF" font-family="-apple-system, sans-serif" font-size="14" font-weight="700">Aarav Sharma</text>
+  <text x="102" y="450" fill="#71717A" font-family="-apple-system, sans-serif" font-size="11">Quarterly Plan &bull; 45d left</text>
+  <rect x="294" y="426" width="66" height="24" rx="12" fill="#14281E" stroke="#10B981" stroke-width="1" />
+  <text x="308" y="442" fill="#34D399" font-family="-apple-system, sans-serif" font-size="10" font-weight="700">ACTIVE</text>
+
+  <!-- Member Row 2 -->
+  <rect x="36" y="484" width="348" height="68" rx="18" fill="#16161B" stroke="#27272F" stroke-width="1" />
+  <circle cx="70" cy="518" r="19" fill="#201F25" stroke="#3F3F46" stroke-width="1.5" />
+  <text x="64" y="523" fill="#A1A1AA" font-family="-apple-system, sans-serif" font-size="13" font-weight="800">RP</text>
+  <text x="102" y="512" fill="#FFFFFF" font-family="-apple-system, sans-serif" font-size="14" font-weight="700">Rohan Patel</text>
+  <text x="102" y="530" fill="#71717A" font-family="-apple-system, sans-serif" font-size="11">Monthly Plan &bull; 14d left</text>
+  <rect x="294" y="506" width="66" height="24" rx="12" fill="#14281E" stroke="#10B981" stroke-width="1" />
+  <text x="308" y="522" fill="#34D399" font-family="-apple-system, sans-serif" font-size="10" font-weight="700">ACTIVE</text>
+
+  <!-- Member Row 3 -->
+  <rect x="36" y="564" width="348" height="68" rx="18" fill="#16161B" stroke="#27272F" stroke-width="1" />
+  <circle cx="70" cy="598" r="19" fill="#2E1B1D" stroke="#EF4444" stroke-width="1.5" />
+  <text x="64" y="603" fill="#F87171" font-family="-apple-system, sans-serif" font-size="13" font-weight="800">PV</text>
+  <text x="102" y="592" fill="#FFFFFF" font-family="-apple-system, sans-serif" font-size="14" font-weight="700">Priya Verma</text>
+  <text x="102" y="610" fill="#71717A" font-family="-apple-system, sans-serif" font-size="11">Half-Yearly &bull; Expires in 3d</text>
+  <rect x="294" y="586" width="66" height="24" rx="12" fill="#312216" stroke="#F59E0B" stroke-width="1" />
+  <text x="300" y="602" fill="#FBBF24" font-family="-apple-system, sans-serif" font-size="10" font-weight="700">EXPIRING</text>
+
+  <!-- Alert Banner: Backup Status -->
+  <rect x="36" y="648" width="348" height="62" rx="18" fill="#1C1418" stroke="#EF4444" stroke-width="1" stroke-opacity="0.3" />
+  <text x="56" y="674" fill="#FFFFFF" font-family="-apple-system, sans-serif" font-size="12" font-weight="700">Automated Daily Snapshot</text>
+  <text x="56" y="692" fill="#A1A1AA" font-family="-apple-system, sans-serif" font-size="11">Last backup synced to Supabase &bull; 05:30 AM</text>
+  <circle cx="356" cy="679" r="6" fill="#10B981" />
+
+  <!-- iOS Bottom Tab Bar -->
+  <rect x="16" y="736" width="388" height="108" rx="0" fill="#101014" stroke="#22222A" stroke-width="1" />
+  
+  <!-- Tab 1 (Active) -->
+  <circle cx="72" cy="764" r="12" fill="#3B1518" />
+  <path d="M 68 764 L 72 760 L 76 764 L 76 768 L 68 768 Z" fill="#EF4444" />
+  <text x="50" y="784" fill="#EF4444" font-family="-apple-system, sans-serif" font-size="10" font-weight="700">Dashboard</text>
+
+  <!-- Tab 2 -->
+  <circle cx="152" cy="764" r="8" fill="none" stroke="#71717A" stroke-width="1.5" />
+  <text x="132" y="784" fill="#71717A" font-family="-apple-system, sans-serif" font-size="10" font-weight="500">Members</text>
+
+  <!-- Tab 3 -->
+  <rect x="226" y="758" width="16" height="12" rx="2" fill="none" stroke="#71717A" stroke-width="1.5" />
+  <text x="219" y="784" fill="#71717A" font-family="-apple-system, sans-serif" font-size="10" font-weight="500">Leads</text>
+
+  <!-- Tab 4 -->
+  <path d="M 304 770 L 308 762 L 312 766 L 316 758" fill="none" stroke="#71717A" stroke-width="1.5" stroke-linecap="round" />
+  <text x="296" y="784" fill="#71717A" font-family="-apple-system, sans-serif" font-size="10" font-weight="500">Analytics</text>
+
+  <!-- Tab 5 -->
+  <circle cx="366" cy="764" r="7" fill="none" stroke="#71717A" stroke-width="1.5" />
+  <text x="348" y="784" fill="#71717A" font-family="-apple-system, sans-serif" font-size="10" font-weight="500">Settings</text>
+
+  <!-- iOS Home Bar Indicator -->
+  <rect x="140" y="828" width="140" height="4.5" rx="2.25" fill="#FFFFFF" opacity="0.8" />
+</svg>

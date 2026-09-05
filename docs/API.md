@@ -1,6 +1,6 @@
 # API Reference & Route Specifications
 
-Complete specification of all RESTful route handlers in BroFit.
+This document provides the complete technical specification for all RESTful route handlers, authentication requirements, and request/response payloads in **BroFit**.
 
 ---
 
@@ -21,10 +21,37 @@ Authorization: Bearer <admin_token>
 
 ---
 
-## 2. Public & Trainee Endpoints
+## 2. Complete Endpoint Directory
+
+| Method | Endpoint | Access Level | Description | Rate Limit |
+| :--- | :--- | :--- | :--- | :--- |
+| `POST` | `/api/admin/login` | Public (Master Passcode) | Authenticates admin passcode, returns signed HMAC token | 5 req / 15 min |
+| `POST` | `/api/admin/logout` | Administrator | Revokes admin token by blacklisting its nonce | - |
+| `GET` | `/api/admin/verify` | Administrator | Validates session token validity on route transition | - |
+| `GET` | `/api/admin/members` | Administrator | Retrieves paginated members with search and sorting | - |
+| `POST` | `/api/admin/members` | Administrator | Registers a new gym member record | - |
+| `PUT` | `/api/admin/members` | Administrator | Updates an existing member profile | - |
+| `DELETE` | `/api/admin/members` | Administrator | Deletes a member and cleans up associated photo assets | - |
+| `GET` | `/api/admin/leads` | Administrator | Retrieves visitor contact submissions | - |
+| `DELETE` | `/api/admin/leads` | Administrator | Deletes a lead record by UUID | - |
+| `GET` | `/api/admin/activity-logs` | Administrator | Fetches immutable audit trail of administrative events | - |
+| `POST` | `/api/admin/upload` | Administrator | Uploads magic-byte validated photo to `member-photos` | - |
+| `POST` | `/api/admin/backup` | Administrator | Generates and saves a full JSON database snapshot | - |
+| `POST` | `/api/generate-diet` | Trainee (OAuth JWT) | Synthesizes 6-meal nutrition protocol; spends 1 credit | 5 credits / day |
+| `POST` | `/api/chat` | Trainee (OAuth JWT) | Tactical fitness chatbot conversation; spends 1 credit | 5 credits / day |
+| `POST` | `/api/contact` | Public Visitor | Ingests contact inquiry into CRM leads inbox | 3 req / 1 hour |
+| `GET` | `/api/public/member-count`| Public Visitor | Live active member count and 4-month quarterly trend | - |
+| `GET` | `/api/rate-limit-status` | Trainee (OAuth JWT) | Checks remaining daily AI generation credits | - |
+| `GET` | `/api/exercises/ninjas` | Public Visitor | Proxies API Ninjas exercise database with 1h cache | - |
+| `GET` | `/api/health` | Public Probe | Service liveness check | - |
+| `GET` | `/api/cron/monthly-revenue`| Cron (`CRON_SECRET`)| Computes monthly revenue, plan breakdown, and churn | - |
+
+---
+
+## 3. Public & Trainee Endpoints
 
 ### `POST /api/generate-diet`
-Synthesizes a 6-meal nutritional protocol and 15-day grocery procurement plan tailored to user biometrics and caloric targets.
+Synthesizes a 6-meal Indian nutritional protocol and 15-day grocery procurement plan tailored to user biometrics and caloric targets.
 
 **Request Headers:**
 ```http
@@ -75,6 +102,11 @@ Authorization: Bearer <supabase_user_jwt>
 }
 ```
 
+<div align="center">
+  <p><sub><b>Mobile UI Rendering of Synthesized Nutrition Response (Full Red/Black iOS Theme)</b></sub></p>
+  <img src="assets/ios-fuel-preview.svg" alt="Rendered Diet Response Interface" width="280" />
+</div>
+
 ---
 
 ### `POST /api/chat`
@@ -85,7 +117,7 @@ Conversational fitness assistant supporting English and Hinglish inquiries.
 {
   "message": "How many grams of protein should I consume for muscle gain?",
   "history": [
-    { "role": "user", "content": "Hi, I am 70kg trainee." }
+    { "role": "user", "content": "Hi, I am a 70kg trainee." }
   ]
 }
 ```
@@ -124,7 +156,39 @@ Submits public inquiry into the gym's CRM leads inbox.
 
 ---
 
-## 3. Administrative Endpoints (`/api/admin/*`)
+### `GET /api/public/member-count`
+Retrieves live count of active gym trainees and 4-month quarterly trend metrics for the public landing page.
+
+**Response (`200 OK`):**
+```json
+{
+  "count": 184,
+  "trends": [
+    { "month": "Jun", "members": 152 },
+    { "month": "Jul", "members": 164 },
+    { "month": "Aug", "members": 176 },
+    { "month": "Sep", "members": 184 }
+  ]
+}
+```
+
+---
+
+### `GET /api/rate-limit-status`
+Returns the authenticated trainee's remaining AI generation credits for today.
+
+**Response (`200 OK`):**
+```json
+{
+  "dailyCredits": 4,
+  "maxDailyCredits": 5,
+  "resetAt": "2026-09-06T00:00:00+05:30"
+}
+```
+
+---
+
+## 4. Administrative Endpoints (`/api/admin/*`)
 
 ### `POST /api/admin/login`
 Authenticates master password against `ADMIN_PASSWORD` using constant-time comparison.
@@ -142,6 +206,19 @@ Authenticates master password against `ADMIN_PASSWORD` using constant-time compa
   "success": true,
   "token": "<stateless_hmac_token>",
   "message": "Welcome back"
+}
+```
+
+---
+
+### `POST /api/admin/logout`
+Revokes an active administrative token by blacklisting its nonce in Redis and memory.
+
+**Response (`200 OK`):**
+```json
+{
+  "success": true,
+  "message": "Session terminated"
 }
 ```
 
@@ -180,6 +257,21 @@ Fetches paginated gym members with search and status filtering.
 
 ---
 
+### `POST /api/admin/upload`
+Uploads a member avatar photograph validated through binary magic-byte inspection (JPEG, PNG, WebP).
+
+**Request:** `multipart/form-data` with `file` binary.
+
+**Response (`200 OK`):**
+```json
+{
+  "success": true,
+  "url": "https://<supabase-url>/storage/v1/object/public/member-photos/uuid-avatar.webp"
+}
+```
+
+---
+
 ### `POST /api/admin/backup`
 Generates a full JSON snapshot of all gym database records and uploads to private Supabase `backups` bucket.
 
@@ -187,8 +279,27 @@ Generates a full JSON snapshot of all gym database records and uploads to privat
 ```json
 {
   "success": true,
-  "filename": "backup-2026-09-05-175245.json",
+  "filename": "backup-2026-09-05-180000.json",
   "membersCount": 184,
   "leadsCount": 42
+}
+```
+
+---
+
+## 5. Cron & Scheduled Endpoints
+
+### `GET /api/cron/monthly-revenue`
+Computes calendar-month revenue, plan breakdown, and churn. Protected by `Authorization: Bearer <CRON_SECRET>`.
+
+**Response (`200 OK`):**
+```json
+{
+  "success": true,
+  "period": "2026-08",
+  "totalRevenue": 142000,
+  "newRegistrations": 28,
+  "renewals": 45,
+  "churned": 4
 }
 ```
