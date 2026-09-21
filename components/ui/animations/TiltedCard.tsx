@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useRef } from "react";
+import Image from "next/image";
 import { motion, useMotionValue, useSpring, SpringOptions } from "framer-motion";
 
 export interface TiltedCardProps {
@@ -60,8 +61,10 @@ export default function TiltedCard({
 
   const rectRef = useRef<DOMRect | null>(null);
   const lastYRef = useRef(0);
+  const rafRef = useRef<number | null>(null);
 
   function handleMouseEnter() {
+    if (typeof window === "undefined" || !window.matchMedia("(hover: hover) and (pointer: fine)").matches) return;
     if (ref.current) {
       rectRef.current = ref.current.getBoundingClientRect();
     }
@@ -70,29 +73,45 @@ export default function TiltedCard({
   }
 
   function handleMouse(e: React.MouseEvent<HTMLElement>) {
+    if (typeof window === "undefined" || !window.matchMedia("(hover: hover) and (pointer: fine)").matches) return;
     if (!ref.current) return;
 
-    const rect = rectRef.current || ref.current.getBoundingClientRect();
-    if (!rect.width || !rect.height) return;
+    if (rafRef.current) return;
 
-    const offsetX = e.clientX - rect.left - rect.width / 2;
-    const offsetY = e.clientY - rect.top - rect.height / 2;
+    const clientX = e.clientX;
+    const clientY = e.clientY;
 
-    const rotationX = (offsetY / (rect.height / 2)) * -rotateAmplitude;
-    const rotationY = (offsetX / (rect.width / 2)) * rotateAmplitude;
+    rafRef.current = requestAnimationFrame(() => {
+      rafRef.current = null;
+      if (!ref.current) return;
 
-    rotateX.set(rotationX);
-    rotateY.set(rotationY);
+      const rect = rectRef.current || ref.current.getBoundingClientRect();
+      if (!rect.width || !rect.height) return;
 
-    x.set(e.clientX - rect.left);
-    y.set(e.clientY - rect.top);
+      const offsetX = clientX - rect.left - rect.width / 2;
+      const offsetY = clientY - rect.top - rect.height / 2;
 
-    const velocityY = offsetY - lastYRef.current;
-    rotateFigcaption.set(-velocityY * 0.6);
-    lastYRef.current = offsetY;
+      const rotationX = (offsetY / (rect.height / 2)) * -rotateAmplitude;
+      const rotationY = (offsetX / (rect.width / 2)) * rotateAmplitude;
+
+      rotateX.set(rotationX);
+      rotateY.set(rotationY);
+
+      x.set(clientX - rect.left);
+      y.set(clientY - rect.top);
+
+      const velocityY = offsetY - lastYRef.current;
+      rotateFigcaption.set(-velocityY * 0.6);
+      lastYRef.current = offsetY;
+    });
   }
 
   function handleMouseLeave() {
+    if (typeof window === "undefined" || !window.matchMedia("(hover: hover) and (pointer: fine)").matches) return;
+    if (rafRef.current) {
+      cancelAnimationFrame(rafRef.current);
+      rafRef.current = null;
+    }
     rectRef.current = null;
     opacity.set(0);
     scale.set(1);
@@ -126,11 +145,15 @@ export default function TiltedCard({
         }}
       >
         {imageSrc && (
-          <motion.img
-            src={imageSrc}
-            alt={altText}
-            className="absolute inset-0 w-full h-full object-cover will-change-transform [transform:translateZ(0)] pointer-events-none"
-          />
+          <div className="absolute inset-0 w-full h-full will-change-transform [transform:translateZ(0)] pointer-events-none">
+            <Image
+              src={imageSrc}
+              alt={altText}
+              fill
+              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 460px, 460px"
+              className="object-cover"
+            />
+          </div>
         )}
 
         {children && (

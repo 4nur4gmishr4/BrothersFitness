@@ -50,32 +50,35 @@ const OFFER_ITEMS: OfferSlide[] = [
   },
 ];
 
+const getInitialWidth = () => {
+  if (typeof window === "undefined") return 1180;
+  const w = window.innerWidth;
+  if (w >= 1600) return 1280;
+  if (w >= 1440) return 1180;
+  if (w >= 1200) return 1060;
+  if (w >= 1024) return 920;
+  if (w >= 768) return 680;
+  if (w >= 480) return 440;
+  return Math.min(w - 28, 360);
+};
+
 export default function MobileOfferCarousel() {
-  const [carouselWidth, setCarouselWidth] = useState<number>(360);
+  const [carouselWidth, setCarouselWidth] = useState<number>(getInitialWidth);
 
   useEffect(() => {
+    let timeoutId: NodeJS.Timeout;
     const updateWidth = () => {
-      if (typeof window === "undefined") return;
-      const w = window.innerWidth;
-      if (w >= 1600) {
-        setCarouselWidth(1280);
-      } else if (w >= 1440) {
-        setCarouselWidth(1180);
-      } else if (w >= 1200) {
-        setCarouselWidth(1060);
-      } else if (w >= 1024) {
-        setCarouselWidth(920);
-      } else if (w >= 768) {
-        setCarouselWidth(680);
-      } else if (w >= 480) {
-        setCarouselWidth(440);
-      } else {
-        setCarouselWidth(Math.min(w - 28, 360));
-      }
+      clearTimeout(timeoutId);
+      timeoutId = setTimeout(() => {
+        setCarouselWidth(getInitialWidth());
+      }, 60);
     };
-    updateWidth();
-    window.addEventListener("resize", updateWidth);
-    return () => window.removeEventListener("resize", updateWidth);
+
+    window.addEventListener("resize", updateWidth, { passive: true });
+    return () => {
+      clearTimeout(timeoutId);
+      window.removeEventListener("resize", updateWidth);
+    };
   }, []);
 
   return (

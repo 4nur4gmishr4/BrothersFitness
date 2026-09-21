@@ -4,7 +4,6 @@ import {
   CSSProperties,
   useEffect,
   useId,
-  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -91,12 +90,19 @@ const StrokeText = ({
   const wipeRectRef = useRef<SVGRectElement | null>(null);
   const hasMountedAnimRef = useRef(false);
 
-  const [isMobile, setIsMobile] = useState(false);
+  const [isMobile, setIsMobile] = useState<boolean>(() => {
+    if (typeof window !== "undefined") {
+      return window.innerWidth < 640;
+    }
+    return false;
+  });
+
   useEffect(() => {
-    const check = () => setIsMobile(typeof window !== "undefined" && window.innerWidth < 640);
-    check();
-    window.addEventListener("resize", check);
-    return () => window.removeEventListener("resize", check);
+    if (typeof window === "undefined") return;
+    const mql = window.matchMedia("(max-width: 639px)");
+    const handler = (e: MediaQueryListEvent) => setIsMobile(e.matches);
+    mql.addEventListener("change", handler);
+    return () => mql.removeEventListener("change", handler);
   }, []);
 
   const effectiveFontSize = isMobile && mobileFontSize ? mobileFontSize : fontSize;
@@ -115,11 +121,6 @@ const StrokeText = ({
   const activeHighlightStrokeColor =
     highlightStrokeColor ?? activeHighlightColor;
 
-  const [box, setBox] = useState<StrokeTextBox | null>(null);
-
-  const rawId = useId();
-  const wipeId = `stroke-text-wipe-${rawId.replace(/[^a-zA-Z0-9_-]/g, "")}`;
-
   // Parse lines: supports lines prop, array of strings, or newline-delimited text
   const parsedLines = useMemo<string[]>(() => {
     if (lines && lines.length > 0) return lines;
@@ -127,6 +128,22 @@ const StrokeText = ({
     if (typeof text === "string") return text.split("\n");
     return [DEFAULT_TEXT];
   }, [text, lines]);
+
+  // Stable pre-computed initial bounding box prevents layout thrashing & CLS
+  const [box, setBox] = useState<StrokeTextBox>(() => {
+    const maxChars = Math.max(...(lines || [DEFAULT_TEXT]).map((l) => l.length), 9);
+    const estW = maxChars * (fontSize || 100) * 0.74;
+    const estH = ((lines || [DEFAULT_TEXT]).length || 2) * (fontSize || 100) * (lineHeight || 1.26) + 30;
+    return {
+      x: 0,
+      y: -(fontSize || 100) * 0.85,
+      width: estW,
+      height: estH,
+    };
+  });
+
+  const rawId = useId();
+  const wipeId = `stroke-text-wipe-${rawId.replace(/[^a-zA-Z0-9_-]/g, "")}`;
 
   // Determine if a character in a given line belongs to the highlight word
   const isCharHighlight = (lineText: string, charIndex: number) => {
@@ -148,7 +165,8 @@ const StrokeText = ({
     [effectiveFontSize, fontWeight, fontFamily, letterSpacing]
   );
 
-  useLayoutEffect(() => {
+  // Asynchronous measurement with requestAnimationFrame so layout is never blocked
+  useEffect(() => {
     const node = strokeTextRef.current;
     if (!node) return undefined;
 
@@ -174,26 +192,28 @@ const StrokeText = ({
 
       setBox((prev) =>
         prev &&
-        Math.abs(prev.x - next.x) < 0.5 &&
-        Math.abs(prev.width - next.width) < 0.5 &&
-        Math.abs(prev.y - next.y) < 0.5
+        Math.abs(prev.x - next.x) < 1 &&
+        Math.abs(prev.width - next.width) < 1 &&
+        Math.abs(prev.y - next.y) < 1
           ? prev
           : next
       );
 
-      // If animation already completed in the past, immediately maintain full wipe width
       if (hasMountedAnimRef.current && wipeRectRef.current) {
         gsap.set(wipeRectRef.current, { attr: { width: next.width } });
       }
     };
 
-    measure();
-    if (typeof document !== "undefined" && document.fonts?.ready) {
-      document.fonts.ready.then(measure).catch(() => {});
-    }
+    const rafId = requestAnimationFrame(() => {
+      measure();
+      if (typeof document !== "undefined" && document.fonts?.ready) {
+        document.fonts.ready.then(measure).catch(() => {});
+      }
+    });
 
     return () => {
       cancelled = true;
+      cancelAnimationFrame(rafId);
     };
   }, [parsedLines, effectiveFontSize, fontWeight, fontFamily, letterSpacing, strokeWidth, lineHeight, scaleXVal]);
 

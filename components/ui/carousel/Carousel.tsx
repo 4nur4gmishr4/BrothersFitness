@@ -77,6 +77,9 @@ function CarouselItemWrapper({
         style={{
           width: itemWidth,
           rotateY: rotateY,
+          transform: "translateZ(0)",
+          backfaceVisibility: "hidden",
+          WebkitBackfaceVisibility: "hidden",
         }}
         transition={transition}
       >

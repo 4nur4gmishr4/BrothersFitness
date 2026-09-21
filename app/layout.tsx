@@ -2,7 +2,6 @@ import type { Metadata, Viewport } from "next";
 import { Inter, Anton, Syne } from "next/font/google";
 import "./globals.css";
 import PageWrapper from "@/components/ui/layout/PageWrapper";
-import { GamificationProvider } from "@/components/ui/providers/GamificationContext";
 import ReadingProgressBar from "@/components/ui/layout/ReadingProgressBar";
 import PageTransition from "@/components/ui/layout/PageTransition";
 import PwaUpdateToast from "@/components/ui/primitives/PwaUpdateToast";
@@ -28,14 +27,16 @@ const devSwCleanupScript = process.env.NODE_ENV === "development"
 
 const inter = Inter({
   subsets: ["latin"],
-  variable: "--font-inter"
+  variable: "--font-inter",
+  display: "swap"
 });
 
 // Heavy, ultra-condensed display face for hero + section headlines.
 const anton = Anton({
   weight: "400",
   subsets: ["latin"],
-  variable: "--font-display"
+  variable: "--font-display",
+  display: "swap"
 });
 
 // Unique, sculptural display face tailored for high-impact stroke animations
@@ -215,15 +216,11 @@ export default function RootLayout({
           <ThemedToaster />
           <AdminProvider>
             <UserAuthProvider>
-              <GamificationProvider>
-                
-                  <PageWrapper>
-                    <PageTransition>
-                      {children}
-                    </PageTransition>
-                  </PageWrapper>
-                
-              </GamificationProvider>
+              <PageWrapper>
+                <PageTransition>
+                  {children}
+                </PageTransition>
+              </PageWrapper>
             </UserAuthProvider>
           </AdminProvider>
           <Analytics />

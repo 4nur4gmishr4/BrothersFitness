@@ -39,24 +39,8 @@ export default function ScrollRevealDriver() {
 
     observeAll();
 
-    // New elements added after mount (e.g. via client transitions) MutationObserver keeps the set in sync.
-    const mutationObserver = new MutationObserver((mutations) => {
-      for (const m of mutations) {
-        for (const node of m.addedNodes) {
-          if (node.nodeType === 1) {
-            const el = node as HTMLElement;
-            if (el.matches("[data-reveal]")) observer.observe(el);
-            el.querySelectorAll("[data-reveal]").forEach((n) => observer.observe(n));
-          }
-        }
-      }
-    });
-    const targetNode = document.getElementById("main-content-wrapper") || document.body;
-    mutationObserver.observe(targetNode, { childList: true, subtree: true });
-
     return () => {
       observer.disconnect();
-      mutationObserver.disconnect();
     };
   }, []);
 

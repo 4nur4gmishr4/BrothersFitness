@@ -6,7 +6,6 @@ import { motion } from "framer-motion";
 import Link from "next/link";
 
 // React Bits Components
-import ClickSpark from "@/components/ui/animations/ClickSpark";
 import RotatingText from "@/components/ui/text/RotatingText";
 import BlurText from "@/components/ui/text/BlurText";
 import StrokeText from "@/components/ui/text/StrokeText";
@@ -14,8 +13,7 @@ import MobileOfferCarousel from "@/components/public/widgets/MobileOfferCarousel
 
 export default function Hero() {
   return (
-    <ClickSpark sparkColor="rgba(215, 25, 33, 0.75)" sparkCount={7} sparkRadius={18}>
-      <section className="relative flex flex-col justify-start overflow-hidden pt-5 sm:pt-2 lg:pt-3 pb-8 sm:pb-12 lg:pb-14 bg-surface-canvas text-hi">
+    <section className="relative flex flex-col justify-start overflow-hidden pt-5 sm:pt-2 lg:pt-3 pb-8 sm:pb-12 lg:pb-14 bg-surface-canvas text-hi">
         
         <div className="relative z-10 w-full max-w-[1600px] mx-auto pl-2 pr-4 sm:pl-4 sm:pr-8 md:pl-6 md:pr-12 lg:pl-8 lg:pr-16">
           
@@ -69,7 +67,7 @@ export default function Hero() {
                   ]}
                   rotationInterval={3000}
                   staggerDuration={0.03}
-                  transition={{ type: "spring", damping: 25, stiffness: 280 }}
+                  transition={{ duration: 0.38, ease: [0.16, 1, 0.3, 1] }}
                   mainClassName="text-accent font-bold px-1"
                   splitLevelClassName="overflow-hidden"
                   splitBy="words"
@@ -131,7 +129,6 @@ export default function Hero() {
 
         </div>
       </section>
-    </ClickSpark>
   );
 }
 

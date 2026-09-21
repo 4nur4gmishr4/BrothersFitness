@@ -168,8 +168,11 @@ export default function ContactForm() {
               </div>
             </div>
 
-            {/* Map Iframe Frame */}
-            <div className="relative w-full flex-1 min-h-[320px] sm:min-h-[380px] bg-surface-soft">
+            {/* Map Iframe Frame - strictly isolated with layout & paint containment */}
+            <div
+              className="relative w-full flex-1 min-h-[320px] sm:min-h-[380px] bg-surface-soft overflow-hidden"
+              style={{ contain: "layout paint", transform: "translateZ(0)" }}
+            >
               <iframe
                 src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3683.467612291598!2d79.60906137475789!3d22.599006932003014!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3980174ea48c4799%3A0x8b8b2026e989168a!2sBrother's%20Fitness%20Gym!5e0!3m2!1sen!2sin!4v1789983075141!5m2!1sen!2sin"
                 className="absolute inset-0 w-full h-full border-0"

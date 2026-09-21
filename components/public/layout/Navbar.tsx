@@ -578,10 +578,10 @@ export default function Navbar() {
         )}
       </AnimatePresence>
 
-      {/* Modals */}
-      <ProfileModal isOpen={showProfileModal} onClose={() => setShowProfileModal(false)} />
-      <LoginModal isOpen={showLoginModal} onClose={() => setShowLoginModal(false)} />
-      <WelcomeModal isOpen={showWelcome} onClose={() => setShowWelcome(false)} />
+      {/* Modals rendered on-demand to avoid eager JS chunk download during initial page paint */}
+      {showProfileModal && <ProfileModal isOpen={showProfileModal} onClose={() => setShowProfileModal(false)} />}
+      {showLoginModal && <LoginModal isOpen={showLoginModal} onClose={() => setShowLoginModal(false)} />}
+      {showWelcome && <WelcomeModal isOpen={showWelcome} onClose={() => setShowWelcome(false)} />}
     </>
   );
 }
