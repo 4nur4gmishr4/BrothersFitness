@@ -16,6 +16,10 @@ export default function SmartPreloaderWrapper() {
     // Unmount cleanly at 960ms to free GPU compositor layers and memory
     const timer = setTimeout(() => {
       setIsVisible(false);
+      if (typeof window !== "undefined") {
+        (window as unknown as { __preloaderDone?: boolean }).__preloaderDone = true;
+        window.dispatchEvent(new CustomEvent("preloader-finished"));
+      }
     }, 960);
 
     return () => clearTimeout(timer);

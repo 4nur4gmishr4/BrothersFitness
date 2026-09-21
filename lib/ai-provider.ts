@@ -49,22 +49,18 @@ interface ModelConfig {
 // Production Model Stack - verified working 2026-09-01, ranked by speed.
 // Every model below was live-tested and returned valid responses.
 export const MODEL_STACK: ModelConfig[] = [
-    // --- Fast tier (< 600ms) ---
+    // --- Fast tier (< 800ms) ---
     { id: "codestral-latest", provider: "mistral", name: "Codestral (Mistral AI)" },
     { id: "open-mistral-7b", provider: "mistral", name: "Open Mistral 7B (Mistral AI)" },
     { id: "pixtral-12b-2409", provider: "mistral", name: "Pixtral 12B (Mistral AI)" },
     { id: "command-r-08-2024", provider: "cohere", name: "Command R (Cohere)" },
-
-    // --- Medium tier (600ms–1s) ---
-    { id: "meta-llama/llama-3.1-8b-instruct", provider: "openrouter", name: "Llama 3.1 8B Instruct (OpenRouter)" },
-    { id: "qwen/qwen-2.5-72b-instruct", provider: "openrouter", name: "Qwen 2.5 72B Instruct (OpenRouter)" },
     { id: "command-r-plus-08-2024", provider: "cohere", name: "Command R+ (Cohere)" },
 
-    // --- Slow tier (1s+) - reliable fallbacks ---
-    { id: "mistral-small-latest", provider: "mistral", name: "Mistral Small (Mistral AI)" },
-    { id: "mistral-medium-latest", provider: "mistral", name: "Mistral Medium (Mistral AI)" },
+    // --- Medium / High-Capacity tier (800ms–1.5s) ---
+    { id: "meta-llama/llama-3.1-8b-instruct", provider: "openrouter", name: "Llama 3.1 8B Instruct (OpenRouter)" },
+    { id: "deepseek/deepseek-chat", provider: "openrouter", name: "DeepSeek V3 (OpenRouter)" },
+    { id: "qwen/qwen-2.5-72b-instruct", provider: "openrouter", name: "Qwen 2.5 72B Instruct (OpenRouter)" },
     { id: "meta-llama/llama-3.3-70b-instruct", provider: "openrouter", name: "Llama 3.3 70B Instruct (OpenRouter)" },
-    { id: "deepseek/deepseek-r1", provider: "openrouter", name: "DeepSeek R1 (OpenRouter)" },
 ];
 
 // Initialize Active Clients (Lazy)
