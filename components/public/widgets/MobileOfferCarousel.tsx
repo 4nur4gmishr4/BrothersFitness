@@ -57,18 +57,20 @@ export default function MobileOfferCarousel() {
     const updateWidth = () => {
       if (typeof window === "undefined") return;
       const w = window.innerWidth;
-      if (w >= 1440) {
-        setCarouselWidth(1080);
+      if (w >= 1600) {
+        setCarouselWidth(Math.min(w - 64, 1440));
+      } else if (w >= 1440) {
+        setCarouselWidth(Math.min(w - 64, 1320));
       } else if (w >= 1200) {
-        setCarouselWidth(960);
+        setCarouselWidth(Math.min(w - 48, 1140));
       } else if (w >= 1024) {
-        setCarouselWidth(880);
+        setCarouselWidth(Math.min(w - 40, 980));
       } else if (w >= 768) {
-        setCarouselWidth(680);
+        setCarouselWidth(Math.min(w - 32, 720));
       } else if (w >= 480) {
-        setCarouselWidth(440);
+        setCarouselWidth(Math.min(w - 24, 460));
       } else {
-        setCarouselWidth(Math.min(w - 20, 360));
+        setCarouselWidth(Math.min(w - 16, 360));
       }
     };
     updateWidth();
@@ -77,7 +79,7 @@ export default function MobileOfferCarousel() {
   }, []);
 
   return (
-    <div className="w-full max-w-5xl xl:max-w-6xl mx-auto flex flex-col items-center">
+    <div className="w-full max-w-full xl:max-w-[1440px] 2xl:max-w-[1520px] mx-auto flex flex-col items-center">
       {/* High-Converting Customer Attraction Header (Scaled for Mobile and Laptop) */}
       <div className="w-full text-center px-4 mb-4 md:mb-6 space-y-1.5">
         <h2 className="font-display text-2xl md:text-3xl lg:text-4xl uppercase tracking-wider text-hi">
@@ -89,7 +91,7 @@ export default function MobileOfferCarousel() {
         </p>
       </div>
 
-      {/* Wide Responsive 3D Carousel */}
+      {/* Wide Responsive 3D Carousel (End to End on Laptop, Tactile 3D on Mobile) */}
       <div className="w-full flex justify-center">
         <Carousel
           items={OFFER_ITEMS}
@@ -99,7 +101,7 @@ export default function MobileOfferCarousel() {
           pauseOnHover={true}
           loop={true}
           round={false}
-          className="w-full px-1"
+          className="w-full px-0"
           renderItem={(item, index, itemWidth) => {
             const offer = item as OfferSlide;
             return (

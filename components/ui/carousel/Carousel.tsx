@@ -123,7 +123,7 @@ export default function Carousel({
   className = "",
   renderItem,
 }: CarouselProps) {
-  const containerPadding = 16;
+  const containerPadding = round ? 16 : 0;
   const itemWidth = Math.max(260, baseWidth - containerPadding * 2);
   const trackItemOffset = itemWidth + GAP;
   const itemsForRender = useMemo(() => {
@@ -253,8 +253,8 @@ export default function Carousel({
   return (
     <div
       ref={containerRef}
-      className={`relative overflow-hidden p-4 ${
-        round ? "rounded-full border border-white" : "rounded-[24px] border border-surface-border"
+      className={`relative overflow-hidden ${
+        round ? "p-4 rounded-full border border-white" : "p-0 border-0 bg-transparent"
       } ${className}`}
       style={{
         width: `${baseWidth}px`,
