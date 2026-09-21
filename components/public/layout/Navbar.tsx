@@ -110,8 +110,8 @@ export default function Navbar() {
           isOpen
             ? "bg-surface-canvas border-b border-surface-border shadow-xs"
             : isScrolled
-            ? "bg-surface-canvas/95 backdrop-blur-md border-b border-surface-border/80 shadow-xs"
-            : "bg-surface-canvas/80 backdrop-blur-md border-b border-surface-border/40"
+            ? "bg-surface-canvas/95 md:backdrop-blur-md border-b border-surface-border/80 shadow-xs"
+            : "bg-surface-canvas/90 md:backdrop-blur-md border-b border-surface-border/40"
         }`}
       >
         <div className="w-full max-w-[1600px] mx-auto px-4 sm:px-8 md:px-12 lg:px-16">
@@ -248,12 +248,13 @@ export default function Navbar() {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.15 }}
-              className="fixed top-16 sm:top-20 inset-x-0 bottom-0 z-[190] bg-surface-canvas overflow-y-auto overscroll-contain touch-pan-y w-full h-[calc(100dvh-4rem)] sm:h-[calc(100dvh-5rem)] flex flex-col scrollbar-hide"
+              className="fixed top-16 sm:top-20 inset-x-0 bottom-0 z-[190] bg-surface-canvas overflow-y-auto overscroll-y-contain w-full"
+              style={{ WebkitOverflowScrolling: "touch" }}
               role="dialog"
               aria-modal="true"
             >
               {/* Staggered Navigation Body */}
-              <div className="flex-1 w-full max-w-[1600px] mx-auto px-4 sm:px-8 md:px-12 lg:px-16 py-6 sm:py-10 md:py-14">
+              <div className="w-full max-w-[1600px] mx-auto px-4 sm:px-8 md:px-12 lg:px-16 pt-6 sm:pt-10 md:pt-12 pb-28 sm:pb-36">
               
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-16 items-start">
                 

@@ -139,7 +139,7 @@ export default function TacticalStopwatch() {
           className={`w-14 h-14 rounded-full flex items-center justify-center shadow-2xl transition-all duration-200 cursor-pointer active:scale-95 group ${
             isRunning
               ? "bg-accent text-white shadow-accent/40 scale-105"
-              : "bg-surface-card/95 backdrop-blur-md border border-surface-border text-hi hover:border-accent hover:text-accent shadow-black/20 hover:scale-105"
+              : "bg-surface-card border border-surface-border text-hi hover:border-accent hover:text-accent shadow-black/20 hover:scale-105"
           }`}
           aria-label="Open Workout Timer"
           title="Tactical Workout Stopwatch & Rest Timer"
@@ -150,7 +150,7 @@ export default function TacticalStopwatch() {
               {formatTime(time)}
             </span>
           )}
-          <span className="pointer-events-none absolute right-full mr-3 hidden rounded-xl border border-surface-border bg-surface-card/95 px-2.5 py-1 text-[11px] font-semibold tracking-wide text-hi shadow-xl backdrop-blur-md transition-all duration-150 group-hover:block whitespace-nowrap">
+          <span className="pointer-events-none absolute right-full mr-3 hidden rounded-xl border border-surface-border bg-surface-card px-2.5 py-1 text-[11px] font-semibold tracking-wide text-hi shadow-xl transition-all duration-150 group-hover:block whitespace-nowrap">
             Workout Timer
           </span>
         </button>

@@ -271,7 +271,7 @@ export default function TacticalChatbot() {
         >
           <AnimatedChat size={26} className="text-white group-hover:scale-110" />
           <span className="absolute top-2 right-2 w-2 h-2 rounded-full bg-status-success ring-2 ring-accent pointer-events-none" />
-          <span className="pointer-events-none absolute right-full mr-3 hidden rounded-xl border border-surface-border bg-surface-card/95 px-2.5 py-1 text-[11px] font-semibold tracking-wide text-hi shadow-xl backdrop-blur-md transition-all duration-150 group-hover:block whitespace-nowrap">
+          <span className="pointer-events-none absolute right-full mr-3 hidden rounded-xl border border-surface-border bg-surface-card px-2.5 py-1 text-[11px] font-semibold tracking-wide text-hi shadow-xl transition-all duration-150 group-hover:block whitespace-nowrap">
             Ask AI Coach
           </span>
         </button>

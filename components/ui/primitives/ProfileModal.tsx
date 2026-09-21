@@ -151,7 +151,23 @@ export default function ProfileModal({ isOpen, onClose }: ProfileModalProps) {
 
     const modalProps = useModalDismiss(handleClose, isOpen && isLoggedIn && !!user);
 
-    if (!isOpen || !isLoggedIn || !user) return null;
+    if (!isOpen || !isLoggedIn) return null;
+
+    if (!user) {
+        return (
+            <Portal>
+                <div
+                    className="fixed inset-0 h-[100dvh] w-full z-[250] flex items-center justify-center bg-black/80 backdrop-blur-sm p-3 sm:p-4 modal-overlay-in"
+                    onClick={(e) => { if (e.target === e.currentTarget) handleClose(); }}
+                >
+                    <div className="relative w-full max-w-sm my-auto bg-surface-card border border-surface-border rounded-3xl p-8 flex flex-col items-center justify-center gap-4 modal-panel-in shadow-2xl">
+                        <Loader2 className="w-8 h-8 text-accent animate-spin" />
+                        <p className="text-sm text-mid font-medium">Loading profile...</p>
+                    </div>
+                </div>
+            </Portal>
+        );
+    }
 
     return (
         <Portal>
@@ -162,7 +178,7 @@ export default function ProfileModal({ isOpen, onClose }: ProfileModalProps) {
                 <div
                     {...modalProps}
                     aria-label="Member Profile and Settings"
-                    className="relative w-full max-w-lg my-auto surface-modal border border-surface-border rounded-3xl overflow-hidden max-h-[88dvh] flex flex-col modal-panel-in shadow-2xl"
+                    className="relative w-full max-w-lg my-auto bg-surface-card border border-surface-border rounded-3xl overflow-hidden max-h-[88dvh] flex flex-col modal-panel-in shadow-2xl"
                     onClick={(e) => e.stopPropagation()}
                 >
                     {/* Header */}

@@ -51,7 +51,8 @@ export default function ScrollRevealDriver() {
         }
       }
     });
-    mutationObserver.observe(document.body, { childList: true, subtree: true });
+    const targetNode = document.getElementById("main-content-wrapper") || document.body;
+    mutationObserver.observe(targetNode, { childList: true, subtree: true });
 
     return () => {
       observer.disconnect();
