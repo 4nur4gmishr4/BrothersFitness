@@ -33,10 +33,10 @@ export interface CarouselProps {
   renderItem?: (item: CarouselItem, index: number, itemWidth: number) => ReactNode;
 }
 
-const DRAG_BUFFER = 10;
-const VELOCITY_THRESHOLD = 350;
+const DRAG_BUFFER = 0;
+const VELOCITY_THRESHOLD = 500;
 const GAP = 16;
-const SPRING_OPTIONS = { type: "spring" as const, stiffness: 280, damping: 28 };
+const SPRING_OPTIONS = { type: "spring" as const, stiffness: 300, damping: 30 };
 
 interface CarouselItemWrapperProps {
   item: CarouselItem;
@@ -64,19 +64,17 @@ function CarouselItemWrapper({
     -index * trackItemOffset,
     -(index - 1) * trackItemOffset,
   ];
-  const outputRange = [45, 0, -45];
-  const rotateYTransform = useTransform(x, range, outputRange, { clamp: false });
-  const rotateY = round ? rotateYTransform : 0;
+  const outputRange = [90, 0, -90];
+  const rotateY = useTransform(x, range, outputRange, { clamp: false });
 
   if (renderItem) {
     return (
       <motion.div
-        key={`${item.id}-${index}`}
-        className="relative shrink-0 overflow-hidden cursor-grab active:cursor-grabbing select-none"
+        key={`${item?.id ?? index}-${index}`}
+        className="relative shrink-0 flex flex-col overflow-hidden cursor-grab active:cursor-grabbing select-none"
         style={{
           width: itemWidth,
-          ...(round ? { rotateY, transformStyle: "preserve-3d" } : {}),
-          willChange: "transform",
+          rotateY: rotateY,
         }}
         transition={transition}
       >
@@ -87,30 +85,28 @@ function CarouselItemWrapper({
 
   return (
     <motion.div
-      key={`${item.id}-${index}`}
+      key={`${item?.id ?? index}-${index}`}
       className={`relative shrink-0 flex flex-col ${
         round
           ? "items-center justify-center text-center bg-[#120F17] border-0"
-          : "items-start justify-between bg-surface-card border border-surface-border rounded-2xl shadow-xl"
+          : "items-start justify-between bg-surface-card border border-surface-border rounded-[16px]"
       } overflow-hidden cursor-grab active:cursor-grabbing select-none`}
       style={{
         width: itemWidth,
         height: round ? itemWidth : "100%",
-        rotateY,
-        transformStyle: "preserve-3d",
-        willChange: "transform",
+        rotateY: rotateY,
         ...(round && { borderRadius: "50%" }),
       }}
       transition={transition}
     >
-      <div className={`${round ? "p-0 m-0" : "mb-3 p-4"}`}>
-        <span className="flex h-8 w-8 items-center justify-center rounded-full bg-accent/10 border border-accent/20 text-accent">
+      <div className={`${round ? "p-0 m-0" : "mb-4 p-5"}`}>
+        <span className="flex h-[28px] w-[28px] items-center justify-center rounded-full bg-[#120F17]">
           {item.icon}
         </span>
       </div>
-      <div className="p-4 pt-0">
-        <div className="mb-1 font-bold text-base text-hi">{item.title}</div>
-        <p className="text-xs text-mid leading-relaxed">{item.description}</p>
+      <div className="p-5">
+        <div className="mb-1 font-black text-lg text-white">{item.title}</div>
+        <p className="text-sm text-mid">{item.description}</p>
       </div>
     </motion.div>
   );
@@ -118,65 +114,41 @@ function CarouselItemWrapper({
 
 export default function Carousel({
   items = [],
-  baseWidth = 0,
+  baseWidth = 300,
   autoplay = false,
-  autoplayDelay = 3500,
-  pauseOnHover = true,
-  loop = true,
+  autoplayDelay = 3000,
+  pauseOnHover = false,
+  loop = false,
   round = false,
   className = "",
   renderItem,
 }: CarouselProps) {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const [containerWidth, setContainerWidth] = useState<number>(0);
-
-  useEffect(() => {
-    const el = containerRef.current;
-    if (!el) return;
-    const updateSize = () => {
-      if (el) {
-        setContainerWidth(el.clientWidth);
-      }
-    };
-    updateSize();
-    const ro = new ResizeObserver(updateSize);
-    ro.observe(el);
-    return () => ro.disconnect();
-  }, []);
-
-  const effectiveWidth = containerWidth > 0 ? containerWidth : (baseWidth || 360);
-  const containerPadding = 4;
-  const itemWidth = Math.max(
-    260,
-    baseWidth > 0 ? Math.min(baseWidth, effectiveWidth - containerPadding * 2) : effectiveWidth - containerPadding * 2
-  );
+  const containerPadding = 16;
+  const itemWidth = Math.max(260, baseWidth - containerPadding * 2);
   const trackItemOffset = itemWidth + GAP;
-
   const itemsForRender = useMemo(() => {
-    if (!loop || items.length <= 1) return items;
+    if (!loop) return items;
+    if (items.length === 0) return [];
     return [items[items.length - 1], ...items, items[0]];
   }, [items, loop]);
 
-  const [position, setPosition] = useState<number>(loop && items.length > 1 ? 1 : 0);
+  const [position, setPosition] = useState<number>(loop ? 1 : 0);
   const x = useMotionValue(0);
   const [isHovered, setIsHovered] = useState<boolean>(false);
   const [isJumping, setIsJumping] = useState<boolean>(false);
   const [isAnimating, setIsAnimating] = useState<boolean>(false);
 
+  const containerRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     if (pauseOnHover && containerRef.current) {
       const container = containerRef.current;
-      const handleEnter = () => setIsHovered(true);
-      const handleLeave = () => setIsHovered(false);
-      container.addEventListener("mouseenter", handleEnter);
-      container.addEventListener("mouseleave", handleLeave);
-      container.addEventListener("touchstart", handleEnter, { passive: true });
-      container.addEventListener("touchend", handleLeave, { passive: true });
+      const handleMouseEnter = () => setIsHovered(true);
+      const handleMouseLeave = () => setIsHovered(false);
+      container.addEventListener("mouseenter", handleMouseEnter);
+      container.addEventListener("mouseleave", handleMouseLeave);
       return () => {
-        container.removeEventListener("mouseenter", handleEnter);
-        container.removeEventListener("mouseleave", handleLeave);
-        container.removeEventListener("touchstart", handleEnter);
-        container.removeEventListener("touchend", handleLeave);
+        container.removeEventListener("mouseenter", handleMouseEnter);
+        container.removeEventListener("mouseleave", handleMouseLeave);
       };
     }
   }, [pauseOnHover]);
@@ -192,18 +164,11 @@ export default function Carousel({
     return () => clearInterval(timer);
   }, [autoplay, autoplayDelay, isHovered, pauseOnHover, itemsForRender.length]);
 
-  const isInitialized = useRef<boolean>(false);
-
   useEffect(() => {
-    if (!isInitialized.current) {
-      isInitialized.current = true;
-      const startingPosition = loop && items.length > 1 ? 1 : 0;
-      setPosition(startingPosition);
-      x.set(-startingPosition * trackItemOffset);
-    } else {
-      x.set(-position * trackItemOffset);
-    }
-  }, [items.length, loop, trackItemOffset, position, x]);
+    const startingPosition = loop ? 1 : 0;
+    setPosition(startingPosition);
+    x.set(-startingPosition * trackItemOffset);
+  }, [items.length, loop, trackItemOffset, x]);
 
   useEffect(() => {
     if (!loop && position > itemsForRender.length - 1) {
@@ -282,16 +247,19 @@ export default function Carousel({
     items.length === 0
       ? 0
       : loop
-        ? (position - 1 + items.length) % items.length
-        : Math.min(position, items.length - 1);
+      ? (position - 1 + items.length) % items.length
+      : Math.min(position, items.length - 1);
 
   return (
     <div
       ref={containerRef}
-      className={`relative w-full overflow-hidden select-none mx-auto ${className}`}
+      className={`relative overflow-hidden p-4 ${
+        round ? "rounded-full border border-white" : "rounded-[24px] border border-surface-border"
+      } ${className}`}
       style={{
-        width: "100%",
-        maxWidth: baseWidth > 0 ? `${baseWidth}px` : "100%",
+        width: `${baseWidth}px`,
+        maxWidth: "100%",
+        ...(round && { height: `${baseWidth}px` }),
       }}
     >
       <motion.div
@@ -304,7 +272,6 @@ export default function Carousel({
           perspective: 1000,
           perspectiveOrigin: `${position * trackItemOffset + itemWidth / 2}px 50%`,
           x,
-          willChange: "transform",
         }}
         onDragEnd={handleDragEnd}
         animate={{ x: -(position * trackItemOffset) }}
@@ -314,7 +281,7 @@ export default function Carousel({
       >
         {itemsForRender.map((item, index) => (
           <CarouselItemWrapper
-            key={`${item.id}-${index}`}
+            key={`${item?.id ?? index}-${index}`}
             item={item}
             index={index}
             itemWidth={itemWidth}
@@ -326,28 +293,36 @@ export default function Carousel({
           />
         ))}
       </motion.div>
-
-      {/* Pagination Dots */}
-      {items.length > 1 && (
-        <div className="mt-4 flex w-full justify-center items-center gap-2">
+      <div
+        className={`flex w-full justify-center ${
+          round ? "absolute z-20 bottom-12 left-1/2 -translate-x-1/2" : ""
+        }`}
+      >
+        <div className="mt-4 flex w-[150px] justify-between px-8">
           {items.map((_, index) => (
             <motion.button
               type="button"
               key={index}
               aria-label={`Go to slide ${index + 1}`}
               aria-current={activeIndex === index}
-              className={`h-1.5 rounded-full cursor-pointer border-0 p-0 transition-all duration-200 ${
-                activeIndex === index ? "w-6 bg-accent" : "w-2 bg-surface-border hover:bg-mid"
+              className={`h-2 w-2 rounded-full cursor-pointer border-0 p-0 appearance-none transition-colors duration-150 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white ${
+                activeIndex === index
+                  ? round
+                    ? "bg-white"
+                    : "bg-accent"
+                  : round
+                  ? "bg-[#555]"
+                  : "bg-surface-border hover:bg-mid"
               }`}
               animate={{
-                scale: activeIndex === index ? 1 : 0.85,
+                scale: activeIndex === index ? 1.2 : 1,
               }}
               onClick={() => setPosition(loop ? index + 1 : index)}
               transition={{ duration: 0.15 }}
             />
           ))}
         </div>
-      )}
+      </div>
     </div>
   );
 }
