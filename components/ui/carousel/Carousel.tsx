@@ -65,7 +65,8 @@ function CarouselItemWrapper({
     -(index - 1) * trackItemOffset,
   ];
   const outputRange = [45, 0, -45];
-  const rotateY = useTransform(x, range, outputRange, { clamp: false });
+  const rotateYTransform = useTransform(x, range, outputRange, { clamp: false });
+  const rotateY = round ? rotateYTransform : 0;
 
   if (renderItem) {
     return (
@@ -74,8 +75,7 @@ function CarouselItemWrapper({
         className="relative shrink-0 overflow-hidden cursor-grab active:cursor-grabbing select-none"
         style={{
           width: itemWidth,
-          rotateY,
-          transformStyle: "preserve-3d",
+          ...(round ? { rotateY, transformStyle: "preserve-3d" } : {}),
           willChange: "transform",
         }}
         transition={transition}

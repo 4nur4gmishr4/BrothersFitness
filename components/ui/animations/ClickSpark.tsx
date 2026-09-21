@@ -68,13 +68,16 @@ export default function ClickSpark({
     return t * (2 - t);
   }, []);
 
-  useEffect(() => {
+  const isAnimatingRef = useRef(false);
+
+  const startAnimation = useCallback(() => {
+    if (isAnimatingRef.current) return;
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
-    let animationId: number;
+    isAnimatingRef.current = true;
 
     const draw = (timestamp: number) => {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -104,15 +107,16 @@ export default function ClickSpark({
         return true;
       });
 
-      animationId = requestAnimationFrame(draw);
+      if (sparksRef.current.length > 0) {
+        requestAnimationFrame(draw);
+      } else {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        isAnimatingRef.current = false;
+      }
     };
 
-    animationId = requestAnimationFrame(draw);
-
-    return () => {
-      cancelAnimationFrame(animationId);
-    };
-  }, [sparkColor, sparkSize, sparkRadius, duration, easeFunc, extraScale]);
+    requestAnimationFrame(draw);
+  }, [duration, easeFunc, extraScale, sparkColor, sparkRadius, sparkSize]);
 
   const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
     const canvas = canvasRef.current;
@@ -130,6 +134,7 @@ export default function ClickSpark({
     }));
 
     sparksRef.current.push(...newSparks);
+    startAnimation();
   };
 
   return (

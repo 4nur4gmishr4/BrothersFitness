@@ -394,7 +394,7 @@ export default function TrophyRoom(props: { isModal?: boolean; isPage?: boolean;
           left: smoothX,
           top: smoothY,
         }}
-        className={`pointer-events-none fixed z-50 hidden lg:flex flex-col items-center p-6 rounded-3xl bg-surface-canvas/90 backdrop-blur-2xl border border-surface-border shadow-2xl w-80 -translate-x-1/2 -translate-y-1/2 transition-opacity duration-200 ${
+        className={`pointer-events-none fixed z-50 hidden lg:flex flex-col items-center p-6 rounded-3xl bg-surface-card border border-surface-border shadow-2xl w-80 -translate-x-1/2 -translate-y-1/2 transition-opacity duration-200 ${
           hoveredIndex !== null ? "opacity-100 scale-100" : "opacity-0 scale-95"
         }`}
       >

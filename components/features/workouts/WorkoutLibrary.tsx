@@ -1027,24 +1027,24 @@ export default function WorkoutLibrary() {
                   )}
 
                   {/* Training Category Pill */}
-                  <div className="absolute top-2.5 right-2.5 px-2.5 py-1 rounded-full bg-black/80 backdrop-blur-md border border-white/10 text-[10px] font-bold text-accent uppercase tracking-wider shadow-sm z-10">
+                  <div className="absolute top-2.5 right-2.5 px-2.5 py-1 rounded-full bg-black/90 border border-white/10 text-[10px] font-bold text-accent uppercase tracking-wider shadow-sm z-10">
                     {exercise.category || "STRENGTH"}
                   </div>
 
                   {/* Dynamic Matching Caption Bar on Image */}
                   <div className="absolute bottom-2 left-2 right-2 flex items-center justify-between pointer-events-none z-10 gap-2">
-                    <span className="px-2 py-0.5 rounded-md bg-black/85 backdrop-blur-md border border-white/15 text-[10px] font-bold uppercase tracking-wider text-white truncate shadow-xs">
+                    <span className="px-2 py-0.5 rounded-md bg-black/90 border border-white/15 text-[10px] font-bold uppercase tracking-wider text-white truncate shadow-xs">
                       {exercise.name}
                     </span>
                     {exercise.equipment && (
-                      <span className="px-1.5 py-0.5 rounded-md bg-black/80 backdrop-blur-md border border-white/10 text-[9px] font-semibold uppercase tracking-wider text-accent shrink-0 shadow-xs">
+                      <span className="px-1.5 py-0.5 rounded-md bg-black/90 border border-white/10 text-[9px] font-semibold uppercase tracking-wider text-accent shrink-0 shadow-xs">
                         {exercise.equipment}
                       </span>
                     )}
                   </div>
 
                   {/* Hover overlay hint with exact exercise caption */}
-                  <div className="absolute inset-0 bg-black/65 opacity-0 group-hover/img:opacity-100 transition-opacity duration-200 flex flex-col items-center justify-center p-3 text-center text-white text-xs font-bold backdrop-blur-[1px] z-10">
+                  <div className="absolute inset-0 bg-black/80 opacity-0 group-hover/img:opacity-100 transition-opacity duration-200 flex flex-col items-center justify-center p-3 text-center text-white text-xs font-bold z-10">
                     <Maximize2 className="w-5 h-5 text-accent mb-1.5" />
                     <span className="text-sm font-bold uppercase text-white tracking-wide">{exercise.name}</span>
                     <span className="text-[11px] text-accent font-medium mt-0.5">
@@ -1233,7 +1233,7 @@ export default function WorkoutLibrary() {
             onClick={(e) => e.stopPropagation()}
           >
             {/* Modal Header Bar */}
-            <div className="sticky top-0 z-20 flex items-center justify-between px-5 py-4 bg-surface-card/95 backdrop-blur-md border-b border-surface-border">
+            <div className="sticky top-0 z-20 flex items-center justify-between px-5 py-4 bg-surface-card border-b border-surface-border">
               <div className="flex items-center gap-2 pr-4">
                 <span className="w-2.5 h-2.5 rounded-full bg-accent" />
                 <h3 className="font-display text-lg uppercase tracking-wide text-hi line-clamp-1">

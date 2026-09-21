@@ -57,7 +57,7 @@ export default function SmartPreloaderWrapper() {
             duration: 0.6,
             ease: customEase,
           }}
-          style={{ transformOrigin: "top" }}
+          style={{ transformOrigin: "top", willChange: "transform" }}
         />
       ))}
     </aside>
