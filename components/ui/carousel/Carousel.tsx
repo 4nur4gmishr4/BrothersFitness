@@ -44,6 +44,7 @@ interface CarouselItemWrapperProps {
   itemWidth: number;
   round: boolean;
   trackItemOffset: number;
+  centerOffset: number;
   x: MotionValue<number>;
   transition: Transition;
   renderItem?: (item: CarouselItem, index: number, itemWidth: number) => ReactNode;
@@ -55,14 +56,15 @@ function CarouselItemWrapper({
   itemWidth,
   round,
   trackItemOffset,
+  centerOffset,
   x,
   transition,
   renderItem,
 }: CarouselItemWrapperProps) {
   const range = [
-    -(index + 1) * trackItemOffset,
-    -index * trackItemOffset,
-    -(index - 1) * trackItemOffset,
+    centerOffset - (index + 1) * trackItemOffset,
+    centerOffset - index * trackItemOffset,
+    centerOffset - (index - 1) * trackItemOffset,
   ];
   const outputRange = [90, 0, -90];
   const rotateY = useTransform(x, range, outputRange, { clamp: false });
@@ -114,18 +116,39 @@ function CarouselItemWrapper({
 
 export default function Carousel({
   items = [],
-  baseWidth = 300,
+  baseWidth = 360,
   autoplay = false,
-  autoplayDelay = 3000,
-  pauseOnHover = false,
+  autoplayDelay = 3600,
+  pauseOnHover = true,
   loop = false,
   round = false,
   className = "",
   renderItem,
 }: CarouselProps) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [containerWidth, setContainerWidth] = useState<number>(baseWidth);
+
+  // ResizeObserver for mathematical pixel-perfect centering on both mobile and desktop
+  useEffect(() => {
+    if (!containerRef.current) return;
+    const updateSize = () => {
+      if (containerRef.current) {
+        const w = containerRef.current.clientWidth;
+        if (w > 0) setContainerWidth(w);
+      }
+    };
+    updateSize();
+    const ro = new ResizeObserver(updateSize);
+    ro.observe(containerRef.current);
+    return () => ro.disconnect();
+  }, [baseWidth]);
+
   const containerPadding = round ? 16 : 0;
-  const itemWidth = Math.max(260, baseWidth - containerPadding * 2);
+  const itemWidth = Math.min(Math.max(260, baseWidth - containerPadding * 2), containerWidth);
   const trackItemOffset = itemWidth + GAP;
+  // Exact symmetric offset to lock the active card dead-center in the viewport/container
+  const centerOffset = Math.max(0, (containerWidth - itemWidth) / 2);
+
   const itemsForRender = useMemo(() => {
     if (!loop) return items;
     if (items.length === 0) return [];
@@ -135,40 +158,38 @@ export default function Carousel({
   const [position, setPosition] = useState<number>(loop ? 1 : 0);
   const x = useMotionValue(0);
   const [isHovered, setIsHovered] = useState<boolean>(false);
+  const [isHolding, setIsHolding] = useState<boolean>(false);
   const [isJumping, setIsJumping] = useState<boolean>(false);
   const [isAnimating, setIsAnimating] = useState<boolean>(false);
+  const [progressKey, setProgressKey] = useState<number>(0);
 
-  const containerRef = useRef<HTMLDivElement>(null);
+  // When hold or tap on banners, or autoplay disabled: strictly freeze autoplay and progress
+  const isPaused = !autoplay || isHolding || (pauseOnHover && isHovered) || isAnimating || isJumping;
+
+  // Global pointer release listener so releasing outside banner safely resumes
   useEffect(() => {
-    if (pauseOnHover && containerRef.current) {
-      const container = containerRef.current;
-      const handleMouseEnter = () => setIsHovered(true);
-      const handleMouseLeave = () => setIsHovered(false);
-      container.addEventListener("mouseenter", handleMouseEnter);
-      container.addEventListener("mouseleave", handleMouseLeave);
-      return () => {
-        container.removeEventListener("mouseenter", handleMouseEnter);
-        container.removeEventListener("mouseleave", handleMouseLeave);
-      };
-    }
-  }, [pauseOnHover]);
+    if (!isHolding) return;
+    const handleGlobalRelease = () => {
+      setIsHolding(false);
+    };
+    window.addEventListener("pointerup", handleGlobalRelease);
+    window.addEventListener("touchend", handleGlobalRelease);
+    window.addEventListener("touchcancel", handleGlobalRelease);
+    window.addEventListener("mouseup", handleGlobalRelease);
+    return () => {
+      window.removeEventListener("pointerup", handleGlobalRelease);
+      window.removeEventListener("touchend", handleGlobalRelease);
+      window.removeEventListener("touchcancel", handleGlobalRelease);
+      window.removeEventListener("mouseup", handleGlobalRelease);
+    };
+  }, [isHolding]);
 
-  useEffect(() => {
-    if (!autoplay || itemsForRender.length <= 1) return undefined;
-    if (pauseOnHover && isHovered) return undefined;
-
-    const timer = setInterval(() => {
-      setPosition((prev) => Math.min(prev + 1, itemsForRender.length - 1));
-    }, autoplayDelay);
-
-    return () => clearInterval(timer);
-  }, [autoplay, autoplayDelay, isHovered, pauseOnHover, itemsForRender.length]);
-
+  // Initial and reactive positioning: strictly centered
   useEffect(() => {
     const startingPosition = loop ? 1 : 0;
     setPosition(startingPosition);
-    x.set(-startingPosition * trackItemOffset);
-  }, [items.length, loop, trackItemOffset, x]);
+    x.set(centerOffset - startingPosition * trackItemOffset);
+  }, [items.length, loop, trackItemOffset, centerOffset, x]);
 
   useEffect(() => {
     if (!loop && position > itemsForRender.length - 1) {
@@ -193,7 +214,7 @@ export default function Carousel({
       setIsJumping(true);
       const target = 1;
       setPosition(target);
-      x.set(-target * trackItemOffset);
+      x.set(centerOffset - target * trackItemOffset);
       requestAnimationFrame(() => {
         setIsJumping(false);
         setIsAnimating(false);
@@ -205,7 +226,7 @@ export default function Carousel({
       setIsJumping(true);
       const target = items.length;
       setPosition(target);
-      x.set(-target * trackItemOffset);
+      x.set(centerOffset - target * trackItemOffset);
       requestAnimationFrame(() => {
         setIsJumping(false);
         setIsAnimating(false);
@@ -217,6 +238,7 @@ export default function Carousel({
   };
 
   const handleDragEnd = (_: MouseEvent | TouchEvent | PointerEvent, info: PanInfo): void => {
+    setIsHolding(false);
     const { offset, velocity } = info;
     const direction =
       offset.x < -DRAG_BUFFER || velocity.x < -VELOCITY_THRESHOLD
@@ -232,14 +254,15 @@ export default function Carousel({
       const max = itemsForRender.length - 1;
       return Math.max(0, Math.min(next, max));
     });
+    setProgressKey((k) => k + 1);
   };
 
   const dragProps = loop
     ? {}
     : {
         dragConstraints: {
-          left: -trackItemOffset * Math.max(itemsForRender.length - 1, 0),
-          right: 0,
+          left: centerOffset - trackItemOffset * Math.max(itemsForRender.length - 1, 0),
+          right: centerOffset,
         },
       };
 
@@ -251,78 +274,154 @@ export default function Carousel({
       : Math.min(position, items.length - 1);
 
   return (
-    <div
-      ref={containerRef}
-      className={`relative overflow-hidden ${
-        round ? "p-4 rounded-full border border-white" : "p-0 border-0 bg-transparent"
-      } ${className}`}
-      style={{
-        width: `${baseWidth}px`,
-        maxWidth: "100%",
-        ...(round && { height: `${baseWidth}px` }),
-      }}
-    >
-      <motion.div
-        className="flex"
-        drag={isAnimating ? false : "x"}
-        {...dragProps}
-        style={{
-          width: itemWidth,
-          gap: `${GAP}px`,
-          perspective: 1000,
-          perspectiveOrigin: `${position * trackItemOffset + itemWidth / 2}px 50%`,
-          x,
-        }}
-        onDragEnd={handleDragEnd}
-        animate={{ x: -(position * trackItemOffset) }}
-        transition={effectiveTransition}
-        onAnimationStart={handleAnimationStart}
-        onAnimationComplete={handleAnimationComplete}
-      >
-        {itemsForRender.map((item, index) => (
-          <CarouselItemWrapper
-            key={`${item?.id ?? index}-${index}`}
-            item={item}
-            index={index}
-            itemWidth={itemWidth}
-            round={round}
-            trackItemOffset={trackItemOffset}
-            x={x}
-            transition={effectiveTransition}
-            renderItem={renderItem}
-          />
-        ))}
-      </motion.div>
+    <>
+      <style>{`
+        @keyframes carouselProgressFill {
+          0% {
+            transform: scaleX(0);
+          }
+          100% {
+            transform: scaleX(1);
+          }
+        }
+      `}</style>
       <div
-        className={`flex w-full justify-center ${
-          round ? "absolute z-20 bottom-12 left-1/2 -translate-x-1/2" : ""
-        }`}
+        ref={containerRef}
+        className={`relative overflow-hidden w-full flex flex-col items-center justify-center mx-auto ${
+          round ? "p-4 rounded-full border border-white" : "p-0 border-0 bg-transparent"
+        } ${className}`}
+        style={{
+          width: "100%",
+          maxWidth: `${baseWidth}px`,
+          ...(round && { height: `${baseWidth}px` }),
+        }}
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+        onPointerDown={() => setIsHolding(true)}
+        onPointerUp={() => setIsHolding(false)}
+        onPointerCancel={() => setIsHolding(false)}
+        onTouchStart={() => setIsHolding(true)}
+        onTouchEnd={() => setIsHolding(false)}
+        onTouchCancel={() => setIsHolding(false)}
       >
-        <div className="mt-4 flex w-[150px] justify-between px-8">
-          {items.map((_, index) => (
-            <motion.button
-              type="button"
-              key={index}
-              aria-label={`Go to slide ${index + 1}`}
-              aria-current={activeIndex === index}
-              className={`h-2 w-2 rounded-full cursor-pointer border-0 p-0 appearance-none transition-colors duration-150 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white ${
-                activeIndex === index
-                  ? round
-                    ? "bg-white"
-                    : "bg-accent"
-                  : round
-                  ? "bg-[#555]"
-                  : "bg-surface-border hover:bg-mid"
-              }`}
-              animate={{
-                scale: activeIndex === index ? 1.2 : 1,
-              }}
-              onClick={() => setPosition(loop ? index + 1 : index)}
-              transition={{ duration: 0.15 }}
+        {/* Strictly Centered 3D Carousel Motion Track */}
+        <motion.div
+          className="flex items-center"
+          drag={isAnimating ? false : "x"}
+          {...dragProps}
+          style={{
+            width: itemWidth,
+            gap: `${GAP}px`,
+            perspective: 1000,
+            perspectiveOrigin: `${centerOffset + position * trackItemOffset + itemWidth / 2}px 50%`,
+            x,
+          }}
+          onDragStart={() => setIsHolding(true)}
+          onDragEnd={handleDragEnd}
+          animate={{ x: centerOffset - (position * trackItemOffset) }}
+          transition={effectiveTransition}
+          onAnimationStart={handleAnimationStart}
+          onAnimationComplete={handleAnimationComplete}
+        >
+          {itemsForRender.map((item, index) => (
+            <CarouselItemWrapper
+              key={`${item?.id ?? index}-${index}`}
+              item={item}
+              index={index}
+              itemWidth={itemWidth}
+              round={round}
+              trackItemOffset={trackItemOffset}
+              centerOffset={centerOffset}
+              x={x}
+              transition={effectiveTransition}
+              renderItem={renderItem}
             />
           ))}
+        </motion.div>
+
+        {/* Best Ever Dynamic Segmented Story Progress Bar */}
+        <div className="mt-5 sm:mt-7 flex flex-col items-center gap-2 w-full max-w-sm sm:max-w-md mx-auto px-4 select-none">
+          {/* Segmented Progress Track Pills */}
+          <div className="flex items-center justify-center gap-2 sm:gap-2.5 w-full">
+            {items.map((item, index) => {
+              const isPast = index < activeIndex;
+              const isCurrent = index === activeIndex;
+
+              return (
+                <button
+                  key={item.id ?? index}
+                  type="button"
+                  onClick={() => {
+                    setPosition(loop ? index + 1 : index);
+                    setProgressKey((k) => k + 1);
+                  }}
+                  aria-label={`Jump to slide ${index + 1}: ${item.title}`}
+                  className="group relative flex-1 h-2 sm:h-2.5 rounded-full bg-white/10 hover:bg-white/20 transition-all cursor-pointer overflow-hidden p-0 border-0 focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent"
+                >
+                  {/* Past slides: Solid subtle fill */}
+                  {isPast && (
+                    <div className="w-full h-full bg-white/35 rounded-full" />
+                  )}
+
+                  {/* Active slide: Hardware-accelerated GPU scaleX progress fill */}
+                  {isCurrent && (
+                    <div
+                      key={`prog-${activeIndex}-${progressKey}`}
+                      className="h-full bg-accent rounded-full will-change-transform shadow-[0_0_12px_rgba(215,25,33,0.8)]"
+                      style={{
+                        width: "100%",
+                        transformOrigin: "left",
+                        animationName: "carouselProgressFill",
+                        animationDuration: `${autoplayDelay}ms`,
+                        animationTimingFunction: "linear",
+                        animationFillMode: "forwards",
+                        animationPlayState: isPaused ? "paused" : "running",
+                      }}
+                      onAnimationEnd={() => {
+                        if (!isPaused) {
+                          setPosition((prev) => (loop ? prev + 1 : (prev + 1) % itemsForRender.length));
+                          setProgressKey((k) => k + 1);
+                        }
+                      }}
+                    />
+                  )}
+
+                  {/* Future slides: Dark transparent track */}
+                  {!isPast && !isCurrent && (
+                    <div className="w-full h-full bg-transparent" />
+                  )}
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Active Status Badge & Hold Indicator */}
+          <div className="flex items-center justify-between w-full text-[11px] font-mono tracking-wider text-mid px-1">
+            <div className="flex items-center gap-1.5">
+              <span className="text-white font-bold">{String(activeIndex + 1).padStart(2, "0")}</span>
+              <span className="text-muted/60">/</span>
+              <span className="text-muted/60">{String(items.length).padStart(2, "0")}</span>
+              <span className="ml-1 text-hi font-medium truncate max-w-[120px] sm:max-w-[220px]">
+                {items[activeIndex]?.title}
+              </span>
+            </div>
+
+            {/* Hold to Pause Indicator */}
+            <div className="flex items-center gap-1">
+              {isHolding ? (
+                <span className="inline-flex items-center gap-1.5 text-accent font-semibold animate-pulse text-[10px] uppercase tracking-widest bg-accent/15 px-2 py-0.5 rounded-full border border-accent/40 shadow-xs">
+                  <span className="w-1.5 h-1.5 rounded-full bg-accent animate-ping" />
+                  PAUSED
+                </span>
+              ) : (
+                <span className="text-[10px] text-muted/60 uppercase tracking-widest hidden sm:inline">
+                  HOLD TO PAUSE
+                </span>
+              )}
+            </div>
+          </div>
         </div>
       </div>
-    </div>
+    </>
   );
 }

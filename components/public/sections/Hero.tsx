@@ -120,7 +120,7 @@ export default function Hero() {
           {/* 3D Billboard Carousel: Showcasing Free Gym Trial, Free AI Generator & Workout Library */}
           <div
             id="featured-offer-carousel"
-            className="block mt-8 sm:mt-12 -mx-3 sm:-mx-6 lg:-mx-8 overflow-hidden py-1 w-[calc(100%+1.5rem)] sm:w-[calc(100%+3rem)] lg:w-[calc(100%+4rem)]"
+            className="block mt-8 sm:mt-12 w-full mx-auto overflow-hidden py-1 flex flex-col items-center justify-center"
           >
             <MobileOfferCarousel />
           </div>

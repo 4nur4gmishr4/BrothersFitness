@@ -58,19 +58,19 @@ export default function MobileOfferCarousel() {
       if (typeof window === "undefined") return;
       const w = window.innerWidth;
       if (w >= 1600) {
-        setCarouselWidth(Math.min(w - 64, 1440));
+        setCarouselWidth(1280);
       } else if (w >= 1440) {
-        setCarouselWidth(Math.min(w - 64, 1320));
+        setCarouselWidth(1180);
       } else if (w >= 1200) {
-        setCarouselWidth(Math.min(w - 48, 1140));
+        setCarouselWidth(1060);
       } else if (w >= 1024) {
-        setCarouselWidth(Math.min(w - 40, 980));
+        setCarouselWidth(920);
       } else if (w >= 768) {
-        setCarouselWidth(Math.min(w - 32, 720));
+        setCarouselWidth(680);
       } else if (w >= 480) {
-        setCarouselWidth(Math.min(w - 24, 460));
+        setCarouselWidth(440);
       } else {
-        setCarouselWidth(Math.min(w - 16, 360));
+        setCarouselWidth(Math.min(w - 28, 360));
       }
     };
     updateWidth();
