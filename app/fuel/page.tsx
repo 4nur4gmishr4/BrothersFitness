@@ -145,8 +145,8 @@ function FuelSynthesizerContent() {
         if (isNaN(targetWeightNum) || targetWeightNum <= 0 || targetWeightNum > 500) {
             return { valid: false, error: "Target weight must be between 1-500 kg" };
         }
-        if (isNaN(ageNum) || ageNum < 10 || ageNum > 150) {
-            return { valid: false, error: "Age must be between 10-150 years" };
+        if (isNaN(ageNum) || ageNum < 10 || ageNum > 120) {
+            return { valid: false, error: "Age must be between 10-120 years" };
         }
         if (isNaN(heightNum) || heightNum < 50 || heightNum > 300) {
             return { valid: false, error: "Height must be between 50-300 cm" };
@@ -187,7 +187,7 @@ function FuelSynthesizerContent() {
 
         // Create AbortController for timeout
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 90000); // 90 second timeout
+        const timeoutId = setTimeout(() => controller.abort(), 60000); // 60 second timeout (fits within Vercel 60s limit)
 
         try {
             const res = await fetch("/api/generate-diet", {
@@ -242,7 +242,7 @@ function FuelSynthesizerContent() {
         } catch (err: unknown) {
             const message = err instanceof Error ? err.message : 'Unknown error';
             if (message.includes('abort') || (err instanceof Error && err.name === 'AbortError')) {
-                setError("The request took too long (>90s). Please try again.");
+                setError("The request took too long (>60s). Please try again.");
             } else {
                 // Show the actual error message from backend (e.g. Rate limit, API key)
                 setError(message);

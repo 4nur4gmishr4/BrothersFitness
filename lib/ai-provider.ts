@@ -75,7 +75,8 @@ function getMistralClient() {
     if (!mistralClient && process.env.MISTRAL_API_KEY) {
         mistralClient = new OpenAI({
             baseURL: 'https://api.mistral.ai/v1',
-            apiKey: process.env.MISTRAL_API_KEY
+            apiKey: process.env.MISTRAL_API_KEY,
+            dangerouslyAllowBrowser: true,
         });
     }
     return mistralClient;
@@ -86,6 +87,7 @@ function getOpenRouterClient() {
         openRouterClient = new OpenAI({
             baseURL: 'https://openrouter.ai/api/v1',
             apiKey: process.env.OPENROUTER_API_KEY,
+            dangerouslyAllowBrowser: true,
             defaultHeaders: {
                 'HTTP-Referer': process.env.NEXT_PUBLIC_SITE_URL || 'https://brothersfitness.in',
                 'X-Title': "Brother's Fitness"

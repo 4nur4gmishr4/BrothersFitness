@@ -17,13 +17,17 @@ const { mockSupabase, mockSingle } = vi.hoisted(() => {
     const single = vi.fn();
     const eq = vi.fn(() => ({ single }));
     const select = vi.fn(() => ({ eq }));
+    const updateEq = vi.fn().mockResolvedValue({ error: null });
+    const update = vi.fn(() => ({ eq: updateEq }));
     return {
         mockSupabase: {
             auth: { getUser: vi.fn() },
-            from: vi.fn(() => ({ select })),
+            from: vi.fn(() => ({ select, update })),
             rpc: vi.fn(),
+            update,
         },
         mockSingle: single,
+        mockUpdate: update,
     };
 });
 
@@ -162,6 +166,39 @@ describe('credit-service', () => {
             const res = await spendUserCredit(mockClient, 'u-1');
             expect(res).toBeInstanceOf(NextResponse);
             expect((await jsonResponse(res as NextResponse)).status).toBe(500);
+        });
+
+        it('falls back to direct table update when the spend_user_credit RPC is missing (PGRST202)', async () => {
+            mockSupabase.rpc.mockResolvedValue({
+                data: null,
+                error: { code: 'PGRST202', message: 'Could not find the function public.spend_user_credit' }
+            });
+            mockSingle.mockResolvedValue({
+                data: { daily_credits: 5, last_credit_reset: istToday() },
+                error: null,
+            });
+            const result = await spendUserCredit(mockClient, 'u-1');
+            const ok = result as { remaining: number };
+            expect(ok.remaining).toBe(4);
+            expect(mockSupabase.from).toHaveBeenCalledWith('users');
+            expect(mockSupabase.update).toHaveBeenCalledWith(expect.objectContaining({
+                daily_credits: 4,
+                last_credit_reset: istToday()
+            }));
+        });
+
+        it('returns 429 on fallback table update when user has zero credits left', async () => {
+            mockSupabase.rpc.mockResolvedValue({
+                data: null,
+                error: { code: 'PGRST202', message: 'Could not find the function public.spend_user_credit' }
+            });
+            mockSingle.mockResolvedValue({
+                data: { daily_credits: 0, last_credit_reset: istToday() },
+                error: null,
+            });
+            const res = await spendUserCredit(mockClient, 'u-1');
+            expect(res).toBeInstanceOf(NextResponse);
+            expect((await jsonResponse(res as NextResponse)).status).toBe(429);
         });
     });
 });

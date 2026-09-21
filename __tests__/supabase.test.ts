@@ -47,4 +47,22 @@ describe('supabase client factories', () => {
             expect.objectContaining({ auth: { autoRefreshToken: false, persistSession: false } })
         );
     });
+
+    it('throws when NEXT_PUBLIC_SUPABASE_URL is missing', async () => {
+        delete process.env.NEXT_PUBLIC_SUPABASE_URL;
+        const { getSupabase: getAnon } = await import('@/lib/supabase');
+        expect(() => getAnon()).toThrow(/Missing Supabase credentials/);
+    });
+
+    it('proxies methods and properties through the exported supabase instance', async () => {
+        const dummyFn = vi.fn().mockReturnValue('from_result');
+        mockCreateClient.mockReturnValue({
+            from: dummyFn,
+            staticProp: 'brofit_value',
+        });
+        const { supabase: proxyClient } = await import('@/lib/supabase');
+        expect(proxyClient.from('members')).toBe('from_result');
+        expect(dummyFn).toHaveBeenCalledWith('members');
+        expect((proxyClient as unknown as Record<string, unknown>).staticProp).toBe('brofit_value');
+    });
 });

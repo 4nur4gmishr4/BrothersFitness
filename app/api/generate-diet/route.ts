@@ -5,9 +5,8 @@ import { generateTextWithFallback, type AIRequestConfig } from "@/lib/ai-provide
 import { verifyUserToken, getUserCreditState, spendUserCredit } from "@/lib/credit-service";
 import { getRequestId, withRequestId } from "@/lib/request-id";
 
-// Allow up to 120s for AI generation - multi-provider fallback + JSON retry
-// needs headroom beyond the default Vercel budget (10s).
-export const maxDuration = 120;
+// Allow up to 60s for AI generation - maximum supported by Vercel serverless functions.
+export const maxDuration = 60;
 
 /** Strip ```json / ``` code fences the model sometimes wraps JSON in. */
 function stripJsonFences(text: string): string {
@@ -199,8 +198,8 @@ export async function POST(req: Request) {
             systemPrompt: systemPrompt,
             jsonMode: true,
             temperature: 0.2, // Lower temperature for consistent JSON
-            timeoutMs: 60_000,      // 60s per provider (diet JSON is comprehensive)
-            totalTimeoutMs: 120_000, // 2 min total for retries across providers
+            timeoutMs: 25_000,      // 25s per provider
+            totalTimeoutMs: 50_000, // 50s total to fit within Vercel 60s limit
         }, userPrompt, log);
 
         // 4. Validate the structure; do NOT pass structurally invalid AI output

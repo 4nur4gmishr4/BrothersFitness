@@ -151,6 +151,63 @@ export async function spendUserCredit(
 
     if (error) console.error('Credit deduction failed:', error);
 
+    // Fallback: If the database schema lacks the RPC (PGRST202 or function not found),
+    // fall back gracefully to a direct table update using service role client
+    // so AI generation and chat are NEVER broken for real users in production.
+    const errObj = error as { code?: string; message?: string; details?: string } | null;
+    const isRpcMissing = Boolean(
+        errObj && (
+            errObj.code === 'PGRST202' ||
+            errObj.message?.includes('spend_user_credit') ||
+            errObj.message?.includes('function') ||
+            errObj.message?.includes('schema cache') ||
+            errObj.details?.includes('function')
+        )
+    );
+
+    if (isRpcMissing) {
+        try {
+            const today = istToday();
+            const { data: userRow, error: fetchErr } = await retryableQuery(() =>
+                supabase
+                    .from('users')
+                    .select('daily_credits, last_credit_reset')
+                    .eq('id', userId)
+                    .single()
+            );
+
+            if (!fetchErr && userRow) {
+                const currentCredits = userRow.last_credit_reset === today
+                    ? (userRow.daily_credits ?? MAX_DAILY_CREDITS)
+                    : MAX_DAILY_CREDITS;
+
+                if (currentCredits <= 0) {
+                    return NextResponse.json(
+                        { error: `Daily AI credits used up (0/${MAX_DAILY_CREDITS}). They reset at 5:30 AM IST.` },
+                        { status: 429 }
+                    );
+                }
+
+                const newCredits = Math.max(0, currentCredits - 1);
+                const { error: updateErr } = await retryableQuery(() =>
+                    supabase
+                        .from('users')
+                        .update({
+                            daily_credits: newCredits,
+                            last_credit_reset: today
+                        })
+                        .eq('id', userId)
+                );
+
+                if (!updateErr) {
+                    return { remaining: newCredits };
+                }
+            }
+        } catch (fallbackErr) {
+            console.error('Fallback table update failed:', fallbackErr);
+        }
+    }
+
     // Ambiguous outcome (network error): reconcile instead of retrying the RPC.
     if (isTransientError(error)) {
         const reconciled = await retryableQuery(() =>
