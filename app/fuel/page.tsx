@@ -187,7 +187,7 @@ function FuelSynthesizerContent() {
 
         // Create AbortController for timeout
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 60000); // 60 second timeout (fits within Vercel 60s limit)
+        const timeoutId = setTimeout(() => controller.abort(), 75000); // 75 second timeout to safely allow comprehensive generation
 
         try {
             const res = await fetch("/api/generate-diet", {

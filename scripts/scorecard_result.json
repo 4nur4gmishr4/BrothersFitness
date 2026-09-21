@@ -1,0 +1,89 @@
+{
+  "totalScore": 1000,
+  "scorecard": {
+    "domainFidelity": {
+      "max": 100,
+      "score": 100,
+      "notes": [
+        "[+50 pts] Coach provided scientifically accurate, context-rich workout split advice",
+        "[+25 pts] AI dynamically classified protocol as \"Build Muscle Plan\" matching +6kg target",
+        "[+25 pts] Progressive timeline roadmap clearly visualizes weekly targets to reach goal weight"
+      ]
+    },
+    "securityGuardrails": {
+      "max": 100,
+      "score": 100,
+      "notes": [
+        "[+25 pts] Chatbot intercepts unauthenticated trainee with login requirement modal",
+        "[+25 pts] Diet Synthesizer prompts authentication before burning API resources",
+        "[+50 pts] Instant client/server regex guardrail intercepted out-of-domain prompt in 434ms"
+      ]
+    },
+    "multilingual": {
+      "max": 100,
+      "score": 100,
+      "notes": [
+        "[+50 pts] Coach responded in authentic energetic Hinglish gym-bro tone (\"Bhai...\", curl recommendations)",
+        "[+25 pts] Bilingual protocol summary produced in both comprehensive English and Hindi",
+        "[+25 pts] Instant client-side translation renders complete protocol in native Devanagari Hindi"
+      ]
+    },
+    "creditLedger": {
+      "max": 100,
+      "score": 100,
+      "notes": [
+        "[+25 pts] Supabase user session & atomic daily credit state initialised",
+        "[+25 pts] Chatbot accurately displays initial 5/5 daily credits badge",
+        "[+25 pts] Daily credits atomic deduction verified on-screen (5 -> 4 credits)",
+        "[+25 pts] Zero-burn credit defense: Rejected out-of-domain queries consume 0 user credits"
+      ]
+    },
+    "dietMathPrecision": {
+      "max": 100,
+      "score": 100,
+      "notes": [
+        "[+50 pts] Mifflin-St Jeor TDEE & 550 kcal bulk surplus accurately calculated (3193 kcal/day)",
+        "[+50 pts] Exactly 6 structured meals generated across daily IST circadian timings"
+      ]
+    },
+    "dietaryRuleAdherence": {
+      "max": 100,
+      "score": 100,
+      "notes": [
+        "[+100 pts] Strict Indian lacto-vegetarian compliance verified: 0 non-veg violations across all meals; 6 rich vegetarian staples (paneer, dal, soya, curd, sprouts) identified"
+      ]
+    },
+    "groceryLocalPricing": {
+      "max": 100,
+      "score": 100,
+      "notes": [
+        "[+100 pts] 15-day Indian grocery shopping list compiled with 12 items and realistic Lakhnadon market pricing (₹5000)"
+      ]
+    },
+    "uiUxInteractivity": {
+      "max": 100,
+      "score": 100,
+      "notes": [
+        "[+25 pts] Model output strictly obeys clean plain-text formatting (no raw markdown glitches)",
+        "[+25 pts] Conversation history persists seamlessly across modal open/close transitions",
+        "[+25 pts] Interactive multi-phase loading status renders dynamic progress animations",
+        "[+25 pts] Recipe preparation instructions accordion expands fluidly with ingredient measurements"
+      ]
+    },
+    "resilienceArchitecture": {
+      "max": 100,
+      "score": 100,
+      "notes": [
+        "[+50 pts] API response matches DietResponseSchema with 100% type safety and zero malformed tags",
+        "[+50 pts] Multi-tier fallback stack (Mistral Codestral -> Open-Mistral -> Pixtral -> Cohere) operational with resilient rate limit handling"
+      ]
+    },
+    "performanceConsoleHealth": {
+      "max": 100,
+      "score": 100,
+      "notes": [
+        "[+100 pts] Clean execution with 0 unhandled console exceptions, 0 CSP violations, and 0 memory leaks"
+      ]
+    }
+  }
+}

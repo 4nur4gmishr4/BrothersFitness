@@ -144,6 +144,17 @@ export default function TacticalChatbot() {
 
     if (!isLoggedIn) {
       setShowLoginModal(true);
+      setMessages((prev) => [
+        ...prev,
+        {
+          role: "model",
+          text:
+            language === "hi"
+              ? "Kripya chat karne ke liye pehle login karein."
+              : "Please sign in to continue chatting with Brother's Fitness AI Coach.",
+          isError: true,
+        },
+      ]);
       return;
     }
 
@@ -289,6 +300,7 @@ export default function TacticalChatbot() {
           >
             <div
               {...modalProps}
+              id="tactical-chatbot-modal"
               aria-label="Brother's Fitness AI Assistant"
               className="relative w-full max-w-[440px] h-full sm:h-[85dvh] sm:max-h-[640px] surface-modal rounded-t-3xl sm:rounded-3xl border-t sm:border border-surface-border shadow-2xl flex flex-col overflow-hidden modal-panel-in"
             >

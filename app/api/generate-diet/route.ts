@@ -106,11 +106,11 @@ export async function POST(req: Request) {
           - Meal 4: Lunch (1:00-2:00 PM)
           - Meal 5: Evening Snack (5:00-6:00 PM)
           - Meal 6: Dinner (8:00-9:00 PM)
-      5.  **SHOPPING LIST**: Generate a clean 15-day shopping list of essential Indian grocery items (12-16 key items: primary proteins, staples/grains, and core produce). Include realistic Indian market prices in INR.
+      5.  **SHOPPING LIST**: Generate a clean 15-day shopping list of essential Indian grocery items (10-12 key items: primary proteins, staples/grains, and core produce). Include realistic Indian market prices in INR.
       6.  **CATEGORIZATION**: Split shopping list into 'Home_Essentials' (Spices, Oil, common staples likely at home) and 'Market_Purchase' (Fresh produce, specific proteins, perishables).
-      7.  **RECIPES**: For each meal, include concise recipe instructions, ingredient list with quantities, and detailed macros.
+      7.  **RECIPES**: For each meal, include concise 2-step recipe instructions, ingredient list with quantities, and detailed macros.
       8.  **TIMELINE**: Calculate realistic "estimated_duration" based on ${rateNum} kg/week rate. Provide total_days and total_weeks.
-      9.  **Summary**: Write a clear strategic explanation of the plan.
+      9.  **Summary**: Write a clear, concise 2-3 sentence strategic explanation of the plan in English and Hindi.
 
       **STRICT OUTPUT FORMAT**:
       Return ONLY valid JSON. No Markdown. No pre-text. Matches this schema EXACTLY:
@@ -164,7 +164,7 @@ export async function POST(req: Request) {
                 "fats": 15,
                 "fiber": 5,
                 "sugar": 8,
-                "recipe": { "en": "Step-by-step cooking instructions...", "hi": "Hindi instructions..." },
+                "recipe": { "en": "Cook oats with milk and top with almonds.", "hi": "ओट्स को दूध में पकाएं और बादाम डालें।" },
                 "ingredients": [
                     { "name": { "en": "Ingredient", "hi": "Hindi" }, "quantity": "100g" }
                 ],
@@ -198,8 +198,8 @@ export async function POST(req: Request) {
             systemPrompt: systemPrompt,
             jsonMode: true,
             temperature: 0.2, // Lower temperature for consistent JSON
-            timeoutMs: 25_000,      // 25s per provider
-            totalTimeoutMs: 50_000, // 50s total to fit within Vercel 60s limit
+            timeoutMs: 50_000,      // 50s per provider
+            totalTimeoutMs: 58_000, // 58s total to fit within Vercel 60s limit
         }, userPrompt, log);
 
         // 4. Validate the structure; do NOT pass structurally invalid AI output
