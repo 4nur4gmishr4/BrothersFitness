@@ -119,7 +119,7 @@ export default function Carousel({
   baseWidth = 360,
   autoplay = false,
   autoplayDelay = 3600,
-  pauseOnHover = true,
+  pauseOnHover = false,
   loop = false,
   round = false,
   className = "",
@@ -393,32 +393,6 @@ export default function Carousel({
                 </button>
               );
             })}
-          </div>
-
-          {/* Active Status Badge & Hold Indicator */}
-          <div className="flex items-center justify-between w-full text-[11px] font-mono tracking-wider text-mid px-1">
-            <div className="flex items-center gap-1.5">
-              <span className="text-white font-bold">{String(activeIndex + 1).padStart(2, "0")}</span>
-              <span className="text-muted/60">/</span>
-              <span className="text-muted/60">{String(items.length).padStart(2, "0")}</span>
-              <span className="ml-1 text-hi font-medium truncate max-w-[120px] sm:max-w-[220px]">
-                {items[activeIndex]?.title}
-              </span>
-            </div>
-
-            {/* Hold to Pause Indicator */}
-            <div className="flex items-center gap-1">
-              {isHolding ? (
-                <span className="inline-flex items-center gap-1.5 text-accent font-semibold animate-pulse text-[10px] uppercase tracking-widest bg-accent/15 px-2 py-0.5 rounded-full border border-accent/40 shadow-xs">
-                  <span className="w-1.5 h-1.5 rounded-full bg-accent animate-ping" />
-                  PAUSED
-                </span>
-              ) : (
-                <span className="text-[10px] text-muted/60 uppercase tracking-widest hidden sm:inline">
-                  HOLD TO PAUSE
-                </span>
-              )}
-            </div>
           </div>
         </div>
       </div>

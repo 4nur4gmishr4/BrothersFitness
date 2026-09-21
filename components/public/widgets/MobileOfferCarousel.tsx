@@ -98,7 +98,7 @@ export default function MobileOfferCarousel() {
           baseWidth={carouselWidth}
           autoplay={true}
           autoplayDelay={3600}
-          pauseOnHover={true}
+          pauseOnHover={false}
           loop={true}
           round={false}
           className="w-full px-0"
