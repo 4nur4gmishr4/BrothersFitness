@@ -44,11 +44,11 @@ const nextConfig = {
         headers: [
           {
             key: 'Permissions-Policy',
-            value: 'accelerometer=(), camera=(self), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), payment=(self), usb=()'
+            value: 'accelerometer=(), camera=(self), geolocation=(self "https://www.google.com" "https://maps.google.com"), gyroscope=(), magnetometer=(), microphone=(), payment=(self), usb=()'
           },
           {
             key: 'Content-Security-Policy',
-            value: "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: https://lh3.googleusercontent.com https://auoljtzkmfnmwzfbwdwq.supabase.co https://avatars.githubusercontent.com https://raw.githubusercontent.com https://github.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://auoljtzkmfnmwzfbwdwq.supabase.co https://www.google-analytics.com https://raw.githubusercontent.com https://github.com; frame-src 'self';"
+            value: "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: https://lh3.googleusercontent.com https://auoljtzkmfnmwzfbwdwq.supabase.co https://avatars.githubusercontent.com https://raw.githubusercontent.com https://github.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://auoljtzkmfnmwzfbwdwq.supabase.co https://www.google-analytics.com https://raw.githubusercontent.com https://github.com; frame-src 'self' https://www.google.com https://maps.google.com;"
           },
           {
             key: 'Strict-Transport-Security',
