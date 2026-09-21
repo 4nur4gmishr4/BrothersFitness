@@ -118,12 +118,6 @@ export default function MobileOfferCarousel() {
                     sizes="(max-width: 640px) 100vw, (max-width: 1024px) 720px, 1100px"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-surface-card via-transparent to-transparent opacity-75" />
-
-                  {/* Minimalist Tag Pill */}
-                  <div className="absolute top-3 left-3 md:top-4 md:left-4 flex items-center gap-1.5 px-2.5 py-1 md:px-3.5 md:py-1.5 rounded-full bg-black/90 border border-white/10 text-[10px] md:text-xs font-bold text-accent uppercase tracking-wider shadow-sm">
-                    {offer.icon}
-                    <span>{offer.tag}</span>
-                  </div>
                 </div>
 
                 {/* Clean 1-2 Word Text Bar & Action (Generous Spacing on Laptop) */}
