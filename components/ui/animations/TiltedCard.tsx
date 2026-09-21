@@ -58,12 +58,23 @@ export default function TiltedCard({
     mass: 1,
   });
 
+  const rectRef = useRef<DOMRect | null>(null);
   const lastYRef = useRef(0);
+
+  function handleMouseEnter() {
+    if (ref.current) {
+      rectRef.current = ref.current.getBoundingClientRect();
+    }
+    scale.set(scaleOnHover);
+    opacity.set(1);
+  }
 
   function handleMouse(e: React.MouseEvent<HTMLElement>) {
     if (!ref.current) return;
 
-    const rect = ref.current.getBoundingClientRect();
+    const rect = rectRef.current || ref.current.getBoundingClientRect();
+    if (!rect.width || !rect.height) return;
+
     const offsetX = e.clientX - rect.left - rect.width / 2;
     const offsetY = e.clientY - rect.top - rect.height / 2;
 
@@ -81,12 +92,8 @@ export default function TiltedCard({
     lastYRef.current = offsetY;
   }
 
-  function handleMouseEnter() {
-    scale.set(scaleOnHover);
-    opacity.set(1);
-  }
-
   function handleMouseLeave() {
+    rectRef.current = null;
     opacity.set(0);
     scale.set(1);
     rotateX.set(0);

@@ -69,7 +69,7 @@ export default function Hero() {
                 transition={{ type: "spring", damping: 25, stiffness: 280 }}
                 mainClassName="text-accent font-bold px-1"
                 splitLevelClassName="overflow-hidden"
-                splitBy="characters"
+                splitBy="words"
                 initial={{ y: "100%", opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 exit={{ y: "-120%", opacity: 0 }}

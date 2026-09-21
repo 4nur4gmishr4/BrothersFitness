@@ -84,7 +84,7 @@ export default function Architects() {
                   scaleOnHover={1.02}
                   className="w-full"
                 >
-                  <div className="w-full p-6 sm:p-7 flex flex-col bg-surface-card/80 backdrop-blur-xl rounded-2xl border border-surface-border transition-all duration-200 hover:border-surface-border/90 hover:bg-surface-card/95 shadow-sm">
+                  <div className="w-full p-6 sm:p-7 flex flex-col bg-surface-card rounded-2xl border border-surface-border transition-all duration-200 hover:border-surface-border/90 hover:bg-surface-card/95 shadow-sm">
                     
                     {/* Header Row: Name & Title (Equal Height with Apple Row Hover) */}
                     <div className="min-h-[58px] flex flex-col justify-center -mx-2 px-2 py-1 rounded-xl transition-colors duration-150 hover:bg-surface-elevated/40">

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useState } from "react";
+import React, { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from "react";
 import {
   motion,
   AnimatePresence,
@@ -170,17 +170,35 @@ const RotatingText = forwardRef<RotatingTextRef, RotatingTextProps>(
       [next, previous, jumpTo, reset]
     );
 
+    const containerRef = useRef<HTMLSpanElement | null>(null);
+    const [isInView, setIsInView] = useState(true);
+
     useEffect(() => {
-      if (!auto) return;
+      const el = containerRef.current;
+      if (!el || typeof window === "undefined" || !("IntersectionObserver" in window)) return;
+
+      const observer = new IntersectionObserver(
+        ([entry]) => {
+          setIsInView(entry.isIntersecting);
+        },
+        { threshold: 0.05 }
+      );
+
+      observer.observe(el);
+      return () => observer.disconnect();
+    }, []);
+
+    useEffect(() => {
+      if (!auto || !isInView) return;
       const intervalId = setInterval(next, rotationInterval);
       return () => clearInterval(intervalId);
-    }, [next, rotationInterval, auto]);
+    }, [next, rotationInterval, auto, isInView]);
 
     return (
       <motion.span
+        ref={containerRef}
         className={cn("inline-flex flex-wrap whitespace-pre-wrap relative align-baseline", mainClassName)}
         {...rest}
-        layout
         transition={transition}
       >
         <span className="sr-only">{texts[currentTextIndex]}</span>
@@ -188,7 +206,6 @@ const RotatingText = forwardRef<RotatingTextRef, RotatingTextProps>(
           <motion.span
             key={currentTextIndex}
             className={cn(splitBy === "lines" ? "flex flex-col w-full" : "inline-flex flex-wrap whitespace-pre-wrap relative")}
-            layout
             aria-hidden="true"
           >
             {elements.map((wordObj, wordIndex, array) => {

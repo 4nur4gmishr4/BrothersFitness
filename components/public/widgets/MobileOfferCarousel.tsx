@@ -96,7 +96,7 @@ export default function MobileOfferCarousel() {
                   <div className="absolute inset-0 bg-gradient-to-t from-surface-card via-transparent to-transparent opacity-75" />
 
                   {/* Minimalist Tag Pill */}
-                  <div className="absolute top-3 left-3 flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-black/75 backdrop-blur-md border border-white/10 text-[10px] font-bold text-accent uppercase tracking-wider shadow-sm">
+                  <div className="absolute top-3 left-3 flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-black/90 border border-white/10 text-[10px] font-bold text-accent uppercase tracking-wider shadow-sm">
                     {offer.icon}
                     <span>{offer.tag}</span>
                   </div>

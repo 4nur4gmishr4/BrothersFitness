@@ -16,6 +16,8 @@ import { toast } from "sonner";
 import { AnimatedPhone, AnimatedWhatsApp } from "@/components/ui/icons";
 
 export default function ContactForm() {
+  const [mapLoaded, setMapLoaded] = useState(false);
+
   return (
     <section id="contact" className="w-full select-none">
       <div className="w-full">
@@ -169,15 +171,38 @@ export default function ContactForm() {
             </div>
 
             {/* Map Iframe Frame */}
-            <div className="relative w-full flex-1 min-h-[300px] sm:min-h-[360px] bg-surface-soft">
-              <iframe
-                src="https://www.google.com/maps?q=22.59908339631551,79.61152925095537&z=16&hl=en&output=embed"
-                className="absolute inset-0 w-full h-full border-0"
-                allowFullScreen
-                loading="lazy"
-                referrerPolicy="no-referrer-when-downgrade"
-                title="Brother's Fitness Lakhnadon Location Map"
-              />
+            <div className="relative w-full flex-1 min-h-[300px] sm:min-h-[360px] bg-surface-soft flex items-center justify-center">
+              {mapLoaded ? (
+                <iframe
+                  src="https://www.google.com/maps?q=22.59908339631551,79.61152925095537&z=16&hl=en&output=embed"
+                  className="absolute inset-0 w-full h-full border-0"
+                  allowFullScreen
+                  loading="lazy"
+                  referrerPolicy="no-referrer-when-downgrade"
+                  title="Brother's Fitness Lakhnadon Location Map"
+                />
+              ) : (
+                <div
+                  onClick={() => setMapLoaded(true)}
+                  className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center cursor-pointer bg-surface-soft hover:bg-surface-elevated/40 transition-colors group"
+                >
+                  <div className="w-12 h-12 rounded-2xl bg-accent/10 border border-accent/20 flex items-center justify-center text-accent mb-3 group-hover:scale-105 transition-transform shadow-xs">
+                    <MapPin className="w-6 h-6" />
+                  </div>
+                  <h4 className="text-sm font-bold text-hi uppercase tracking-wide mb-1">
+                    Lakhnadon Branch Map
+                  </h4>
+                  <p className="text-xs text-mid max-w-xs mb-3">
+                    Near Petrol Pump, Lakhnadon, MP 480886
+                  </p>
+                  <button
+                    type="button"
+                    className="px-4 py-2 text-xs font-semibold text-white bg-accent rounded-full hover:brightness-110 active:scale-95 transition-all shadow-xs pointer-events-none"
+                  >
+                    Tap To View Interactive Map
+                  </button>
+                </div>
+              )}
             </div>
 
             {/* Map Bottom Action Bar */}
